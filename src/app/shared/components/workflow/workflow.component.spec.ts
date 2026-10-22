@@ -396,22 +396,174 @@ describe('WorkflowComponent — shell logic (Phase 4)', () => {
       entity: { name: 'Widget', bomLines: [{ id: 1 }] },
     });
     const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
-    expect(map.get('alternates')).toBe(true);
     expect(map.get('review')).toBe(true);
   });
 
   it('visited steps stay complete after jumping back to an earlier step', () => {
-    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'review' }));
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'alternates' }));
     const { component } = buildShell({
       definition: buildDefWithReview(),
       entity: { name: 'Widget', bomLines: [{ id: 1 }] },
     });
     Object.defineProperty(component, 'run', { value: run, writable: true });
     TestBed.tick();
+    pick<() => void>(component, 'next').call(component);
+    run.set(buildRun({ currentStepId: 'review' }));
+    TestBed.tick();
     run.set(buildRun({ currentStepId: 'basics' }));
     const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
     expect(map.get('alternates')).toBe(true);
     expect(map.get('review')).toBe(true);
+  });
+
+  it('a skipped step is not ticked once the user moves past it', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'alternates' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    pick<() => void>(component, 'skip').call(component);
+    run.set(buildRun({ currentStepId: 'review' }));
+    TestBed.tick();
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    expect(pick<() => Map<string, boolean>>(component, 'completionMap')().get('alternates')).toBe(false);
+    expect(pick<(s: WorkflowStepDefinition) => boolean>(component, 'isIncomplete').call(component, steps[2])).toBe(true);
+  });
+
+  it('continuing from a step that was skipped earlier ticks it', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'alternates' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    pick<() => void>(component, 'skip').call(component);
+    run.set(buildRun({ currentStepId: 'review' }));
+    TestBed.tick();
+    run.set(buildRun({ currentStepId: 'alternates' }));
+    TestBed.tick();
+    pick<() => void>(component, 'next').call(component);
+    run.set(buildRun({ currentStepId: 'review' }));
+    TestBed.tick();
+    expect(pick<() => Map<string, boolean>>(component, 'completionMap')().get('alternates')).toBe(true);
+  });
+
+  it('a gated step behind the user stays unticked while its gates fail', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'alternates' }),
+      entity: { name: 'Widget', bomLines: [] },
+    });
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    expect(pick<() => Map<string, boolean>>(component, 'completionMap')().get('bom')).toBe(false);
+    expect(pick<(s: WorkflowStepDefinition) => boolean>(component, 'isIncomplete').call(component, steps[1])).toBe(true);
+  });
+
+  it('after a remount past a gate-less step, that step shows as visited, not complete', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'review' }),
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    const isComplete = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isComplete');
+    const isIncomplete = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isIncomplete');
+    expect(isComplete.call(component, steps[2])).toBe(false);
+    expect(isIncomplete.call(component, steps[2])).toBe(false);
+    expect(isComplete.call(component, steps[0])).toBe(true);
+    expect(isIncomplete.call(component, steps[0])).toBe(false);
+  });
+
+  it('on resume, steps filled in a previous session are not flagged and a saved skip still is', () => {
+    const { component } = buildShell({
+      run: buildRun({ currentStepId: 'review', draftPayload: { skippedStepIds: ['alternates'] } }),
+      definition: {
+        ...buildDefWithReview(),
+        steps: [
+          ...buildDef().steps,
+          { id: 'notes', labelKey: 'workflow.parts.steps.notes', componentName: 'PartNotesStepComponent', required: false, completionGates: [] },
+          { id: 'review', labelKey: 'workflow.parts.steps.review', componentName: 'PartReviewStepComponent', required: true, completionGates: ['hasBasics'] },
+        ],
+      },
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    TestBed.tick();
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    const isIncomplete = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isIncomplete');
+    expect(steps.map(s => s.id)).toEqual(['basics', 'bom', 'alternates', 'notes', 'review']);
+    expect(isIncomplete.call(component, steps[0])).toBe(false);
+    expect(isIncomplete.call(component, steps[1])).toBe(false);
+    expect(isIncomplete.call(component, steps[2])).toBe(true);
+    expect(isIncomplete.call(component, steps[3])).toBe(false);
+    expect(pick<() => Map<string, boolean>>(component, 'completionMap')().get('alternates')).toBe(false);
+  });
+
+  it('skip and a later continue report the skipped steps for the parent to save', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'alternates' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    const changes: string[][] = [];
+    component.skippedStepsChanged.subscribe(ids => changes.push(ids));
+
+    pick<() => void>(component, 'skip').call(component);
+    run.set(buildRun({ currentStepId: 'review' }));
+    TestBed.tick();
+    run.set(buildRun({ currentStepId: 'alternates' }));
+    TestBed.tick();
+    pick<() => void>(component, 'next').call(component);
+
+    expect(changes).toEqual([['alternates'], []]);
+  });
+
+  it('a continue that clears nothing reports no change', () => {
+    const { component } = buildShell({ run: buildRun({ currentStepId: 'bom' }) });
+    TestBed.tick();
+    const emit = vi.spyOn(component.skippedStepsChanged, 'emit');
+
+    pick<() => void>(component, 'next').call(component);
+
+    expect(emit).not.toHaveBeenCalled();
+  });
+
+  it('a different run mounting replaces the skipped steps with that run\'s saved list', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ id: 1, currentStepId: 'alternates' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    pick<() => void>(component, 'skip').call(component);
+    run.set(buildRun({ id: 1, currentStepId: 'review' }));
+    TestBed.tick();
+    const steps = pick<() => WorkflowStepDefinition[]>(component, 'steps')();
+    const isIncomplete = pick<(s: WorkflowStepDefinition) => boolean>(component, 'isIncomplete');
+    expect(isIncomplete.call(component, steps[2])).toBe(true);
+
+    run.set(buildRun({ id: 2, currentStepId: 'review', draftPayload: null }));
+    TestBed.tick();
+    expect(isIncomplete.call(component, steps[2])).toBe(false);
+  });
+
+  it('switching mode keeps the steps the user continued from', () => {
+    const run = signal<WorkflowRun | null>(buildRun({ currentStepId: 'alternates' }));
+    const { component } = buildShell({
+      definition: buildDefWithReview(),
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
+    });
+    Object.defineProperty(component, 'run', { value: run, writable: true });
+    TestBed.tick();
+    pick<() => void>(component, 'next').call(component);
+    run.set(buildRun({ currentStepId: 'review', mode: 'express' }));
+    TestBed.tick();
+    run.set(buildRun({ currentStepId: 'review', mode: 'guided' }));
+    expect(pick<() => Map<string, boolean>>(component, 'completionMap')().get('alternates')).toBe(true);
   });
 
   it('an unvisited step whose predecessors pass stays reachable even though it is not ticked', () => {

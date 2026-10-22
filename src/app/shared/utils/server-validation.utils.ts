@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { AbstractControl, FormGroup } from '@angular/forms';
+import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
 
 /**
  * Shape of a single validation error returned by the server's
@@ -14,6 +14,10 @@ export interface ServerValidationError {
   field: string;
   message: string;
   rejectedValue?: string | null;
+  /** Stable error code (a FluentValidation validator name or an explicit API code) the UI can word itself. */
+  code?: string | null;
+  /** The rule's limits behind the code (`maxLength`, `comparisonValue`, `from`, `to`, ...). */
+  params?: Record<string, unknown> | null;
 }
 
 /**
@@ -48,10 +52,14 @@ export function parseServerValidationEnvelope(
     const message = (e as { message?: unknown }).message;
     if (typeof field !== 'string' || typeof message !== 'string') return null;
     const rv = (e as { rejectedValue?: unknown }).rejectedValue;
+    const code = (e as { code?: unknown }).code;
+    const params = (e as { params?: unknown }).params;
     parsed.push({
       field,
       message,
       rejectedValue: typeof rv === 'string' ? rv : (rv == null ? null : String(rv)),
+      code: typeof code === 'string' ? code : null,
+      params: params && typeof params === 'object' ? params as Record<string, unknown> : null,
     });
   }
   return parsed;
@@ -75,7 +83,11 @@ export function hasServerValidationDetail(error: HttpErrorResponse | unknown): b
  * `lineItems[0].quantity`) to the matching `AbstractControl`, or `null` when no
  * matching control exists. Falls back to a case-insensitive lookup on the
  * top-level form so that `Field` from PascalCase server output hits the
- * camelCase reactive control.
+ * camelCase reactive control, then to the last path segment so a wrapped
+ * `data.title` still reaches a flat `title` control. That fallback applies only
+ * to a path with no index, and only when the one control anywhere in the form
+ * with that name is a top-level control, so `lines[0].quantity` never lands on
+ * a top-level `quantity`.
  */
 export function resolveFormControl(
   form: FormGroup,
@@ -101,7 +113,22 @@ export function resolveFormControl(
     if (key.toLowerCase() === lower) return control;
   }
 
-  return null;
+  const segments = normalized.split('.');
+  if (segments.length < 2 || segments.some(segment => /^\d+$/.test(segment))) return null;
+  const matches = controlsNamed(form, segments[segments.length - 1].toLowerCase());
+  return matches.length === 1 && matches[0].parent === form ? matches[0] : null;
+}
+
+function controlsNamed(parent: AbstractControl, lowerName: string): AbstractControl[] {
+  const children: [string, AbstractControl][] = parent instanceof FormGroup
+    ? Object.entries(parent.controls)
+    : parent instanceof FormArray
+      ? parent.controls.map((control, index): [string, AbstractControl] => [String(index), control])
+      : [];
+  return children.flatMap(([key, control]) => [
+    ...(key.toLowerCase() === lowerName ? [control] : []),
+    ...controlsNamed(control, lowerName),
+  ]);
 }
 
 /**

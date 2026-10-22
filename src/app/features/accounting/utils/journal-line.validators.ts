@@ -1,9 +1,10 @@
 import { AbstractControl, FormArray, ValidationErrors } from '@angular/forms';
 
-/** A line must carry exactly one non-zero side (debit XOR credit). */
+/** A line must carry exactly one non-zero side (debit XOR credit), and neither side may be negative. */
 export function lineValidator(control: AbstractControl): ValidationErrors | null {
   const debit = Number(control.get('debit')?.value) || 0;
   const credit = Number(control.get('credit')?.value) || 0;
+  if (debit < 0 || credit < 0) return { negativeAmount: true };
   if (debit > 0 && credit > 0) return { bothSides: true };
   if (debit === 0 && credit === 0) return { emptyLine: true };
   return null;

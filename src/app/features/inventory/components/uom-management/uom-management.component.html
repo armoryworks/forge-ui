@@ -1,10 +1,10 @@
 <div class="uom-management">
   <div class="uom-management__tabs">
     <button class="tab" [class.tab--active]="activeSection() === 'uoms'" (click)="switchSection('uoms')">
-      Units of Measure
+      {{ 'inventory.tabs.uom' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeSection() === 'conversions'" (click)="switchSection('conversions')">
-      Conversions
+      {{ 'inventory.uom.conversions' | translate }}
     </button>
   </div>
 
@@ -12,7 +12,7 @@
     @if (canManage) {
       <div class="uom-management__header">
         <button class="action-btn action-btn--create action-btn--sm" data-testid="uom-new-btn" (click)="openCreateUom()">
-          <span class="material-icons-outlined">add</span> New UOM
+          <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newUom' | translate }}
         </button>
       </div>
     }
@@ -24,15 +24,15 @@
         [data]="uoms()"
         [clickableRows]="canManage"
         emptyIcon="straighten"
-        emptyMessage="No units of measure configured"
+        [emptyMessage]="'inventory.uom.emptyUoms' | translate"
         (rowClick)="openEditUom($any($event))">
         <ng-template appColumnCell="isBaseUnit" let-row>
           @if (row.isBaseUnit) {
-            <span class="material-icons-outlined" aria-label="Base unit">check</span>
+            <span class="material-icons-outlined" [attr.aria-label]="'inventory.uom.baseUnit' | translate">check</span>
           }
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
-          <button class="icon-btn" aria-label="Edit UOM" (click)="openEditUom(row); $event.stopPropagation()">
+          <button class="icon-btn" [attr.aria-label]="'inventory.uom.editUom' | translate" (click)="openEditUom(row); $event.stopPropagation()">
             <span class="material-icons-outlined">edit</span>
           </button>
         </ng-template>
@@ -44,7 +44,7 @@
     @if (canManage) {
       <div class="uom-management__header">
         <button class="action-btn action-btn--create action-btn--sm" data-testid="uom-new-conversion-btn" (click)="openCreateConversion()">
-          <span class="material-icons-outlined">add</span> New Conversion
+          <span class="material-icons-outlined">add</span> {{ 'inventory.uom.newConversion' | translate }}
         </button>
       </div>
     }
@@ -55,10 +55,10 @@
         [columns]="conversionColumns"
         [data]="conversions()"
         emptyIcon="swap_horiz"
-        emptyMessage="No conversions configured">
+        [emptyMessage]="'inventory.uom.emptyConversions' | translate">
         <ng-template appColumnCell="isReversible" let-row>
           @if (row.isReversible) {
-            <span class="material-icons-outlined" aria-label="Reversible">check</span>
+            <span class="material-icons-outlined" [attr.aria-label]="'inventory.uom.reversible' | translate">check</span>
           }
         </ng-template>
       </app-data-table>
@@ -68,31 +68,31 @@
 
 <!-- UOM Dialog -->
 @if (showUomDialog()) {
-  <app-dialog [title]="editingUom() ? 'Edit Unit of Measure' : 'New Unit of Measure'" width="520px" (closed)="showUomDialog.set(false)">
+  <app-dialog [title]="(editingUom() ? 'inventory.uom.editTitle' : 'inventory.uom.newTitle') | translate" width="520px" (closed)="showUomDialog.set(false)">
     <div [formGroup]="uomForm">
       <div class="dialog-row">
-        <app-input label="Code" formControlName="code" [required]="true" placeholder="e.g. EA, FT, LB" />
-        <app-input label="Name" formControlName="name" [required]="true" placeholder="e.g. Each, Foot, Pound" />
+        <app-input [label]="'inventory.uom.code' | translate" formControlName="code" [required]="true" [placeholder]="'inventory.uom.codePlaceholder' | translate" />
+        <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" [placeholder]="'inventory.uom.namePlaceholder' | translate" />
       </div>
       <div class="dialog-row">
-        <app-select label="Category" formControlName="category" [options]="categoryOptions" [required]="true" />
-        <app-input label="Symbol" formControlName="symbol" placeholder="e.g. ft, lb, kg" />
+        <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" [required]="true" />
+        <app-input [label]="'inventory.uom.symbol' | translate" formControlName="symbol" [placeholder]="'inventory.uom.symbolPlaceholder' | translate" />
       </div>
       <div class="dialog-row">
-        <app-input label="Decimal Places" formControlName="decimalPlaces" type="number" [required]="true" />
-        <app-input label="Sort Order" formControlName="sortOrder" type="number" />
+        <app-input [label]="'inventory.uom.decimalPlaces' | translate" formControlName="decimalPlaces" type="number" [required]="true" />
+        <app-input [label]="'inventory.uom.sortOrder' | translate" formControlName="sortOrder" type="number" />
       </div>
-      <app-toggle label="Base Unit for Category" formControlName="isBaseUnit" />
+      <app-toggle [label]="'inventory.uom.baseForCategory' | translate" formControlName="isBaseUnit" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="showUomDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showUomDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="uomViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="uomForm.invalid || saving()"
         (click)="saveUom()">
         <span class="material-icons-outlined">save</span>
-        {{ editingUom() ? 'Update' : 'Create' }}
+        {{ (editingUom() ? 'inventory.uom.update' : 'common.create') | translate }}
       </button>
       </app-validation-button>
     </div>
@@ -101,24 +101,24 @@
 
 <!-- Conversion Dialog -->
 @if (showConversionDialog()) {
-  <app-dialog title="New Conversion" width="520px" (closed)="showConversionDialog.set(false)">
+  <app-dialog [title]="'inventory.uom.newConversion' | translate" width="520px" (closed)="showConversionDialog.set(false)">
     <div [formGroup]="conversionForm">
       <div class="dialog-row">
-        <app-select label="From UOM" formControlName="fromUomId" [options]="uomSelectOptions()" [required]="true" />
-        <app-select label="To UOM" formControlName="toUomId" [options]="uomSelectOptions()" [required]="true" />
+        <app-select [label]="'inventory.uom.fromUom' | translate" formControlName="fromUomId" [options]="uomSelectOptions()" [required]="true" />
+        <app-select [label]="'inventory.uom.toUom' | translate" formControlName="toUomId" [options]="uomSelectOptions()" [required]="true" />
       </div>
-      <app-input label="Conversion Factor" formControlName="conversionFactor" type="number" [required]="true"
-        placeholder="e.g. 12 (1 ft = 12 in)" />
-      <app-toggle label="Reversible (auto-creates inverse)" formControlName="isReversible" />
+      <app-input [label]="'inventory.uom.conversionFactor' | translate" formControlName="conversionFactor" type="number" [required]="true"
+        [placeholder]="'inventory.uom.factorPlaceholder' | translate" />
+      <app-toggle [label]="'inventory.uom.reversibleToggle' | translate" formControlName="isReversible" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="showConversionDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showConversionDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="conversionViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="conversionForm.invalid || saving()"
         (click)="saveConversion()">
-        <span class="material-icons-outlined">save</span> Create
+        <span class="material-icons-outlined">save</span> {{ 'common.create' | translate }}
       </button>
       </app-validation-button>
     </div>

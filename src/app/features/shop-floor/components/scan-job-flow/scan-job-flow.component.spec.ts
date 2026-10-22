@@ -141,7 +141,8 @@ interface TrackingInternals {
   confirmAdvanceStage(): void;
   startOperation(row: JobOperationRow, entryType?: 'Run' | 'Setup'): void;
   stopOperation(row: JobOperationRow): void;
-  stopRunningTimer(timer: { id: number; jobNumber: string }): void;
+  stopRunningTimer(timer: { id: number; jobNumber: string; jobId?: number | null; operationId?: number | null; entryType?: string | null }): void;
+  suggestedOperationId: () => number | null;
   openQuantity(row: JobOperationRow): void;
 }
 
@@ -185,7 +186,7 @@ describe('ScanJobFlowComponent — operation tracking', () => {
   const dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
 
   function pieces(completedQuantity: number, complete = false, extra: Partial<OperationQuantityDialogResult> = {}): OperationQuantityDialogResult {
-    return { completedQuantity, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete, ...extra };
+    return { completedQuantity, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete, addedQuantity: completedQuantity, addedScrap: 0, ...extra };
   }
 
   function create(): TrackingInternals {
@@ -325,6 +326,56 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(shopFloor.stopTimer).toHaveBeenCalledWith({ timeEntryId: 9 });
   });
 
+  it('suggests the step this user is running, then one in progress, then the first open step — and never starts it', () => {
+    shopFloor.getConfig.mockReturnValue(of({ operationTracking: true }));
+    const mine = { timeEntryId: 9, userId: 3, userName: 'Doe, Pat', userInitials: 'PD', entryType: 'Run', timerStart: new Date().toISOString() };
+    const other = { ...mine, timeEntryId: 10, userId: 8 };
+    shopFloor.getOperations
+      .mockReturnValueOnce(of(operations([opRow(1, { status: 'Complete' }), opRow(2, { openTimers: [other] }), opRow(3, { openTimers: [mine] })])))
+      .mockReturnValueOnce(of(operations([opRow(1, { status: 'Skipped' }), opRow(2), opRow(3, { status: 'InProgress' })])))
+      .mockReturnValueOnce(of(operations([opRow(1, { status: 'Complete' }), opRow(2), opRow(3)])));
+
+    expect(create().suggestedOperationId()).toBe(103);
+    expect(create().suggestedOperationId()).toBe(103);
+    expect(create().suggestedOperationId()).toBe(102);
+    expect(shopFloor.startOperationTimer).not.toHaveBeenCalled();
+    shopFloor.getConfig.mockReturnValue(of({ operationTracking: false }));
+  });
+
+  it('stopping a run timer asks for good and scrap pieces with blank defaults and sends them with the stop', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    const mine = { timeEntryId: 9, userId: 3, userName: 'Doe, Pat', userInitials: 'PD', entryType: 'Run', timerStart: new Date().toISOString() };
+    const c = create();
+
+    dialogResult = pieces(10, false, { addedQuantity: 4, scrapQuantity: 1, addedScrap: 1 });
+    c.stopOperation(opRow(2, { openTimers: [mine], plannedQuantity: 40 }));
+
+    const data = (dialog.open.mock.calls[0] as unknown[])[1] as { data: { mode: string; plannedQuantity: number } };
+    expect(data.data.mode).toBe('stop');
+    expect(data.data.plannedQuantity).toBe(40);
+    expect(shopFloor.stopOperationTimer).toHaveBeenCalledWith(5, 102, { goodQuantity: 4, scrapQuantity: 1 });
+  });
+
+  it('Skip stops without a count, a setup timer stops without asking, and closing the dialog stops nothing', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    const run = { timeEntryId: 9, userId: 3, userName: 'Doe, Pat', userInitials: 'PD', entryType: 'Run', timerStart: new Date().toISOString() };
+    const c = create();
+
+    dialogResult = pieces(0, false, { skipped: true, addedQuantity: 0 });
+    c.stopOperation(opRow(2, { openTimers: [run] }));
+    expect(shopFloor.stopOperationTimer).toHaveBeenLastCalledWith(5, 102, {});
+
+    dialog.open.mockClear();
+    c.stopOperation(opRow(1, { openTimers: [{ ...run, entryType: 'Setup' }] }));
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(shopFloor.stopOperationTimer).toHaveBeenLastCalledWith(5, 101);
+
+    shopFloor.stopOperationTimer.mockClear();
+    dialogResult = undefined;
+    c.stopOperation(opRow(2, { openTimers: [run] }));
+    expect(shopFloor.stopOperationTimer).not.toHaveBeenCalled();
+  });
+
   it('a Done that completes the last operation offers the gated move to the next status', () => {
     shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
     shopFloor.updateOperationProgress.mockReturnValue(of({
@@ -370,9 +421,21 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(config.data).toEqual({
       title: 'shopFloor.operations.quantityTitle:{"step":2,"title":"Step 2"}',
       jobQuantity: 40, completedQuantity: 12, scrapQuantity: 1,
-      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true,
+      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true, decimalPlaces: null, plannedQuantity: null, gate: null,
     });
     expect(shopFloor.updateOperationProgress).not.toHaveBeenCalled();
+  });
+
+  it('Record pieces passes the stock unit decimals to the dialog', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true, reasons: [] }));
+    shopFloor.getOperations.mockReturnValueOnce(of({ ...operations([opRow(1), opRow(2)]), quantityDecimalPlaces: 0 }));
+    dialogResult = undefined;
+    const c = create();
+
+    c.openQuantity(opRow(2));
+
+    const config = (dialog.open.mock.calls[0] as unknown[])[1] as { data: Record<string, unknown> };
+    expect(config.data['decimalPlaces']).toBe(0);
   });
 
   it('scrap, rework and a reason travel with the recorded pieces', () => {

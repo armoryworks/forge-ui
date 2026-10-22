@@ -1,0 +1,50 @@
+@use 'styles/variables' as *;
+
+.labor-recon {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+}
+
+.labor-recon__filters,
+.labor-recon__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $sp-md;
+}
+
+.labor-recon__hint,
+.labor-recon__summary {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: $font-size-md;
+}
+
+.labor-recon__error {
+  margin: 0;
+  color: var(--error);
+}
+
+.labor-recon__muted {
+  color: var(--text-muted);
+}
+
+.labor-recon__over {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+.labor-recon__recompute {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.labor-recon__section-title {
+  margin: 0;
+  font-size: $font-size-lg;
+}

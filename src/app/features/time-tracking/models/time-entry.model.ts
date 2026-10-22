@@ -19,4 +19,6 @@ export interface TimeEntry {
   operationStepNumber?: number | null;
   operationTitle?: string | null;
   entryType?: string | null;
+  laborMinutes?: number | null;
+  allocationMethod?: string | null;
 }

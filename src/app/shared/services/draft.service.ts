@@ -1,4 +1,5 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -23,6 +24,7 @@ interface Registration {
 @Injectable({ providedIn: 'root' })
 export class DraftService {
   private readonly auth = inject(AuthService);
+  private readonly translate = inject(TranslateService);
   private readonly storage = inject(DraftStorageService);
   private readonly broadcast = inject(DraftBroadcastService);
   private readonly preferences = inject(UserPreferencesService);
@@ -209,14 +211,14 @@ export class DraftService {
     if (reg) {
       // Another tab is editing the same form — restore their changes
       reg.form.restoreDraft(draft.formData);
-      this.snackbar.info('Updated from another tab');
+      this.snackbar.info(this.translate.instant('drafts.updatedInOtherTab'));
     }
   }
 
   private handleRemoteDraftClear(key: string): void {
     const reg = this.registrations.get(key);
     if (reg) {
-      this.snackbar.info('Draft discarded in another tab');
+      this.snackbar.info(this.translate.instant('drafts.discardedInOtherTab'));
     }
     this.refreshHasDrafts();
   }
@@ -225,7 +227,7 @@ export class DraftService {
     const key = this.buildKey(entityType, entityId);
     const reg = this.registrations.get(key);
     if (reg) {
-      this.snackbar.info('This record was saved in another tab');
+      this.snackbar.info(this.translate.instant('drafts.savedInOtherTab'));
     }
     // Clear local draft — the server version is now authoritative
     this.storage.delete(key);

@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { PresetCustomComponent } from './preset-custom.component';
@@ -48,6 +49,7 @@ describe('PresetCustomComponent', () => {
     previewCustom = vi.fn((overrides: PresetCustomOverride[]) => of(previewFor(overrides)));
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: PresetService, useValue: { previewCustom, previewing: signal(false) } },

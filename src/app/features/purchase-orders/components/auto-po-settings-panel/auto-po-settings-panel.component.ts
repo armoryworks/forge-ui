@@ -85,7 +85,7 @@ export class AutoPoSettingsPanelComponent {
 
     this.poService.updateAutoPoSettings(request).subscribe({
       next: () => {
-        this.snackbar.success(this.translate.instant('autoPo.settingsSaved') || 'Auto-PO settings saved');
+        this.snackbar.success(this.translate.instant('autoPo.settingsSaved'));
         this.saving.set(false);
         this.form.markAsPristine();
       },

@@ -24,6 +24,7 @@ interface InvoiceListItem {
   total: number;
   dueDate?: string;
   createdAt: string;
+  currencyCode?: string | null;
 }
 
 @Component({

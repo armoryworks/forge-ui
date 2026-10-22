@@ -20,6 +20,7 @@ import { EntityLinkComponent } from '../../shared/components/entity-link/entity-
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
+import { RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -43,6 +44,7 @@ function durationInRange(group: AbstractControl): ValidationErrors | null {
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     PageHeaderComponent,
     DialogComponent,
     InputComponent,
@@ -77,6 +79,8 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   private readonly capabilities = inject(CapabilityService);
 
   protected readonly billableEnabled = computed(() => this.capabilities.isEnabled('CAP-PS-TIME-BILLABLE'));
+  protected readonly canSeeLaborReconciliation = computed(() =>
+    this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'Controller']));
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -157,10 +161,24 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     { field: 'jobNumber', header: this.translate.instant('timeTracking.colJob') },
     { field: 'category', header: this.translate.instant('timeTracking.colCategory'), sortable: true },
     { field: 'durationMinutes', header: this.translate.instant('timeTracking.colDuration'), sortable: true },
+    { field: 'laborMinutes', header: this.translate.instant('timeTracking.colLabor'), sortable: true },
     { field: 'notes', header: this.translate.instant('timeTracking.colNotes') },
     { field: 'type', header: this.translate.instant('timeTracking.colType'), width: '80px' },
     { field: 'actions', header: '', width: '64px', align: 'right' },
   ];
+
+  protected readonly concurrentTimers = computed(() => {
+    const timed = this.entries().filter(e => e.timerStart && e.timerStop && !e.isManual);
+    const counts = new Map<number, number>();
+    for (const entry of timed) {
+      const start = new Date(entry.timerStart!).getTime();
+      const stop = new Date(entry.timerStop!).getTime();
+      const overlapping = timed.filter(other => other.id !== entry.id && other.userId === entry.userId
+        && new Date(other.timerStart!).getTime() < stop && new Date(other.timerStop!).getTime() > start).length;
+      if (overlapping > 0) counts.set(entry.id, overlapping);
+    }
+    return counts;
+  });
 
   protected readonly timeRowClass = (row: unknown) => {
     const entry = row as TimeEntry;
@@ -172,6 +190,10 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return new Date(entry.date).getTime() >= today.getTime();
+  }
+
+  protected canChange(entry: TimeEntry): boolean {
+    return entry.userId === this.auth.user()?.id || this.auth.hasAnyRole(['Admin', 'Manager']);
   }
 
   constructor() {
@@ -243,7 +265,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   }
 
   protected saveEntry(): void {
-    if (this.entryForm.invalid) return;
+    if (this.entryForm.invalid || this.saving()) return;
     const form = this.entryForm.getRawValue();
     const duration = ((form.hours ?? 0) * 60) + (form.minutes ?? 0);
     if (duration <= 0) return;
@@ -275,12 +297,15 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   protected closeTimerDialog(): void { this.showTimerDialog.set(false); }
 
   protected startTimer(): void {
+    if (this.saving()) return;
     const form = this.timerForm.getRawValue();
+    this.saving.set(true);
     this.service.startTimer({
       category: form.category || undefined,
       notes: form.notes || undefined,
     }).subscribe({
-      next: () => { this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
+      next: () => { this.saving.set(false); this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
+      error: () => this.saving.set(false),
     });
   }
 
@@ -302,12 +327,14 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
   protected stopTimer(): void {
     const target = this.stopTarget();
-    if (!target) return;
+    if (!target || this.saving()) return;
+    this.saving.set(true);
     this.service.stopTimer({
       timeEntryId: target.id,
       notes: this.stopNotesControl.value || undefined,
     }).subscribe({
-      next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
+      next: () => { this.saving.set(false); this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
+      error: () => this.saving.set(false),
     });
   }
 

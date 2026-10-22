@@ -70,7 +70,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()" [disabled]="saving()">{{ 'common.cancel' | translate }}</button>
-    <app-validation-button [violations]="violations">
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button
       data-testid="job-save-btn"
       class="action-btn action-btn--primary"

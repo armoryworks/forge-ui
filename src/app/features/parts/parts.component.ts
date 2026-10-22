@@ -92,6 +92,7 @@ export class PartsComponent {
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly duplicating = signal(false);
+  protected readonly savingPart = signal(false);
   /**
    * Entity-less workflow drafts the user has started but hasn't materialized
    * a Part row for yet. Surfaced as color-coded ghost rows at the top of the
@@ -100,23 +101,43 @@ export class PartsComponent {
    */
   protected readonly entitylessDrafts = signal<WorkflowRun[]>([]);
 
+  /** Ghost rows for the entity-less drafts that match the applied search (see {@link buildDraftPartRows}). */
+  private readonly draftRows = computed<PartListRow[]>(() => buildDraftPartRows(
+    this.entitylessDrafts(),
+    this.appliedSearch(),
+    this.translate.instant('parts.drafts.unnamed'),
+  ));
+
+  /**
+   * Entity-less drafts are not Part rows, so they only join the list when the status filter is
+   * All or Draft; under any other status they are counted in {@link hiddenDraftCount} instead.
+   */
+  private readonly showDraftRows = computed(() => {
+    const status = this.statusFilter();
+    return !status || status === 'Draft';
+  });
+
+  /** Drafts kept out of the list by the status filter, offered as a "show drafts" link. */
+  protected readonly hiddenDraftCount = computed(() => this.showDraftRows() ? 0 : this.draftRows().length);
+
   /**
    * Parts list with entity-less workflow drafts prepended as synthetic
-   * "ghost" rows (see {@link buildDraftPartRows}). Each ghost has `_draftRun`
+   * "ghost" rows when the status filter allows them. Each ghost has `_draftRun`
    * set so cell templates can branch on it, takes its label from the part
    * number and name typed into the New Part form (otherwise "Unnamed draft"),
    * and is filtered by the applied search like parts are.
    */
   protected readonly combinedRows = computed<PartListRow[]>(() => [
-    ...(this.pageRequest().pageIndex === 0
-      ? buildDraftPartRows(
-        this.entitylessDrafts(),
-        this.appliedSearch(),
-        this.translate.instant('parts.drafts.unnamed'),
-      )
-      : []),
+    ...(this.pageRequest().pageIndex === 0 && this.showDraftRows() ? this.draftRows() : []),
     ...this.parts(),
   ]);
+
+  /** True when a search or a non-default filter is narrowing the list. */
+  protected readonly hasActiveFilters = computed(() =>
+    !!this.appliedSearch()
+    || this.statusFilter() !== 'Active'
+    || !!this.procurementFilter()
+    || !!this.inventoryClassFilter());
 
   // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
   protected readonly totalCount = signal<number>(0);
@@ -189,8 +210,8 @@ export class PartsComponent {
     { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('common.name'), sortable: true, exportValue: row => (row as { name?: string }).name },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
-    { field: 'procurementSource', header: 'Procurement', sortable: true, width: '110px' },
-    { field: 'inventoryClass', header: 'Class', sortable: true, width: '110px' },
+    { field: 'procurementSource', header: 'columns.procurement', sortable: true, width: '110px' },
+    { field: 'inventoryClass', header: 'columns.class', sortable: true, width: '110px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
@@ -373,13 +394,24 @@ export class PartsComponent {
     this.searchRequests.next('');
   }
 
+  protected clearFilters(): void {
+    if (this.statusFilterControl.value !== 'Active') this.statusFilterControl.setValue('Active');
+    if (this.procurementFilterControl.value) this.procurementFilterControl.setValue('');
+    if (this.inventoryClassFilterControl.value) this.inventoryClassFilterControl.setValue('');
+    if (this.searchControl.value || this.appliedSearch()) this.clearSearch();
+  }
+
+  protected showDrafts(): void {
+    this.statusFilterControl.setValue('Draft');
+  }
+
   // ── Detail Dialog ──
 
   protected openPartDetail(partId: number): void {
     // Phase 5: if this is a Draft part, see if a workflow run exists and offer
     // to resume; otherwise fall back to the regular detail dialog.
     const part = this.parts().find(p => p.id === partId);
-    if (part?.status === 'Draft') {
+    if (part?.status === 'Draft' || part?.status === 'Prototype') {
       this.tryResumeOrOpenDetail(partId);
       return;
     }
@@ -674,7 +706,7 @@ export class PartsComponent {
   }
 
   protected savePart(): void {
-    if (this.partForm.invalid) return;
+    if (this.savingPart() || this.partForm.invalid) return;
 
     // Drop any prior server messages so a re-submit doesn't accumulate.
     // (Phase 3 / WU-02 envelope pattern, mirroring customer-create.)
@@ -682,6 +714,7 @@ export class PartsComponent {
 
     const form = this.partForm.getRawValue();
     const editing = this.editingPart();
+    this.savingPart.set(true);
 
     if (editing) {
       this.partsService.updatePart(editing.id, {
@@ -700,11 +733,13 @@ export class PartsComponent {
         abcClass: (form.abcClass as AbcClass | null) ?? null,
       }, formValidationContext()).subscribe({
         next: () => {
+          this.savingPart.set(false);
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partUpdated'));
         },
         error: (err: HttpErrorResponse) => {
+          this.savingPart.set(false);
           // Phase 3 / WU-02 / F6: surface per-field server errors against the
           // form so the validation popover lights up on the offending field
           // (e.g. partType). Legacy non-envelope errors fall through to the
@@ -725,6 +760,7 @@ export class PartsComponent {
         inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
       }, formValidationContext()).subscribe({
         next: (detail) => {
+          this.savingPart.set(false);
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partCreated'));
@@ -732,6 +768,7 @@ export class PartsComponent {
           this.openPartDetail(detail.id);
         },
         error: (err: HttpErrorResponse) => {
+          this.savingPart.set(false);
           // Phase 3 / WU-02 / F6: see updatePart error handler for details.
           const applied = FormValidationService.applyServerError(this.partForm, err);
           if (applied?.unmatched.length) {

@@ -155,6 +155,39 @@ describe('WorkflowService — Phase 4', () => {
     expect(service.currentRun()?.currentStepId).toBe('bom');
   });
 
+  it('saveSkippedSteps PUTs the skipped step ids silently and leaves currentRun alone', () => {
+    const current = buildRun({ id: 4 });
+    service.currentRun.set(current);
+    service.saveSkippedSteps(4, ['alternates']).subscribe();
+    const req = httpMock.expectOne(`${environment.apiUrl}/workflows/4/skipped-steps`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ stepIds: ['alternates'] });
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
+    req.flush(buildRun({ id: 4, draftPayload: { skippedStepIds: ['alternates'] } }));
+    expect(service.currentRun()).toBe(current);
+  });
+
+  it('jumpToStep waits for an in-flight skipped-steps save before sending', () => {
+    service.saveSkippedSteps(1, ['alternates']).subscribe();
+    let result: unknown;
+    service.jumpToStep(1, 'review').subscribe(r => (result = r));
+    const skipped = httpMock.expectOne(`${environment.apiUrl}/workflows/1/skipped-steps`);
+    httpMock.expectNone(`${environment.apiUrl}/workflows/1/jump`);
+    skipped.flush(buildRun());
+    const jumped = buildRun({ currentStepId: 'review' });
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/jump`).flush(jumped);
+    expect(result).toEqual({ success: true, run: jumped });
+  });
+
+  it('patchStep still sends when the skipped-steps save it waited for fails', () => {
+    service.saveSkippedSteps(1, []).subscribe({ error: () => undefined });
+    service.patchStep(1, 'alternates', {}).subscribe();
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/skipped-steps`)
+      .flush({ title: 'Conflict' }, { status: 409, statusText: 'Conflict' });
+    httpMock.expectOne(`${environment.apiUrl}/workflows/1/step`).flush(buildRun({ currentStepId: 'review' }));
+    expect(service.currentRun()?.currentStepId).toBe('review');
+  });
+
   it('jumpToStep PATCHes jump and returns success:true on 200', () => {
     const updated = buildRun({ currentStepId: 'basics' });
     let result: unknown;

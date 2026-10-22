@@ -24,8 +24,10 @@ import { OperationQuantityDialogResult } from '../../../shared/models/operation-
 import { UpdateJobOperationProgressRequest } from '../../../shared/models/update-job-operation-progress-request.model';
 import { DurationMsPipe } from '../../../shared/pipes/duration-ms.pipe';
 import { AuthService } from '../../../shared/services/auth.service';
+import { StepGateService } from '../../../shared/services/step-gate.service';
 import { BoardHubService } from '../../../shared/services/board-hub.service';
 import { JobOperationsService } from '../../../shared/services/job-operations.service';
+import { LabelPrintService } from '../../../shared/services/label-print.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { secondTicker } from '../../../shared/utils/second-ticker';
 import { JobCostService } from '../services/job-cost.service';
@@ -66,10 +68,12 @@ export class OperationTimeTabComponent {
   private readonly operationsService = inject(JobOperationsService);
   private readonly costService = inject(JobCostService);
   private readonly auth = inject(AuthService);
+  private readonly stepGate = inject(StepGateService);
   private readonly boardHub = inject(BoardHubService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly labelPrint = inject(LabelPrintService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly loading = signal(false);
@@ -81,6 +85,8 @@ export class OperationTimeTabComponent {
 
   readonly trackingEnabled = computed(() => this.data()?.trackingEnabled === true);
   readonly jobQuantity = computed(() => this.data()?.jobQuantity ?? 0);
+  protected readonly gating = computed(() => this.data()?.stepGating ?? 'Off');
+  protected readonly gated = computed(() => this.gating() !== 'Off');
   protected readonly targetStart = computed(() => {
     const target = this.data()?.targetQuantity;
     const start = this.jobQuantity();
@@ -125,7 +131,9 @@ export class OperationTimeTabComponent {
     { field: 'actions', header: '', width: '110px', align: 'right' },
     { field: 'remainingMs', header: this.translate.instant('jobOperations.columns.remaining'), sortable: true, width: '100px', align: 'right' },
     { field: 'perPiece', header: this.translate.instant('jobOperations.columns.perPiece'), width: '140px' },
-    ...this.baseColumns.slice(2),
+    ...this.baseColumns.slice(2, 7),
+    { field: 'laborMinutes', header: this.translate.instant('jobOperations.columns.laborHours'), sortable: true, width: '80px', align: 'right' },
+    ...this.baseColumns.slice(7),
   ];
 
   readonly opColumns = computed(() => this.trackingEnabled() ? this.trackingColumns : this.baseColumns);
@@ -248,6 +256,9 @@ export class OperationTimeTabComponent {
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
           reasons: this.operationsService.reasons(),
+          decimalPlaces: this.data()?.quantityDecimalPlaces ?? null,
+          plannedQuantity: row.plannedQuantity ?? null,
+          gate: row.source ? this.stepGate.gateFor(row.source, this.data()?.stepGating) : null,
         },
       }).afterClosed().subscribe(result => {
       if (!result) return;
@@ -257,6 +268,7 @@ export class OperationTimeTabComponent {
         status: result.complete ? 'Complete' : null,
         ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
         ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
+        ...(result.acknowledgeGate ? { acknowledgeGate: true, overrideReason: result.overrideReason ?? null } : {}),
       }, result.complete ? 'jobOperations.messages.completed' : 'jobOperations.messages.recorded');
     });
   }
@@ -313,6 +325,19 @@ export class OperationTimeTabComponent {
         error: () => this.reload(),
       });
     });
+  }
+
+  printStepLabels(): void {
+    const jobId = this.jobId();
+    const labels = this.operations()
+      .filter(row => row.operationId != null && row.source?.isRoutingStep !== false)
+      .map(row => ({
+        type: 'barcode' as const,
+        value: `FJO:${jobId}.${row.operationId}`,
+        label: this.translate.instant('jobOperations.stepLabel', { step: row.operationSequence, title: row.operationName }),
+        width: 60,
+      }));
+    if (labels.length > 0) void this.labelPrint.printLabels(labels);
   }
 
   private afterWrite(): void {

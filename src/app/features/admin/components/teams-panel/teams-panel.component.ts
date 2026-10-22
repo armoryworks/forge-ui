@@ -73,16 +73,16 @@ export class TeamsPanelComponent implements OnInit {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'color', header: '', width: '36px' },
-    { field: 'name', header: 'Team Name', sortable: true },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'memberCount', header: 'Members', sortable: true, width: '100px', align: 'center' },
-    { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
+    { field: 'name', header: 'teamsPanel.teamName', sortable: true },
+    { field: 'description', header: 'common.description', sortable: true },
+    { field: 'memberCount', header: 'teamsPanel.members', sortable: true, width: '100px', align: 'center' },
+    { field: 'actions', header: 'common.actions', width: '140px', align: 'right' },
   ];
 
   protected readonly terminalColumns: ColumnDef[] = [
-    { field: 'name', header: 'Terminal Name', sortable: true },
-    { field: 'teamName', header: 'Team', sortable: true },
-    { field: 'deviceToken', header: 'Device Token', sortable: true, width: '200px' },
+    { field: 'name', header: 'columns.terminalName', sortable: true },
+    { field: 'teamName', header: 'columns.team', sortable: true },
+    { field: 'deviceToken', header: 'columns.deviceToken', sortable: true, width: '200px' },
     { field: 'actions', header: '', width: '60px', align: 'right' },
   ];
 
@@ -167,9 +167,9 @@ export class TeamsPanelComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Team?',
-        message: `This will delete "${team.name}" and unassign all its members. Active kiosk terminals must be removed first.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('teamsPanel.messages.deleteTitle'),
+        message: this.translate.instant('teamsPanel.messages.deleteMessage', { name: team.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {

@@ -29,6 +29,12 @@
   @include mobile { display: none; }
 }
 
+.reports-picker {
+  display: none;
+
+  @include mobile { display: block; }
+}
+
 .report-nav-item {
   display: flex; align-items: center; gap: $sp-md; padding: $sp-md $sp-lg;
   border: none; background: transparent; color: var(--text-secondary);

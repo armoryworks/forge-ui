@@ -5,7 +5,7 @@
     [multiple]="multiple()"
     [placeholder]="placeholder()"
     [disabled]="disabled() || isReadonly()"
-    [required]="required()"
+    [required]="isRequired()"
     (selectionChange)="onSelectionChange($event.value)"
     (blur)="markTouched()">
     @for (opt of options(); track opt.value) {

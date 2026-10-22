@@ -29,7 +29,7 @@ export class WatchtowerService {
     return this.http.post<void>(`${this.base}/proposals/${id}/dismiss`, {});
   }
 
-  poll(): Observable<{ created: number }> {
-    return this.http.post<{ created: number }>(`${this.base}/poll`, {});
+  poll(): Observable<{ created: number; activeSources: number; failedSources: number }> {
+    return this.http.post<{ created: number; activeSources: number; failedSources: number }>(`${this.base}/poll`, {});
   }
 }

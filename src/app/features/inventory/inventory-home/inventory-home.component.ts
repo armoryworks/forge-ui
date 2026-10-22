@@ -104,9 +104,9 @@ export class InventoryHomeComponent {
   protected readonly lowStockCount = computed(() => this.lowStock().length);
 
   protected readonly stockColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '140px' },
-    { field: 'description', phoneHidden: true, header: 'Description', sortable: true },
-    { field: 'onHand', header: 'On hand', sortable: true, type: 'number', align: 'right', width: '110px' },
+    { field: 'partNumber', header: 'columns.partNumber', sortable: true, width: '140px' },
+    { field: 'description', phoneHidden: true, header: 'common.description', sortable: true },
+    { field: 'onHand', header: 'columns.onHand', sortable: true, type: 'number', align: 'right', width: '110px' },
     { field: 'actions', header: '', sortable: false, align: 'right', width: '150px' },
   ];
 

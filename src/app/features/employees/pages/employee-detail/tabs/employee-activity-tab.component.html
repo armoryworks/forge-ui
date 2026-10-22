@@ -6,7 +6,7 @@
   } @else if (activities().length === 0) {
     <div class="tab-empty">
       <span class="material-icons-outlined">history</span>
-      <p>No activity recorded</p>
+      <p>{{ 'employees.employeeActivityTab.noActivityRecorded' | translate }}</p>
     </div>
   } @else {
     <app-activity-timeline [activities]="$any(activities())" />

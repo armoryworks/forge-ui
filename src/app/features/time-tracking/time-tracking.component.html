@@ -14,6 +14,12 @@
     <span class="material-icons-outlined">edit_note</span>
     {{ 'timeTracking.manualEntry' | translate }}
   </button>
+  @if (canSeeLaborReconciliation()) {
+    <a data-testid="labor-reconciliation-link" class="action-btn" routerLink="labor-reconciliation">
+      <span class="material-icons-outlined">balance</span>
+      {{ 'laborReconciliation.title' | translate }}
+    </a>
+  }
 </app-page-header>
 
 <div class="time-tracking-layout">
@@ -62,6 +68,16 @@
         <ng-template appColumnCell="category" let-entry>
           <span class="text-muted">{{ entry.category ?? '—' }}</span>
         </ng-template>
+        <ng-template appColumnCell="laborMinutes" let-entry>
+          @if (entry.timerStart && !entry.timerStop) {
+            &mdash;
+          } @else {
+            <span [attr.data-testid]="'time-entry-labor-' + entry.id">{{ formatDuration(entry.laborMinutes ?? entry.durationMinutes) }}</span>
+            @if (concurrentTimers().get(entry.id); as others) {
+              <span class="time-entry__split" [attr.data-testid]="'time-entry-split-' + entry.id">{{ 'timeTracking.splitWith' | translate: { count: others } }}</span>
+            }
+          }
+        </ng-template>
         <ng-template appColumnCell="durationMinutes" let-entry>
           @if (entry.timerStart && !entry.timerStop) {
             <span class="running-badge">{{ 'timeTracking.running' | translate }}</span>
@@ -83,7 +99,7 @@
         <ng-template appColumnCell="actions" let-entry>
           @if (!isEditable(entry)) {
             <span class="material-icons-outlined lock-icon" [title]="'timeTracking.lockedTitle' | translate">lock</span>
-          } @else {
+          } @else if (canChange(entry)) {
             <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTimeEntry(entry); $event.stopPropagation()">
               <span class="material-icons-outlined">delete</span>
             </button>
@@ -143,7 +159,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeTimerDialog()">{{ 'common.cancel' | translate }}</button>
-      <button data-testid="timer-start-btn" class="action-btn action-btn--primary" (click)="startTimer()">
+      <button data-testid="timer-start-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="startTimer()">
         <span class="material-icons-outlined">play_circle</span>
         {{ 'timeTracking.start' | translate }}
       </button>
@@ -165,7 +181,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeStopDialog()">{{ 'common.cancel' | translate }}</button>
-      <button data-testid="timer-stop-btn" class="action-btn action-btn--warn" (click)="stopTimer()">
+      <button data-testid="timer-stop-btn" class="action-btn action-btn--warn" [disabled]="saving()" (click)="stopTimer()">
         <span class="material-icons-outlined">stop_circle</span>
         {{ 'timeTracking.stopTimer' | translate }}
       </button>

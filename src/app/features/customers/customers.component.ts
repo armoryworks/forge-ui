@@ -32,6 +32,7 @@ import { NewCustomerForkDialogComponent, CustomerCreatePath } from './components
 import { LeadPickerDialogComponent } from './components/new-customer-fork-dialog/lead-picker-dialog.component';
 import { LeadItem } from '../leads/models/lead-item.model';
 import { LeadsService } from '../leads/services/leads.service';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-customers',
@@ -87,7 +88,7 @@ export class CustomersComponent {
   // optional; existing minimal-payload submissions still work.
   protected readonly showDialog = signal(false);
   protected readonly customerForm = new FormGroup({
-    name: new FormControl('', [Validators.required]),
+    name: new FormControl('', [requiredTrimmed]),
     customerNumber: new FormControl('', [Validators.maxLength(50)]),
     companyName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
@@ -356,16 +357,16 @@ export class CustomersComponent {
   }
 
   protected saveCustomer(): void {
-    if (this.customerForm.invalid) return;
+    if (this.customerForm.invalid || this.saving()) return;
     this.saving.set(true);
     // Drop any prior server messages so a re-submit doesn't accumulate.
     FormValidationService.clearServerErrors(this.customerForm);
     const form = this.customerForm.getRawValue();
 
     this.customerService.createCustomer({
-      name: form.name!,
+      name: form.name!.trim(),
       customerNumber: this.manualNumbers.isEnabled('customers') ? (form.customerNumber?.trim() || undefined) : undefined,
-      companyName: form.companyName || undefined,
+      companyName: form.companyName?.trim() || undefined,
       email: form.email || undefined,
       phone: form.phone || undefined,
       // F3 — full-record fields. Empty strings collapse to undefined so the

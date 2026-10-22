@@ -64,12 +64,12 @@ export class PartAlternatesTabComponent {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'alternatePartNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'alternatePartName', header: 'Name', sortable: true },
-    { field: 'type', header: 'Type', sortable: true, width: '110px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '80px', align: 'center' },
-    { field: 'isApproved', header: 'Approved', sortable: true, width: '90px', align: 'center' },
-    { field: 'isBidirectional', header: 'Bi-Dir', sortable: true, width: '70px', align: 'center' },
+    { field: 'alternatePartNumber', header: 'parts.partNumber', sortable: true, width: '120px' },
+    { field: 'alternatePartName', header: 'common.name', sortable: true },
+    { field: 'type', header: 'common.type', sortable: true, width: '110px' },
+    { field: 'priority', header: 'common.priority', sortable: true, width: '80px', align: 'center' },
+    { field: 'isApproved', header: 'columns.approved', sortable: true, width: '90px', align: 'center' },
+    { field: 'isBidirectional', header: 'columns.bidirectional', sortable: true, width: '70px', align: 'center' },
     { field: 'actions', header: '', width: '80px' },
   ];
 
@@ -132,7 +132,7 @@ export class PartAlternatesTabComponent {
       next: () => {
         this.saving.set(false);
         this.showDialog.set(false);
-        this.snackbar.success('Alternate part added');
+        this.snackbar.success(this.translate.instant('parts.alternatesMessages.added'));
         this.loadAlternates(this.partId());
       },
       error: () => this.saving.set(false),
@@ -142,7 +142,7 @@ export class PartAlternatesTabComponent {
   protected approve(alt: PartAlternate): void {
     this.partsService.updatePartAlternate(this.partId(), alt.id, { isApproved: true }).subscribe({
       next: () => {
-        this.snackbar.success('Alternate approved');
+        this.snackbar.success(this.translate.instant('parts.alternatesMessages.approved'));
         this.loadAlternates(this.partId());
       },
     });
@@ -152,16 +152,16 @@ export class PartAlternatesTabComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Alternate',
-        message: `Remove ${alt.alternatePartNumber} as alternate?`,
-        confirmLabel: 'Remove',
+        title: this.translate.instant('parts.alternatesMessages.removeTitle'),
+        message: this.translate.instant('parts.alternatesMessages.removeMessage', { part: alt.alternatePartNumber }),
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.partsService.deletePartAlternate(this.partId(), alt.id).subscribe({
         next: () => {
-          this.snackbar.success('Alternate removed');
+          this.snackbar.success(this.translate.instant('parts.alternatesMessages.removed'));
           this.loadAlternates(this.partId());
         },
       });

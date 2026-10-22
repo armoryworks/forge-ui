@@ -147,7 +147,7 @@ export class ScannerService implements OnDestroy {
     const elapsed = now - this.lastKeyTime;
     this.lastKeyTime = now;
 
-    if (elapsed < this.SCAN_THRESHOLD_MS) {
+    if (this.buffer && (elapsed < this.SCAN_THRESHOLD_MS || this.completeTimer)) {
       this.buffer += event.key;
     } else {
       this.buffer = event.key;

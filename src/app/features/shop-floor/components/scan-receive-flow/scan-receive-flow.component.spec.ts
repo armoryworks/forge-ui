@@ -98,4 +98,38 @@ describe('ScanReceiveFlowComponent', () => {
 
     expect(receive).toHaveBeenCalledWith({ partId: 5, purchaseOrderLineId: 31, quantity: 6, toLocationId: 9, lotNumber: 'HT-77' });
   });
+
+  it('says why a partial quantity was not accepted instead of doing nothing', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ScanActionService, useValue: { receive: vi.fn() } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+        { provide: InventoryService, useValue: { getBinLocations: () => of([]) } },
+        { provide: TranslateService, useValue: { instant: (key: string, p?: Record<string, unknown>) => p ? `${key} ${JSON.stringify(p)}` : key } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new ScanReceiveFlowComponent());
+    mockSignalInputs(component, { context: CONTEXT });
+    const flow = component as unknown as ReceiveInternals & {
+      selectPartial: () => void;
+      confirmPartial: () => void;
+      partialQty: { setValue: (v: number) => void; touched: boolean; errors: Record<string, { message: string }> | null };
+    };
+    flow.ngOnInit();
+    flow.selectPartial();
+
+    flow.partialQty.setValue(9);
+    flow.confirmPartial();
+    expect(flow.step()).toBe('quantity');
+    expect(flow.partialQty.touched).toBe(true);
+    expect(flow.partialQty.errors?.['quantity'].message).toBe('kioskFlows.common.quantityAtMost {"max":6}');
+
+    flow.partialQty.setValue(0);
+    flow.confirmPartial();
+    expect(flow.partialQty.errors?.['quantity'].message).toBe('kioskFlows.common.quantityPositive');
+
+    flow.partialQty.setValue(4);
+    flow.confirmPartial();
+    expect(flow.step()).toBe('destination');
+  });
 });

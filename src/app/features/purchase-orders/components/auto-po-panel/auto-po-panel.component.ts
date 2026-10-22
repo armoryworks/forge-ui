@@ -98,7 +98,7 @@ export class AutoPoPanelComponent {
     if (ids.length === 1) {
       this.poService.convertSuggestion(ids[0]).subscribe({
         next: () => {
-          this.snackbar.success(this.translate.instant('autoPo.convertedSuccess') || 'Suggestion converted to PO');
+          this.snackbar.success(this.translate.instant('autoPo.convertedSuccess'));
           this.converting.set(false);
           this.selectedIds.set([]);
           this.loadSuggestions();
@@ -108,10 +108,7 @@ export class AutoPoPanelComponent {
     } else {
       this.poService.bulkConvertSuggestions(ids).subscribe({
         next: (poIds) => {
-          this.snackbar.success(
-            (this.translate.instant('autoPo.bulkConvertedSuccess') || '{{count}} suggestions converted to POs')
-              .replace('{{count}}', String(poIds.length)),
-          );
+          this.snackbar.success(this.translate.instant('autoPo.bulkConvertedSuccess', { count: poIds.length }));
           this.converting.set(false);
           this.selectedIds.set([]);
           this.loadSuggestions();
@@ -148,15 +145,9 @@ export class AutoPoPanelComponent {
 
   private finishDismiss(completed: number, errors: number): void {
     if (errors === 0) {
-      this.snackbar.success(
-        (this.translate.instant('autoPo.dismissedSuccess') || '{{count}} suggestion(s) dismissed')
-          .replace('{{count}}', String(completed)),
-      );
+      this.snackbar.success(this.translate.instant('autoPo.dismissedSuccess', { count: completed }));
     } else {
-      this.snackbar.error(
-        (this.translate.instant('autoPo.dismissedPartial') || '{{errors}} failed to dismiss')
-          .replace('{{errors}}', String(errors)),
-      );
+      this.snackbar.error(this.translate.instant('autoPo.dismissedPartial', { errors }));
     }
     this.converting.set(false);
     this.selectedIds.set([]);
@@ -166,7 +157,7 @@ export class AutoPoPanelComponent {
   protected triggerRun(): void {
     this.poService.triggerAutoPoRun().subscribe({
       next: () => {
-        this.snackbar.success(this.translate.instant('autoPo.runTriggered') || 'Auto-PO analysis triggered');
+        this.snackbar.success(this.translate.instant('autoPo.runTriggered'));
       },
     });
   }

@@ -7,6 +7,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { mockSignalInputs } from '../../../../testing/signal-input-harness';
 import { CurrencyDisplayComponent } from './currency-display.component';
 import { CurrencyService } from '../../services/currency.service';
+import { provideTranslateService } from '@ngx-translate/core';
 
 class StubCurrencyService {
   private readonly _base = signal<string>('USD');
@@ -33,6 +34,7 @@ function setup(initialBase: string = 'USD'): Setup {
   stub.setBase(initialBase);
   TestBed.configureTestingModule({
     providers: [
+      provideTranslateService(),
       provideHttpClient(),
       provideHttpClientTesting(),
       { provide: CurrencyService, useValue: stub },
@@ -69,6 +71,15 @@ describe('CurrencyDisplayComponent', () => {
     inputs.currency.set('EUR');
 
     expect(text().endsWith('EUR')).toBe(true);
+  });
+
+  it('marks a CAD record with its code under a USD base', () => {
+    const { inputs, text } = setup('USD');
+    inputs.value.set(10200);
+    inputs.currency.set('CAD');
+
+    expect(text()).toContain('10,200.00');
+    expect(text().endsWith(' CAD')).toBe(true);
   });
 
   it('uses base when record currency is null, no suffix', () => {

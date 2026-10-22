@@ -1,5 +1,5 @@
 <app-page-header [title]="'reports.sankey.title' | translate" [subtitle]="'reports.sankey.subtitle' | translate" helpTourId="sankey-reports">
-  <button class="action-btn action-btn--sm" (click)="goBack()" aria-label="Back to reports">
+  <button class="action-btn action-btn--sm" (click)="goBack()" [attr.aria-label]="'reports.sankey.backToReports2' | translate">
     <span class="material-icons-outlined">arrow_back</span>
     {{ 'reports.sankey.backToReports' | translate }}
   </button>
@@ -19,6 +19,9 @@
   </aside>
 
   <main class="reports-main">
+    <app-select class="reports-picker" data-testid="sankey-select-mobile"
+                [label]="'reports.chooseReport' | translate" [options]="reportPickerOptions" [formControl]="reportPicker" />
+
     <div class="report-header">
       <h2 class="report-header__title">{{ activeReportDef().label }}</h2>
 
@@ -39,6 +42,11 @@
         <span class="material-icons-outlined spin">sync</span>
         {{ 'reports.loadingReport' | translate }}
       </div>
+    } @else if (loadError()) {
+      <app-empty-state data-testid="sankey-load-error" icon="error_outline"
+                       [message]="'reports.loadFailed' | translate"
+                       [actionLabel]="'reports.retry' | translate"
+                       (action)="loadReport()" />
     } @else {
       <app-sankey-chart [data]="flowData()" [height]="500" />
     }

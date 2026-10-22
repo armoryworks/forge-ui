@@ -15,6 +15,12 @@
   align-items: flex-start;
   min-width: max-content;
 
+  &__column {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
   &__operation {
     flex-shrink: 0;
     width: 160px;

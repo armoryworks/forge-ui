@@ -30,8 +30,16 @@
     {{ 'accounting.ledger.scanAnomalies' | translate }}
   </button>
   @if (anomalyCount() > 0) {
-    <span class="chip chip--warning">{{ 'accounting.ledger.flagged' | translate: { count: anomalyCount() } }}</span>
+    <button type="button" class="chip chip--warning ledger-flag-filter" [attr.aria-pressed]="flaggedOnly()"
+      (click)="toggleFlaggedOnly()" data-testid="ledger-flagged-filter">
+      {{ 'accounting.ledger.flagged' | translate: { count: anomalyCount() } }}
+    </button>
   }
+  <button type="button" class="action-btn action-btn--sm" [attr.aria-pressed]="showDrafts()" (click)="toggleDrafts()"
+    data-testid="ledger-drafts">
+    <span class="material-icons-outlined" aria-hidden="true">drafts</span>
+    {{ (showDrafts() ? 'accounting.ledger.allEntries' : 'accounting.ledger.rejectedDrafts') | translate }}
+  </button>
   @if (lensAccount(); as lens) {
     <span class="chip chip--info">{{ lens.accountNumber }} — {{ lens.accountName }}</span>
     <a class="action-btn action-btn--sm" routerLink="/accounting/ledger">
@@ -49,6 +57,15 @@
     <p class="acct-caveat" data-testid="ledger-loaded-only">
       {{ 'accounting.ledger.loadedOnly' | translate: { shown: entries().length, total: page()!.totalCount } }}
     </p>
+  }
+  @if (accountNotFound()) {
+    <p class="acct-error" role="alert">{{ 'accounting.ledger.accountNotFound' | translate }}</p>
+  }
+  @if (showDrafts()) {
+    <p class="acct-muted ledger-note">{{ 'accounting.ledger.draftsNote' | translate }}</p>
+  }
+  @if (flaggedOnly() && flaggedOffPage() > 0) {
+    <p class="acct-muted ledger-note">{{ 'accounting.ledger.flaggedOffPage' | translate: { count: flaggedOffPage() } }}</p>
   }
 
   <app-data-table
@@ -86,13 +103,13 @@
         @if (row.reversalOfEntryId || row.reversedByEntryId) {
           <div class="ledger-detail__refs">
             @if (row.reversalOfEntryId) {
-              <button type="button" class="chip chip--info ledger-detail__ref-link" (click)="locateEntry(row.reversalOfEntryId)">
-                {{ 'accounting.ledger.reverses' | translate: { number: row.reversalOfEntryId } }}
+              <button type="button" class="chip chip--info ledger-detail__ref-link" (click)="locateEntry(row.reversalOfEntryId, row.reversalOfEntryNumber)">
+                {{ 'accounting.ledger.reverses' | translate: { number: row.reversalOfEntryNumber ?? row.reversalOfEntryId } }}
               </button>
             }
             @if (row.reversedByEntryId) {
-              <button type="button" class="chip chip--warning ledger-detail__ref-link" (click)="locateEntry(row.reversedByEntryId)">
-                {{ 'accounting.ledger.reversedBy' | translate: { number: row.reversedByEntryId } }}
+              <button type="button" class="chip chip--warning ledger-detail__ref-link" (click)="locateEntry(row.reversedByEntryId, row.reversedByEntryNumber)">
+                {{ 'accounting.ledger.reversedBy' | translate: { number: row.reversedByEntryNumber ?? row.reversedByEntryId } }}
               </button>
             }
           </div>
@@ -152,6 +169,14 @@
         </div>
 
         <div class="ledger-detail__actions">
+          @if (row.status === 'Draft') {
+            @if (canResubmit(row)) {
+              <button type="button" class="action-btn action-btn--sm" (click)="resubmitDraft(row)" data-testid="ledger-resubmit">
+                <span class="material-icons-outlined" aria-hidden="true">send</span>
+                {{ 'accounting.ledger.resubmit' | translate }}
+              </button>
+            }
+          } @else {
           @if (row.status === 'Posted' && !row.reversedByEntryId) {
             <button type="button" class="action-btn action-btn--sm action-btn--danger" (click)="reverseEntry(row)">
               <span class="material-icons-outlined" aria-hidden="true">undo</span>
@@ -165,6 +190,7 @@
             <span class="material-icons-outlined" aria-hidden="true">edit_note</span>
             {{ 'accounting.ledger.correct' | translate }}
           </a>
+          }
         </div>
       </div>
     </ng-template>

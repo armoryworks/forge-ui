@@ -1,11 +1,11 @@
 @if (open()) {
-  <div class="training-context-panel" role="complementary" aria-label="Training help for this page">
+  <div class="training-context-panel" role="complementary" [attr.aria-label]="'shared.trainingContextPanel.trainingHelpForThisPage' | translate">
     <div class="training-context-panel__header">
       <span class="material-icons-outlined training-context-panel__icon">school</span>
-      <span class="training-context-panel__title">Help for this page</span>
+      <span class="training-context-panel__title">{{ 'shared.trainingContextPanel.helpForThisPage' | translate }}</span>
       <button class="icon-btn training-context-panel__close"
               (click)="closed.emit()"
-              aria-label="Close training help panel">
+              [attr.aria-label]="'shared.trainingContextPanel.closeTrainingHelpPanel' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -18,7 +18,7 @@
       } @else if (modules().length === 0) {
         <div class="training-context-panel__empty">
           <span class="material-icons-outlined">menu_book</span>
-          <p>No training modules for this page yet</p>
+          <p>{{ 'shared.trainingContextPanel.noTrainingModulesForThisPage' | translate }}</p>
         </div>
       } @else {
         <div class="training-context-panel__list">
@@ -30,7 +30,7 @@
               <span class="material-icons-outlined training-context-card__icon">{{ contentTypeIcon(module.contentType) }}</span>
               <div class="training-context-card__info">
                 <span class="training-context-card__title">{{ module.title }}</span>
-                <span class="training-context-card__meta">~{{ module.estimatedMinutes }} min</span>
+                <span class="training-context-card__meta">{{ 'shared.trainingContextPanel.estimatedminutesMin' | translate:{ estimatedMinutes: module.estimatedMinutes } }}</span>
               </div>
               @if (module.myStatus === 'Completed') {
                 <span class="material-icons-outlined training-context-card__done">check_circle</span>

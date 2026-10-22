@@ -22,6 +22,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
 
 /**
  * Phase 1r / Batch 9 — admin CRUD for the LeadSource catalog.
@@ -61,19 +62,19 @@ export class LeadSourcesComponent {
   protected readonly editingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'code', header: 'Code', sortable: true, width: '160px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'qualityScore', header: 'Quality', sortable: true, type: 'number', align: 'right', width: '90px' },
-    { field: 'leadCount', header: 'Leads', sortable: true, type: 'number', align: 'right', width: '80px' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '90px', align: 'center' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'code', header: 'admin.leadSources.fieldCode', sortable: true, width: '160px' },
+    { field: 'description', header: 'common.description', sortable: true },
+    { field: 'qualityScore', header: 'columns.quality', sortable: true, type: 'number', align: 'right', width: '90px' },
+    { field: 'leadCount', header: 'columns.leads', sortable: true, type: 'number', align: 'right', width: '80px' },
+    { field: 'isActive', header: 'common.active', sortable: true, width: '90px', align: 'center' },
+    { field: 'createdAt', header: 'common.created', sortable: true, type: 'date', width: '110px' },
     { field: 'actions', header: '', width: '110px', align: 'right' },
   ];
 
   protected readonly form = new FormGroup({
-    name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
-    code: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(50), Validators.pattern(/^[a-z0-9_-]+$/i)] }),
+    name: new FormControl<string>('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(100)] }),
+    code: new FormControl<string>('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(50), Validators.pattern(/^[a-z0-9_-]+$/i)] }),
     description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     isActive: new FormControl<boolean>(true, { nonNullable: true }),
   });
@@ -124,7 +125,7 @@ export class LeadSourcesComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     this.saving.set(true);
     const f = this.form.getRawValue();
     const id = this.editingId();

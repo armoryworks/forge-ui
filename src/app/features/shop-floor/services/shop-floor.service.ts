@@ -16,6 +16,7 @@ import { JobOperationProgressResult } from '../models/job-operation-progress-res
 import { UpdateJobOperationProgressRequest } from '../models/update-job-operation-progress-request.model';
 import { OperationTimerEntryType } from '../models/operation-timer-entry-type.type';
 import { RunningTimer } from '../models/running-timer.model';
+import { StopOperationTimerRequest } from '../models/stop-operation-timer-request.model';
 import { StopTimerTarget } from '../models/stop-timer-target.model';
 import { RaiseKioskAndonRequest } from '../models/raise-kiosk-andon-request.model';
 import { RaiseKioskAndonResult } from '../models/raise-kiosk-andon-result.model';
@@ -65,7 +66,7 @@ export class ShopFloorService {
 
   startTimer(jobId: number): Observable<unknown> {
     return this.http.post(`${environment.apiUrl}/time-tracking/timer/start`, {
-      jobId, category: null, notes: null,
+      jobId, category: null, notes: null, switchFromActive: true,
     });
   }
 
@@ -94,9 +95,11 @@ export class ShopFloorService {
       `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType }, this.silent());
   }
 
-  stopOperationTimer(jobId: number, operationId: number): Observable<JobOperationTimerStopResult> {
+  stopOperationTimer(
+    jobId: number, operationId: number, request: StopOperationTimerRequest = {},
+  ): Observable<JobOperationTimerStopResult> {
     return this.http.post<JobOperationTimerStopResult>(
-      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/stop`, { notes: null }, this.silent());
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/timer/stop`, { notes: null, ...request }, this.silent());
   }
 
   updateOperationProgress(

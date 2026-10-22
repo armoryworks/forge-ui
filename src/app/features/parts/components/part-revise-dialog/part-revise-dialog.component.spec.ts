@@ -104,4 +104,21 @@ describe('PartReviseDialogComponent', () => {
 
     expect(createRevision).not.toHaveBeenCalled();
   });
+
+  it('rejects the current revision or one already in history, ignoring case and spaces', () => {
+    const form = (create() as unknown as DialogInternals).form;
+
+    form.controls.revision.setValue(' a ');
+    expect(form.controls.revision.hasError('revisionTaken')).toBe(true);
+
+    form.controls.revision.setValue('C');
+    expect(form.controls.revision.hasError('revisionTaken')).toBe(false);
+  });
+
+  it('treats a whitespace-only reason as missing', () => {
+    const form = (create() as unknown as DialogInternals).form;
+    form.controls.changeReason.setValue('   ');
+
+    expect(form.controls.changeReason.hasError('required')).toBe(true);
+  });
 });

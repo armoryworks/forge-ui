@@ -37,6 +37,7 @@ import { EMPTY, merge } from 'rxjs';
 import { FormValidationService } from '../../services/form-validation.service';
 import { LanguageService } from '../../services/language.service';
 import { decimalPlaces, formatLocaleNumber, parseLocaleNumber } from '../../utils/locale-number';
+import { controlIsRequired } from '../../validators/control-is-required';
 
 @Component({
   selector: 'app-input',
@@ -106,6 +107,11 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     if (!max || this.type() !== 'text' || this.mask()) return null;
     const length = this.textLength();
     return length >= Math.floor(max * 0.8) ? `${length} / ${max}` : null;
+  });
+
+  protected readonly isRequired = computed(() => {
+    this.controlState();
+    return this.required() || controlIsRequired(this.control());
   });
 
   protected readonly errorStateMatcher: ErrorStateMatcher = {

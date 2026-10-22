@@ -68,7 +68,7 @@ export class LotDialogComponent {
   }
 
   protected save(): void {
-    if (this.lotForm.invalid) return;
+    if (this.lotForm.invalid || this.saving()) return;
     this.saving.set(true);
     const f = this.lotForm.getRawValue();
 

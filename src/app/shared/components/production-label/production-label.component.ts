@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal, OnInit } from '@angular/core';
 import { LabelPrintService } from '../../services/label-print.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface LabelData {
   title: string;
@@ -11,6 +12,7 @@ export interface LabelData {
 
 @Component({
   selector: 'app-production-label',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './production-label.component.html',
   styleUrl: './production-label.component.scss',

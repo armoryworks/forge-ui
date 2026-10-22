@@ -29,6 +29,7 @@ export class ScanDevicesPanelComponent implements OnInit {
 
   readonly devices = signal<ScanDevice[]>([]);
   readonly loading = signal(false);
+  readonly loadFailed = signal(false);
   readonly showPairForm = signal(false);
   readonly pairing = signal(false);
 
@@ -41,6 +42,7 @@ export class ScanDevicesPanelComponent implements OnInit {
 
   loadDevices(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.scanActionService.getDevices().subscribe({
       next: (devices) => {
         this.devices.set(devices);
@@ -48,6 +50,7 @@ export class ScanDevicesPanelComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.loadFailed.set(true);
       },
     });
   }

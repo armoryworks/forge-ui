@@ -77,7 +77,7 @@ export class CustomerAddressDialogComponent {
   protected readonly form = new FormGroup({
     label: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
     addressType: new FormControl<string>('Billing', { nonNullable: true, validators: [Validators.required] }),
-    address: new FormControl<Address | null>(null, [Validators.required, CustomerAddressDialogComponent.addressCompleteValidator]),
+    address: new FormControl<Address | null>(null, [(control: AbstractControl) => this.addressCompleteValidator(control)]),
     isDefault: new FormControl<boolean>(false, { nonNullable: true }),
     contactName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     phone: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
@@ -121,14 +121,26 @@ export class CustomerAddressDialogComponent {
 
   /**
    * AddressFormComponent emits a non-null Address as soon as ANY field has
-   * a value, with '' for the rest — reject those partials so form.invalid
-   * reflects the server's NotEmpty rules on line1/city/state/postalCode/country.
+   * a value, with '' for the rest, and null before any field is touched.
+   * Both count as incomplete; the message names each missing part so it
+   * matches the server's NotEmpty rules on line1/city/state/postalCode/country.
    */
-  static addressCompleteValidator(control: AbstractControl): ValidationErrors | null {
+  private addressCompleteValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value as Address | null;
-    if (!value) return null; // null is handled by Validators.required
-    const complete = !!(value.line1 && value.city && value.state && value.postalCode && value.country);
-    return complete ? null : { addressIncomplete: true };
+    const parts: [string | null | undefined, string][] = [
+      [value?.line1, 'common.street'],
+      [value?.city, 'common.city'],
+      [value?.state, 'common.state'],
+      [value?.postalCode, 'common.zip'],
+      [value?.country, 'common.country'],
+    ];
+    const missing = parts.filter(([part]) => !part?.trim()).map(([, key]) => this.translate.instant(key) as string);
+    if (missing.length === 0) return null;
+    return {
+      addressIncomplete: {
+        message: this.translate.instant('customers.addresses.missingParts', { parts: missing.join(', ') }) as string,
+      },
+    };
   }
 
   protected close(): void {

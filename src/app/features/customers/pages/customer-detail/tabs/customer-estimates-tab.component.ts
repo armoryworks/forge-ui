@@ -30,6 +30,8 @@ import { PartDetail } from '../../../../parts/models/part-detail.model';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectOption } from '../../../../../shared/components/select/select.component';
 import { fromIsoDate, toIsoDate } from '../../../../../shared/utils/date.utils';
+import { MONEY_DECIMALS, UNIT_DECIMALS } from '../../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../../shared/validators/max-decimals.validator';
 
 const STATUS_OPTIONS: SelectOption[] = [
   { value: 'Draft', label: 'Draft' },
@@ -86,7 +88,10 @@ export class CustomerEstimatesTabComponent implements OnInit {
   protected readonly estimateForm = new FormGroup({
     title: new FormControl('', [Validators.required, Validators.maxLength(300)]),
     description: new FormControl(''),
-    estimatedAmount: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    estimatedAmount: new FormControl<number>(0, [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('customers.estimates.estimatedAmount'), this.translate),
+    ]),
     validUntil: new FormControl<Date | null>(null),
     notes: new FormControl(''),
     status: new FormControl<EstimateStatus>('Draft'),
@@ -103,8 +108,14 @@ export class CustomerEstimatesTabComponent implements OnInit {
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
-    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    quantity: new FormControl<number>(1, { nonNullable: true, validators: [
+      Validators.required, Validators.min(0.0001),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.qty'), this.translate),
+    ] }),
+    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.amount'), this.translate),
+    ] }),
   });
 
   /** True while the unit price reflects the resolved customer/list price and hasn't been manually edited. */

@@ -1,3 +1,5 @@
+import { OperationPredecessorRequest } from './operation-predecessor-request.model';
+
 export interface UpdateOperationRequest {
   stepNumber?: number;
   title?: string;
@@ -6,6 +8,10 @@ export interface UpdateOperationRequest {
   estimatedMs?: number;
   setupMinutes?: number;
   runMinutesLot?: number;
+  scrapFactor?: number;
+  laborAttendancePercent?: number;
+  cycleCountdown?: boolean;
+  predecessors?: OperationPredecessorRequest[];
   isQcCheckpoint?: boolean;
   qcCriteria?: string;
   referencedOperationId?: number;
@@ -14,4 +20,5 @@ export interface UpdateOperationRequest {
   isSubcontract?: boolean;
   subcontractVendorId?: number | null;
   subcontractTurnTimeDays?: number | null;
+  removeConflictingPredecessors?: boolean;
 }

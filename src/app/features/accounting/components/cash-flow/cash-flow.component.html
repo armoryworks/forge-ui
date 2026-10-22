@@ -14,8 +14,14 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
+      <app-statement-period mode="range" [from]="period().from" [to]="period().to ?? r.toDate" (periodChange)="setPeriod($event)" />
       <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
     </div>
+
+    <p class="acct-muted stmt-period-note">
+      {{ 'accounting.comparison.currentPeriod' | translate }}:
+      @if (r.fromDate) { {{ r.fromDate | dateOnly }} } @else { {{ 'accounting.period.inception' | translate }} } – {{ r.toDate | dateOnly }}
+    </p>
 
     @if (viewMode() === 'visual') {
       <app-cash-flow-visual [report]="r" />
@@ -70,6 +76,14 @@
         <tr>
           <td>{{ 'accounting.cashFlow.netChangeInCash' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netChangeInCash" /></td>
+        </tr>
+        <tr>
+          <td>{{ 'accounting.cashFlow.beginningCash' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.beginningCash" /></td>
+        </tr>
+        <tr class="statement__subtotal">
+          <td>{{ 'accounting.cashFlow.endingCash' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.endingCash" /></td>
         </tr>
         <tr class="statement__reconcile">
           <td>{{ 'accounting.cashFlow.actualCashMovement' | translate }}</td>

@@ -80,6 +80,8 @@
       <span class="material-icons-outlined devices-panel__spinner">sync</span>
       {{ 'kioskFlows.devices.loading' | translate }}
     </div>
+  } @else if (loadFailed()) {
+    <app-empty-state icon="error_outline" [message]="'kioskFlows.common.loadFailed' | translate" data-testid="devices-load-failed" />
   } @else if (devices().length === 0) {
     <app-empty-state icon="devices" [message]="'kioskFlows.devices.empty' | translate" />
   } @else {

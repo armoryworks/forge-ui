@@ -1,10 +1,13 @@
 import {
+  AfterContentInit,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   forwardRef,
   inject,
+  Injector,
   input,
   OnInit,
   output,
@@ -20,6 +23,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, map, of } from 'rxjs';
 
+import { BoundControl } from '../../utils/bound-control';
 import {
   SimilarEntitiesDialogComponent,
   SimilarEntitiesDialogData,
@@ -41,10 +45,12 @@ import {
     },
   ],
 })
-export class EntityPickerComponent implements ControlValueAccessor, OnInit {
+export class EntityPickerComponent implements ControlValueAccessor, OnInit, AfterContentInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
+  private readonly injector = inject(Injector);
+  private readonly bound = new BoundControl();
 
   readonly label = input.required<string>();
   readonly entityType = input.required<string>();
@@ -90,6 +96,7 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   protected readonly searchControl = new FormControl('');
   protected readonly results = signal<Record<string, unknown>[]>([]);
   protected readonly disabled = signal(false);
+  protected readonly isRequired = computed(() => this.required() || this.bound.isRequired());
   /** True when {@link createNewLabel} is set AND the user has typed >= 2 chars — controls the dropdown's "Create new" row visibility. */
   protected readonly canShowCreateNew = signal(false);
   /** True while exactly one character is typed — the dropdown shows a "type at least 2 characters" hint instead of results. */
@@ -98,6 +105,10 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
 
   private onChange: (value: unknown) => void = () => {};
   private onTouched: () => void = () => {};
+
+  ngAfterContentInit(): void {
+    this.bound.attach(this.injector, this.destroyRef);
+  }
 
   ngOnInit(): void {
     this.searchControl.valueChanges.pipe(
@@ -316,6 +327,12 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     return v == null ? '' : String(v);
   }
 
+  /**
+   * Ids left out of the search results, e.g. the record being edited when it cannot be its own
+   * source. Empty by default, so other consumers see every result.
+   */
+  readonly excludeIds = input<readonly unknown[]>([]);
+
   private search(term: string) {
     // Phase 3 / WU-17 standardised paged-list endpoints on `?q=` + `{ items, totalCount, page, pageSize }`.
     // Older endpoints still accept `?search=` and either return a flat array or a `{ data: [] }` envelope.
@@ -337,10 +354,15 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
       .pipe(
         catchError(() => of([] as Record<string, unknown>[])),
         switchMap(res => {
-          if (Array.isArray(res)) return of(res);
+          if (Array.isArray(res)) return of(this.withoutExcluded(res));
           const env = res as Envelope;
-          return of(env.items ?? env.data ?? []);
+          return of(this.withoutExcluded(env.items ?? env.data ?? []));
         }),
       );
+  }
+
+  private withoutExcluded(rows: Record<string, unknown>[]): Record<string, unknown>[] {
+    const excluded = this.excludeIds();
+    return excluded.length ? rows.filter(row => !excluded.includes(row['id'])) : rows;
   }
 }

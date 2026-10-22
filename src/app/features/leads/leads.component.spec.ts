@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -146,6 +146,44 @@ describe('LeadsComponent — inline account creation (forge#2/#3)', () => {
 
     expect(internals.leads()[0].status).toBe('Contacted');
     expect(internals.showLostDialog()).toBe(true);
+  });
+
+  it('marks a dragged lead Lost once when Confirm is pressed twice before the server answers', () => {
+    const internals = component as unknown as {
+      leads: { set: (rows: unknown[]) => void };
+      onCardDrop: (event: unknown, status: string) => void;
+      lostReasonControl: { setValue: (v: string) => void };
+      confirmLost: () => void;
+    };
+    const lead = { id: 7, companyName: 'Acme', contactName: null, email: null, leadNumber: 'LEAD-00007', status: 'New' };
+    internals.leads.set([lead]);
+    leadsService.updateLead.mockReturnValueOnce(new Subject());
+
+    internals.onCardDrop({ previousContainer: {}, container: {}, item: { data: lead } }, 'Lost');
+    internals.lostReasonControl.setValue('Went elsewhere');
+    internals.confirmLost();
+    internals.confirmLost();
+
+    expect(leadsService.updateLead).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets Confirm Lost be pressed again after the server rejects the first press', () => {
+    const internals = component as unknown as {
+      leads: { set: (rows: unknown[]) => void };
+      onCardDrop: (event: unknown, status: string) => void;
+      lostReasonControl: { setValue: (v: string) => void };
+      confirmLost: () => void;
+    };
+    const lead = { id: 8, companyName: 'Acme', contactName: null, email: null, leadNumber: 'LEAD-00008', status: 'New' };
+    internals.leads.set([lead]);
+    leadsService.updateLead.mockReturnValueOnce(throwError(() => new Error('boom')));
+
+    internals.onCardDrop({ previousContainer: {}, container: {}, item: { data: lead } }, 'Lost');
+    internals.lostReasonControl.setValue('Went elsewhere');
+    internals.confirmLost();
+    internals.confirmLost();
+
+    expect(leadsService.updateLead).toHaveBeenCalledTimes(2);
   });
 
   describe('bulk assign', () => {

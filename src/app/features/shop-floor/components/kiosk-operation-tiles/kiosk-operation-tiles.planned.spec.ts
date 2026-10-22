@@ -50,4 +50,16 @@ describe('KioskOperationTilesComponent planned quantity', () => {
     expect(el.querySelector('[data-testid="kiosk-op-tile-planned-2"]')).toBeNull();
     expect(el.querySelector('[data-testid="kiosk-op-tile-2"] .op-tile__qty')?.textContent?.trim()).toBe('0 / 322');
   });
+
+  it('counts the first step against the whole start when yield sets the start', () => {
+    const fixture = TestBed.createComponent(KioskOperationTilesComponent);
+    fixture.componentRef.setInput('operations', [row(1, { plannedQuantity: 112 }), row(2, { plannedQuantity: 105 })]);
+    fixture.componentRef.setInput('jobQuantity', 112);
+    fixture.componentRef.setInput('now', 0);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-testid="kiosk-op-tile-planned-1"]')?.textContent?.trim()).toBe('0 / 112 planned');
+    expect(el.querySelector('[data-testid="kiosk-op-tile-planned-2"]')?.textContent?.trim()).toBe('0 / 105 planned');
+  });
 });

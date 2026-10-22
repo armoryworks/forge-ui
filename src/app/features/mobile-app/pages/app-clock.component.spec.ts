@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -15,12 +15,14 @@ import { AppClockComponent } from './app-clock.component';
 
 interface ClockInternals {
   doPunch(kind: 'ClockIn'): Promise<void>;
+  primaryPunch(): string;
 }
 
 describe('AppClockComponent', () => {
   let shared: boolean;
   let token: string | null;
   const offer = vi.fn();
+  const errorFrom = vi.fn();
   const clear = vi.fn(() => { token = null; });
   const api = {
     clockState: vi.fn(),
@@ -33,6 +35,7 @@ describe('AppClockComponent', () => {
     shared = true;
     token = 'person-token';
     offer.mockReset();
+    errorFrom.mockReset();
     clear.mockClear();
     api.clockState.mockReset().mockReturnValue(of(state));
     api.clockPunch.mockReset().mockReturnValue(of({ eventId: 5, state }));
@@ -42,7 +45,7 @@ describe('AppClockComponent', () => {
         { provide: MobileApiService, useValue: api },
         { provide: UndoService, useValue: { offer } },
         { provide: OfflineQueueService, useValue: { remove: vi.fn() } },
-        { provide: SnackbarService, useValue: { error: vi.fn() } },
+        { provide: SnackbarService, useValue: { error: vi.fn(), errorFrom } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
         { provide: SharedIdentityService, useValue: { identified: signal(true), person: signal(null), clear } },
         { provide: AuthService, useValue: { token: () => token } },
@@ -72,5 +75,25 @@ describe('AppClockComponent', () => {
 
     expect(clear).not.toHaveBeenCalled();
     expect(api.undoClockPunch).toHaveBeenCalledWith(5, undefined);
+  });
+
+  it('shows the server reason for a refused punch and reloads the real state', async () => {
+    shared = false;
+    const refused = new Error('409');
+    api.clockPunch.mockReturnValue(throwError(() => refused));
+    const clock = TestBed.runInInjectionContext(() => new AppClockComponent()) as unknown as ClockInternals;
+    api.clockState.mockClear();
+
+    await clock.doPunch('ClockIn');
+
+    expect(errorFrom).toHaveBeenCalledWith(refused, 'mobileApp.clock.failed');
+    expect(api.clockState).toHaveBeenCalledOnce();
+  });
+
+  it('ends a lunch with End lunch rather than End break', () => {
+    shared = false;
+    api.clockState.mockReturnValue(of({ state: 'break', lastEventType: 'LunchStart', lastEventAt: null, lastEventId: 6 }));
+    const lunch = TestBed.runInInjectionContext(() => new AppClockComponent()) as unknown as ClockInternals;
+    expect(lunch.primaryPunch()).toBe('LunchEnd');
   });
 });

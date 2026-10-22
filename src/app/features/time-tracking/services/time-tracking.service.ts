@@ -14,6 +14,9 @@ import { TimeCorrectionLog } from '../models/time-correction-log.model';
 import { CorrectTimeEntryRequest } from '../models/correct-time-entry-request.model';
 import { OvertimeRule, CreateOvertimeRuleRequest, OvertimeBreakdown } from '../models/overtime.model';
 import { ShiftAssignment, CreateShiftAssignmentRequest } from '../models/shift-assignment.model';
+import { LaborReconciliationRow } from '../models/labor-reconciliation-row.model';
+import { LaborRecomputeRequest } from '../models/labor-recompute-request.model';
+import { LaborRecomputeResult } from '../models/labor-recompute-result.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeTrackingService {
@@ -27,6 +30,16 @@ export class TimeTrackingService {
     if (from) params = params.set('from', from);
     if (to) params = params.set('to', to);
     return this.http.get<TimeEntry[]>(`${this.base}/entries`, { params });
+  }
+
+  getLaborReconciliation(from: string, to: string, userId?: number | null): Observable<LaborReconciliationRow[]> {
+    let params = new HttpParams().set('from', from).set('to', to);
+    if (userId) params = params.set('userId', userId);
+    return this.http.get<LaborReconciliationRow[]>(`${this.base}/labor-reconciliation`, { params });
+  }
+
+  recomputeLabor(request: LaborRecomputeRequest): Observable<LaborRecomputeResult> {
+    return this.http.post<LaborRecomputeResult>(`${this.base}/labor-allocation/recompute`, request);
   }
 
   createTimeEntry(request: CreateTimeEntryRequest): Observable<TimeEntry> {

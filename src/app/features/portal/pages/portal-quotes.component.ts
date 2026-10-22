@@ -65,6 +65,7 @@ export class PortalQuotesComponent implements OnInit {
   }
 
   private submitResponse(quote: PortalQuote, accepted: boolean): void {
+    if (this.isResponding(quote.id)) return;
     const next = new Set(this.responding());
     next.add(quote.id);
     this.responding.set(next);

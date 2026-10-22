@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, LOCALE_ID } from '@angular/core';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,6 +26,7 @@ const TOTAL_COLOR = '#2563eb';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CashFlowVisualComponent {
+  private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
 
   readonly report = input.required<CashFlowStatement>();
@@ -88,7 +89,7 @@ export class CashFlowVisualComponent {
               label: (ctx) => {
                 const raw = ctx.raw as [number, number];
                 const magnitude = Math.abs(raw[1] - raw[0]);
-                return `${ctx.label}: ${magnitude.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`;
+                return `${ctx.label}: ${magnitude.toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`;
               },
             },
           },

@@ -79,6 +79,9 @@ interface SetupInternals {
   unlock(): void;
   choosePath(path: 'quick' | 'full'): void;
   onSubmit(): void;
+  toCompany(): void;
+  ignoreRepeatClick(event: MouseEvent): void;
+  completeFromModules(event: MouseEvent): void;
   accountForm: FormGroup;
   companyForm: FormGroup;
 }
@@ -379,5 +382,70 @@ describe('SetupComponent — module bundles', () => {
     await Promise.resolve();
 
     expect(navigate).toHaveBeenCalledWith(['/dashboard']);
+  });
+});
+
+describe('SetupComponent — one setup per press', () => {
+  it('posts setup once when Complete is pressed twice before the server answers', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.onSubmit();
+    component.onSubmit();
+
+    expect(httpMock.match(SETUP_URL).length).toBe(1);
+  });
+
+  it('lets Complete be pressed again after the server rejects the first setup', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.onSubmit();
+    httpMock.expectOne(SETUP_URL).flush({ detail: 'nope' }, { status: 500, statusText: 'Server Error' });
+    component.onSubmit();
+
+    expect(httpMock.match(SETUP_URL).length).toBe(1);
+  });
+
+  it('advances the account step only once when Next is pressed twice', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('full');
+    fillWizard(component);
+
+    component.toCompany();
+    component.step.set(3);
+    component.toCompany();
+
+    expect(component.step()).toBe(3);
+  });
+
+  it('does not submit the company step from the second click of a double-click on Next', () => {
+    const { component } = setup();
+    const second = new MouseEvent('click', { detail: 2, cancelable: true });
+    const single = new MouseEvent('click', { detail: 1, cancelable: true });
+
+    component.ignoreRepeatClick(second);
+    component.ignoreRepeatClick(single);
+
+    expect(second.defaultPrevented).toBe(true);
+    expect(single.defaultPrevented).toBe(false);
+  });
+
+  it('does not complete setup from the second click of a double-click on the company Next', () => {
+    const { component, httpMock } = setup();
+    flushStatus(httpMock, { setupRequired: true, activationRequired: false });
+    component.choosePath('quick');
+    fillWizard(component);
+
+    component.completeFromModules(new MouseEvent('click', { detail: 2 }));
+    expect(httpMock.match(SETUP_URL).length).toBe(0);
+
+    component.completeFromModules(new MouseEvent('click', { detail: 1 }));
+    expect(httpMock.match(SETUP_URL).length).toBe(1);
   });
 });

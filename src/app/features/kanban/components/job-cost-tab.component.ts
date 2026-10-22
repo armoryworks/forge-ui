@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, injec
 import { CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -42,6 +42,7 @@ export class JobCostTabComponent {
 
   private readonly costService = inject(JobCostService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly capabilities = inject(CapabilityService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
@@ -58,13 +59,13 @@ export class JobCostTabComponent {
   });
 
   readonly materialColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'partDescription', header: 'Description', sortable: true },
-    { field: 'quantity', header: 'Qty', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'unitCost', header: 'Unit Cost', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalCost', header: 'Total', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'issueType', header: 'Type', sortable: true, width: '80px' },
-    { field: 'issuedAt', header: 'Date', sortable: true, type: 'date', width: '120px' },
+    { field: 'partNumber', header: this.translate.instant('jobCostTab.colPartNumber'), sortable: true, width: '120px' },
+    { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('jobCostTab.colQty'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'unitCost', header: this.translate.instant('jobCostTab.colUnitCost'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalCost', header: this.translate.instant('common.total'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'issueType', header: this.translate.instant('common.type'), sortable: true, width: '80px' },
+    { field: 'issuedAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
@@ -100,7 +101,7 @@ export class JobCostTabComponent {
     this.costService.returnMaterial(issue.jobId, issue.id).subscribe({
       next: () => {
         this.returningId.set(null);
-        this.snackbar.success('Material returned to stock');
+        this.snackbar.success(this.translate.instant('jobCostTab.returned'));
         this.loadData(this.jobId());
       },
       error: () => this.returningId.set(null),
@@ -120,7 +121,7 @@ export class JobCostTabComponent {
   recalculateCosts(): void {
     this.costService.recalculateCosts(this.jobId()).subscribe({
       next: () => {
-        this.snackbar.success('Costs recalculated');
+        this.snackbar.success(this.translate.instant('jobCostTab.recalculated'));
         this.loadData(this.jobId());
       },
     });
@@ -130,5 +131,11 @@ export class JobCostTabComponent {
     if (variance > 0) return 'cost-tab__variance--over';
     if (variance < 0) return 'cost-tab__variance--under';
     return '';
+  }
+
+  protected issueTypeLabel(issueType: string): string {
+    const key = `jobCostTab.issueTypes.${issueType.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? issueType : text;
   }
 }

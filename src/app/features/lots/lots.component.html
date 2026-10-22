@@ -4,7 +4,7 @@
 
 <div class="page-header">
   <app-input
-    label="Search lot number or part"
+    [label]="'lots.searchLabel' | translate"
     [formControl]="searchControl"
     [attr.aria-label]="'common.search' | translate"
     (keydown.enter)="applySearch()" />

@@ -17,7 +17,7 @@
         <app-empty-state icon="precision_manufacturing" [message]="'oee.noWorkCenters' | translate" />
       } @else {
         <!-- Work Center Grid -->
-        <section class="oee-page__grid" aria-label="Work center OEE overview">
+        <section class="oee-page__grid" [attr.aria-label]="'oee.gridLabel' | translate">
           @for (wc of workCenters(); track wc.workCenterId) {
             <app-oee-work-center-card
               [data]="wc"

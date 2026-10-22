@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -39,6 +39,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 })
 export class CreateAnnouncementDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<CreateAnnouncementDialogComponent>);
+  private readonly translate = inject(TranslateService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
@@ -134,7 +135,7 @@ export class CreateAnnouncementDialogComponent implements OnInit {
     }).subscribe({
       next: (announcement) => {
         this.saving.set(false);
-        this.snackbar.success('Announcement sent');
+        this.snackbar.success(this.translate.instant('announcements.sentToast'));
         this.dialogRef.close(announcement);
       },
       error: () => {

@@ -1,6 +1,6 @@
 import {
-  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, Injector, OnDestroy, OnInit,
-  Renderer2, signal,
+  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, HostListener, inject, Injector, OnDestroy, OnInit,
+  Renderer2, signal, viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { catchError, debounceTime, forkJoin, interval, of, Subject, switchMap } from 'rxjs';
+import { catchError, concatMap, debounceTime, forkJoin, from, interval, last, Observable, of, Subject, switchMap, tap, throwError } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
@@ -41,9 +41,21 @@ import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dialog/scan-label-dialog.component';
 import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
 import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
+import { describeStepGate, stepGateViolationOf } from '../../shared/utils/step-gate-error';
+import { focusCancelOnOpen } from '../../shared/utils/focus-dialog-cancel';
+import { describeNonClockScan } from './utils/describe-scan';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
 import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
+import { KioskRunningTimersComponent } from './components/kiosk-running-timers/kiosk-running-timers.component';
+import { ClockOutSheetDialogComponent } from './components/clock-out-sheet/clock-out-sheet-dialog.component';
+import { KioskStepActionsService } from './services/kiosk-step-actions.service';
+import { KioskCycleTrackerService } from './services/kiosk-cycle-tracker.service';
+import { RunningTimer } from './models/running-timer.model';
+import { RunningTimerCycles } from './models/running-timer-cycles.model';
+import { KioskRunningTimer } from './models/kiosk-running-timer.model';
+import { ClockOutSheetData } from './models/clock-out-sheet-data.model';
+import { ClockOutSheetLine } from './models/clock-out-sheet-line.model';
 import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-log.component';
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
@@ -53,6 +65,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { LanguageService } from '../../shared/services/language.service';
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28] as const;
 
@@ -71,10 +84,12 @@ const TERMINAL_KEY = 'forge-kiosk-terminal';
 
 type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'assign' | 'receiving' | 'shipping';
 
+const SIGNED_IN_PHASES: ReadonlySet<DisplayPhase> = new Set<DisplayPhase>(['actions', 'job-select', 'assign', 'receiving', 'shipping']);
+
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
+  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, KioskRunningTimersComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -112,6 +127,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  private readonly language = inject(LanguageService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
@@ -250,7 +266,15 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Action state
   protected readonly processing = signal<string | null>(null);
-  private readonly operationTracking = signal(false);
+  protected readonly operationTracking = signal(false);
+  protected readonly stepsOpen = signal(false);
+  private readonly scanOverlay = viewChild(ScanActionOverlayComponent);
+  private readonly stepActions = inject(KioskStepActionsService);
+  private readonly cycleTracker = inject(KioskCycleTrackerService);
+  protected readonly nowMs = computed(() => {
+    this.tick();
+    return Date.now();
+  });
   protected readonly actionFeedback = signal<{ workerId: number; success: boolean; message: string; detail: string | null } | null>(null);
 
   // Job selection state
@@ -295,6 +319,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     const worker = this.selectedWorker();
     return !!worker && this.SUPERVISE_ROLES.has(worker.role);
   });
+  protected readonly supervisorSignedIn = computed(() =>
+    this.canSupervise() && SIGNED_IN_PHASES.has(this.phase()) && this.authService.isAuthenticated());
 
   // Undo panel
   protected readonly undoPanelOpen = signal(false);
@@ -501,6 +527,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       next: (result) => {
         if (result.scanType === 'employee') {
           this.signInScannedEmployee(result.entityId, scanValue);
+        } else if (result.scanType === 'job' && result.isClosed) {
+          this.showScanFeedback(this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' }));
         } else if (result.scanType === 'job') {
           this.showScanFeedback(this.translate.instant('shopFloor.display.workOrderScanned', { number: result.entityNumber, title: result.entityTitle }));
         } else if (result.scanType === 'storage-location') {
@@ -509,17 +537,16 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         } else if (result.scanType === 'sales-order') {
           this.showScanFeedback(this.translate.instant('shopFloor.display.salesOrderScanned', { number: result.entityNumber }));
         } else {
-          this.showScanFeedback(this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
+          this.showScanFeedback(describeNonClockScan(result, this.translate)
+            ?? this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
         }
       },
-      error: () => {
-        // Identification failed — treat as badge scan anyway (fallback)
-        this.scannedValue.set(scanValue);
-        this.pinControl.reset();
-        this.pinError.set(null);
-        this.phase.set('pin');
-        this.selectedWorker.set(null);
-        this.startPhaseTimeout(PIN_TIMEOUT_MS);
+      error: (err: HttpErrorResponse) => {
+        if (err?.status === 401 && localStorage.getItem(DEVICE_TOKEN_KEY)) {
+          this.unpair();
+          return;
+        }
+        this.showScanFeedback(this.translate.instant('shopFloor.scanCheckFailed'));
       },
     });
   }
@@ -620,8 +647,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       this.authenticating.set(true);
       this.pinError.set(null);
       this.authService.login({ email: worker.email, password: credential }).subscribe({
-        next: () => {
+        next: (response) => {
           this.authenticating.set(false);
+          if (response.mfaRequired) {
+            this.pinControl.reset();
+            this.pinError.set(this.translate.instant('shopFloor.kioskMfaUseBadge'));
+            return;
+          }
           this.enterActionsPhase();
         },
         error: () => {
@@ -701,12 +733,44 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   protected clockAction(worker: ClockWorker, eventType: string): void {
+    if (this.processing()) return;
+    const clockingOut = this.clockTypes.definitions().find(d => d.code === eventType)?.statusMapping === 'Out';
+    const timers = worker.runningTimers ?? [];
+    if (clockingOut && this.operationTracking() && timers.length > 0) {
+      this.resetAutoLogoutTimer();
+      this.dialog.open<ClockOutSheetDialogComponent, ClockOutSheetData, ClockOutSheetLine[] | undefined>(ClockOutSheetDialogComponent, {
+        width: '560px',
+        maxWidth: '95vw',
+        data: { workerName: worker.name, timers },
+      }).afterClosed().subscribe(lines => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
+        if (!lines) {
+          this.startAutoLogoutTimer();
+          return;
+        }
+        this.punch(worker, eventType, lines);
+      });
+      return;
+    }
+    this.punch(worker, eventType, []);
+  }
+
+  private punch(worker: ClockWorker, eventType: string, sheet: ClockOutSheetLine[]): void {
     const key = `${worker.userId}-${eventType}`;
     if (this.processing()) return;
     this.processing.set(key);
     this.resetAutoLogoutTimer();
 
-    this.loading.track(this.translate.instant('shopFloor.display.processing'), this.shopFloorService.clockInOut(worker.userId, eventType)).subscribe({
+    const counted = sheet.filter(line => (line.goodQuantity || line.scrapQuantity)
+      && line.timer.jobId != null && line.timer.operationId != null);
+    const recordPieces$: Observable<unknown> = counted.length === 0
+      ? of(null)
+      : from(counted).pipe(
+        concatMap(line => this.recordSheetLine(line)),
+        last());
+    const punch$ = recordPieces$.pipe(switchMap(() => this.shopFloorService.clockInOut(worker.userId, eventType)));
+
+    this.loading.track(this.translate.instant('shopFloor.display.processing'), punch$).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -714,22 +778,59 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         const eventDef = this.clockTypes.definitions().find(d => d.code === eventType);
         const nowWorking = eventDef?.statusMapping === 'In';
         const clockedInWithoutWork = nowWorking && eventDef.category === 'work' && worker.assignments.length === 0;
+        const recorded = this.translate.instant('shopFloor.punchRecorded', {
+          event: eventDef?.label ?? eventType,
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        });
+        this.showActionFeedback(worker.userId, true, recorded);
         if (clockedInWithoutWork) {
-          this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.scheduleTransition(() => this.openJobPicker(worker), 800);
         } else if (nowWorking) {
-          this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.startAutoLogoutTimer();
         } else {
-          this.showActionFeedback(worker.userId, true, this.translate.instant('shopFloor.actionDone'));
           this.scheduleTransition(() => this.ephemeralLogout(), 1500);
         }
       },
       error: (err: HttpErrorResponse) => {
         this.processing.set(null);
         this.showActionFeedback(worker.userId, false, this.translate.instant('shopFloor.actionFailed'), this.serverReason(err));
+        if (err?.status === 409) this.loadData();
       },
     });
+  }
+
+  private recordSheetLine(line: ClockOutSheetLine): Observable<unknown> {
+    const jobId = line.timer.jobId!;
+    const operationId = line.timer.operationId!;
+    const request = { goodQuantity: line.goodQuantity, scrapQuantity: line.scrapQuantity };
+    return this.shopFloorService.stopOperationTimer(jobId, operationId, request).pipe(
+      catchError((err: unknown) => {
+        const gate = stepGateViolationOf(err);
+        if (!gate) return throwError(() => err);
+        const warn = gate.mode === 'Warn';
+        this.resetAutoLogoutTimer();
+        return this.dialog.open(ConfirmDialogComponent, {
+          width: '440px',
+          data: {
+            title: this.translate.instant('shopFloor.clockOutSheet.gateTitle', {
+              jobNumber: line.timer.jobNumber ?? '', step: line.timer.stepNumber ?? '',
+            }),
+            message: `${describeStepGate(gate, this.translate)} ${this.translate.instant(
+              warn ? 'shopFloor.clockOutSheet.gateWarnHint' : 'shopFloor.clockOutSheet.gateBlockHint')}`,
+            confirmLabel: this.translate.instant(
+              warn ? 'shopFloor.clockOutSheet.gateRecordAnyway' : 'shopFloor.clockOutSheet.gateSkipPieces'),
+            severity: 'warn',
+          } satisfies ConfirmDialogData,
+        }).afterClosed().pipe(
+          switchMap(confirmed => {
+            if (!confirmed) return throwError(() => err);
+            return warn
+              ? this.shopFloorService.stopOperationTimer(jobId, operationId, { ...request, acknowledgeGate: true })
+              : of(null);
+          }),
+        );
+      }),
+    );
   }
 
   // ─── Job Selection ───
@@ -784,6 +885,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected claimJob(job: KioskAvailableJob): void {
     const worker = this.jobSelectWorker();
     if (!worker || this.processing()) return;
+    if (this.operationTracking()) {
+      this.openJobSteps(job);
+      return;
+    }
     this.processing.set(`claim-${job.jobId}`);
     this.clearPhaseTimeout();
 
@@ -887,6 +992,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         this.processing.set(null);
         this.showActionFeedback(worker.userId, false,
           this.translate.instant('shopFloor.timerStartFailed', { jobNumber: assignment.jobNumber, reason: this.serverReason(err) }));
+        if (err?.status === 409) this.loadData();
       },
     });
   }
@@ -960,10 +1066,114 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.focusSearchArea();
   }
 
+  protected readonly selectedWorkerTimers = computed<RunningTimer[]>(() => {
+    const worker = this.selectedWorker();
+    return worker ? (worker.runningTimers ?? []).map(timer => toRunningTimer(timer, worker.userId)) : [];
+  });
+
+  protected openJobSteps(
+    job: { jobId: number; jobNumber: string; title: string; stageName: string },
+    focusOperationId: number | null = null,
+  ): void {
+    const overlay = this.scanOverlay();
+    if (!overlay || this.processing()) return;
+    this.clearPhaseTimeout();
+    this.actionFeedback.set(null);
+    this.stepsOpen.set(true);
+    this.startAutoLogoutTimer();
+    overlay.openJobById(job.jobId, { jobNumber: job.jobNumber, title: job.title, stageName: job.stageName }, focusOperationId);
+  }
+
+  @HostListener('document:pointerdown')
+  @HostListener('document:keydown')
+  protected onKioskActivity(): void {
+    this.keepSignedInSessionAlive();
+  }
+
+  protected onOverlayDismissed(): void {
+    if (!this.stepsOpen()) return;
+    this.stepsOpen.set(false);
+    if (this.phase() === 'job-select') {
+      this.jobSelectWorker.set(null);
+      this.phase.set('actions');
+    }
+    this.loadData();
+    if (SIGNED_IN_PHASES.has(this.phase())) this.startAutoLogoutTimer();
+  }
+
+  protected chipStop(timer: RunningTimer): void {
+    this.runChip(timer, 'stop');
+  }
+
+  protected chipRecord(timer: RunningTimer): void {
+    this.runChip(timer, 'record');
+  }
+
+  protected chipDone(timer: RunningTimer): void {
+    this.runChip(timer, 'done');
+  }
+
+  protected chipCycles(event: RunningTimerCycles): void {
+    this.runChip(event.timer, 'cycles', event.cycles);
+  }
+
+  private runChip(timer: RunningTimer, kind: 'stop' | 'record' | 'done' | 'cycles', cycles = 0): void {
+    const worker = this.selectedWorker();
+    if (!worker || this.processing()) return;
+    this.resetAutoLogoutTimer();
+    this.processing.set(`chip-${timer.id}`);
+    const jobId = timer.jobId;
+    const operationId = timer.operationId;
+    const action$: Observable<unknown> = jobId == null || operationId == null
+      ? this.shopFloorService.stopTimer({ timeEntryId: timer.id })
+      : this.stepActions.loadStep(jobId, operationId).pipe(
+        switchMap(step => {
+          if (!step) return of(null);
+          if (kind === 'cycles') {
+            const reported = step.row.completedQuantity + step.row.scrapQuantity + cycles;
+            const gated = (step.context.gating ?? 'Off') !== 'Off' && step.row.available != null && reported > step.row.available;
+            const record$: Observable<unknown> = gated
+              ? this.stepActions.recordPieces(jobId, step.row, step.context, cycles)
+              : this.shopFloorService.updateOperationProgress(jobId, operationId, {
+                completedQuantity: step.row.completedQuantity + cycles,
+                scrapQuantity: step.row.scrapQuantity,
+                expectedVersion: step.row.version,
+              });
+            return record$.pipe(tap(result => {
+              if (result !== null) this.cycleTracker.advance(timer.id, cycles);
+            }));
+          }
+          if (kind === 'record') return this.stepActions.recordPieces(jobId, step.row, step.context);
+          return this.stepActions.stop(jobId, step.row, step.context, kind === 'done' ? 'Run' : timer.entryType);
+        }));
+
+    action$.subscribe({
+      next: (result) => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
+        this.processing.set(null);
+        this.startAutoLogoutTimer();
+        if (result === null) return;
+        this.loadData();
+        this.showActionFeedback(worker.userId, true, this.translate.instant(
+          kind === 'record' || kind === 'cycles' ? 'shopFloor.display.piecesRecorded' : 'shopFloor.timerStoppedOn',
+          { jobNumber: timer.jobNumber ?? '' }));
+      },
+      error: (err: HttpErrorResponse) => {
+        if (this.selectedWorker()?.userId !== worker.userId) return;
+        this.processing.set(null);
+        this.startAutoLogoutTimer();
+        this.showActionFeedback(worker.userId, false, this.translate.instant(
+          kind === 'record' || kind === 'cycles' ? 'shopFloor.display.piecesRecordFailed' : 'shopFloor.timerStopFailed',
+          { reason: this.serverReason(err) }));
+        this.loadData();
+      },
+    });
+  }
+
   // ─── Receiving ───
 
   protected enterReceiving(): void {
-    this.clearAutoLogoutTimer();
+    this.startAutoLogoutTimer();
     this.phase.set('receiving');
     this.selectedPO.set(null);
     this.receivingLines.set([]);
@@ -973,21 +1183,32 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private loadReceivablePOs(): void {
     const receivableStatuses = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
-    this.poService.getPurchaseOrders().subscribe(pos => {
-      const openPos = pos.filter(po => receivableStatuses.includes(po.status));
-      const details: PurchaseOrderDetail[] = [];
-      if (openPos.length === 0) {
-        this.receivablePOs.set([]);
-        return;
-      }
-      openPos.forEach(po => {
-        this.poService.getPurchaseOrderById(po.id).subscribe(detail => {
-          if (detail.lines.some(l => l.remainingQuantity > 0)) {
-            details.push(detail);
-            this.receivablePOs.set([...details]);
-          }
+    this.poService.getPurchaseOrders().subscribe({
+      next: pos => {
+        const openPos = pos.filter(po => receivableStatuses.includes(po.status));
+        const details: PurchaseOrderDetail[] = [];
+        if (openPos.length === 0) {
+          this.receivablePOs.set([]);
+          return;
+        }
+        let reported = false;
+        openPos.forEach(po => {
+          this.poService.getPurchaseOrderById(po.id).subscribe({
+            next: detail => {
+              if (detail.lines.some(l => l.remainingQuantity > 0)) {
+                details.push(detail);
+                this.receivablePOs.set([...details]);
+              }
+            },
+            error: () => {
+              if (reported) return;
+              reported = true;
+              this.onKioskListLoadFailed('shopFloor.display.receivingLoadFailed');
+            },
+          });
         });
-      });
+      },
+      error: () => this.onKioskListLoadFailed('shopFloor.display.receivingLoadFailed'),
     });
   }
 
@@ -1036,7 +1257,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           if (completed === lines.length) {
             this.receivingSubmitting.set(false);
             this.showScanFeedback(this.translate.instant('shopFloor.display.receivedLines', { count: lines.length }));
-            setTimeout(() => this.ephemeralLogout(), 1500);
+            this.scheduleTransition(() => this.ephemeralLogout(), 1500);
           }
         },
         error: () => {
@@ -1058,25 +1279,36 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // ─── Shipping ───
 
   protected enterShipping(): void {
-    this.clearAutoLogoutTimer();
+    this.startAutoLogoutTimer();
     this.phase.set('shipping');
     this.selectedShipment.set(null);
     this.loadShippableShipments();
   }
 
   private loadShippableShipments(): void {
-    this.shipmentService.getShipments(undefined, 'Pending').subscribe(pending => {
-      this.shipmentService.getShipments(undefined, 'Packed').subscribe(packed => {
-        this.shippableShipments.set([...pending, ...packed]);
-      });
+    forkJoin({
+      pending: this.shipmentService.getShipments(undefined, 'Pending'),
+      packed: this.shipmentService.getShipments(undefined, 'Packed'),
+    }).subscribe({
+      next: ({ pending, packed }) => this.shippableShipments.set([...pending, ...packed]),
+      error: () => this.onKioskListLoadFailed('shopFloor.display.shippingLoadFailed'),
     });
   }
 
   protected selectShipmentForShipping(shipment: ShipmentListItem): void {
-    this.shipmentService.getShipmentById(shipment.id).subscribe(detail => {
-      this.selectedShipment.set(detail);
-      this.resetAutoLogoutTimer();
+    this.resetAutoLogoutTimer();
+    this.shipmentService.getShipmentById(shipment.id).subscribe({
+      next: detail => {
+        this.selectedShipment.set(detail);
+        this.resetAutoLogoutTimer();
+      },
+      error: () => this.onKioskListLoadFailed('shopFloor.display.shippingLoadFailed'),
     });
+  }
+
+  private onKioskListLoadFailed(messageKey: string): void {
+    this.showScanFeedback(this.translate.instant(messageKey));
+    this.resetAutoLogoutTimer();
   }
 
   protected confirmShip(): void {
@@ -1103,7 +1335,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       next: () => {
         this.shippingSubmitting.set(false);
         this.showScanFeedback(this.translate.instant('shopFloor.display.shipmentShipped', { number: shipment.shipmentNumber }));
-        setTimeout(() => this.ephemeralLogout(), 1500);
+        this.scheduleTransition(() => this.ephemeralLogout(), 1500);
       },
       error: (err: unknown) => {
         this.shippingSubmitting.set(false);
@@ -1147,6 +1379,21 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected toggleUndoPanel(): void {
     this.undoPanelOpen.update(v => !v);
+    this.keepSignedInSessionAlive();
+  }
+
+  protected toggleDailyLog(): void {
+    this.showDailyLog.update(v => !v);
+    this.keepSignedInSessionAlive();
+  }
+
+  protected toggleDevicesPanel(): void {
+    this.showDevicesPanel.update(v => !v);
+    this.keepSignedInSessionAlive();
+  }
+
+  private keepSignedInSessionAlive(): void {
+    if (this.autoLogoutTimer) this.resetAutoLogoutTimer();
   }
 
   protected closeLocationView(): void {
@@ -1157,11 +1404,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected closeDailyLog(): void {
     this.showDailyLog.set(false);
+    this.keepSignedInSessionAlive();
     this.focusSearchArea();
   }
 
   protected closeDevicesPanel(): void {
     this.showDevicesPanel.set(false);
+    this.keepSignedInSessionAlive();
     this.focusSearchArea();
   }
 
@@ -1218,7 +1467,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.dialog.open(ConfirmDialogComponent, {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant('shopFloor.exitKioskConfirmTitle'),
@@ -1226,7 +1475,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         confirmLabel: this.translate.instant('shopFloor.exitKiosk'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
+    });
+    focusCancelOnOpen(ref);
+    ref.afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       // Tear down kiosk state, then re-authenticate via /login.
       this.scanner.stop();
@@ -1270,6 +1521,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     localStorage.setItem('sf-font-index', String(this.fontSizeIndex()));
   }
 
+  protected priorityLabel(priority: string | null | undefined): string {
+    if (!priority) return '';
+    const key = `priority.${priority.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? priority : text;
+  }
+
   protected priorityClass(priority: string): string {
     switch (priority) {
       case 'Urgent': return 'priority--urgent';
@@ -1291,6 +1549,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private ephemeralLogout(): void {
     this.clearAutoLogoutTimer();
+    this.dialog.closeAll();
     // Defence-in-depth: the preview never establishes a worker session (no
     // sign-in) and doesn't reach here, but must never clear the trainee's own
     // session if it somehow does — only reset the display.
@@ -1300,6 +1559,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private resetToMain(): void {
+    if (this.stepsOpen()) {
+      this.stepsOpen.set(false);
+      this.scanOverlay()?.dismiss();
+    }
     this.clearAutoLogoutTimer();
     this.clearPhaseTimeout();
     this.clearTransitionTimer();
@@ -1313,6 +1576,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.pinControl.reset();
     this.processing.set(null);
     this.operationTracking.set(false);
+    if (this.actionFeedback() && !this.feedbackTimer) this.scheduleFeedbackClear();
+    this.undoPanelOpen.set(false);
+    this.showDailyLog.set(false);
+    this.showDevicesPanel.set(false);
     this.phase.set('main');
   }
 
@@ -1350,6 +1617,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private showActionFeedback(workerId: number, success: boolean, message: string, detail: string | null = null): void {
     this.clearFeedbackTimer();
     this.actionFeedback.set({ workerId, success, message, detail });
+    if (success) this.scheduleFeedbackClear();
+  }
+
+  private scheduleFeedbackClear(): void {
+    this.clearFeedbackTimer();
     this.feedbackTimer = setTimeout(() => {
       this.feedbackTimer = null;
       this.actionFeedback.set(null);
@@ -1385,6 +1657,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   private serverReason(err: HttpErrorResponse): string {
+    const gate = stepGateViolationOf(err);
+    if (gate) return describeStepGate(gate, this.translate);
     const body = err?.error as { detail?: unknown; title?: unknown } | string | null | undefined;
     const candidates = typeof body === 'string' ? [body] : body && typeof body === 'object' ? [body.detail, body.title] : [];
     const reason = candidates.map(c => typeof c === 'string' ? c.trim() : '').find(c => this.isPresentableReason(c));
@@ -1514,7 +1788,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private updateClock(): void {
     this.clockDisplay.set(
-      new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      new Date().toLocaleTimeString(this.language.intlLocale(), { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
     );
     this.tick.update(t => t + 1);
   }
@@ -1528,4 +1802,20 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     if (minutes >= 1) return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
     return `${seconds}s`;
   }
+}
+
+function toRunningTimer(timer: KioskRunningTimer, userId: number): RunningTimer {
+  return {
+    id: timer.timeEntryId,
+    jobId: timer.jobId,
+    jobNumber: timer.jobNumber,
+    userId,
+    timerStart: timer.timerStart,
+    operationId: timer.operationId,
+    jobOperationId: timer.jobOperationId,
+    operationStepNumber: timer.stepNumber,
+    operationTitle: timer.operationTitle,
+    entryType: timer.entryType,
+    cycleMinutes: timer.cycleMinutes ?? null,
+  };
 }

@@ -3,6 +3,7 @@ import { forkJoin, of } from 'rxjs';
 
 import { AnnouncementService } from '../../services/announcement.service';
 import { Announcement } from '../../models/announcement.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface AnnouncementGroup {
   representative: Announcement;
@@ -12,6 +13,7 @@ interface AnnouncementGroup {
 
 @Component({
   selector: 'app-announcement-overlay',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './announcement-overlay.component.html',
   styleUrl: './announcement-overlay.component.scss',

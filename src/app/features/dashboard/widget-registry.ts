@@ -4,7 +4,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   // ─── Row 0: primary operational widgets (3 × 33%) ───
   {
     id: 'todays-tasks',
-    title: "Today's Tasks",
+    titleKey: 'dashboard.widgets.todaysTasks',
     icon: 'task_alt',
     component: 'todays-tasks',
     capability: 'CAP-EXT-KANBAN',
@@ -15,7 +15,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 2,
     viewAllLink: '/kanban',
-    viewAllLabel: 'View board',
+    viewAllLabelKey: 'dashboard.widgets.viewBoard',
   },
   {
     id: 'jobs-by-stage',
@@ -30,11 +30,11 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 3,
     viewAllLink: '/kanban',
-    viewAllLabel: 'View board',
+    viewAllLabelKey: 'dashboard.widgets.viewBoard',
   },
   {
     id: 'team-load',
-    title: 'Team Load',
+    titleKey: 'dashboard.widgets.teamLoad',
     icon: 'groups',
     component: 'team-load',
     capability: 'CAP-EXT-KANBAN',
@@ -45,12 +45,12 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 3,
     viewAllLink: '/time-tracking',
-    viewAllLabel: 'Time tracking',
+    viewAllLabelKey: 'dashboard.widgets.timeTracking',
   },
   // ─── Row 1: deadlines + activity + margin (3 × 33%) ───
   {
     id: 'deadlines',
-    title: 'Deadlines',
+    titleKey: 'dashboard.widgets.deadlines',
     icon: 'event',
     component: 'deadlines',
     capability: 'CAP-EXT-KANBAN',
@@ -61,11 +61,11 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 2,
     viewAllLink: '/calendar',
-    viewAllLabel: 'View calendar',
+    viewAllLabelKey: 'dashboard.widgets.viewCalendar',
   },
   {
     id: 'activity',
-    title: 'Activity',
+    titleKey: 'dashboard.widgets.activity',
     icon: 'history',
     component: 'activity',
     defaultX: 4,
@@ -77,7 +77,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   },
   {
     id: 'margin-summary',
-    title: 'Margin Summary',
+    titleKey: 'dashboard.widgets.marginSummary',
     icon: 'trending_up',
     component: 'margin-summary',
     capability: 'CAP-ACCT-BUILTIN',
@@ -92,7 +92,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   // ─── Row 2: cycle + orders + eod (3 × 33%) ───
   {
     id: 'cycle-progress',
-    title: 'Cycle Progress',
+    titleKey: 'dashboard.widgets.cycleProgress',
     icon: 'loop',
     component: 'cycle-progress',
     capability: 'CAP-PLAN-MRP',
@@ -104,11 +104,11 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 2,
     viewAllLink: '/planning',
-    viewAllLabel: 'Planning cycles',
+    viewAllLabelKey: 'dashboard.widgets.planningCycles',
   },
   {
     id: 'open-orders',
-    title: 'Open Orders',
+    titleKey: 'dashboard.widgets.openOrders',
     icon: 'shopping_cart',
     component: 'open-orders',
     capability: 'CAP-O2C-SO',
@@ -119,11 +119,11 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 2,
     viewAllLink: '/sales-orders',
-    viewAllLabel: 'All orders',
+    viewAllLabelKey: 'dashboard.widgets.allOrders',
   },
   {
     id: 'eod-prompt',
-    title: 'End of Day',
+    titleKey: 'dashboard.widgets.endOfDay',
     icon: 'nightlight',
     component: 'eod-prompt',
     capability: 'CAP-HR-TIMETRACK',
@@ -137,7 +137,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   // ─── Row 3: action items (follow-up tasks) ───
   {
     id: 'action-items',
-    title: 'Action Items',
+    titleKey: 'dashboard.widgets.actionItems',
     icon: 'task_alt',
     component: 'action-items',
     defaultX: 0,
@@ -150,7 +150,7 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   // ─── Inventory snapshot — the lead widget when only Inventory is enabled ───
   {
     id: 'low-stock',
-    title: 'Inventory Snapshot',
+    titleKey: 'dashboard.widgets.inventorySnapshot',
     icon: 'inventory_2',
     component: 'low-stock',
     capability: 'CAP-INV-CORE',
@@ -162,6 +162,6 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     minW: 2,
     minH: 2,
     viewAllLink: '/inventory/home/tasks',
-    viewAllLabel: 'View inventory',
+    viewAllLabelKey: 'dashboard.widgets.viewInventory',
   },
 ];

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 
 import { BaseChartDirective } from '../../charts/base-chart.directive';
 import { ChartData, ChartOptions, ChartType, ActiveElement, ChartEvent } from 'chart.js';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface DrillLevel {
   label: string;
@@ -20,7 +21,7 @@ export interface DrillEvent {
 @Component({
   selector: 'app-drillable-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [BaseChartDirective, TranslatePipe],
   templateUrl: './drillable-chart.component.html',
   styleUrl: './drillable-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -5,4 +5,5 @@ export interface CreateInvoiceLineRequest {
   unitPrice: number;
   taxable: boolean;
   notes?: string;
+  salesOrderLineId?: number;
 }

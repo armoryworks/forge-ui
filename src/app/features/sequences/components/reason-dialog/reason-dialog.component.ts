@@ -4,6 +4,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
+import { DialogEscapeService } from '../../../../shared/services/dialog-escape.service';
 
 export interface ReasonDialogData {
   title: string;
@@ -26,13 +29,14 @@ export interface ReasonDialogData {
   styleUrl: './reason-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReasonDialogComponent {
+export class ReasonDialogComponent implements DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<ReasonDialogComponent, string>);
   readonly data: ReasonDialogData = inject(MAT_DIALOG_DATA);
+  private readonly dialogEscape = inject(DialogEscapeService);
 
   protected readonly reason = new FormControl<string>('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.minLength(3)],
+    validators: [requiredTrimmed, Validators.minLength(3)],
   });
 
   protected confirm(): void {
@@ -42,6 +46,10 @@ export class ReasonDialogComponent {
       return;
     }
     this.dialogRef.close(value);
+  }
+
+  onDialogEscape(): void {
+    this.dialogEscape.closeUnlessDirty(this.reason.value.trim() !== '', () => this.cancel());
   }
 
   protected cancel(): void {

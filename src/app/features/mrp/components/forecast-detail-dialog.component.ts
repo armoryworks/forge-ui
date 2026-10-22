@@ -113,6 +113,10 @@ export class ForecastDetailDialogComponent {
     });
   }
 
+  protected hasUnsavedOverrides(): boolean {
+    return this.rows().some(r => r.override?.dirty === true);
+  }
+
   protected approve(): void {
     this.dialogRef.close('approve');
   }

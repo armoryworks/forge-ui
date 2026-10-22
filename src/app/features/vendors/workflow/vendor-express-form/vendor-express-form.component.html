@@ -46,4 +46,21 @@
       [maxlength]="4000"
       data-testid="vendor-express-notes" />
   </form>
+
+  <div class="vendor-workflow-step__actions">
+    <app-validation-button
+      class="validation-button--inline"
+      [violations]="violations"
+      [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        type="button"
+        data-testid="vendor-express-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'vendors.workflow.express.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
 </section>

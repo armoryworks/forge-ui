@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -14,6 +15,7 @@ describe('MfaRecoveryCodesDialogComponent', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: MAT_DIALOG_DATA, useValue: { remainingCodes } },
         { provide: MatDialogRef, useValue: { close: vi.fn() } },
         { provide: MfaService, useValue: mfa },

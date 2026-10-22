@@ -18,6 +18,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface RecallDetailDialogData {
   recallId: number;
@@ -35,7 +36,7 @@ export interface RecallDetailDialogData {
   styleUrl: './recall-detail-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecallDetailDialogComponent {
+export class RecallDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<RecallDetailDialogComponent, boolean>);
   private readonly recallService = inject(RecallService);
   private readonly auth = inject(AuthService);
@@ -140,6 +141,10 @@ export class RecallDetailDialogComponent {
         this.snackbar.errorFrom(err, 'recalls.resolveFailed');
       },
     });
+  }
+
+  onDialogEscape(): void {
+    this.close();
   }
 
   protected close(): void {

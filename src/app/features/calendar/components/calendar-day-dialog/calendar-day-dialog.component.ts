@@ -12,6 +12,7 @@ import {
   EventStatusDialogData,
   EventStatusDialogResult,
 } from '../event-status-dialog/event-status-dialog.component';
+import { LanguageService } from '../../../../shared/services/language.service';
 
 /** An event enriched with its layer colour for display in the day-detail dialog. */
 export interface CalendarDayEvent {
@@ -59,11 +60,12 @@ export class CalendarDayDialogComponent {
   protected readonly data = inject<CalendarDayDialogData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<CalendarDayDialogComponent, CalendarDayDialogResult>);
   private readonly dialog = inject(MatDialog);
+  private readonly language = inject(LanguageService);
 
   // Events held in a signal so a status change reflects immediately without reopening.
   protected readonly events = signal<CalendarDayEvent[]>(this.data.events);
 
-  protected readonly title = this.data.date.toLocaleDateString('en-US', {
+  protected readonly title = this.data.date.toLocaleDateString(this.language.intlLocale(), {
     weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
   });
 

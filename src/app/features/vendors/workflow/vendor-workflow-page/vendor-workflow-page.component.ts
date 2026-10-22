@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { forkJoin, map } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 import { EntityValidator } from '../../../../shared/models/entity-validator.model';
 import { LoadingService } from '../../../../shared/services/loading.service';
@@ -55,6 +55,8 @@ export class VendorWorkflowPageComponent {
   private readonly translate = inject(TranslateService);
   private readonly loading = inject(LoadingService);
   private readonly navTree = inject(NavTreeService);
+
+  private static readonly DEFAULT_DEFINITION_ID = 'vendor-guided-v1';
 
   protected readonly vendor = signal<VendorDetail | null>(null);
   protected readonly run = signal<WorkflowRun | null>(null);
@@ -113,14 +115,23 @@ export class VendorWorkflowPageComponent {
         return;
       }
       if (!definitionId) {
+        if (!vendorId) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { workflow: VendorWorkflowPageComponent.DEFAULT_DEFINITION_ID },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
+          return;
+        }
         this.router.navigate(['/vendors'], {
-          queryParams: vendorId ? { detail: `vendor:${vendorId}` } : {},
+          queryParams: { detail: `vendor:${vendorId}` },
           replaceUrl: true,
         });
         return;
       }
       if (vendorId) {
-        this.loadWorkflowContext(vendorId, definitionId);
+        this.loadWorkflowContext(vendorId, runId, definitionId);
         return;
       }
       if (runId) {
@@ -136,7 +147,7 @@ export class VendorWorkflowPageComponent {
     // swap /vendors/new for /vendors/{id} via replaceUrl.
     effect(() => {
       const run = this.workflowService.currentRun();
-      if (!run || run.entityId == null) return;
+      if (!run || run.entityId == null || run.mode === 'express') return;
       if (this.vendorIdFromUrl() !== 0) return;
       this.router.navigate(['/vendors', run.entityId], {
         queryParams: { runId: run.id, mode: run.mode },
@@ -151,6 +162,7 @@ export class VendorWorkflowPageComponent {
       const run = this.run();
       if (!target || !run) return;
       if (run.currentStepId === target) return;
+      if (!this.definition()?.steps.some((s) => s.id === target)) return;
       this.run.set({ ...run, currentStepId: target });
     });
 
@@ -235,6 +247,7 @@ export class VendorWorkflowPageComponent {
           this.router.navigate(['/vendors']);
           return;
         }
+        if (this.leaveClosedRun(run)) return;
         if (run.entityId != null) {
           this.vendorService.getVendorById(run.entityId).subscribe({
             next: (vendor) => {
@@ -243,6 +256,10 @@ export class VendorWorkflowPageComponent {
               this.definition.set(definition);
               this.validators.set(validators);
               this.workflowService.setContext({ run, definition, entity: vendor, validators });
+            },
+            error: (err: unknown) => {
+              this.snackbar.errorFrom(err, 'vendors.workflow.page.loadFailed');
+              this.router.navigate(['/vendors']);
             },
           });
           return;
@@ -261,16 +278,19 @@ export class VendorWorkflowPageComponent {
     });
   }
 
-  private loadWorkflowContext(vendorId: number, definitionId: string): void {
+  private loadWorkflowContext(vendorId: number, runId: number, definitionId: string): void {
     this.loadError.set(null);
     this.loading.start('vendor-workflow', this.translate.instant('vendors.workflow.page.loading'));
+    const candidates$: Observable<WorkflowRun[]> = runId
+      ? this.workflowService.getRun(runId).pipe(map((r) => [r]))
+      : this.workflowService.listActive().pipe(map((runs) => runs.filter((r) => r.completedAt == null && r.abandonedAt == null)));
     forkJoin({
       vendor: this.vendorService.getVendorById(vendorId),
-      activeRuns: this.workflowService.listActive(),
+      candidates: candidates$,
       definitions: this.workflowService.loadDefinitionsForEntity('Vendor'),
       validators: this.workflowService.loadValidatorsForEntity('Vendor'),
     }).subscribe({
-      next: ({ vendor, activeRuns, definitions, validators }) => {
+      next: ({ vendor, candidates, definitions, validators }) => {
         this.loading.stop('vendor-workflow');
         const definition = definitions.find((d) => d.definitionId === definitionId) ?? null;
         if (!definition) {
@@ -278,31 +298,14 @@ export class VendorWorkflowPageComponent {
           this.router.navigate(['/vendors']);
           return;
         }
-        const run = activeRuns.find((r) => r.entityType === 'Vendor' && r.entityId === vendorId
-          && r.completedAt == null && r.abandonedAt == null
+        const run = candidates.find((r) => r.entityType === 'Vendor' && r.entityId === vendorId
           && r.definitionId === definitionId) ?? null;
 
         if (!run) {
-          this.workflowService.startRun({
-            entityType: 'Vendor',
-            definitionId,
-            mode: this.modeFromUrl(),
-            entityId: vendorId,
-          }).subscribe({
-            next: (created) => {
-              this.run.set(created);
-              this.vendor.set(vendor);
-              this.definition.set(definition);
-              this.validators.set(validators);
-              this.workflowService.setContext({ run: created, definition, entity: vendor, validators });
-            },
-            error: (err: unknown) => {
-              this.snackbar.errorFrom(err, 'vendors.workflow.page.startFailed');
-              this.router.navigate(['/vendors']);
-            },
-          });
+          this.router.navigate(['/vendors'], { queryParams: { detail: `vendor:${vendorId}` }, replaceUrl: true });
           return;
         }
+        if (this.leaveClosedRun(run)) return;
         this.vendor.set(vendor);
         this.run.set(run);
         this.definition.set(definition);
@@ -328,11 +331,21 @@ export class VendorWorkflowPageComponent {
   protected retryLoad(): void {
     const vendorId = this.vendorIdFromUrl();
     const definitionId = this.definitionIdFromUrl();
-    if (vendorId && definitionId) this.loadWorkflowContext(vendorId, definitionId);
+    if (vendorId && definitionId) this.loadWorkflowContext(vendorId, this.runIdFromUrl(), definitionId);
   }
 
   protected backToList(): void {
     this.router.navigate(['/vendors']);
+  }
+
+  private leaveClosedRun(run: WorkflowRun): boolean {
+    if (run.abandonedAt == null && run.completedAt == null) return false;
+    const completed = run.completedAt != null;
+    const queryParams = completed && run.entityId != null ? { detail: `vendor:${run.entityId}` } : {};
+    this.workflowService.clearContext();
+    this.router.navigate(['/vendors'], { queryParams, replaceUrl: true }).then(() => this.snackbar.info(
+      this.translate.instant(completed ? 'workflow.shell.closedRun.completed' : 'workflow.shell.closedRun.abandoned')));
+    return true;
   }
 
   protected onModeChanged(mode: 'express' | 'guided'): void {
@@ -423,6 +436,12 @@ export class VendorWorkflowPageComponent {
     this.navigateToStep(next);
   }
 
+  protected onSkippedStepsChanged(stepIds: string[]): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.saveSkippedSteps(run.id, stepIds).subscribe();
+  }
+
   protected onCompleteRequested(): void {
     const run = this.run();
     if (!run) return;
@@ -456,7 +475,16 @@ export class VendorWorkflowPageComponent {
   }
 
   protected onClosed(): void {
-    this.workflowService.clearContext();
-    this.router.navigate(['/vendors']);
+    const leave = (): void => {
+      this.workflowService.clearContext();
+      this.router.navigate(['/vendors']);
+    };
+    const run = this.workflowService.currentRun() ?? this.run();
+    if (!run || run.entityId != null || run.completedAt != null || run.abandonedAt != null
+      || this.workflowService.stepSavePending()) {
+      leave();
+      return;
+    }
+    this.workflowService.abandonRun(run.id, 'user').subscribe({ next: leave, error: leave });
   }
 }

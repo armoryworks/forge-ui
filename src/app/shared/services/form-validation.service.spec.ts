@@ -1,6 +1,8 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
+import { onOrAfter } from '../validators/on-or-after.validator';
 import { FormValidationService } from './form-validation.service';
 
 describe('FormValidationService', () => {
@@ -141,7 +143,7 @@ describe('FormValidationService', () => {
       });
     });
 
-    it('should use field key as fallback label when not in labels map', () => {
+    it('should derive a readable label from the field key when not in labels map', () => {
       const form = new FormGroup({
         unknownField: new FormControl('', Validators.required),
       });
@@ -149,7 +151,7 @@ describe('FormValidationService', () => {
       TestBed.runInInjectionContext(() => {
         const violations = FormValidationService.getViolations(form, {});
 
-        expect(violations()).toContain('unknownField is required');
+        expect(violations()).toContain('Unknown field is required');
       });
     });
 
@@ -227,4 +229,139 @@ describe('FormValidationService', () => {
       expect(FormValidationService.collectViolationItems(form, {})).toEqual([]);
     });
   });
+
+  describe('with a translator', () => {
+    afterEach(() => FormValidationService.setTranslator(null));
+
+    it('builds each message from its validation.messages key and parameters', () => {
+      const calls: [string, Record<string, unknown>][] = [];
+      FormValidationService.setTranslator((key, params) => {
+        calls.push([key, params]);
+        return `${key}:${JSON.stringify(params)}`;
+      });
+
+      expect(FormValidationService.messageFor('required', true, 'Nombre')).toBe('validation.messages.required:{"label":"Nombre"}');
+      expect(FormValidationService.messageFor('minlength', { requiredLength: 3, actualLength: 1 }, 'Código'))
+        .toBe('validation.messages.minLength:{"label":"Código","count":3}');
+      expect(FormValidationService.messageFor('somethingCustom', true, 'Campo')).toBe('validation.messages.invalid:{"label":"Campo"}');
+      expect(calls.length).toBe(3);
+    });
+
+    it('words coded server errors in the UI language, but keeps the server wording in English', () => {
+      const catalog: Record<string, string> = { 'apiErrors.validators.required': '{{field}} es obligatorio.', 'common.name': 'Nombre' };
+      const fill = (key: string, params: Record<string, unknown>) =>
+        (catalog[key] ?? key).replace(/\{\{(\w+)\}\}/g, (_: string, n: string) => String(params[n] ?? ''));
+      const response = new HttpErrorResponse({
+        status: 400,
+        error: { errors: [{ field: 'name', message: 'Name is required.', code: 'NotEmptyValidator' }] },
+      });
+
+      let language = 'es';
+      FormValidationService.setTranslator(fill, () => language);
+      const form = new FormGroup({ name: new FormControl('') });
+      FormValidationService.applyServerError(form, response);
+      expect(form.controls.name.errors?.['serverError'].message).toBe('Nombre es obligatorio.');
+
+      language = 'en';
+      FormValidationService.applyServerError(form, response);
+      expect(form.controls.name.errors?.['serverError'].message).toBe('Name is required.');
+    });
+
+    it('leaves validator-supplied and server messages untouched', () => {
+      FormValidationService.setTranslator(() => 'translated');
+
+      expect(FormValidationService.messageFor('custom', { message: 'Pick a later date' }, 'Date')).toBe('Pick a later date');
+      expect(FormValidationService.messageFor('serverError', { message: 'already used' }, 'Code')).toBe('Code: already used');
+    });
+  });
+
+  describe('collectViolationItems with nested groups', () => {
+    it('reports errors inside nested groups under their path', () => {
+      const form = new FormGroup({
+        name: new FormControl('ok'),
+        address: new FormGroup({
+          postalCode: new FormControl('', Validators.required),
+          city: new FormControl('', Validators.required),
+        }),
+      });
+
+      expect(FormValidationService.collectViolationItems(form, { 'address.city': 'City' })).toEqual([
+        { controlName: 'address.postalCode', message: 'Postal code is required' },
+        { controlName: 'address.city', message: 'City is required' },
+      ]);
+    });
+  });
+
+  describe('labelFromControlName', () => {
+    it('splits camelCase and snake_case names into sentence case', () => {
+      expect(FormValidationService.labelFromControlName('unitPrice')).toBe('Unit price');
+      expect(FormValidationService.labelFromControlName('min_qty')).toBe('Min qty');
+    });
+  });
+
+  describe('messageFor', () => {
+    it('prefixes a server message with the field label', () => {
+      expect(FormValidationService.messageFor('serverError', { message: 'already in use' }, 'Code')).toBe('Code: already in use');
+    });
+
+    it('does not repeat the label when the server message already names the field', () => {
+      expect(FormValidationService.messageFor('serverError', { message: 'Name must contain visible characters.' }, 'Name'))
+        .toBe('Name must contain visible characters.');
+    });
+
+    it('describes a whole-number failure', () => {
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Machines')).toBe('Machines must be a whole number');
+    });
+  });
+
+  describe('messageFor with a translator', () => {
+    const catalogs: Record<string, Record<string, string>> = {
+      en: {
+        'validation.messages.wholeNumber': '{{label}} must be a whole number',
+        'validation.messages.positive': '{{label}} must be greater than 0',
+        'validation.endOnOrAfterStartDate': 'End date must be on or after the start date',
+      },
+      es: {
+        'validation.messages.wholeNumber': '{{label}} debe ser un número entero',
+        'validation.messages.positive': '{{label}} debe ser mayor que 0',
+        'validation.endOnOrAfterStartDate': 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+      },
+    };
+    let lang = 'en';
+
+    beforeEach(() => {
+      lang = 'en';
+      FormValidationService.setTranslator((key, params) =>
+        (catalogs[lang][key] ?? key).replace('{{label}}', String(params['label'])));
+    });
+
+    afterEach(() => FormValidationService.setTranslator(null));
+
+    it('reads the whole-number and greater-than-zero messages in the current language', () => {
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Máquinas')).toBe('Máquinas must be a whole number');
+      lang = 'es';
+      expect(FormValidationService.messageFor('wholeNumber', true, 'Máquinas')).toBe('Máquinas debe ser un número entero');
+      expect(FormValidationService.messageFor('positive', true, 'Cantidad')).toBe('Cantidad debe ser mayor que 0');
+    });
+
+    it('translates a date-order error each time it is shown, so a language switch applies', () => {
+      const form = new FormGroup({
+        startDate: new FormControl<Date | null>(new Date(2026, 9, 10)),
+        endDate: new FormControl<Date | null>(new Date(2026, 9, 9), onOrAfter('startDate', 'validation.endOnOrAfterStartDate')),
+      });
+      form.controls.endDate.updateValueAndValidity();
+
+      expect(FormValidationService.collectViolations(form, { endDate: 'End date' }))
+        .toEqual(['End date must be on or after the start date']);
+      lang = 'es';
+      expect(FormValidationService.collectViolations(form, { endDate: 'End date' }))
+        .toEqual(['La fecha de fin debe ser igual o posterior a la fecha de inicio']);
+    });
+  });
+
+  it('shows the key of a translated error when no translator is set', () => {
+    expect(FormValidationService.messageFor('onOrAfter', { messageKey: 'validation.dueOnOrAfterBillDate' }, 'Due date'))
+      .toBe('validation.dueOnOrAfterBillDate');
+  });
 });
+

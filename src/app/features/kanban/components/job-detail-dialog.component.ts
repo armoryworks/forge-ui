@@ -6,6 +6,7 @@ import { JobDetailPanelComponent } from './job-detail-panel.component';
 import { JobDetail } from '../models/job-detail.model';
 import { UserRef } from '../models/user-ref.model';
 import { KanbanService } from '../services/kanban.service';
+import { DialogEscapeHandler } from '../../../shared/models/dialog-escape.model';
 
 export interface JobDetailDialogData {
   jobId: number;
@@ -33,7 +34,7 @@ export interface JobDetailDialogResult {
   styles: [`:host { display: block; width: 100%; height: 100%; } app-job-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class JobDetailDialogComponent {
+export class JobDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<JobDetailDialogComponent, JobDetailDialogResult | undefined>);
 
   protected readonly data = inject<JobDetailDialogData>(MAT_DIALOG_DATA);
@@ -43,6 +44,10 @@ export class JobDetailDialogComponent {
     if (this.users().length === 0) {
       inject(KanbanService).getUsers().subscribe(users => this.users.set(users));
     }
+  }
+
+  onDialogEscape(): void {
+    this.close();
   }
 
   protected close(): void {

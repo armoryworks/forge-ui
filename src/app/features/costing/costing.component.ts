@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
 import { format } from 'date-fns';
@@ -25,6 +25,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
+import { maxDecimalsValidator } from '../../shared/validators/max-decimals.validator';
 
 import { CostingService } from './services/costing.service';
 import { CostingRatesVisualComponent } from './components/costing-rates-visual/costing-rates-visual.component';
@@ -37,11 +38,14 @@ import {
   OverheadPool,
   WorkCenterCostRate,
   CostingTemplate,
+  workCenterRateLabel,
 } from './models/costing.model';
 import { CostingTab } from './models/costing-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-costing',
@@ -52,7 +56,7 @@ import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive
     TabDirective,
     ScrollCueDirective,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
-    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe,
+    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe, CurrencyDisplayComponent,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
   ],
   templateUrl: './costing.component.html',
@@ -94,6 +98,7 @@ export class CostingComponent {
   protected readonly rates = signal<WorkCenterCostRate[]>([]);
   protected readonly ratesPeriodId = signal<number | null>(null);
   protected readonly costingTemplates = signal<CostingTemplate[]>([]);
+  protected readonly saving = signal(false);
 
   protected readonly typeOptions: SelectOption[] = [
     { value: 'Production', label: 'Production' },
@@ -116,27 +121,27 @@ export class CostingComponent {
   ];
 
   protected readonly templateColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'description', header: 'Description' },
-    { field: 'lines', header: 'Lines', width: '70px', align: 'center' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'description', header: 'common.description' },
+    { field: 'lines', header: 'costing.templates.lines', width: '70px', align: 'center' },
     { field: 'isSystem', header: '', width: '90px' },
     { field: 'actions', header: '', width: '160px' },
   ];
 
   protected readonly periodColumns: ColumnDef[] = [
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '120px' },
-    { field: 'endDate', phoneHidden: true, header: 'End', sortable: true, type: 'date', width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum' },
-    { field: 'frozenAt', phoneHidden: true, header: 'Frozen', sortable: true, type: 'date', width: '120px' },
+    { field: 'startDate', header: 'costing.periods.start', sortable: true, type: 'date', width: '120px' },
+    { field: 'endDate', phoneHidden: true, header: 'costing.periods.end', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum' },
+    { field: 'frozenAt', phoneHidden: true, header: 'costing.periods.frozen', sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', align: 'right' },
   ];
   protected readonly rateColumns: ColumnDef[] = [
-    { field: 'workCenterId', header: 'Work Center', sortable: true },
-    { field: 'laborRate', header: 'Labor', type: 'number', align: 'right' },
-    { field: 'laborOhRate', header: 'Labor OH', type: 'number', align: 'right' },
-    { field: 'machineRate', header: 'Machine', type: 'number', align: 'right' },
-    { field: 'machineOhVarRate', header: 'Mch OH Var', type: 'number', align: 'right' },
-    { field: 'machineOhFixedRate', header: 'Mch OH Fixed', type: 'number', align: 'right' },
+    { field: 'workCenterId', header: 'costing.rates.workCenter', sortable: true },
+    { field: 'laborRate', header: 'costing.rates.labor', type: 'number', align: 'right' },
+    { field: 'laborOhRate', header: 'costing.rates.laborOh', type: 'number', align: 'right' },
+    { field: 'machineRate', header: 'costing.rates.machine', type: 'number', align: 'right' },
+    { field: 'machineOhVarRate', header: 'costing.rates.mchVar', type: 'number', align: 'right' },
+    { field: 'machineOhFixedRate', header: 'costing.rates.mchFixed', type: 'number', align: 'right' },
   ];
   protected readonly costCenterColumns: ColumnDef[] = [
     { field: 'code', header: this.translate.instant('costing.costCenters.code'), sortable: true },
@@ -168,20 +173,23 @@ export class CostingComponent {
     end: this.fb.control<Date | null>(null, Validators.required),
   });
   protected readonly costCenterForm = this.fb.group({
-    code: ['', [Validators.required, Validators.maxLength(32)]],
-    name: ['', [Validators.required, Validators.maxLength(128)]],
+    code: ['', [requiredTrimmed, Validators.maxLength(32)]],
+    name: ['', [requiredTrimmed, Validators.maxLength(128)]],
     type: ['Production', Validators.required],
-    sqft: this.fb.control<number | null>(null),
-    headcount: this.fb.control<number | null>(null),
+    sqft: this.fb.control<number | null>(null, Validators.min(0)),
+    headcount: this.fb.control<number | null>(null, Validators.min(0)),
     isInventoriable: [true],
   });
   protected readonly poolForm = this.fb.group({
     costingCostCenterId: this.fb.control<number | null>(null, Validators.required),
     workCenterId: this.fb.control<number | null>(null),
-    code: ['', [Validators.required, Validators.maxLength(32)]],
-    name: ['', [Validators.required, Validators.maxLength(128)]],
+    code: ['', [requiredTrimmed, Validators.maxLength(32)]],
+    name: ['', [requiredTrimmed, Validators.maxLength(128)]],
     behavior: ['Fixed', Validators.required],
-    fixedPortion: this.fb.control<number | null>(null),
+    fixedPortion: this.fb.control<number | null>(null, [
+      Validators.min(0), Validators.max(1),
+      maxDecimalsValidator(6, this.translate.instant('costing.pools.fixedPortion'), this.translate),
+    ]),
     driver: ['MachineHour', Validators.required],
   });
   protected readonly budgetForm = this.fb.group({
@@ -191,7 +199,13 @@ export class CostingComponent {
     budgetDriverQty: this.fb.control<number | null>(null, [Validators.required, Validators.min(0.0001)]),
   });
 
+  protected readonly workCenterRateLabel = workCenterRateLabel;
+
   constructor() {
+    this.poolForm.controls.behavior.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(behavior => this.syncFixedPortionRequired(behavior));
+
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'periods') this.loadPeriods();
@@ -199,6 +213,13 @@ export class CostingComponent {
       else if (tab === 'pools') { this.loadPools(); this.loadCostCenters(); this.loadPeriods(); }
       else if (tab === 'templates') this.loadTemplates();
     });
+  }
+
+  private syncFixedPortionRequired(behavior: string | null): void {
+    const control = this.poolForm.controls.fixedPortion;
+    if (behavior === 'Semi') control.addValidators(Validators.required);
+    else control.removeValidators(Validators.required);
+    control.updateValueAndValidity();
   }
 
   protected switchTab(tab: CostingTab): void {
@@ -292,17 +313,20 @@ export class CostingComponent {
     const v = this.periodForm.getRawValue();
     const start = toIsoDate(v.start);
     const end = toIsoDate(v.end);
-    if (!start || !end) return;
+    if (!start || !end || this.saving()) return;
+    this.saving.set(true);
     this.service.createPeriod(start, end).subscribe({
-      next: () => { this.snackbar.success('Period created'); this.periodForm.reset(); this.loadPeriods(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success(this.translate.instant('costing.messages.periodCreated')); this.periodForm.reset(); this.loadPeriods(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'); },
     });
   }
 
   protected freeze(period: CostingPeriod): void {
+    if (this.saving()) return;
+    this.saving.set(true);
     this.service.freezePeriod(period.id).subscribe({
-      next: r => { this.snackbar.success(`Frozen: ${r.budgetsRated} budget(s), ${r.workCentersRated} rate(s)`); this.loadPeriods(); this.viewRates(period.id); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'),
+      next: r => { this.saving.set(false); this.snackbar.success(this.translate.instant('costing.messages.frozen', { budgets: r.budgetsRated, rates: r.workCentersRated })); this.loadPeriods(); this.viewRates(period.id); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'); },
     });
   }
 
@@ -315,36 +339,39 @@ export class CostingComponent {
   }
 
   protected createCostCenter(): void {
-    if (this.costCenterForm.invalid) return;
+    if (this.costCenterForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.costCenterForm.getRawValue();
     this.service.createCostCenter({
       code: v.code!, name: v.name!, type: v.type as CostingCostCenter['type'],
       parentId: null, sqft: v.sqft, headcount: v.headcount, isInventoriable: v.isInventoriable!,
     }).subscribe({
-      next: () => { this.snackbar.success('Cost center created'); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success(this.translate.instant('costing.messages.costCenterCreated')); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'); },
     });
   }
 
   protected createPool(): void {
-    if (this.poolForm.invalid) return;
+    if (this.poolForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.poolForm.getRawValue();
     this.service.createPool({
       costingCostCenterId: v.costingCostCenterId!, workCenterId: v.workCenterId,
       code: v.code!, name: v.name!, behavior: v.behavior as OverheadPool['behavior'],
       fixedPortion: v.fixedPortion, driver: v.driver as OverheadPool['driver'],
     }).subscribe({
-      next: () => { this.snackbar.success('Pool created'); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'),
+      next: () => { this.saving.set(false); this.snackbar.success(this.translate.instant('costing.messages.poolCreated')); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'); },
     });
   }
 
   protected setBudget(): void {
-    if (this.budgetForm.invalid) return;
+    if (this.budgetForm.invalid || this.saving()) return;
+    this.saving.set(true);
     const v = this.budgetForm.getRawValue();
     this.service.upsertBudget(v.overheadCostPoolId!, v.costingPeriodId!, v.budgetAmount!, v.budgetDriverQty!).subscribe({
-      next: r => { this.snackbar.success(`Budget set — rate ${r.derivedRate.toFixed(4)}`); this.budgetForm.reset(); },
-      error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'),
+      next: r => { this.saving.set(false); this.snackbar.success(this.translate.instant('costing.messages.budgetSet', { rate: r.derivedRate.toFixed(4) })); this.budgetForm.reset(); },
+      error: (err: unknown) => { this.saving.set(false); this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'); },
     });
   }
 }

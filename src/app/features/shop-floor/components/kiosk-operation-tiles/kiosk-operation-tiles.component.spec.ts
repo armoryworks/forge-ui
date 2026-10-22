@@ -76,4 +76,38 @@ describe('KioskOperationTilesComponent', () => {
     expect(result.map(t => t.closed)).toEqual([true, true, false]);
     expect(result[2].elapsedMs).toBeNull();
   });
+
+  it('highlights the suggested step without starting it and folds finished steps under Done', () => {
+    const fixture = TestBed.createComponent(KioskOperationTilesComponent);
+    fixture.componentRef.setInput('operations', [row(1, { status: 'Complete' }), row(2, { status: 'Skipped' }), row(3), row(4)]);
+    fixture.componentRef.setInput('jobQuantity', 40);
+    fixture.componentRef.setInput('currentUserId', 3);
+    fixture.componentRef.setInput('now', now);
+    fixture.componentRef.setInput('suggestedOperationId', 104);
+    const starts: JobOperationRow[] = [];
+    fixture.componentInstance.start.subscribe(r => starts.push(r));
+    const c = fixture.componentInstance as unknown as {
+      openTiles: () => (Tile & { suggested: boolean })[];
+      doneTiles: () => Tile[];
+      showDone: () => boolean;
+      toggleDone: () => void;
+    };
+
+    expect(c.openTiles().map(t => [t.row.stepNumber, t.suggested])).toEqual([[3, false], [4, true]]);
+    expect(c.doneTiles().map(t => t.row.stepNumber)).toEqual([1, 2]);
+    expect(c.showDone()).toBe(false);
+    c.toggleDone();
+    expect(c.showDone()).toBe(true);
+    expect(starts).toEqual([]);
+  });
+
+  it('marks the step a barcode scan points at as focused', () => {
+    const fixture = TestBed.createComponent(KioskOperationTilesComponent);
+    fixture.componentRef.setInput('operations', [row(1), row(2)]);
+    fixture.componentRef.setInput('jobQuantity', 40);
+    fixture.componentRef.setInput('now', now);
+    fixture.componentRef.setInput('focusOperationId', 102);
+    const result = (fixture.componentInstance as unknown as { tiles: () => (Tile & { focused: boolean })[] }).tiles();
+    expect(result.map(t => t.focused)).toEqual([false, true]);
+  });
 });

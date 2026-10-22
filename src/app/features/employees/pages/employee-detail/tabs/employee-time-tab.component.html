@@ -1,5 +1,5 @@
 <div class="tab-toolbar">
-  <app-select label="Period" [formControl]="periodControl" [options]="periodOptions"
+  <app-select [label]="'employees.employeeTimeTab.period' | translate" [formControl]="periodControl" [options]="periodOptions"
     (selectionChange)="onPeriodChange()" />
   <span class="tab-toolbar__spacer"></span>
 </div>
@@ -11,5 +11,5 @@
     [data]="entries()"
     [loading]="loading()"
     emptyIcon="schedule"
-    emptyMessage="No time entries found" />
+    [emptyMessage]="'employees.employeeTimeTab.noTimeEntriesFound' | translate" />
 </div>

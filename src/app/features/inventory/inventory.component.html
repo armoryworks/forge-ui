@@ -116,7 +116,7 @@
         <div class="panel-header">
           <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'inventory.searchPlaceholder' | translate" />
           @if (searchControl.value) {
-            <button class="icon-btn" matTooltip="Clear search" matTooltipPosition="above" (click)="clearSearch()">
+            <button class="icon-btn" [matTooltip]="'inventory.clearSearch' | translate" [attr.aria-label]="'inventory.clearSearch' | translate" matTooltipPosition="above" (click)="clearSearch()">
               <span class="material-icons-outlined">close</span>
             </button>
           }
@@ -558,7 +558,7 @@
             <div class="replenishment-section__header">
               <div class="replenishment-section__title">
                 <span class="material-icons-outlined replenishment-section__icon">notification_important</span>
-                Pending Reorder Suggestions
+                {{ 'inventory.replenishment.pendingTitle' | translate }}
                 <span class="chip chip--warning">{{ pendingSuggestions().length }}</span>
               </div>
               <div class="replenishment-section__actions">
@@ -578,7 +578,7 @@
               [data]="pendingSuggestions()"
               [selectable]="true"
               emptyIcon="check_circle"
-              emptyMessage="No pending reorder suggestions"
+              [emptyMessage]="'inventory.replenishment.noPending' | translate"
               (selectionChange)="onSuggestionSelectionChange($event)">
 
               <ng-template appColumnCell="partNumber" let-row>
@@ -629,7 +629,7 @@
               <ng-template appColumnCell="daysOfStockRemaining" let-row>
                 @if ($any(row).daysOfStockRemaining !== null) {
                   <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
-                    {{ $any(row).daysOfStockRemaining }}d
+                    {{ 'inventory.burnRates.daysShort' | translate: { count: $any(row).daysOfStockRemaining } }}
                   </span>
                 } @else {
                   <span class="text-muted">—</span>
@@ -662,8 +662,8 @@
                   </button>
                   <button class="icon-btn"
                     (click)="openDismissDialog($any(row)); $event.stopPropagation()"
-                    aria-label="Dismiss suggestion for {{ $any(row).partNumber }}"
-                    matTooltip="Dismiss">
+                    [attr.aria-label]="'inventory.replenishment.dismissFor' | translate: { part: $any(row).partNumber }"
+                    [matTooltip]="'common.dismiss' | translate">
                     <span class="material-icons-outlined">close</span>
                   </button>
                 </div>
@@ -674,7 +674,7 @@
         } @else {
           <div class="replenishment-empty">
             <span class="material-icons-outlined replenishment-empty__icon">check_circle</span>
-            <span>No pending reorder suggestions — inventory levels look good.</span>
+            <span>{{ 'inventory.replenishment.allGood' | translate }}</span>
           </div>
         }
 
@@ -683,20 +683,20 @@
           <div class="replenishment-section__header">
             <div class="replenishment-section__title">
               <span class="material-icons-outlined replenishment-section__icon">local_fire_department</span>
-              Burn Rate Analysis
+              {{ 'inventory.burnRates.title' | translate }}
             </div>
             <div class="replenishment-section__actions">
-              <app-input label="Search parts"
+              <app-input [label]="'inventory.burnRates.searchParts' | translate"
                 [formControl]="burnRateFilter"
                 (keydown.enter)="loadBurnRates()" />
               <button class="action-btn action-btn--sm"
                 [class.action-btn--primary]="burnRateNeedsReorderOnly()"
                 (click)="toggleBurnRateFilter()"
-                matTooltip="Show only parts that need reordering">
+                [matTooltip]="'inventory.burnRates.needsReorderTooltip' | translate">
                 <span class="material-icons-outlined">filter_list</span>
-                Needs Reorder
+                {{ 'inventory.burnRates.needsReorder' | translate }}
               </button>
-              <button class="icon-btn" (click)="loadBurnRates()" aria-label="Refresh burn rates" matTooltip="Refresh">
+              <button class="icon-btn" (click)="loadBurnRates()" [attr.aria-label]="'inventory.burnRates.refresh' | translate" [matTooltip]="'common.refresh' | translate">
                 <span class="material-icons-outlined">refresh</span>
               </button>
             </div>
@@ -707,7 +707,7 @@
             [data]="burnRates()"
             [rowClass]="burnRateRowClass"
             emptyIcon="local_fire_department"
-            emptyMessage="No burn rate data — start receiving and picking parts to build history">
+            [emptyMessage]="'inventory.burnRates.empty' | translate">
             <ng-template appColumnCell="partNumber" let-row>
               <span class="mono nowrap">{{ $any(row).partNumber }}</span>
             </ng-template>
@@ -723,7 +723,7 @@
             <ng-template appColumnCell="daysOfStockRemaining" let-row>
               @if ($any(row).daysOfStockRemaining !== null) {
                 <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
-                  {{ $any(row).daysOfStockRemaining }}d
+                  {{ 'inventory.burnRates.daysShort' | translate: { count: $any(row).daysOfStockRemaining } }}
                 </span>
               } @else {
                 <span class="text-muted">—</span>
@@ -731,9 +731,9 @@
             </ng-template>
             <ng-template appColumnCell="needsReorder" let-row>
               @if ($any(row).needsReorder) {
-                <span class="chip chip--error">Yes</span>
+                <span class="chip chip--error">{{ 'common.yes' | translate }}</span>
               } @else {
-                <span class="chip chip--success">OK</span>
+                <span class="chip chip--success">{{ 'inventory.burnRates.ok' | translate }}</span>
               }
             </ng-template>
           </app-data-table>
@@ -971,22 +971,22 @@
 
 <!-- Dismiss Suggestion Dialog -->
 @if (showDismissDialog() && dismissTarget()) {
-  <app-dialog title="Dismiss Reorder Suggestion" width="440px" (closed)="closeDismissDialog()">
+  <app-dialog [title]="'inventory.replenishment.dismissTitle' | translate" width="440px" (closed)="closeDismissDialog()">
     <p class="text-muted">
-      Dismissing the suggestion for <strong>{{ dismissTarget()!.partNumber }}</strong>.
-      Please provide a reason so it can be reviewed later.
+      {{ 'inventory.replenishment.dismissingFor' | translate }} <strong>{{ dismissTarget()!.partNumber }}</strong>.
+      {{ 'inventory.replenishment.dismissReasonHint' | translate }}
     </p>
     <app-textarea
-      label="Reason"
+      [label]="'inventory.columns.reason' | translate"
       [formControl]="dismissReasonControl"
       [rows]="3"
       [maxlength]="500"
       [required]="true" />
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDismissDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDismissDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [disabled]="dismissReasonControl.invalid || replenishmentSaving()"
-        (click)="submitDismiss()">Dismiss</button>
+        (click)="submitDismiss()">{{ 'common.dismiss' | translate }}</button>
     </div>
   </app-dialog>
 }

@@ -25,6 +25,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { RecentCommunicationsComponent } from '../../../../shared/components/recent-communications/recent-communications.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-lead-detail-panel',
@@ -66,7 +67,7 @@ export class LeadDetailPanelComponent {
   // Lost reason dialog. Reason required + validation-button stereotype on
   // submit so a salesperson can't drop a lead without recording why.
   protected readonly showLostDialog = signal(false);
-  protected readonly lostReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
+  protected readonly lostReasonControl = new FormControl('', [requiredTrimmed, Validators.maxLength(500)]);
   protected readonly lostFormGroup = new FormGroup({ reason: this.lostReasonControl });
   protected readonly lostViolations = FormValidationService.getViolations(this.lostFormGroup, {
     reason: this.translate.instant('leads.reason'),
@@ -278,16 +279,19 @@ export class LeadDetailPanelComponent {
 
   protected confirmLost(): void {
     const lead = this.lead();
-    if (!lead) return;
+    if (!lead || this.saving()) return;
+    this.saving.set(true);
     this.leadsService.updateLead(lead.id, {
       status: 'Lost',
       lostReason: this.lostReasonControl.value || undefined,
     }).subscribe({
       next: (updated) => {
+        this.saving.set(false);
         this.lead.set(updated);
         this.showLostDialog.set(false);
         this.lostReasonControl.setValue('');
       },
+      error: () => this.saving.set(false),
     });
   }
 

@@ -1,4 +1,4 @@
-const LOCALES: Record<string, string> = { en: 'en-US', es: 'es-ES' };
+const LOCALES: Record<string, string> = { en: 'en-US', es: 'es-US' };
 
 interface Separators { decimal: string; group: string }
 
@@ -24,10 +24,10 @@ function separatorsFor(lang: string): Separators {
 
 /**
  * Parse number text typed in the given app language (`en`, `es`). Accepts an optional sign, the
- * language's decimal separator and correctly placed group separators (`1,500.25` in en,
- * `1.500,25` in es). Returns null for blank text and NaN for anything else that is not a whole
- * number in that form (`1,5` in en, `1.5` in es, `-`, `1e3`), so a separator typed in the wrong
- * place is reported instead of being dropped.
+ * language's decimal separator and correctly placed group separators (`1,500.25` in en and in
+ * es, which keeps US conventions as es-US). Returns null for blank text and NaN for anything else that is not a whole
+ * number in that form (`1,5`, `-`, `1e3`), so a separator typed in the wrong place is reported
+ * instead of being dropped.
  */
 export function parseLocaleNumber(text: string | null | undefined, lang: string): number | null {
   const trimmed = (text ?? '').trim();
@@ -45,11 +45,13 @@ export function parseLocaleNumber(text: string | null | undefined, lang: string)
 
 /**
  * Format a number for display in the given app language without rounding it. Group separators
- * are added only when `grouping` is true, so quantity fields read `1500.25` / `1500,25`.
+ * are added only when `grouping` is true, so quantity fields read `1500.25`.
+ * `minimumFractionDigits` pads with zeros (`42.50` for money) and never rounds.
  */
-export function formatLocaleNumber(value: number, lang: string, grouping = false): string {
+export function formatLocaleNumber(value: number, lang: string, grouping = false, minimumFractionDigits = 0): string {
   return new Intl.NumberFormat(LOCALES[lang] ?? lang, {
     useGrouping: grouping,
+    minimumFractionDigits,
     maximumFractionDigits: 20,
   }).format(value);
 }

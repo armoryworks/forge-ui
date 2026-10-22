@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { ToastService } from '../../services/toast.service';
 import { ToastContainerComponent } from './toast.component';
@@ -18,7 +19,7 @@ describe('ToastContainerComponent top layer', () => {
   let hide: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ToastContainerComponent], providers: [provideNoopAnimations()] });
+    TestBed.configureTestingModule({ imports: [ToastContainerComponent], providers: [provideNoopAnimations(), provideTranslateService()] });
     const fixture = TestBed.createComponent(ToastContainerComponent);
     host = fixture.nativeElement as HTMLElement;
     toasts = TestBed.inject(ToastService);

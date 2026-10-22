@@ -274,9 +274,9 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="cancelLost()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="lostViolations">
+      <app-validation-button [violations]="lostViolations" [loading]="saving()">
         <button class="action-btn action-btn--primary"
-          [disabled]="lostFormGroup.invalid"
+          [disabled]="lostFormGroup.invalid || saving()"
           (click)="confirmLost()">{{ 'leads.confirmLost' | translate }}</button>
       </app-validation-button>
     </div>

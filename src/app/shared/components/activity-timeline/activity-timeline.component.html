@@ -2,7 +2,7 @@
   <div class="timeline__filters">
     @if (actionOptions().length > 1) {
       <select class="timeline__filter-select" (change)="onActionFilter($event)">
-        <option value="">All Actions</option>
+        <option value="">{{ 'activityHistory.allActions' | translate }}</option>
         @for (action of actionOptions(); track action) {
           <option [value]="action">{{ action }}</option>
         }
@@ -10,7 +10,7 @@
     }
     @if (userOptions().length > 1) {
       <select class="timeline__filter-select" (change)="onUserFilter($event)">
-        <option value="">All Users</option>
+        <option value="">{{ 'activityHistory.allUsers' | translate }}</option>
         @for (user of userOptions(); track user) {
           <option [value]="user">{{ user }}</option>
         }
@@ -62,6 +62,6 @@
       </div>
     </div>
   } @empty {
-    <div class="timeline__empty">No activity yet</div>
+    <div class="timeline__empty">{{ 'activityHistory.noActivityYet' | translate }}</div>
   }
 </div>

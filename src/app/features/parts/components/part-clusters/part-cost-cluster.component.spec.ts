@@ -75,3 +75,24 @@ describe('PartCostClusterComponent', () => {
     expect(c.form.value['manualCostOverride']).toBe(12.5);
   });
 });
+
+describe('PartCostClusterComponent standard cost', () => {
+  const std = (source: 'Override' | 'Calculation', calculatedAmount: number | null) => ({
+    amount: 12, source, calculatedAmount, calculatedAt: '2026-10-01T00:00:00Z',
+    materialCost: null, laborCost: null, overheadCost: null,
+  });
+
+  it('says whether the standard is the override or the calculation', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } })],
+    });
+    const component = TestBed.runInInjectionContext(() => new PartCostClusterComponent()) as unknown as {
+      standardSourceKey(s: ReturnType<typeof std>): string;
+    };
+
+    expect(component.standardSourceKey(std('Calculation', 12))).toBe('parts.detail.clusters.cost.sourceCalculation');
+    expect(component.standardSourceKey(std('Override', null))).toBe('parts.detail.clusters.cost.sourceOverride');
+    expect(component.standardSourceKey(std('Override', 10))).toBe('parts.detail.clusters.cost.sourceOverrideWithCalc');
+  });
+});

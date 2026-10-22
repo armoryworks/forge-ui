@@ -236,6 +236,16 @@
     color: var(--text);
   }
 
+  &--error {
+    align-self: flex-start;
+  }
+
+  &--error &__bubble {
+    background: var(--error-light);
+    border: $border-width-thin solid var(--error);
+    color: var(--text);
+  }
+
   &__bubble--typing {
     display: flex;
     align-items: center;

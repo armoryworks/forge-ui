@@ -15,6 +15,7 @@ interface DetailApi {
   canApply(): boolean;
   scheduleControl: FormControl<number | null>;
   saveOverrides(): void;
+  hasUnsavedOverrides(): boolean;
   applyToSchedule(): void;
   approve(): void;
   close(): void;
@@ -72,6 +73,16 @@ describe('ForecastDetailDialogComponent', () => {
 
     expect(mrp.createForecastOverride).toHaveBeenCalledTimes(1);
     expect(mrp.createForecastOverride).toHaveBeenCalledWith(5, '2026-11-01T00:00:00Z', 65);
+  });
+
+  it('reports unsaved overrides so closing asks first', () => {
+    const { dialog } = setup('Draft');
+    expect(dialog.hasUnsavedOverrides()).toBe(false);
+
+    dialog.rows()[1].override!.setValue(65);
+    dialog.rows()[1].override!.markAsDirty();
+
+    expect(dialog.hasUnsavedOverrides()).toBe(true);
   });
 
   it('hands approval back to the page so it confirms first', () => {

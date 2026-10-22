@@ -9,3 +9,10 @@
   font-size: $font-size-base;
   font-weight: 500;
 }
+
+.currency-input__error {
+  color: var(--error);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+  padding: $sp-xs $sp-md 0;
+}

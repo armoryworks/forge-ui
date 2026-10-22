@@ -82,6 +82,7 @@ import { ADMIN_TABS } from './models/admin-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { formatDate } from '../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-admin',
@@ -1204,14 +1205,14 @@ export class AdminComponent implements OnInit {
     const date = this.lockThroughControl.value;
     if (!date) return;
 
-    const formatted = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    const formatted = formatDate(date);
 
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Lock Pay Period?',
-        message: `This will lock all unlocked time entries through ${formatted}. Locked entries cannot be edited or deleted. This action cannot be undone.`,
-        confirmLabel: 'Lock Period',
+        title: this.translate.instant('admin.payPeriodLock.title'),
+        message: this.translate.instant('admin.payPeriodLock.message', { date: formatted }),
+        confirmLabel: this.translate.instant('admin.payPeriodLock.confirm'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -1221,7 +1222,7 @@ export class AdminComponent implements OnInit {
         next: (result) => {
           this.lockingPeriod.set(false);
           this.lockThroughControl.reset();
-          this.snackbar.success(`${result.lockedCount} time ${result.lockedCount === 1 ? 'entry' : 'entries'} locked successfully.`);
+          this.snackbar.success(this.translate.instant(result.lockedCount === 1 ? 'admin.payPeriodLock.lockedOne' : 'admin.payPeriodLock.lockedOther', { count: result.lockedCount }));
         },
         error: (err: unknown) => {
           this.lockingPeriod.set(false);

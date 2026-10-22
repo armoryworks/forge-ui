@@ -19,12 +19,14 @@ export const SHOP_FLOOR_ROUTES: Routes = [
   },
   {
     path: 'scan',
+    canActivate: [authGuard],
     data: { titleKey: 'routeTitles.inventoryScan' },
     loadComponent: () =>
       import('./scan/inventory-scan.component').then((m) => m.InventoryScanComponent),
   },
   {
     path: 'scan-log',
+    canActivate: [authGuard],
     data: { titleKey: 'kioskFlows.dailyLog.title' },
     loadComponent: () =>
       import('./components/scan-daily-log/scan-daily-log.component').then((m) => m.ScanDailyLogComponent),

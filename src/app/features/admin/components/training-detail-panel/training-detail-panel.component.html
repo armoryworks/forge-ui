@@ -4,7 +4,7 @@
       <span class="material-icons-outlined" aria-hidden="true">school</span>
       {{ 'adminPanels.trainingDetail.title' | translate }}
     </h2>
-    <button class="icon-btn" aria-label="Close detail panel" (click)="close()">
+    <button class="icon-btn" [attr.aria-label]="'adminPanels.trainingDetail.closeDetailPanel' | translate" (click)="close()">
       <span class="material-icons-outlined">close</span>
     </button>
   </div>

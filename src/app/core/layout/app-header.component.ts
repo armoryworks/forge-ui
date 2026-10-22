@@ -1,9 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, HostListener, OnInit } from '@angular/core';
+import {
+  afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, DOCUMENT, ElementRef, inject, Injector, signal, HostListener,
+  OnInit, viewChild,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter, map, switchMap, catchError, of } from 'rxjs';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
+import { hasModifierKey } from '@angular/cdk/keycodes';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -51,6 +56,14 @@ export class AppHeaderComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
+  private readonly document = inject(DOCUMENT);
+  private readonly injector = inject(Injector);
+
+  private readonly userTrigger = viewChild<ElementRef<HTMLElement>>('userTrigger');
+  private readonly userMenu = viewChild<ElementRef<HTMLElement>>('userMenu');
+  private readonly chatPanel = viewChild(ChatComponent);
+  private readonly aiHelpPanel = viewChild(AiHelpPanelComponent);
 
   protected readonly showAboutDialog = signal(false);
 
@@ -215,6 +228,8 @@ export class AppHeaderComponent implements OnInit {
       event.preventDefault();
       const input = document.querySelector<HTMLInputElement>('.search-input');
       input?.focus();
+    } else if (event.key === 'Escape' && !event.defaultPrevented && !hasModifierKey(event)) {
+      this.closeTopPanelOnEscape();
     }
   }
 
@@ -402,6 +417,11 @@ export class AppHeaderComponent implements OnInit {
 
   protected toggleUserMenu(): void {
     this.userMenuOpen.update(v => !v);
+    if (!this.userMenuOpen()) return;
+    afterNextRender(
+      () => this.userMenu()?.nativeElement.querySelector<HTMLElement>('.user-menu__item')?.focus(),
+      { injector: this.injector },
+    );
   }
 
   protected closeUserMenu(): void {
@@ -431,5 +451,33 @@ export class AppHeaderComponent implements OnInit {
 
   protected closeAbout(): void {
     this.showAboutDialog.set(false);
+  }
+
+  private closeTopPanelOnEscape(): void {
+    if (this.dialog.openDialogs.length > 0 || this.document.querySelector('app-dialog')) return;
+    if (this.userMenuOpen()) {
+      this.userMenuOpen.set(false);
+      this.userTrigger()?.nativeElement.focus();
+      return;
+    }
+    if (this.panelOpen()) {
+      this.notificationService.closePanel();
+      return;
+    }
+    if (this.showTrainingPanel()) {
+      this.showTrainingPanel.set(false);
+      return;
+    }
+    const aiHelpPanel = this.aiHelpPanel();
+    if (aiHelpPanel?.open()) {
+      aiHelpPanel.toggle();
+      return;
+    }
+    const chatPanel = this.chatPanel();
+    if (chatPanel?.panelOpen()) {
+      chatPanel.toggle();
+      return;
+    }
+    if (this.layout.mobileMenuOpen()) this.layout.closeMobileMenu();
   }
 }

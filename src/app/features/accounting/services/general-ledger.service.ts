@@ -64,7 +64,8 @@ export class GeneralLedgerService {
   /**
    * Profit & Loss. When `compare` is true the response carries prior-period and variance
    * figures per line and per total; an explicit prior window (compareFromDate/compareToDate)
-   * overrides the server's immediately-preceding-equal-length default.
+   * overrides the server's default (the same dates a year earlier for fiscal year-to-date, else the
+   * preceding period of equal length). With no fromDate the server starts at the fiscal year containing toDate.
    */
   getProfitAndLoss(
     bookId: number,
@@ -136,8 +137,9 @@ export class GeneralLedgerService {
    * 1099 report for a calendar year — every 1099-flagged vendor with its total cash paid and the
    * IRS $600 threshold flag. Not book-scoped.
    */
-  get1099Report(year: number): Observable<Form1099Report> {
-    const params = new HttpParams().set('year', year);
+  get1099Report(year: number, includeZeroPayments = false): Observable<Form1099Report> {
+    let params = new HttpParams().set('year', year);
+    if (includeZeroPayments) params = params.set('includeZeroPayments', true);
     return this.http.get<Form1099Report>(`${this.base}/1099-report`, { params });
   }
 
@@ -286,6 +288,11 @@ export class GeneralLedgerService {
   rejectJournalEntry(entryId: number, reason?: string | null): Observable<ManualJournalEntryResult> {
     const params = reason ? new HttpParams().set('reason', reason) : undefined;
     return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/reject`, {}, params ? { params } : {});
+  }
+
+  /** Edit and resubmit a rejected manual journal entry (a Draft): it keeps its number and returns to PendingApproval. */
+  resubmitJournalEntry(entryId: number, request: ManualJournalEntryInput): Observable<ManualJournalEntryResult> {
+    return this.http.post<ManualJournalEntryResult>(`${this.base}/journal-entries/${entryId}/resubmit`, request);
   }
 
   /** Reverse a posted journal entry — posts an equal-and-opposite entry; the original is never edited. */

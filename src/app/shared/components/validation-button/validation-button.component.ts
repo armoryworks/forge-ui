@@ -1,20 +1,26 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   EventEmitter,
   inject,
+  Injector,
   input,
   Output,
   Signal,
   signal,
 } from '@angular/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule, TooltipPosition } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
 
 import { ViolationItem } from '../../services/form-validation.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 const OUTSIDE_CLICK_DEBOUNCE_MS = 150;
 const AUTO_CLOSE_AFTER_CLEAR_MS = 1200;
@@ -22,13 +28,16 @@ const AUTO_CLOSE_AFTER_CLEAR_MS = 1200;
 @Component({
   selector: 'app-validation-button',
   standalone: true,
-  imports: [OverlayModule, MatTooltipModule],
+  imports: [OverlayModule, MatTooltipModule, TranslatePipe],
   templateUrl: './validation-button.component.html',
   styleUrl: './validation-button.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ValidationButtonComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly violations = input.required<Signal<string[]>>();
   /**
@@ -41,6 +50,28 @@ export class ValidationButtonComponent {
    */
   readonly violationItems = input<Signal<ViolationItem[]> | null>(null);
   readonly loading = input<boolean, unknown>(false, { transform: (v: unknown) => !!v });
+  /**
+   * Where the warning trigger's tooltip opens. Defaults to above; a consumer whose inline field
+   * errors sit just above the button (so the tooltip would cover them) can move it.
+   */
+  readonly tooltipPosition = input<TooltipPosition>('above');
+
+  private readonly translate = inject(TranslateService, { optional: true });
+
+  protected triggerTooltip(): string {
+    return this.translateOr('validationButton.show', {}, 'Show validation errors');
+  }
+
+  protected triggerAriaLabel(): string {
+    const count = this.count();
+    return this.translateOr(count === 1 ? 'validationButton.triggerAriaOne' : 'validationButton.triggerAriaOther', { count },
+      `${count} validation issue${count === 1 ? '' : 's'}. Click to view.`);
+  }
+
+  private translateOr(key: string, params: Record<string, unknown>, fallback: string): string {
+    const text = this.translate?.instant(key, params);
+    return typeof text === 'string' && text && text !== key ? text : fallback;
+  }
 
   /** Emitted when the user clicks a violation entry in the popover. */
   @Output() readonly violationClicked = new EventEmitter<string>();
@@ -86,6 +117,7 @@ export class ValidationButtonComponent {
   ];
 
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private clickLatched = false;
 
   constructor() {
     // Auto-close after violations clear, so the user sees the "all-clear" for a moment.
@@ -99,7 +131,25 @@ export class ValidationButtonComponent {
       }
     });
 
-    this.destroyRef.onDestroy(() => this.cancelScheduledClose());
+    const guard = (event: MouseEvent) => this.guardRepeatClick(event);
+    this.host.nativeElement.addEventListener('click', guard, true);
+    this.destroyRef.onDestroy(() => {
+      this.host.nativeElement.removeEventListener('click', guard, true);
+      this.cancelScheduledClose();
+    });
+  }
+
+  private guardRepeatClick(event: MouseEvent): void {
+    const button = (event.target as Element | null)?.closest('button');
+    if (!button || !this.host.nativeElement.contains(button) || button.classList.contains('validation-button__trigger')) return;
+    if (this.clickLatched || this.loading()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    this.clickLatched = true;
+    afterNextRender(() => { this.clickLatched = false; }, { injector: this.injector });
+    this.cdr.markForCheck();
   }
 
   protected toggle(): void {

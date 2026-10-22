@@ -1,0 +1,253 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.graph-editor {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint,
+  &__note {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__mode {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--primary);
+    background: var(--primary-light);
+    font-size: var(--font-size-sm);
+  }
+
+  &__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: $sp-md;
+    align-items: start;
+
+    @include mobile {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__scroller {
+    overflow: auto;
+    max-height: 70vh;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    @include custom-scrollbar(4px);
+  }
+
+  &__canvas {
+    position: relative;
+  }
+
+  &__edges {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &__edge {
+    fill: none;
+    stroke: var(--text-muted);
+    stroke-width: $border-width;
+
+    &--implicit {
+      stroke-dasharray: 6 4;
+    }
+
+    &--done {
+      stroke: var(--warning);
+    }
+
+    &--conflict {
+      stroke: var(--error);
+      stroke-dasharray: 2 4;
+    }
+
+    &--drag {
+      stroke: var(--primary);
+    }
+  }
+
+  &__nodes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__node-slot {
+    position: absolute;
+    display: flex;
+  }
+
+  &__node {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $sp-xs;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    text-align: left;
+    cursor: grab;
+    touch-action: none;
+
+    &--selected {
+      border-color: var(--primary);
+    }
+
+    &--source {
+      border-color: var(--accent);
+      border-style: dashed;
+    }
+  }
+
+  &__node-number {
+    @include uppercase-label(var(--font-size-xxs), 0.05em, 700);
+    color: var(--text-muted);
+  }
+
+  &__node-title {
+    max-width: 100%;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    @include truncate;
+  }
+
+  &__node-meta {
+    max-width: 100%;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    @include truncate;
+  }
+
+  &__handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $btn-icon-size;
+    border: $border-width solid var(--border);
+    border-left: none;
+    background: var(--surface);
+    color: var(--primary);
+    cursor: crosshair;
+    touch-action: none;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+
+    &--conflicts {
+      padding: $sp-md;
+      border: $border-width-thin solid var(--error);
+      background: var(--error-light);
+    }
+  }
+
+  &__section-title {
+    margin: 0;
+    @include uppercase-label(var(--font-size-xxs), 0.05em, 700);
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-xs $sp-sm;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    font-size: var(--font-size-sm);
+  }
+
+  &__row-label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__row-icon--error {
+    color: var(--error);
+    font-size: $icon-size-sm;
+  }
+
+  &__drag {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: $icon-size-sm;
+  }
+
+  &__tag {
+    margin-left: $sp-sm;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__add {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__dirty {
+    margin-right: auto;
+    font-size: var(--font-size-sm);
+    color: var(--warning);
+  }
+}

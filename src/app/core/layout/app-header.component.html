@@ -8,7 +8,7 @@
     <img class="app-header__lockup" [src]="branding.wordmarkUrl()" alt="Forge" />
   </a>
   <div class="header-sep hide-tablet"></div>
-  <nav class="breadcrumb hide-tablet" aria-label="Breadcrumb">
+  <nav class="breadcrumb hide-tablet" [attr.aria-label]="'header.breadcrumb' | translate">
     <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
     @if (hiddenCrumbs().length > 0) {
       <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
@@ -48,7 +48,7 @@
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" data-testid="header-search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keydown.enter)="onSearchEnter()" />
-    <kbd>Ctrl+K</kbd>
+    <kbd>{{ 'header.ctrlK' | translate }}</kbd>
 
     @if (showResults()) {
       <div class="search-results" [class.search-results--two-col]="aiService.available()">
@@ -163,14 +163,14 @@
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>
     <div class="app-header__user">
-      <button class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
+      <button #userTrigger class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
         <span class="user-trigger__name hide-tablet">{{ userFullName() }}</span>
         <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'account_circle' }}</span>
       </button>
 
       @if (userMenuOpen()) {
         <div class="user-menu-backdrop" role="button" tabindex="0" [attr.aria-label]="'header.closeUserMenu' | translate" (click)="closeUserMenu()" (keydown.enter)="closeUserMenu()"></div>
-        <div class="user-menu">
+        <div #userMenu class="user-menu">
           <div class="user-menu__header">
             <div class="user-menu__avatar" [style.background]="userAvatarColor()">
               {{ userInitials() }}
@@ -190,7 +190,7 @@
           </button>
           <button class="user-menu__item" (click)="openAbout()">
             <span class="material-icons-outlined">info</span>
-            About
+            {{ 'header.about.menu' | translate }}
           </button>
           <div class="user-menu__divider"></div>
           <div class="user-menu__lang">
@@ -232,13 +232,13 @@
   (closed)="showTrainingPanel.set(false)" />
 
 @if (showAboutDialog()) {
-  <app-dialog title="About Armory Works Forge" width="420px" (closed)="closeAbout()">
+  <app-dialog [title]="'header.about.title' | translate" width="420px" (closed)="closeAbout()">
     <div class="about-dialog">
-      <img class="about-dialog__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
+      <img class="about-dialog__lockup" [src]="branding.marqueeUrl()" [alt]="'header.about.logoAlt' | translate" />
 
       <div class="about-dialog__meta">
         <div class="about-dialog__row">
-          <span class="about-dialog__label">Your build</span>
+          <span class="about-dialog__label">{{ 'header.about.build' | translate }}</span>
           <span class="about-dialog__value about-dialog__value--stack">
             @if (versionService.local(); as v) {
               @if (v.sha === 'dev') {
@@ -253,23 +253,22 @@
           </span>
         </div>
         <div class="about-dialog__row">
-          <span class="about-dialog__label">License</span>
+          <span class="about-dialog__label">{{ 'header.about.license' | translate }}</span>
           <span class="about-dialog__value">Apache License 2.0</span>
         </div>
         <div class="about-dialog__row">
-          <span class="about-dialog__label">Stack</span>
+          <span class="about-dialog__label">{{ 'header.about.stack' | translate }}</span>
           <span class="about-dialog__value">Angular 21 · .NET 9 · PostgreSQL</span>
         </div>
       </div>
 
       <p class="about-dialog__desc text-muted">
-        Open-source ERP and production management for small manufacturers.
-        Integrates with QuickBooks Online for accounting sync.
+        {{ 'header.about.description' | translate }}
       </p>
     </div>
 
     <div dialog-footer>
-      <button class="action-btn action-btn--primary" (click)="closeAbout()">Close</button>
+      <button class="action-btn action-btn--primary" (click)="closeAbout()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }

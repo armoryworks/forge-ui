@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, LOCALE_ID } from '@angular/core';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -26,6 +26,7 @@ const EQUITY_COLOR = '#2563eb';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BalanceSheetVisualComponent {
+  private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
 
   readonly report = input.required<BalanceSheet>();
@@ -71,7 +72,7 @@ export class BalanceSheetVisualComponent {
             callbacks: {
               label: (ctx) => {
                 const value = ctx.raw as number;
-                return `${ctx.dataset.label}: ${value.toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`;
+                return `${ctx.dataset.label}: ${value.toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`;
               },
             },
           },

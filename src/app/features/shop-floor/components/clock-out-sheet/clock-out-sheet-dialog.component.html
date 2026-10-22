@@ -1,0 +1,33 @@
+<app-dialog [title]="'shopFloor.clockOutSheet.title' | translate: { name: data.workerName }" width="560px" (closed)="cancel()">
+  <p class="clock-out-sheet__hint">{{ 'shopFloor.clockOutSheet.hint' | translate }}</p>
+  <ul class="clock-out-sheet__list">
+    @for (row of rows; track row.timer.timeEntryId) {
+      <li class="clock-out-sheet__row" [attr.data-testid]="'clock-out-sheet-row-' + row.timer.timeEntryId">
+        <div class="clock-out-sheet__label">
+          <span class="clock-out-sheet__job">{{ row.timer.jobNumber ?? ('shopFloor.operations.indirect' | translate) }}</span>
+          <span class="clock-out-sheet__step">{{ row.isStep ? stepLabel(row.timer) : ('shopFloor.operations.wholeJob' | translate) }}</span>
+        </div>
+        @if (row.isStep) {
+          <div class="clock-out-sheet__fields" [formGroup]="row.form">
+            <app-input type="number" min="0" formControlName="good"
+                       [label]="'shopFloor.clockOutSheet.good' | translate"
+                       [attr.data-testid]="'clock-out-sheet-good-' + row.timer.timeEntryId" />
+            <app-input type="number" min="0" formControlName="scrap"
+                       [label]="'shopFloor.clockOutSheet.scrap' | translate"
+                       [attr.data-testid]="'clock-out-sheet-scrap-' + row.timer.timeEntryId" />
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="clock-out-sheet-cancel" (click)="cancel()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button type="button" class="action-btn action-btn--primary clock-out-sheet__confirm" data-testid="clock-out-sheet-confirm" (click)="clockOut()">
+      <span class="material-icons-outlined">logout</span>
+      {{ 'shopFloor.clockOutSheet.confirm' | translate }}
+    </button>
+  </div>
+</app-dialog>

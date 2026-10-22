@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { TokenSetupComponent } from './token-setup.component';
 import { AuthService, AuthUser } from '../../shared/services/auth.service';
@@ -69,5 +70,31 @@ describe('TokenSetupComponent', () => {
 
     expect(router.navigate).not.toHaveBeenCalledWith(['/account/profile']);
     expect(router.navigate).toHaveBeenCalledWith(['/accounting']);
+  });
+
+  function filledForm(): TokenSetupHarness {
+    const setup = TestBed.runInInjectionContext(() => new TokenSetupComponent()) as unknown as TokenSetupHarness;
+    setup.form.setValue({ password: 'Forge-Setup-2026!', confirmPassword: 'Forge-Setup-2026!' });
+    return setup;
+  }
+
+  it('posts the setup once when Enter submits twice before the server answers', () => {
+    completeSetup.mockReturnValue(new Subject());
+    const setup = filledForm();
+
+    setup.onSubmit();
+    setup.onSubmit();
+
+    expect(completeSetup).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the user retry after the server rejects the setup', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: { detail: 'nope' } })));
+    const setup = filledForm();
+
+    setup.onSubmit();
+    setup.onSubmit();
+
+    expect(completeSetup).toHaveBeenCalledTimes(2);
   });
 });

@@ -172,6 +172,21 @@ describe('OperationTimeTabComponent', () => {
     expect(view.targetStart()).toEqual({ target: 300, start: 322 });
   });
 
+  it('plans the first step at the whole start when yield sets the start above the routing plan', () => {
+    const { component } = setup(of({
+      ...payload(true, [
+        op({ operationId: 7, stepNumber: 10, plannedQuantity: 112 }),
+        op({ operationId: 8, jobOperationId: null, stepNumber: 20, plannedQuantity: 105 }),
+      ]),
+      jobQuantity: 112,
+      targetQuantity: 100,
+    }));
+
+    expect(component.operations().map(r => r.plannedQuantity)).toEqual([112, 105]);
+    const view = component as unknown as { targetStart: () => { target: number; start: number } | null };
+    expect(view.targetStart()).toEqual({ target: 100, start: 112 });
+  });
+
   it('shows no target beside the start for a job without one', () => {
     const { component } = setup(of(payload(true)));
 
@@ -295,7 +310,7 @@ describe('OperationTimeTabComponent', () => {
     component.openQuantity(firstRow(component));
     expect(dialog.open.mock.calls[0][1].data).toEqual({
       title: 'Mill', jobQuantity: 40, completedQuantity: 20, scrapQuantity: 0,
-      reasons: [{ code: 'tooling', label: 'Tool wear' }],
+      reasons: [{ code: 'tooling', label: 'Tool wear' }], decimalPlaces: null, plannedQuantity: null, gate: null,
     });
     afterClosed.next({ completedQuantity: 30, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false });
 
@@ -306,6 +321,26 @@ describe('OperationTimeTabComponent', () => {
       expectedVersion: 5,
     });
     expect(finished).not.toHaveBeenCalled();
+  });
+
+  it('shows the step gate in the dialog and sends the acknowledgement it returns', () => {
+    const gated = { ...payload(true, [op({ available: 22, availableFromStep: 1 })]), stepGating: 'Warn' as const };
+    const { component, operations, dialog, afterClosed } = setup(of(gated));
+    operations.updateProgress.mockReturnValue(of({ operation: op({ completedQuantity: 25, version: 6 }), allOperationsComplete: false }));
+
+    component.openQuantity(firstRow(component));
+    expect(dialog.open.mock.calls[0][1].data.gate).toEqual({
+      mode: 'Warn', available: 22, availableFromStep: 1, waitingOnSteps: [], canOverride: true,
+    });
+    afterClosed.next({
+      completedQuantity: 25, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete: false,
+      acknowledgeGate: true, overrideReason: 'counted twice at the saw',
+    });
+
+    expect(operations.updateProgress).toHaveBeenCalledWith(JOB_ID, 7, {
+      completedQuantity: 25, scrapQuantity: 0, status: null, expectedVersion: 5,
+      acknowledgeGate: true, overrideReason: 'counted twice at the saw',
+    });
   });
 
   it('sends rework and the reason only when the dialog recorded them', () => {

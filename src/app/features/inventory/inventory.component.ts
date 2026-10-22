@@ -54,6 +54,7 @@ import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 
 @Component({
@@ -176,17 +177,17 @@ export class InventoryComponent {
   protected readonly cycleCounts = signal<CycleCount[]>([]);
 
   protected readonly cycleCountColumns: ColumnDef[] = [
-    { field: 'locationName', header: 'Location', sortable: true },
-    { field: 'countedByName', header: 'Counted By', sortable: true },
-    { field: 'countedAt', header: 'Date', sortable: true, type: 'date', width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '110px',
+    { field: 'locationName', header: this.translate.instant('inventory.location'), sortable: true },
+    { field: 'countedByName', header: this.translate.instant('inventory.columns.countedBy'), sortable: true },
+    { field: 'countedAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '110px',
       filterOptions: [
-        { value: 'Pending', label: 'Pending' },
-        { value: 'Approved', label: 'Approved' },
-        { value: 'Rejected', label: 'Rejected' },
+        { value: 'Pending', label: this.translate.instant('inventory.statuses.pending') },
+        { value: 'Approved', label: this.translate.instant('inventory.statuses.approved') },
+        { value: 'Rejected', label: this.translate.instant('inventory.statuses.rejected') },
       ]},
-    { field: 'lineCount', header: 'Items', sortable: true, width: '70px', align: 'right' },
-    { field: 'variance', header: 'Variance', sortable: true, width: '90px', align: 'right' },
+    { field: 'lineCount', header: this.translate.instant('inventory.columns.items'), sortable: true, width: '70px', align: 'right' },
+    { field: 'variance', header: this.translate.instant('inventory.columns.variance'), sortable: true, width: '90px', align: 'right' },
   ];
 
   // Bin locations for dropdowns
@@ -196,7 +197,7 @@ export class InventoryComponent {
   // Location dialog
   protected readonly showLocationDialog = signal(false);
   protected readonly locationForm = new FormGroup({
-    name: new FormControl('', [Validators.required, Validators.maxLength(200)]),
+    name: new FormControl('', [requiredTrimmed, Validators.maxLength(200)]),
     locationType: new FormControl<LocationType>('Area', [Validators.required]),
     parentId: new FormControl<number | null>(null),
     barcode: new FormControl('', [Validators.maxLength(100)]),
@@ -289,14 +290,14 @@ export class InventoryComponent {
   protected readonly reservationFilterJobId = signal<number | null>(null);
 
   protected readonly reservationColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'partDescription', header: 'Description', sortable: true },
-    { field: 'locationPath', header: 'Bin Location', sortable: true },
-    { field: 'quantity', header: 'Qty', sortable: true, align: 'right', width: '80px' },
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'jobTitle', header: 'Job', sortable: true },
-    { field: 'notes', header: 'Notes', sortable: false },
-    { field: 'createdAt', header: 'Reserved', sortable: true, type: 'date', width: '120px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
+    { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'locationPath', header: this.translate.instant('inventory.columns.binLocation'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('inventory.columns.qty'), sortable: true, align: 'right', width: '80px' },
+    { field: 'jobNumber', header: this.translate.instant('inventory.columns.jobNumber'), sortable: true, width: '100px' },
+    { field: 'jobTitle', header: this.translate.instant('inventory.columns.job'), sortable: true },
+    { field: 'notes', header: this.translate.instant('common.notes'), sortable: false },
+    { field: 'createdAt', header: this.translate.instant('inventory.columns.reservedDate'), sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
@@ -520,7 +521,7 @@ export class InventoryComponent {
   }
 
   protected saveLocation(): void {
-    if (this.locationForm.invalid) return;
+    if (this.locationForm.invalid || this.saving()) return;
 
     this.saving.set(true);
     const form = this.locationForm.getRawValue();
@@ -548,13 +549,14 @@ export class InventoryComponent {
 
   protected getReasonLabel(reason: string | null): string {
     if (!reason) return '\u2014';
-    const labels: Record<string, string> = {
-      Receive: 'Received', Pick: 'Picked', Restock: 'Restocked',
-      QcRelease: 'QC Released', Ship: 'Shipped', Move: 'Moved',
-      Adjustment: 'Adjusted', Return: 'Returned',
-      Transfer: 'Transferred', CycleCount: 'Cycle Count',
+    const keys: Record<string, string> = {
+      Receive: 'received', Pick: 'picked', Restock: 'restocked',
+      QcRelease: 'qcReleased', Ship: 'shipped', Move: 'moved',
+      Adjustment: 'adjusted', Return: 'returned',
+      Transfer: 'transferred', CycleCount: 'cycleCount',
     };
-    return labels[reason] ?? reason;
+    const key = keys[reason];
+    return key ? this.translate.instant(`inventory.reasons.${key}`) : reason;
   }
 
   protected getStatusClass(status: string): string {
@@ -912,31 +914,31 @@ export class InventoryComponent {
   );
 
   protected readonly burnRateColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '150px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'preferredVendorName', header: 'Vendor', sortable: true, width: '140px' },
-    { field: 'available', header: 'Available', sortable: true, type: 'number', align: 'right', width: '90px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
+    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'preferredVendorName', header: this.translate.instant('inventory.receivingInspection.columns.vendor'), sortable: true, width: '140px' },
+    { field: 'available', header: this.translate.instant('inventory.available'), sortable: true, type: 'number', align: 'right', width: '90px' },
     { field: 'incomingPoQuantity', header: this.translate.instant('replenishmentUi.incoming'), sortable: true, align: 'right', width: '130px' },
-    { field: 'burnRate30Day', header: '30d / day', sortable: true, align: 'right', width: '80px' },
-    { field: 'burnRate60Day', header: '60d / day', sortable: true, align: 'right', width: '80px' },
-    { field: 'burnRate90Day', header: '90d / day', sortable: true, align: 'right', width: '80px' },
-    { field: 'daysOfStockRemaining', header: 'Days Left', sortable: true, align: 'right', width: '80px' },
-    { field: 'projectedStockoutDate', header: 'Stockout', sortable: true, type: 'date', width: '100px' },
-    { field: 'needsReorder', header: 'Reorder', sortable: true, width: '80px', align: 'center' },
+    { field: 'burnRate30Day', header: this.translate.instant('inventory.burnRates.per30'), sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRate60Day', header: this.translate.instant('inventory.burnRates.per60'), sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRate90Day', header: this.translate.instant('inventory.burnRates.per90'), sortable: true, align: 'right', width: '80px' },
+    { field: 'daysOfStockRemaining', header: this.translate.instant('inventory.burnRates.daysLeft'), sortable: true, align: 'right', width: '80px' },
+    { field: 'projectedStockoutDate', header: this.translate.instant('inventory.burnRates.stockout'), sortable: true, type: 'date', width: '100px' },
+    { field: 'needsReorder', header: this.translate.instant('inventory.burnRates.reorder'), sortable: true, width: '80px', align: 'center' },
   ];
 
   protected readonly suggestionColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '150px' },
-    { field: 'partDescription', header: 'Description', sortable: true },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '150px' },
+    { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
     { field: 'reorderPoint', header: this.translate.instant('replenishmentUi.why'), sortable: true, width: '170px' },
     { field: 'supplyType', header: this.translate.instant('replenishmentUi.supply'), sortable: true, width: '90px' },
-    { field: 'vendorName', header: 'Vendor', sortable: true, width: '140px' },
+    { field: 'vendorName', header: this.translate.instant('inventory.receivingInspection.columns.vendor'), sortable: true, width: '140px' },
     { field: 'leadTimeDays', header: this.translate.instant('replenishmentUi.leadTime'), sortable: true, align: 'right', width: '90px' },
-    { field: 'availableStock', header: 'Available', sortable: true, align: 'right', width: '80px' },
-    { field: 'burnRateDailyAvg', header: 'Burn/Day', sortable: true, align: 'right', width: '80px' },
-    { field: 'daysOfStockRemaining', header: 'Days Left', sortable: true, align: 'right', width: '80px' },
-    { field: 'projectedStockoutDate', header: 'Stockout', sortable: true, type: 'date', width: '100px' },
-    { field: 'suggestedQuantity', header: 'Suggest Qty', sortable: true, align: 'right', width: '90px' },
+    { field: 'availableStock', header: this.translate.instant('inventory.available'), sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRateDailyAvg', header: this.translate.instant('inventory.burnRates.burnPerDay'), sortable: true, align: 'right', width: '80px' },
+    { field: 'daysOfStockRemaining', header: this.translate.instant('inventory.burnRates.daysLeft'), sortable: true, align: 'right', width: '80px' },
+    { field: 'projectedStockoutDate', header: this.translate.instant('inventory.burnRates.stockout'), sortable: true, type: 'date', width: '100px' },
+    { field: 'suggestedQuantity', header: this.translate.instant('inventory.burnRates.suggestQty'), sortable: true, align: 'right', width: '90px' },
     { field: 'actions', header: '', width: '200px', align: 'right' },
   ];
 
@@ -1093,7 +1095,7 @@ export class InventoryComponent {
         this.replenishmentSaving.set(false);
         this.closeDismissDialog();
         this.loadSuggestions();
-        this.snackbar.info('Suggestion dismissed');
+        this.snackbar.info(this.translate.instant('inventory.messages.suggestionDismissed'));
       },
       error: () => this.replenishmentSaving.set(false),
     });

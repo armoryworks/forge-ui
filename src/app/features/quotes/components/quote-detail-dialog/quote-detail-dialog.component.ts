@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { QuoteDetailPanelComponent } from '../quote-detail-panel/quote-detail-panel.component';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface QuoteDetailDialogData {
   quoteId: number;
@@ -21,12 +22,16 @@ export interface QuoteDetailDialogData {
   styles: [`:host { display: block; width: 100%; height: 100%; } app-quote-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuoteDetailDialogComponent {
+export class QuoteDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<QuoteDetailDialogComponent, QuoteDetailDialogResult | undefined>);
 
   protected readonly data = inject<QuoteDetailDialogData>(MAT_DIALOG_DATA);
 
   private changed = false;
+
+  onDialogEscape(): void {
+    this.close();
+  }
 
   protected close(): void {
     this.dialogRef.close(this.changed ? { changed: true } : undefined);

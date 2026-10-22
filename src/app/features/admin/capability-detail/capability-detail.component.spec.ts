@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
@@ -14,6 +15,7 @@ describe('CapabilityDetailComponent · unknown code', () => {
   function create(code: string) {
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: code })) } },
         { provide: Router, useValue: { navigate: vi.fn() } },
         {

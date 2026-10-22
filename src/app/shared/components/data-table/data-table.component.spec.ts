@@ -39,6 +39,15 @@ describe('DataTableComponent · formatCellValue', () => {
     table = TestBed.createComponent(DataTableComponent).componentInstance;
   });
 
+  it('shows an enum cell by its filter option label and leaves unknown values as they are', () => {
+    const bucketCol: ColumnDef = {
+      field: 'bucket', header: 'Bucket', type: 'enum',
+      filterOptions: [{ value: '1-30 Days', label: '1-30 días' }],
+    };
+    expect(table.formatCellValue({ bucket: '1-30 Days' }, bucketCol)).toBe('1-30 días');
+    expect(table.formatCellValue({ bucket: 'Later' }, bucketCol)).toBe('Later');
+  });
+
   it('renders a date-only value as that calendar date', () => {
     expect(table.formatCellValue({ date: '2026-10-07' }, dateCol)).toBe('10/07/2026');
   });
@@ -218,6 +227,16 @@ describe('DataTableComponent · behaviour', () => {
     ]);
 
     expect(sortBy('qty', 'asc')).toEqual(['c', 'b', 'a']);
+  });
+
+  it('filters a currency column by a min/max range like a number column', () => {
+    setup([{ field: 'amount', header: 'Amount', type: 'currency' }], [
+      { id: 1, amount: 50 }, { id: 2, amount: 150 }, { id: 3, amount: 1200.5 },
+    ]);
+
+    internals.filters.set({ amount: { min: 100, max: 1000 } });
+
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2]);
   });
 
   it('matches text filters without regard to accents in either the data or the filter', () => {
@@ -673,5 +692,85 @@ describe('DataTableComponent · server paging', () => {
 
     expect(internals.pagedData()).toEqual(rows);
     expect(internals.hasFilter('partNumber')).toBe(false);
+  });
+});
+
+describe('DataTableComponent · column headers', () => {
+  const columns: ColumnDef[] = [
+    { field: 'name', header: 'common.name' },
+    { field: 'code', header: 'Code' },
+  ];
+  let translate: TranslateService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService(),
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', { common: { name: 'Name' } });
+    translate.setTranslation('es', { common: { name: 'Nombre' } });
+    translate.use('en');
+  });
+
+  function headerTexts(fixture: ComponentFixture<DataTableComponent>): string[] {
+    return Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.data-table__th-content'),
+      el => el.textContent?.trim() ?? '',
+    );
+  }
+
+  it('shows a header key in the current language and follows a live language switch', () => {
+    const fixture = TestBed.createComponent(DataTableComponent);
+    fixture.componentRef.setInput('tableId', 'header-spec');
+    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('data', [{ id: 1, name: 'Bracket', code: 'BR-1' }]);
+    fixture.detectChanges();
+    expect(headerTexts(fixture)).toEqual(['Name', 'Code']);
+
+    translate.use('es');
+    fixture.detectChanges();
+
+    expect(headerTexts(fixture)).toEqual(['Nombre', 'Code']);
+  });
+});
+
+describe('DataTableComponent · row click', () => {
+  let table: DataTableComponent;
+  let emitted: unknown[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService(),
+        { provide: ComponentFixtureAutoDetect, useValue: false },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    table = TestBed.createComponent(DataTableComponent).componentInstance;
+    emitted = [];
+    table.rowClick.subscribe(row => emitted.push(row));
+  });
+
+  it('opens a row on a single click', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 1 }));
+
+    expect(emitted).toEqual([{ id: 1 }]);
+  });
+
+  it('ignores the second click of a double-click that lands on the row', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 2 }));
+
+    expect(emitted).toEqual([]);
+  });
+
+  it('still opens a row from keyboard activation, which reports no click count', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 0 }));
+
+    expect(emitted).toEqual([{ id: 1 }]);
   });
 });

@@ -14,6 +14,7 @@
     <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <div class="acct-view-bar">
+      <app-statement-period mode="asOf" [to]="r.asOfDate" (periodChange)="setPeriod($event)" />
       @if (viewMode() !== 'visual') {
         <app-toggle class="acct-compare-toggle" [label]="'accounting.comparison.compareToPrior' | translate" [formControl]="compareControl" />
       }
@@ -23,11 +24,12 @@
     @if (viewMode() === 'visual') {
       <app-balance-sheet-visual [report]="r" />
     } @else {
-    @if (compare() && r.hasComparison && r.compareAsOfDate) {
-      <p class="acct-muted stmt-compare-note">
-        {{ 'accounting.comparison.priorDate' | translate }}: {{ r.compareAsOfDate }}
-      </p>
-    }
+    <p class="acct-muted stmt-compare-note">
+      {{ 'accounting.period.asOf' | translate }}: {{ r.asOfDate | dateOnly }}
+      @if (compare() && r.hasComparison && r.compareAsOfDate) {
+        · {{ 'accounting.comparison.priorDate' | translate }}: {{ r.compareAsOfDate | dateOnly }}
+      }
+    </p>
 
     <table class="statement" aria-label="Balance sheet">
       @if (compare()) {

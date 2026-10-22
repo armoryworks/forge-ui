@@ -2,13 +2,13 @@
   <!-- ─── Standard Header (non-government forms only) ─── -->
   @if (!isGovernmentLayout()) {
     <div class="compliance-form__header">
-      <button class="action-btn action-btn--sm compliance-form__back-btn" (click)="onBack()" aria-label="Back to forms list">
+      <button class="action-btn action-btn--sm compliance-form__back-btn" (click)="onBack()" [attr.aria-label]="'account.complianceFormRenderer.backToFormsList' | translate">
         <span class="material-icons-outlined">arrow_back</span>
       </button>
       <div class="compliance-form__header-text">
         <h2 class="compliance-form__title">{{ definition().title }}</h2>
         <p class="compliance-form__subtitle">
-          Form {{ definition().formNumber }} (Rev. {{ definition().revision }}) — {{ definition().agency }}
+          {{ 'account.complianceFormRenderer.formFormnumberRevRevisionAgency' | translate:{ formNumber: definition().formNumber, revision: definition().revision, agency: definition().agency } }}
         </p>
       </div>
     </div>
@@ -16,7 +16,7 @@
 
   <!-- ─── Tab Bar ─── -->
   @if (hasMultiplePages()) {
-    <div class="compliance-form__tabs" role="tablist" aria-label="Form pages"
+    <div class="compliance-form__tabs" role="tablist" [attr.aria-label]="'account.complianceFormRenderer.formPages' | translate"
       [class.gov-form__tabs]="isGovernmentLayout()">
       @for (page of pages(); track page.id; let i = $index) {
         <button class="compliance-form__tab"
@@ -126,7 +126,7 @@
                             maxlength="11"
                             [placeholder]="field.placeholder ?? ''"
                             [attr.autocomplete]="field.autocomplete ?? null"
-                            aria-label="Social security number">
+                            [attr.aria-label]="'account.complianceFormRenderer.socialSecurityNumber' | translate">
                         } @else if (field.type === 'textarea') {
                           @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
                           <textarea class="gov-form__textarea" [id]="field.id" [formControlName]="field.id"
@@ -213,7 +213,7 @@
                       <div class="gov-form__signature-row">
                         <div class="gov-form__signature-field">
                           <input class="gov-form__input gov-form__input--signature" [id]="field.id" [formControlName]="field.id"
-                            placeholder="Type your full legal name"
+                            [placeholder]="'account.complianceFormRenderer.typeYourFullLegalName' | translate"
                             [attr.autocomplete]="field.autocomplete ?? null"
                             [attr.aria-label]="field.label">
                           <label class="gov-form__field-label" [attr.for]="field.id"><strong>{{ field.label }}</strong> ({{ field.hint }})</label>
@@ -273,7 +273,7 @@
                             (input)="formatSsn($event, field.id)"
                             maxlength="11"
                             [placeholder]="field.placeholder ?? ''"
-                            aria-label="Social security number">
+                            [attr.aria-label]="'account.complianceFormRenderer.socialSecurityNumber' | translate">
                         } @else {
                           <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                             [attr.type]="field.type === 'date' ? 'date' : 'text'"
@@ -323,7 +323,7 @@
                           maxlength="11"
                           [placeholder]="field.placeholder ?? ''"
                           [attr.autocomplete]="field.autocomplete ?? null"
-                          aria-label="Social security number">
+                          [attr.aria-label]="'account.complianceFormRenderer.socialSecurityNumber' | translate">
                       } @else if (field.type === 'textarea') {
                         @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
                         <textarea class="gov-form__textarea" [id]="field.id" [formControlName]="field.id"
@@ -386,7 +386,7 @@
                       <div class="gov-form__signature-field">
                         <label class="gov-form__field-label" [attr.for]="field.id"><strong>{{ field.label }}</strong></label>
                         <input class="gov-form__input gov-form__input--signature" [id]="field.id" [formControlName]="field.id"
-                          placeholder="Type your full legal name"
+                          [placeholder]="'account.complianceFormRenderer.typeYourFullLegalName' | translate"
                           [attr.aria-label]="field.label">
                       </div>
                       @for (dateField of section.fields; track dateField.id) {
@@ -412,7 +412,7 @@
                         (input)="formatSsn($event, field.id)"
                         maxlength="11"
                         [placeholder]="field.placeholder ?? ''"
-                        aria-label="Social security number">
+                        [attr.aria-label]="'account.complianceFormRenderer.socialSecurityNumber' | translate">
                     </div>
                   }
                   @else if (field.type === 'text' || field.type === 'date') {
@@ -477,7 +477,7 @@
         <!-- Employers Only -->
         @else if (section.layout === 'employers-only') {
           <div class="gov-form__employers">
-            <div class="gov-form__employers-label"><strong>Employers<br>Only</strong></div>
+            <div class="gov-form__employers-label"><strong>{{ 'account.complianceFormRenderer.employers' | translate }}<br>{{ 'account.complianceFormRenderer.only' | translate }}</strong></div>
             <div class="gov-form__employers-content">
               <div class="gov-form__employers-row">
                 @for (field of section.fields; track field.id) {
@@ -602,9 +602,9 @@
     [class.gov-form__footer]="isGovernmentLayout()">
     @if (isGovernmentLayout()) {
       <div class="compliance-form__nav">
-        <button class="action-btn action-btn--sm" (click)="onBack()" aria-label="Back to forms list">
+        <button class="action-btn action-btn--sm" (click)="onBack()" [attr.aria-label]="'account.complianceFormRenderer.backToFormsList' | translate">
           <span class="material-icons-outlined">arrow_back</span>
-          Back
+          {{ 'common.back' | translate }}
         </button>
       </div>
     } @else if (hasMultiplePages()) {
@@ -612,9 +612,9 @@
         <button class="action-btn action-btn--sm"
           [disabled]="isFirstPage()"
           (click)="prevPage()"
-          aria-label="Previous page">
+          [attr.aria-label]="'account.complianceFormRenderer.previousPage' | translate">
           <span class="material-icons-outlined">chevron_left</span>
-          Prev
+          {{ 'account.complianceFormRenderer.prev' | translate }}
         </button>
         <span class="compliance-form__page-indicator">
           {{ activePageIndex() + 1 }} / {{ pages().length }}
@@ -622,8 +622,8 @@
         <button class="action-btn action-btn--sm"
           [disabled]="isLastPage()"
           (click)="nextPage()"
-          aria-label="Next page">
-          Next
+          [attr.aria-label]="'account.complianceFormRenderer.nextPage' | translate">
+          {{ 'common.next' | translate }}
           <span class="material-icons-outlined">chevron_right</span>
         </button>
       </div>
@@ -639,7 +639,7 @@
           } @else {
             <span class="material-icons-outlined">save</span>
           }
-          Save Draft
+          {{ 'account.complianceFormRenderer.saveDraft' | translate }}
         </button>
         <app-validation-button [violations]="violations">
         <button class="action-btn action-btn--primary"
@@ -650,7 +650,7 @@
           } @else {
             <span class="material-icons-outlined">check</span>
           }
-          Submit Form
+          {{ 'account.complianceFormRenderer.submitForm' | translate }}
         </button>
         </app-validation-button>
       </div>

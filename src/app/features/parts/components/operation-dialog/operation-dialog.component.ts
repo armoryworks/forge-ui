@@ -1,11 +1,18 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { Operation, OperationMaterial } from '../../models/operation.model';
+import { OperationPredecessorRequest } from '../../models/operation-predecessor-request.model';
+import { UpdateOperationRequest } from '../../models/update-operation-request.model';
+import { defaultPredecessorIds } from '../../utils/routing-predecessors.utils';
+import { describeConflicts, predecessorConflictsOf } from '../../utils/predecessor-conflicts.utils';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { BOMLine } from '../../models/bom-line.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -18,6 +25,7 @@ import { ActivityTimelineComponent } from '../../../../shared/components/activit
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AuthSrcDirective } from '../../../../shared/directives/auth-src.directive';
@@ -31,6 +39,7 @@ import { WorkCenter } from '../../../scheduling/models/scheduling.model';
 import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -62,6 +71,11 @@ export interface OperationDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationDialogComponent implements OnInit {
+  /** Largest setup / lot time the server's numeric(10,2) minute columns hold. */
+  static readonly MAX_MINUTES = 99_999_999.99;
+  /** Largest turn time the server's numeric(5,1) column holds. */
+  static readonly MAX_TURN_TIME_DAYS = 9_999.9;
+
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   @ViewChild('subcontractVendorPicker') protected subcontractVendorPicker?: EntityPickerComponent;
 
@@ -100,9 +114,18 @@ export class OperationDialogComponent implements OnInit {
    *  `estimatedMs` for edit mode. Sub-minute remainder (0–59.999) lands in `seconds`. */
   private readonly estParts = OperationDialogComponent.decomposeMs(this.data.operation?.estimatedMs ?? null);
 
+  private readonly scrapFactorRange = (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value === null || value === undefined || value === '') return null;
+    const percent = Number(value);
+    return percent >= 0 && percent < 100
+      ? null
+      : { scrapFactorRange: { message: this.translate.instant('parts.scrapFactorError') } };
+  };
+
   protected readonly formGroup = new FormGroup({
     stepNumber: new FormControl<number>(this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
-    title: new FormControl(this.data.operation?.title ?? '', [Validators.required, Validators.maxLength(200)]),
+    title: new FormControl(this.data.operation?.title ?? '', [requiredTrimmed, Validators.maxLength(200)]),
     instructions: new FormControl(this.data.operation?.instructions ?? ''),
     workCenterId: new FormControl<number | null>(this.data.operation?.workCenterId ?? null),
     // Composable estimated time — canonically stored in milliseconds; composed on save,
@@ -110,8 +133,21 @@ export class OperationDialogComponent implements OnInit {
     estHours: new FormControl<number | null>(this.estParts.hours, [Validators.min(0)]),
     estMinutes: new FormControl<number | null>(this.estParts.minutes, [Validators.min(0)]),
     estSeconds: new FormControl<number | null>(this.estParts.seconds, [Validators.min(0), Validators.max(59.999)]),
-    setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [Validators.min(0)]),
-    runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [Validators.min(0)]),
+    setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [
+      Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
+      maxDecimalsValidator(2, this.translate.instant('parts.setupTime'), this.translate),
+    ]),
+    runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [
+      Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
+      maxDecimalsValidator(2, this.translate.instant('parts.lotTime'), this.translate),
+    ]),
+    scrapFactorPercent: new FormControl<number | null>(
+      this.data.operation?.scrapFactor ? Math.round(this.data.operation.scrapFactor * 1_000_000) / 10_000 : null,
+      [this.scrapFactorRange]),
+    laborAttendancePercent: new FormControl<number | null>(this.data.operation?.laborAttendancePercent ?? 100, [
+      Validators.required, Validators.min(0), Validators.max(100),
+      maxDecimalsValidator(2, this.translate.instant('parts.laborAttendance'), this.translate),
+    ]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
@@ -120,7 +156,51 @@ export class OperationDialogComponent implements OnInit {
     // shows / hides the two dependent fields based on the toggle.
     isSubcontract: new FormControl(this.data.operation?.isSubcontract ?? false),
     subcontractVendorId: new FormControl<number | null>(this.data.operation?.subcontractVendorId ?? null),
-    subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [Validators.min(0.1)]),
+    subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [
+      Validators.min(0.1), Validators.max(OperationDialogComponent.MAX_TURN_TIME_DAYS),
+      maxDecimalsValidator(1, this.translate.instant('parts.subcontractTurnTimeDays'), this.translate),
+    ]),
+    predecessorIds: new FormControl<number[]>(this.initialPredecessorIds(), { nonNullable: true }),
+    completeGateIds: new FormControl<number[]>(
+      (this.data.operation?.predecessors ?? []).filter(p => p.gate === 'Complete').map(p => p.operationId), { nonNullable: true }),
+    cycleCountdown: new FormControl(this.data.operation?.cycleCountdown ?? false, { nonNullable: true }),
+  });
+
+  private readonly hadExplicitPredecessors = (this.data.operation?.predecessors ?? []).length > 0;
+  private readonly stepNumberValue = toSignal(
+    this.formGroup.controls.stepNumber.valueChanges.pipe(startWith(this.formGroup.controls.stepNumber.value)),
+    { initialValue: this.formGroup.controls.stepNumber.value });
+  private readonly predecessorValue = toSignal(
+    this.formGroup.controls.predecessorIds.valueChanges.pipe(startWith(this.formGroup.controls.predecessorIds.value)),
+    { initialValue: this.formGroup.controls.predecessorIds.value });
+
+  protected readonly predecessorOptions = computed<SelectOption[]>(() => {
+    const step = Number(this.stepNumberValue() ?? 0);
+    const currentId = this.data.operation?.id;
+    return (this.data.operations ?? [])
+      .filter(o => o.id !== currentId && o.stepNumber < step)
+      .sort((a, b) => a.stepNumber - b.stepNumber)
+      .map(o => ({ value: o.id, label: `Op ${o.stepNumber}: ${o.title}` }));
+  });
+  protected readonly completeGateOptions = computed<SelectOption[]>(() => {
+    const selected = new Set(this.predecessorValue());
+    return this.predecessorOptions().filter(o => selected.has(o.value as number));
+  });
+
+  private readonly keepDefaultPredecessors = this.formGroup.controls.stepNumber.valueChanges
+    .pipe(takeUntilDestroyed())
+    .subscribe(step => {
+      const control = this.formGroup.controls.predecessorIds;
+      if (control.dirty) return;
+      control.setValue(defaultPredecessorIds(this.data.operations ?? [], Number(step ?? 0), this.data.operation?.id));
+    });
+
+  private readonly attendance = toSignal(
+    this.formGroup.controls.laborAttendancePercent.valueChanges.pipe(startWith(this.formGroup.controls.laborAttendancePercent.value)),
+    { initialValue: this.formGroup.controls.laborAttendancePercent.value });
+  protected readonly attendanceBelowFull = computed(() => {
+    const value = this.attendance();
+    return value !== null && value !== undefined && Number(value) < 100;
   });
 
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {
@@ -131,6 +211,8 @@ export class OperationDialogComponent implements OnInit {
     estSeconds: this.translate.instant('parts.estSeconds'),
     setupMinutes: this.translate.instant('parts.setupTime'),
     runMinutesLot: this.translate.instant('parts.lotTime'),
+    scrapFactorPercent: this.translate.instant('parts.scrapFactor'),
+    laborAttendancePercent: this.translate.instant('parts.laborAttendance'),
     subcontractVendorId: this.translate.instant('parts.subcontractVendor'),
     subcontractTurnTimeDays: this.translate.instant('parts.subcontractTurnTimeDays'),
   });
@@ -214,6 +296,57 @@ export class OperationDialogComponent implements OnInit {
     });
   }
 
+  private initialPredecessorIds(): number[] {
+    const explicit = (this.data.operation?.predecessors ?? []).map(p => p.operationId);
+    if (explicit.length > 0) return explicit;
+    const step = this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1;
+    return defaultPredecessorIds(this.data.operations ?? [], step, this.data.operation?.id);
+  }
+
+  private predecessorPayload(stepNumber: number): OperationPredecessorRequest[] | undefined {
+    const allowed = new Set(this.predecessorOptions().map(o => o.value as number));
+    const selected = this.formGroup.controls.predecessorIds.value.filter(id => allowed.has(id));
+    const complete = new Set(this.formGroup.controls.completeGateIds.value);
+    const defaults = defaultPredecessorIds(this.data.operations ?? [], stepNumber, this.data.operation?.id);
+    const isDefault = selected.length === 0 || (selected.every(id => !complete.has(id))
+      && selected.length === defaults.length && defaults.every(id => selected.includes(id)));
+    if (isDefault) return this.hadExplicitPredecessors ? [] : undefined;
+    return selected.map((id): OperationPredecessorRequest => ({ operationId: id, gate: complete.has(id) ? 'Complete' : 'Quantity' }));
+  }
+
+  private submitUpdate(request: UpdateOperationRequest): void {
+    this.partsService.updateOperation(this.data.partId, this.data.operation!.id, request, true).subscribe({
+      next: (result) => {
+        this.saving.set(false);
+        this.dialogRef.clearDraft();
+        this.matDialogRef.close(result);
+      },
+      error: (err: unknown) => {
+        const conflicts = predecessorConflictsOf(err);
+        if (!conflicts) {
+          this.saving.set(false);
+          this.snackbar.errorFrom(err, 'parts.operationSaveFailed');
+          return;
+        }
+        this.matDialog.open(ConfirmDialogComponent, {
+          width: '440px',
+          data: {
+            title: this.translate.instant('parts.predecessorConflictTitle'),
+            message: this.translate.instant('parts.predecessorConflictMessage', { links: describeConflicts(conflicts) }),
+            confirmLabel: this.translate.instant('parts.predecessorConflictConfirm'),
+            severity: 'warn',
+          } satisfies ConfirmDialogData,
+        }).afterClosed().subscribe(confirmed => {
+          if (confirmed) {
+            this.submitUpdate({ ...request, removeConflictingPredecessors: true });
+            return;
+          }
+          this.saving.set(false);
+        });
+      },
+    });
+  }
+
   protected save(): void {
     if (this.formGroup.invalid) return;
     this.saving.set(true);
@@ -224,6 +357,7 @@ export class OperationDialogComponent implements OnInit {
     // all-blank composition sends no estimate.
     const composedMs = ((raw.estHours ?? 0) * 3_600_000) + ((raw.estMinutes ?? 0) * 60_000) + Math.round((raw.estSeconds ?? 0) * 1000);
     const estimatedMs = composedMs > 0 ? composedMs : undefined;
+    const scrapFactor = (raw.scrapFactorPercent ?? 0) / 100;
 
     // Phase 3 H5 / WU-13 — only send subcontract metadata when the toggle is
     // on; when off, send the flag as false + clear vendor/turn-time so the
@@ -232,8 +366,9 @@ export class OperationDialogComponent implements OnInit {
     const subVendorId = isSubcontract ? (raw.subcontractVendorId ?? undefined) : null;
     const subTurnTime = isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : null;
 
+    const predecessors = this.predecessorPayload(raw.stepNumber ?? 1);
     if (this.data.operation) {
-      this.partsService.updateOperation(this.data.partId, this.data.operation.id, {
+      this.submitUpdate({
         stepNumber: raw.stepNumber ?? undefined,
         title: raw.title ?? undefined,
         instructions: raw.instructions || undefined,
@@ -241,19 +376,16 @@ export class OperationDialogComponent implements OnInit {
         estimatedMs,
         setupMinutes: raw.setupMinutes ?? 0,
         runMinutesLot: raw.runMinutesLot ?? 0,
+        scrapFactor,
+        laborAttendancePercent: raw.laborAttendancePercent ?? 100,
         isQcCheckpoint: raw.isQcCheckpoint ?? undefined,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? 0,
         isSubcontract,
         subcontractVendorId: subVendorId as number | null | undefined,
         subcontractTurnTimeDays: subTurnTime as number | null | undefined,
-      }).subscribe({
-        next: (result) => {
-          this.saving.set(false);
-          this.dialogRef.clearDraft();
-          this.matDialogRef.close(result);
-        },
-        error: () => this.saving.set(false),
+        cycleCountdown: raw.cycleCountdown,
+        ...(predecessors !== undefined ? { predecessors } : {}),
       });
     } else {
       this.partsService.createOperation(this.data.partId, {
@@ -264,12 +396,16 @@ export class OperationDialogComponent implements OnInit {
         estimatedMs,
         setupMinutes: raw.setupMinutes ?? undefined,
         runMinutesLot: raw.runMinutesLot ?? undefined,
+        scrapFactor,
+        laborAttendancePercent: raw.laborAttendancePercent ?? 100,
         isQcCheckpoint: raw.isQcCheckpoint ?? false,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? undefined,
         isSubcontract,
         subcontractVendorId: isSubcontract ? (raw.subcontractVendorId ?? undefined) : undefined,
         subcontractTurnTimeDays: isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : undefined,
+        cycleCountdown: raw.cycleCountdown,
+        ...(predecessors !== undefined ? { predecessors } : {}),
       }).subscribe({
         next: (result) => {
           this.saving.set(false);

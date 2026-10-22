@@ -4,7 +4,7 @@
       <span class="material-icons-outlined">undo</span>
       <h3 class="undo-panel__title">{{ 'kioskFlows.undo.title' | translate }}</h3>
     </div>
-    <span class="undo-panel__summary">{{ 'kioskFlows.undo.actionsToday' | translate: { count: todayCount() } }}</span>
+    <span class="undo-panel__summary">{{ 'kioskFlows.undo.actionsRecent' | translate: { count: recentEntries().length, hours: lookbackHours } }}</span>
     <button class="icon-btn" (click)="close()" [attr.aria-label]="'kioskFlows.undo.closeAria' | translate">
       <span class="material-icons-outlined">close</span>
     </button>
@@ -14,6 +14,12 @@
     <div class="undo-panel__loading">
       <span class="material-icons-outlined undo-panel__spinner">sync</span>
       {{ 'common.loading' | translate }}
+    </div>
+  } @else if (loadFailed()) {
+    <div class="undo-panel__empty" role="alert" data-testid="undo-load-failed">
+      <span class="material-icons-outlined">error_outline</span>
+      <p>{{ 'kioskFlows.common.loadFailed' | translate }}</p>
+      <button type="button" class="action-btn action-btn--sm" (click)="loadEntries()">{{ 'kioskSetup.retry' | translate }}</button>
     </div>
   } @else if (recentEntries().length === 0) {
     <div class="undo-panel__empty">

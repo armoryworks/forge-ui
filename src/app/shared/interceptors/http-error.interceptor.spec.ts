@@ -25,8 +25,12 @@ describe('httpErrorInterceptor', () => {
   let toast: { show: ReturnType<typeof vi.fn> };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let mfaRoute: string;
+  let language: string;
+  let catalog: Record<string, string>;
 
   beforeEach(() => {
+    language = 'en';
+    catalog = {};
     snackbar = {
       error: vi.fn(),
       warn: vi.fn(),
@@ -43,7 +47,14 @@ describe('httpErrorInterceptor', () => {
         provideHttpClientTesting(),
         { provide: SnackbarService, useValue: snackbar },
         { provide: ToastService, useValue: toast },
-        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (k: string, p?: Record<string, unknown>) =>
+              (catalog[k] ?? k).replace(/\{\{(\w+)\}\}/g, (_: string, n: string) => String(p?.[n] ?? '')),
+            getCurrentLang: () => language,
+          },
+        },
         { provide: Router, useValue: router },
         { provide: LayoutService, useValue: { getMfaEnrollmentRoute: () => mfaRoute } },
       ],
@@ -279,6 +290,47 @@ describe('httpErrorInterceptor', () => {
 
       expect(snackbar.error).not.toHaveBeenCalled();
       expect(wasHttpErrorShown(captured())).toBe(false);
+    });
+
+    it('words coded field errors in Spanish when the UI is in Spanish', () => {
+      language = 'es';
+      catalog = {
+        'apiErrors.validators.maxLength': '{{field}} debe tener {{maxLength}} caracteres o menos.',
+        'apiErrors.codes.leadNameRequired': 'Indique un nombre de empresa o un nombre de contacto.',
+        'common.name': 'Nombre',
+      };
+      post();
+      httpMock.expectOne('/api/v1/sales-orders').flush(
+        {
+          status: 400,
+          detail: 'Name must be 200 characters or fewer. Provide a company name or a contact name.',
+          errors: [
+            { field: 'data.name', message: 'Name must be 200 characters or fewer.', code: 'MaximumLengthValidator', params: { maxLength: 200 } },
+            { field: 'data.companyName', message: 'Provide a company name or a contact name.', code: 'lead-name-required' },
+          ],
+        },
+        { status: 400, statusText: 'Bad Request' },
+      );
+
+      expect(snackbar.error).toHaveBeenCalledWith(
+        'Nombre debe tener 200 caracteres o menos. Indique un nombre de empresa o un nombre de contacto.');
+    });
+
+    it('keeps the server wording in English and for codes the catalog does not word', () => {
+      post();
+      httpMock.expectOne('/api/v1/sales-orders').flush(
+        { detail: 'Quantity must be greater than zero.', errors: [{ field: 'quantity', message: 'Quantity must be greater than zero.', code: 'GreaterThanValidator' }] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      expect(snackbar.error).toHaveBeenLastCalledWith('Quantity must be greater than zero.');
+
+      language = 'es';
+      post();
+      httpMock.expectOne('/api/v1/sales-orders').flush(
+        { detail: 'predicate must be valid JSON.', errors: [{ field: 'predicate', message: 'predicate must be valid JSON.', code: 'PredicateValidator' }] },
+        { status: 400, statusText: 'Bad Request' },
+      );
+      expect(snackbar.error).toHaveBeenLastCalledWith('predicate must be valid JSON.');
     });
 
     it('still shows a non-envelope 400 even when the caller handles field errors', () => {

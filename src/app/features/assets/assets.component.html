@@ -1,5 +1,6 @@
 <app-page-header [title]="'assets.title' | translate" [subtitle]="'assets.subtitle' | translate">
-  <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'assets.searchPlaceholder' | translate"  />
+  <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'assets.searchPlaceholder' | translate"
+    (keyup.enter)="applyFilters()" />
   <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
   <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
   <button class="action-btn action-btn--create" data-testid="new-asset-btn" (click)="openCreateAsset()">
@@ -50,7 +51,7 @@
   <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" [draftConfig]="draftConfig" [draftFormGroup]="assetForm" (closed)="closeDialog()">
 
     <div [formGroup]="assetForm">
-      <app-input [label]="'assets.name' | translate" formControlName="name" data-testid="asset-name" />
+      <app-input [label]="'assets.name' | translate" formControlName="name" [maxlength]="200" data-testid="asset-name" />
 
       <div class="dialog-row">
         <app-select [label]="'common.type' | translate" formControlName="assetType" [options]="assetTypeOptions" data-testid="asset-type" />
@@ -90,8 +91,9 @@
             [options]="workCenterOptions()" displayField="label" valueField="value"
             formControlName="workCenterId"
             data-testid="asset-work-center-id" />
-          <app-input [label]="'assets.glAccount' | translate"
+          <app-input [label]="(editingAsset() ? 'assets.glAccountLabel' : 'assets.glAccount') | translate"
             formControlName="glAccount"
+            [info]="editingAsset() ? ('assets.glAccountSyncHint' | translate) : ''"
             data-testid="asset-gl-account" />
         </div>
       </fieldset>

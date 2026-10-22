@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Observable } from 'rxjs';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -8,12 +9,15 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export interface SaveReportDialogData {
   name: string;
   description: string;
   isShared: boolean;
+  submit: (result: SaveReportDialogResult) => Observable<unknown>;
 }
 
 export interface SaveReportDialogResult {
@@ -21,6 +25,9 @@ export interface SaveReportDialogResult {
   description: string;
   isShared: boolean;
 }
+
+const NAME_MAX_LENGTH = 100;
+const DESCRIPTION_MAX_LENGTH = 500;
 
 @Component({
   selector: 'app-save-report-dialog',
@@ -41,30 +48,45 @@ export interface SaveReportDialogResult {
 export class SaveReportDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<SaveReportDialogComponent>);
   private readonly data = inject<SaveReportDialogData>(MAT_DIALOG_DATA);
+  private readonly translate = inject(TranslateService);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly form = new FormGroup({
-    name: new FormControl(this.data.name, [Validators.required, Validators.maxLength(100)]),
-    description: new FormControl(this.data.description),
+    name: new FormControl(this.data.name, [requiredTrimmed, Validators.maxLength(NAME_MAX_LENGTH)]),
+    description: new FormControl(this.data.description, [Validators.maxLength(DESCRIPTION_MAX_LENGTH)]),
     isShared: new FormControl(this.data.isShared),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Report Name',
-    description: 'Description',
-    isShared: 'Shared',
+    name: this.translate.instant('reports.reportName'),
+    description: this.translate.instant('common.description'),
+    isShared: this.translate.instant('reports.shareWithTeam'),
   });
+
+  protected readonly nameMaxLength = NAME_MAX_LENGTH;
+  protected readonly descriptionMaxLength = DESCRIPTION_MAX_LENGTH;
+  protected readonly saving = signal(false);
 
   protected close(): void {
     this.dialogRef.close();
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     const f = this.form.getRawValue();
-    this.dialogRef.close({
-      name: f.name!,
+    const result: SaveReportDialogResult = {
+      name: f.name!.trim(),
       description: f.description ?? '',
       isShared: f.isShared ?? false,
-    } satisfies SaveReportDialogResult);
+    };
+    this.saving.set(true);
+    this.data.submit(result).subscribe({
+      next: () => this.dialogRef.close(result),
+      error: (err: unknown) => {
+        this.saving.set(false);
+        const applied = FormValidationService.applyServerError(this.form, err);
+        if (applied?.unmatched.length) this.snackbar.error(applied.unmatched[0].message);
+      },
+    });
   }
 }

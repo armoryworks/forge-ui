@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal,
 } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScanActionService } from '../../../../shared/services/scan-action.service';
@@ -30,7 +30,7 @@ export class ScanCountFlowComponent implements OnInit {
 
   protected readonly step = signal<CountStep>('enter');
   protected readonly submitting = signal(false);
-  protected readonly countControl = new FormControl<number>(0);
+  protected readonly countControl = new FormControl<number | null>(0, [Validators.required, Validators.min(0)]);
 
   protected readonly hasDifference = signal(false);
   protected readonly difference = signal(0);
@@ -40,6 +40,10 @@ export class ScanCountFlowComponent implements OnInit {
   }
 
   protected confirmCount(): void {
+    if (this.countControl.invalid) {
+      this.countControl.markAsTouched();
+      return;
+    }
     const actual = this.countControl.value ?? 0;
     const recorded = this.context().currentStock;
     const diff = actual - recorded;

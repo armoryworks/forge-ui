@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +15,8 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { CreatePlanningCycleRequest } from '../../models/create-planning-cycle-request.model';
 import { UpdatePlanningCycleRequest } from '../../models/update-planning-cycle-request.model';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
+import { onOrAfter } from '../../../../shared/validators/on-or-after.validator';
 
 @Component({
   selector: 'app-cycle-dialog',
@@ -49,9 +52,12 @@ export class CycleDialogComponent implements OnInit {
   }));
 
   protected readonly formGroup = new FormGroup({
-    name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    name: new FormControl('', [requiredTrimmed, Validators.maxLength(100)]),
     startDate: new FormControl<Date | null>(null, [Validators.required]),
-    endDate: new FormControl<Date | null>(null, [Validators.required]),
+    endDate: new FormControl<Date | null>(null, [
+      Validators.required,
+      onOrAfter('startDate', 'validation.endOnOrAfterStartDate'),
+    ]),
     goals: new FormControl(''),
   });
 
@@ -61,6 +67,12 @@ export class CycleDialogComponent implements OnInit {
     endDate: 'End Date',
     goals: 'Goals',
   });
+
+  constructor() {
+    this.formGroup.controls.startDate.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.formGroup.controls.endDate.updateValueAndValidity());
+  }
 
   ngOnInit(): void {
     const existing = this.cycle();
@@ -84,7 +96,7 @@ export class CycleDialogComponent implements OnInit {
   }
 
   protected save(): void {
-    if (this.formGroup.invalid) return;
+    if (this.formGroup.invalid || this.saving()) return;
 
     const raw = this.formGroup.getRawValue();
 

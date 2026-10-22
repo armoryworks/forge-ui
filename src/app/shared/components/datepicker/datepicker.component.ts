@@ -1,9 +1,12 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   forwardRef,
   inject,
+  Injector,
   input,
   signal,
 } from '@angular/core';
@@ -24,6 +27,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { TranslateService } from '@ngx-translate/core';
 
+import { BoundControl } from '../../utils/bound-control';
 import { formatDate, toCalendarDate } from '../../utils/date.utils';
 import { provideStrictDateAdapter } from '../../utils/strict-date-adapter';
 
@@ -53,9 +57,11 @@ import { provideStrictDateAdapter } from '../../utils/strict-date-adapter';
     provideStrictDateAdapter(),
   ],
 })
-export class DatepickerComponent implements ControlValueAccessor, Validator {
+export class DatepickerComponent implements ControlValueAccessor, Validator, AfterContentInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService, { optional: true });
+  private readonly injector = inject(Injector);
+  private readonly bound = new BoundControl();
 
   readonly label = input.required<string>();
   readonly min = input<Date | null>(null);
@@ -75,6 +81,8 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
    * driving.
    */
   protected readonly internalControl = new FormControl<Date | null>(null);
+
+  protected readonly isRequired = computed(() => this.required() || this.bound.isRequired());
 
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -137,6 +145,10 @@ export class DatepickerComponent implements ControlValueAccessor, Validator {
   setDisabledState(disabled: boolean): void {
     if (disabled) this.internalControl.disable({ emitEvent: false });
     else this.internalControl.enable({ emitEvent: false });
+  }
+
+  ngAfterContentInit(): void {
+    this.bound.attach(this.injector, this.destroyRef);
   }
 
   protected markTouched(): void {

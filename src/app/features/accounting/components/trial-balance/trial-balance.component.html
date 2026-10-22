@@ -6,6 +6,10 @@
   }</app-page-header>
 
 <div class="page-content page-content--table">
+  <div class="acct-view-bar">
+    <app-statement-period mode="asOf" [to]="period().to ?? report()?.toDate ?? null" (periodChange)="setPeriod($event)" />
+  </div>
+
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
   }
@@ -17,22 +21,25 @@
     [loading]="loading()"
     emptyIcon="balance"
     [emptyMessage]="'accounting.trialBalance.empty' | translate">
+    <ng-template appColumnCell="debitBalance" let-row>
+      @if (row.debitBalance) { <app-currency-display [value]="row.debitBalance" /> }
+    </ng-template>
+    <ng-template appColumnCell="creditBalance" let-row>
+      @if (row.creditBalance) { <app-currency-display [value]="row.creditBalance" /> }
+    </ng-template>
     <ng-template appColumnCell="debitTotal" let-row>
       <app-currency-display [value]="row.debitTotal" />
     </ng-template>
     <ng-template appColumnCell="creditTotal" let-row>
       <app-currency-display [value]="row.creditTotal" />
     </ng-template>
-    <ng-template appColumnCell="netBalance" let-row>
-      <app-currency-display [value]="row.netBalance" />
-    </ng-template>
   </app-data-table>
 
   @if (report(); as r) {
     <div class="totals-strip">
       <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
-      <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="r.totalDebit" /></span>
-      <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="r.totalCredit" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="r.totalDebitBalance" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="r.totalCreditBalance" /></span>
     </div>
   }
 </div>

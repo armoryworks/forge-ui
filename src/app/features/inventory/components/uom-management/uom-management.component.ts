@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InventoryService } from '../../services/inventory.service';
 import { UnitOfMeasure, UomCategory } from '../../models/unit-of-measure.model';
@@ -23,7 +24,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   selector: 'app-uom-management',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DataTableComponent, ColumnCellDirective,
+    ReactiveFormsModule, TranslatePipe, DataTableComponent, ColumnCellDirective,
     DialogComponent, InputComponent, SelectComponent, ToggleComponent,
     ValidationButtonComponent, LoadingBlockDirective, EmptyStateComponent,
   ],
@@ -34,6 +35,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 export class UomManagementComponent implements OnInit {
   private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
 
@@ -49,30 +51,30 @@ export class UomManagementComponent implements OnInit {
   protected readonly activeSection = signal<'uoms' | 'conversions'>('uoms');
 
   protected readonly categoryOptions: SelectOption[] = [
-    { value: 'Count', label: 'Count' },
-    { value: 'Length', label: 'Length' },
-    { value: 'Weight', label: 'Weight' },
-    { value: 'Volume', label: 'Volume' },
-    { value: 'Area', label: 'Area' },
-    { value: 'Time', label: 'Time' },
+    { value: 'Count', label: this.translate.instant('inventory.uom.categories.count') },
+    { value: 'Length', label: this.translate.instant('inventory.uom.categories.length') },
+    { value: 'Weight', label: this.translate.instant('inventory.uom.categories.weight') },
+    { value: 'Volume', label: this.translate.instant('inventory.uom.categories.volume') },
+    { value: 'Area', label: this.translate.instant('inventory.uom.categories.area') },
+    { value: 'Time', label: this.translate.instant('inventory.uom.categories.time') },
   ];
 
   protected readonly uomColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true, width: '80px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'symbol', header: 'Symbol', sortable: true, width: '80px' },
-    { field: 'category', header: 'Category', sortable: true, filterable: true, type: 'enum',
+    { field: 'code', header: this.translate.instant('inventory.uom.code'), sortable: true, width: '80px' },
+    { field: 'name', header: this.translate.instant('common.name'), sortable: true },
+    { field: 'symbol', header: this.translate.instant('inventory.uom.symbol'), sortable: true, width: '80px' },
+    { field: 'category', header: this.translate.instant('common.category'), sortable: true, filterable: true, type: 'enum',
       filterOptions: this.categoryOptions, width: '120px' },
-    { field: 'decimalPlaces', header: 'Decimals', sortable: true, align: 'center', width: '90px' },
-    { field: 'isBaseUnit', header: 'Base', sortable: true, align: 'center', width: '70px' },
+    { field: 'decimalPlaces', header: this.translate.instant('inventory.uom.decimals'), sortable: true, align: 'center', width: '90px' },
+    { field: 'isBaseUnit', header: this.translate.instant('inventory.uom.base'), sortable: true, align: 'center', width: '70px' },
     ...(this.canManage ? [{ field: 'actions', header: '', width: '60px' }] : []),
   ];
 
   protected readonly conversionColumns: ColumnDef[] = [
-    { field: 'fromUomCode', header: 'From', sortable: true, width: '100px' },
-    { field: 'toUomCode', header: 'To', sortable: true, width: '100px' },
-    { field: 'conversionFactor', header: 'Factor', sortable: true, align: 'right', width: '120px' },
-    { field: 'isReversible', header: 'Reversible', sortable: true, align: 'center', width: '100px' },
+    { field: 'fromUomCode', header: this.translate.instant('common.from'), sortable: true, width: '100px' },
+    { field: 'toUomCode', header: this.translate.instant('common.to'), sortable: true, width: '100px' },
+    { field: 'conversionFactor', header: this.translate.instant('inventory.uom.factor'), sortable: true, align: 'right', width: '120px' },
+    { field: 'isReversible', header: this.translate.instant('inventory.uom.reversible'), sortable: true, align: 'center', width: '100px' },
   ];
 
   protected readonly uomForm = new FormGroup({
@@ -93,11 +95,13 @@ export class UomManagementComponent implements OnInit {
   });
 
   protected readonly uomViolations = FormValidationService.getViolations(this.uomForm, {
-    code: 'Code', name: 'Name', category: 'Category', decimalPlaces: 'Decimal Places',
+    code: this.translate.instant('inventory.uom.code'), name: this.translate.instant('common.name'),
+    category: this.translate.instant('common.category'), decimalPlaces: this.translate.instant('inventory.uom.decimalPlaces'),
   });
 
   protected readonly conversionViolations = FormValidationService.getViolations(this.conversionForm, {
-    fromUomId: 'From UOM', toUomId: 'To UOM', conversionFactor: 'Conversion Factor',
+    fromUomId: this.translate.instant('inventory.uom.fromUom'), toUomId: this.translate.instant('inventory.uom.toUom'),
+    conversionFactor: this.translate.instant('inventory.uom.conversionFactor'),
   });
 
   protected readonly uomSelectOptions = signal<SelectOption[]>([]);
@@ -145,7 +149,7 @@ export class UomManagementComponent implements OnInit {
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.snackbar.success(editing ? 'UOM updated' : 'UOM created');
+        this.snackbar.success(this.translate.instant(editing ? 'inventory.uom.updated' : 'inventory.uom.created'));
         this.showUomDialog.set(false);
         this.saving.set(false);
         this.loadUoms();
@@ -171,7 +175,7 @@ export class UomManagementComponent implements OnInit {
       isReversible: data.isReversible,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.snackbar.success('Conversion created');
+        this.snackbar.success(this.translate.instant('inventory.uom.conversionCreated'));
         this.showConversionDialog.set(false);
         this.saving.set(false);
         this.loadConversions();

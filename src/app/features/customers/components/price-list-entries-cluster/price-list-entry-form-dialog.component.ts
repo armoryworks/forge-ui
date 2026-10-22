@@ -20,6 +20,7 @@ import { PriceListsService } from '../../services/price-lists.service';
 import { PriceListEntry } from '../../models/price-list.model';
 import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../../parts/components/part-quick-create-dialog/part-quick-create-dialog.component';
 import { PartDetail } from '../../../parts/models/part-detail.model';
+import { wholeNumber } from '../../../../shared/validators/whole-number.validator';
 
 export interface PriceListEntryFormDialogData {
   /** Null = create mode; populated = edit mode (PartId locked). */
@@ -84,7 +85,7 @@ export class PriceListEntryFormDialogComponent {
     ),
     minQuantity: new FormControl<number | null>(
       this.data.entry?.minQuantity ?? 1,
-      [Validators.required, Validators.min(1)],
+      [Validators.required, Validators.min(1), wholeNumber],
     ),
     currency: new FormControl<string>(
       this.data.entry?.currency ?? this.currencyService.baseCurrency() ?? 'USD',
@@ -122,7 +123,7 @@ export class PriceListEntryFormDialogComponent {
       }).subscribe({
         next: result => {
           this.saving.set(false);
-          this.snackbar.success('Price entry updated');
+          this.snackbar.success(this.translate.instant('priceListEntry.messages.updated'));
           this.dialogRef.close(result);
         },
         error: () => this.saving.set(false),
@@ -137,7 +138,7 @@ export class PriceListEntryFormDialogComponent {
       }).subscribe({
         next: result => {
           this.saving.set(false);
-          this.snackbar.success('Price entry added');
+          this.snackbar.success(this.translate.instant('priceListEntry.messages.added'));
           this.dialogRef.close(result);
         },
         error: () => this.saving.set(false),

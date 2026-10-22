@@ -3,15 +3,13 @@
   <div class="panel-header__actions">
     <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="role-templates-new">
       <span class="material-icons-outlined">add</span>
-      New Template
+      {{ 'admin.roleTemplatesPanel.newTemplate' | translate }}
     </button>
   </div>
 </div>
 
 <p class="panel-hint">
-  Role bundles ("rollups") group several base roles under one name — handy for scoping a System API key
-  to a set of roles without listing each one. System defaults seed at install and are read-only;
-  create your own to customize.
+  {{ 'admin.roleTemplatesPanel.roleBundlesRollupsGroupSeveralBase' | translate }}
 </p>
 
 <div [appLoadingBlock]="loading()">
@@ -20,8 +18,8 @@
     [columns]="columns"
     [data]="templates()"
     emptyIcon="layers"
-    emptyMessage="No role templates yet"
-    emptyHelpText="Create one to bundle several base roles into a single rollup.">
+    [emptyMessage]="'admin.roleTemplatesPanel.noRoleTemplatesYet' | translate"
+    [emptyHelpText]="'admin.roleTemplatesPanel.createOneToBundleSeveralBase' | translate">
 
     <ng-template appColumnCell="name" let-row>
       <span class="template-name">{{ row.name }}</span>
@@ -41,26 +39,26 @@
 
     <ng-template appColumnCell="isSystemDefault" let-row>
       @if (row.isSystemDefault) {
-        <span class="chip chip--system" matTooltip="Seeded at install. Read-only — duplicate to customize."
-              matTooltipPosition="above">System</span>
+        <span class="chip chip--system" [matTooltip]="'admin.roleTemplatesPanel.seededAtInstallReadOnlyDuplicate' | translate"
+              matTooltipPosition="above">{{ 'admin.roleTemplatesPanel.system' | translate }}</span>
       } @else {
-        <span class="chip chip--custom">Custom</span>
+        <span class="chip chip--custom">{{ 'admin.roleTemplatesPanel.custom' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="actions" let-row>
       <div class="action-cell">
         @if (!row.isSystemDefault) {
-          <button class="icon-btn" matTooltip="Edit" matTooltipPosition="above"
-                  (click)="openEdit(row); $event.stopPropagation()" aria-label="Edit role template">
+          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above"
+                  (click)="openEdit(row); $event.stopPropagation()" [attr.aria-label]="'admin.roleTemplatesPanel.editRoleTemplate' | translate">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn icon-btn--danger" matTooltip="Delete" matTooltipPosition="above"
-                  (click)="delete(row); $event.stopPropagation()" aria-label="Delete role template">
+          <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above"
+                  (click)="delete(row); $event.stopPropagation()" [attr.aria-label]="'admin.roleTemplatesPanel.deleteRoleTemplate' | translate">
             <span class="material-icons-outlined">delete</span>
           </button>
         } @else {
-          <span class="icon-btn icon-btn--disabled" matTooltip="System defaults are read-only"
+          <span class="icon-btn icon-btn--disabled" [matTooltip]="'admin.roleTemplatesPanel.systemDefaultsAreReadOnly' | translate"
                 matTooltipPosition="above">
             <span class="material-icons-outlined">lock</span>
           </span>
@@ -74,21 +72,21 @@
   <app-dialog [title]="editingTemplate() ? 'Edit Role Template' : 'New Role Template'"
               width="540px" (closed)="closeDialog()">
     <div [formGroup]="form">
-      <app-input label="Template Name" formControlName="name" [maxlength]="100" [required]="true" />
-      <app-textarea label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
-      <app-select label="Included Roles"
+      <app-input [label]="'admin.roleTemplatesPanel.templateName' | translate" formControlName="name" [maxlength]="100" [required]="true" />
+      <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="2" [maxlength]="500" />
+      <app-select [label]="'admin.roleTemplatesPanel.includedRoles' | translate"
                   formControlName="includedRoleNames"
                   [options]="roleOptions()"
                   [multiple]="true"
                   [required]="true"
-                  placeholder="Pick the underlying roles this template grants" />
+                  [placeholder]="'admin.roleTemplatesPanel.pickTheUnderlyingRolesThisTemplate' | translate" />
       <p class="form-hint">
-        Pick at least one. A System API key scoped to this bundle is granted every role listed above.
+        {{ 'admin.roleTemplatesPanel.pickAtLeastOneASystem' | translate }}
       </p>
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations" [loading]="saving()">
         <button class="action-btn action-btn--primary"
                 [disabled]="form.invalid || saving()"

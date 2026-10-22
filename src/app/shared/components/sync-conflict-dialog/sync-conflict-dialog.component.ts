@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { SyncConflict, SyncConflictResolution } from '../../models/sync-conflict.model';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 export interface SyncConflictDialogData {
   conflict: SyncConflict;
@@ -17,7 +18,7 @@ export interface SyncConflictDialogData {
   styleUrl: './sync-conflict-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SyncConflictDialogComponent {
+export class SyncConflictDialogComponent implements DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<SyncConflictDialogComponent, SyncConflictResolution>);
   readonly data: SyncConflictDialogData = inject(MAT_DIALOG_DATA);
 
@@ -43,6 +44,10 @@ export class SyncConflictDialogComponent {
 
   keepServer(): void {
     this.dialogRef.close('keep-server');
+  }
+
+  onDialogEscape(): void {
+    this.cancel();
   }
 
   cancel(): void {

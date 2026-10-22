@@ -13,13 +13,15 @@
       <ng-template appColumnCell="isActive" let-row>{{ row.isActive ? '✓' : '—' }}</ng-template>
       <ng-template appColumnCell="name" let-row>
         {{ row.name }}
-        @if (row.isControlAccount) { <span class="coa-chip">{{ 'accounting.coa.control' | translate }}</span> }
+        @if (row.isControlAccount) { <span class="chip chip--info coa-chip">{{ 'accounting.coa.control' | translate }}</span> }
       </ng-template>
       <ng-template appColumnCell="actions" let-row>
-        @if (!row.isControlAccount) {
-          <button class="action-btn action-btn--sm" (click)="openEdit(row); $event.stopPropagation()"
-            [attr.data-testid]="'coa-edit-' + row.id">{{ 'common.edit' | translate }}</button>
-        }
+        <span class="coa-actions">
+          @if (!row.isControlAccount) {
+            <button class="action-btn action-btn--sm" (click)="openEdit(row); $event.stopPropagation()"
+              [attr.data-testid]="'coa-edit-' + row.id">{{ 'common.edit' | translate }}</button>
+          }
+        </span>
       </ng-template>
     </app-data-table>
   </ng-container>
@@ -42,9 +44,15 @@
       </div>
       <div class="dialog-row">
         <app-select [label]="'accounting.coa.type' | translate" formControlName="accountType" [options]="typeOptions"
-          (valueChange)="onTypeChange()" data-testid="coa-type" />
-        <app-select [label]="'accounting.coa.normalBalance' | translate" formControlName="normalBalance" [options]="balanceOptions" data-testid="coa-balance" />
+          [isReadonly]="structuralLocked()" data-testid="coa-type" />
+        <app-select [label]="'accounting.coa.normalBalance' | translate" formControlName="normalBalance" [options]="balanceOptions"
+          [isReadonly]="structuralLocked()" data-testid="coa-balance" />
       </div>
+      @if (contraBalance()) {
+        <p class="coa-contra-note" data-testid="coa-contra-note">
+          {{ 'accounting.coa.contraNote' | translate }}
+        </p>
+      }
       <div class="dialog-row">
         <app-select [label]="'accounting.coa.parent' | translate" formControlName="parentAccountId" [options]="parentOptions()" data-testid="coa-parent" />
         <app-select [label]="'accounting.coa.cashFlow' | translate" formControlName="cashFlowCategory" [options]="cashFlowOptions" data-testid="coa-cashflow" />

@@ -58,8 +58,8 @@
             @if (provider.id === 'quickbooks' && showSandboxGuides() && qbIntegration()?.sandboxSteps?.length) {
               <p class="integration-card__sandbox-hint">
                 <span class="material-icons-outlined">science</span>
-                <button class="link-btn" (click)="configureIntegration(qbIntegration()!)" aria-label="QuickBooks sandbox setup guide">
-                  Sandbox setup guide
+                <button class="link-btn" (click)="configureIntegration(qbIntegration()!)" [attr.aria-label]="'integrations.quickbooksSandboxSetupGuide' | translate">
+                  {{ 'integrations.sandboxSetupGuide' | translate }}
                 </button>
               </p>
             }
@@ -102,7 +102,7 @@
                 <button class="action-btn action-btn--sm action-btn--primary"
                         (click)="connectProvider('local')"
                         [disabled]="loading()"
-                        aria-label="Use standalone mode">
+                        [attr.aria-label]="'integrations.useStandaloneMode' | translate">
                   {{ 'integrations.useStandalone' | translate }}
                 </button>
               } @else if (isOAuthProvider(provider.id)) {

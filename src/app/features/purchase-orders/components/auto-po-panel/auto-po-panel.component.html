@@ -11,12 +11,12 @@
 
     @if (hasSelection()) {
       <button class="action-btn" [disabled]="converting()" (click)="dismissSelected()"
-        data-testid="auto-po-dismiss-btn" aria-label="Dismiss selected suggestions">
+        data-testid="auto-po-dismiss-btn" [attr.aria-label]="'autoPo.dismissSelectedSuggestions' | translate">
         <span class="material-icons-outlined">close</span>
         {{ 'autoPo.dismiss' | translate }}
       </button>
       <button class="action-btn action-btn--primary" [disabled]="converting()" (click)="convertSelected()"
-        data-testid="auto-po-convert-btn" aria-label="Convert selected suggestions to purchase orders">
+        data-testid="auto-po-convert-btn" [attr.aria-label]="'autoPo.convertSelectedSuggestionsToPurchaseOrders' | translate">
         <span class="material-icons-outlined">shopping_cart</span>
         {{ 'autoPo.convertToPo' | translate }}
       </button>
@@ -24,7 +24,7 @@
 
     @if (isAdmin) {
       <button class="action-btn" (click)="triggerRun()" data-testid="auto-po-run-btn"
-        aria-label="Run auto-PO analysis now">
+        [attr.aria-label]="'autoPo.runAutoPoAnalysisNow' | translate">
         <span class="material-icons-outlined">play_arrow</span>
         {{ 'autoPo.runAnalysis' | translate }}
       </button>

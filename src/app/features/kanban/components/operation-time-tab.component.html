@@ -40,6 +40,13 @@
           <span class="op-time__summary-label">{{ 'jobOperations.summary.quantity' | translate }}</span>
           <span class="op-time__summary-value">{{ jobQuantity() | number:'1.0-4' }}</span>
         </div>
+        <div class="op-time__summary-item">
+          <button type="button" class="action-btn action-btn--sm" data-testid="operation-print-step-labels"
+                  (click)="printStepLabels()">
+            <span class="material-icons-outlined">qr_code_2</span>
+            {{ 'jobOperations.printStepLabels' | translate }}
+          </button>
+        </div>
         @if (targetStart(); as plan) {
           <div class="op-time__summary-item" data-testid="operation-time-target-start">
             <span class="op-time__summary-label">{{ 'jobOperations.summary.target' | translate }}</span>
@@ -84,6 +91,12 @@
             @if (row.scrapQuantity > 0) {
               <span class="op-time__scrap">{{ 'jobOperations.scrapCount' | translate: { count: (row.scrapQuantity | number:'1.0-4') } }}</span>
             }
+            @if (gated() && !row.closed && (row.source?.available ?? null) !== null) {
+              <span class="op-time__available" [class.op-time__available--block]="gating() === 'Block'"
+                    [attr.data-testid]="'operation-available-' + row.operationSequence">
+                {{ 'jobOperations.gate.availableHint' | translate: { available: (row.source?.available | number:'1.0-4'), step: row.source?.availableFromStep } }}
+              </span>
+            }
           </ng-template>
           <ng-template appColumnCell="timers" let-row>
             <div class="op-time__timers">
@@ -126,6 +139,15 @@
           <ng-template appColumnCell="actualRunMinutes" let-row>
             <span class="op-time__num" [class]="getVarianceClass(row.runVarianceMinutes)">
               {{ formatMinutes(row.actualRunMinutes) }}
+            </span>
+          </ng-template>
+          <ng-template appColumnCell="laborMinutes" let-row>
+            <span class="op-time__num" [attr.data-testid]="'operation-labor-' + row.operationSequence">
+              @if (row.laborMinutes !== null && row.laborMinutes !== undefined) {
+                {{ (row.laborMinutes / 60) | number:'1.2-2' }}
+              } @else {
+                &mdash;
+              }
             </span>
           </ng-template>
           <ng-template appColumnCell="actualTotalMinutes" let-row>

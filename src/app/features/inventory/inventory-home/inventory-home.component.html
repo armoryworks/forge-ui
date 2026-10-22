@@ -10,7 +10,7 @@
     </a>
   </header>
 
-  <nav class="tab-bar" appTabList appScrollCue aria-label="Inventory views">
+  <nav class="tab-bar" appTabList appScrollCue [attr.aria-label]="'inventory.home.inventoryViews' | translate">
     <button class="tab" [appTab]="activeTab() === 'kiosk'" (click)="switchTab('kiosk')">
       <span class="material-icons-outlined">touch_app</span>{{ 'inventory.home.tabs.kiosk' | translate }}
     </button>

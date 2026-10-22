@@ -6,11 +6,12 @@ import {
   output,
 } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-detail-side-panel',
   standalone: true,
-  imports: [MatTooltipModule],
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './detail-side-panel.component.html',
   styleUrl: './detail-side-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

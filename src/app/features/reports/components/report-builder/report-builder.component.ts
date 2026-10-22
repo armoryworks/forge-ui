@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, compute
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable, tap } from 'rxjs';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartData, ChartEvent, ChartOptions } from 'chart.js';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,9 +13,11 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SpacerDirective } from '../../../../shared/directives/spacer.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { formValidationContext } from '../../../../shared/interceptors/http-error.interceptor';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { toDateOnly } from '../../../../shared/utils/date.utils';
@@ -28,7 +31,8 @@ import {
   SavedReport,
   RunReportResponse,
 } from '../../models/report-builder.model';
-import { SaveReportDialogComponent } from '../save-report-dialog/save-report-dialog.component';
+import { SaveReportDialogComponent, SaveReportDialogData } from '../save-report-dialog/save-report-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 interface FilterRow {
   fieldControl: FormControl<string>;
@@ -55,6 +59,7 @@ const CHART_COLOR_DIM = 'rgba(59, 130, 246, 0.2)';
     InputComponent,
     SelectComponent,
     EmptyStateComponent,
+    ValidationButtonComponent,
     SpacerDirective,
     LoadingBlockDirective,
     TranslatePipe,
@@ -92,6 +97,7 @@ export class ReportBuilderComponent {
   protected readonly filters = signal<FilterRow[]>([]);
   protected readonly reportResults = signal<RunReportResponse | null>(null);
   protected readonly isRunning = signal(false);
+  protected readonly runError = signal(false);
   protected readonly editingReport = signal<SavedReport | null>(null);
 
   /** Currently active drill-down filter value (label clicked in chart). Null = no filter. */
@@ -171,13 +177,19 @@ export class ReportBuilderComponent {
   // Computed: numeric field options (for chart value)
   protected readonly numericFieldOptions = computed<SelectOption[]>(() => {
     return this.availableFields()
-      .filter(f => f.type === 'number')
+      .filter(f => f.type === 'number' || f.type === 'currency')
       .map(f => ({ value: f.field, label: f.label }));
   });
 
   // Computed: can run the report
   protected readonly canRun = computed<boolean>(() => {
     return !!this.entitySource() && this.selectedColumns().length > 0;
+  });
+
+  protected readonly runBlockers = computed<string[]>(() => {
+    if (!this.entitySource()) return [this.translate.instant('reports.chooseDataSourceFirst')];
+    if (this.selectedColumns().length === 0) return [this.translate.instant('reports.pickColumnFirst')];
+    return [];
   });
 
   // Computed: result columns for DataTable
@@ -187,15 +199,16 @@ export class ReportBuilderComponent {
     const entity = this.selectedEntity();
     return results.columns.map(col => {
       const fieldDef = entity?.fields.find(f => f.field === col);
-      const colType = fieldDef?.type === 'number' ? 'number'
+      const colType: ColumnDef['type'] = fieldDef?.type === 'number' ? 'number'
+        : fieldDef?.type === 'currency' ? 'currency'
         : fieldDef?.type === 'date' ? 'date'
         : 'text';
       return {
         field: col,
         header: fieldDef?.label ?? col,
         sortable: true,
-        type: colType as 'text' | 'number' | 'date',
-        align: colType === 'number' ? 'right' as const : 'left' as const,
+        type: colType,
+        align: colType === 'number' || colType === 'currency' ? 'right' as const : 'left' as const,
       };
     });
   });
@@ -368,6 +381,7 @@ export class ReportBuilderComponent {
   protected runReport(): void {
     if (!this.canRun()) return;
     this.isRunning.set(true);
+    this.runError.set(false);
     this.drillFilter.set(null);
 
     const filterValues: ReportFilter[] = this.filters().map(f => ({
@@ -388,7 +402,11 @@ export class ReportBuilderComponent {
         this.reportResults.set(results);
         this.isRunning.set(false);
       },
-      error: () => this.isRunning.set(false),
+      error: () => {
+        this.reportResults.set(null);
+        this.runError.set(true);
+        this.isRunning.set(false);
+      },
     });
   }
 
@@ -420,18 +438,14 @@ export class ReportBuilderComponent {
 
   protected openSaveDialog(): void {
     const existing = this.editingReport();
-    const ref = this.dialog.open(SaveReportDialogComponent, {
+    this.dialog.open(SaveReportDialogComponent, {
       width: '420px',
       data: {
         name: existing?.name ?? '',
         description: existing?.description ?? '',
         isShared: existing?.isShared ?? false,
-      },
-    });
-
-    ref.afterClosed().subscribe((result: { name: string; description: string; isShared: boolean } | undefined) => {
-      if (!result) return;
-      this.saveReport(result.name, result.description, result.isShared);
+        submit: result => this.saveReport(result.name, result.description, result.isShared),
+      } satisfies SaveReportDialogData,
     });
   }
 
@@ -454,11 +468,23 @@ export class ReportBuilderComponent {
   protected deleteSelectedReport(): void {
     const editing = this.editingReport();
     if (!editing) return;
-    this.builderService.deleteReport(editing.id).subscribe({
-      next: () => {
-        this.snackbar.success(this.translate.instant('reports.reportDeleted'));
-        this.newReport();
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('reports.deleteReportTitle'),
+        message: this.translate.instant('reports.deleteReportConfirm', { name: editing.name }),
+        confirmLabel: this.translate.instant('common.delete'),
+        cancelLabel: this.translate.instant('common.cancel'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.builderService.deleteReport(editing.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('reports.reportDeleted'));
+          this.newReport();
+        },
+      });
     });
   }
 
@@ -489,12 +515,13 @@ export class ReportBuilderComponent {
           }));
           this.filters.set(filterRows);
           this.drillFilter.set(null);
+          if (this.canRun()) this.runReport();
         });
       },
     });
   }
 
-  private saveReport(name: string, description: string, isShared: boolean): void {
+  private saveReport(name: string, description: string, isShared: boolean): Observable<unknown> {
     const filterValues: ReportFilter[] = this.filters().map(f => ({
       field: f.fieldControl.value,
       operator: f.operatorControl.value,
@@ -518,16 +545,15 @@ export class ReportBuilderComponent {
 
     const existing = this.editingReport();
     if (existing) {
-      this.builderService.updateReport(existing.id, request).subscribe({
-        next: () => this.snackbar.success(this.translate.instant('reports.reportUpdated')),
-      });
-    } else {
-      this.builderService.createReport(request).subscribe({
-        next: (saved) => {
-          this.editingReport.set(saved);
-          this.snackbar.success(this.translate.instant('reports.reportSaved'));
-        },
-      });
+      return this.builderService.updateReport(existing.id, request, formValidationContext()).pipe(
+        tap(() => this.snackbar.success(this.translate.instant('reports.reportUpdated'))),
+      );
     }
+    return this.builderService.createReport(request, formValidationContext()).pipe(
+      tap(saved => {
+        this.editingReport.set(saved);
+        this.snackbar.success(this.translate.instant('reports.reportSaved'));
+      }),
+    );
   }
 }

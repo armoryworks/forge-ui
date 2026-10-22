@@ -12,6 +12,7 @@ import { DialogComponent } from '../dialog/dialog.component';
 import { InputComponent } from '../input/input.component';
 import { NumericKeypadComponent } from '../numeric-keypad/numeric-keypad.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
+import { ToggleComponent } from '../toggle/toggle.component';
 import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { OperationQuantityDialogData } from '../../models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../models/operation-quantity-dialog-result.model';
@@ -21,7 +22,7 @@ type QuantityField = 'quantity' | 'scrap' | 'rework';
 @Component({
   selector: 'app-operation-quantity-dialog',
   standalone: true,
-  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, NumericKeypadComponent, SelectComponent, ValidationButtonComponent],
+  imports: [DecimalPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, NumericKeypadComponent, SelectComponent, ToggleComponent, ValidationButtonComponent],
   templateUrl: './operation-quantity-dialog.component.html',
   styleUrl: './operation-quantity-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,7 +34,9 @@ export class OperationQuantityDialogComponent {
   protected readonly data = inject<OperationQuantityDialogData>(MAT_DIALOG_DATA);
 
   protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
-  protected readonly showScrap = signal(false);
+  protected readonly stopMode = this.data.mode === 'stop';
+  protected readonly steps = [1, 5, 10];
+  protected readonly showScrap = signal(this.stopMode);
   protected readonly showRework = signal(false);
   protected readonly touch = this.data.touch === true;
   protected readonly activeField = signal<QuantityField>('quantity');
@@ -44,10 +47,12 @@ export class OperationQuantityDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
-    quantity: new FormControl<number | null>(this.remaining),
-    scrap: new FormControl<number | null>(0),
+    quantity: new FormControl<number | null>(this.data.initialQuantity ?? (this.stopMode ? null : this.defaultRecordQuantity())),
+    scrap: new FormControl<number | null>(this.stopMode ? null : 0),
     rework: new FormControl<number | null>(0),
     reason: new FormControl<string | null>(null),
+    gateAck: new FormControl<boolean>(false, { nonNullable: true }),
+    gateReason: new FormControl<string | null>(null),
   });
 
   private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)), { initialValue: this.form.value });
@@ -58,6 +63,23 @@ export class OperationQuantityDialogComponent {
   protected readonly newCompleted = computed(() => this.data.completedQuantity + this.added());
   protected readonly newScrap = computed(() => this.data.scrapQuantity + this.addedScrap());
   protected readonly isAll = computed(() => this.newCompleted() + this.newScrap() >= this.data.jobQuantity);
+  protected readonly doneCompleted = computed(() => this.stopMode && this.value().quantity == null
+    ? Math.max(this.data.completedQuantity, this.data.jobQuantity - this.newScrap())
+    : this.newCompleted());
+  protected readonly gate = this.data.gate ?? null;
+  protected readonly gateWaitingOn = (this.data.gate?.waitingOnSteps ?? []).join(', ');
+  private readonly previousTotal = this.data.completedQuantity + this.data.scrapQuantity;
+  protected readonly recordGated = computed(() => this.exceedsGate(this.newCompleted() + this.newScrap()));
+  protected readonly doneExceedsGate = computed(() => this.exceedsGate(this.doneCompleted() + this.newScrap()));
+  protected readonly gateQuantityShown = computed(() => this.recordGated() || this.doneExceedsGate());
+  protected readonly doneGated = computed(() => this.doneExceedsGate() || (this.gate?.waitingOnSteps.length ?? 0) > 0);
+  protected readonly gateShown = computed(() => this.recordGated() || this.doneGated());
+  protected readonly gateAckOn = computed(() => this.value().gateAck === true);
+  protected readonly gateCleared = computed(() => {
+    const gate = this.gate;
+    if (!gate || !gate.canOverride || !this.gateAckOn()) return false;
+    return gate.mode === 'Warn' || !!this.value().gateReason?.trim();
+  });
   protected readonly askReason = computed(() => this.reasonOptions.length > 1 && (this.addedScrap() > 0 || this.addedRework() > 0));
 
   protected readonly violations = computed(() => {
@@ -65,6 +87,13 @@ export class OperationQuantityDialogComponent {
     const raw = this.value();
     if (isNegative(raw.quantity) || isNegative(raw.scrap) || isNegative(raw.rework)) {
       issues.push(this.translate.instant('jobOperations.dialog.negative'));
+    }
+    const places = this.data.decimalPlaces;
+    if (places !== null && places !== undefined
+      && [raw.quantity, raw.scrap, raw.rework].some(v => !fitsDecimals(v, places))) {
+      issues.push(places === 0
+        ? this.translate.instant('jobOperations.dialog.wholeNumbers')
+        : this.translate.instant('jobOperations.dialog.decimals', { places }));
     }
     if (this.newCompleted() + this.newScrap() > this.data.jobQuantity) {
       issues.push(this.translate.instant('jobOperations.dialog.overQuantity', {
@@ -75,9 +104,22 @@ export class OperationQuantityDialogComponent {
     return issues;
   });
 
+  protected readonly overPlanned = computed(() => {
+    const planned = this.data.plannedQuantity;
+    return planned != null && planned > 0 && this.newCompleted() + this.newScrap() > planned;
+  });
+
+  protected readonly doneViolations = computed(() => this.doneGated() && !this.gateCleared()
+    ? [...this.violations(), this.translate.instant(this.gate?.canOverride
+      ? 'jobOperations.gate.confirmFirst'
+      : 'jobOperations.gate.askSupervisor')]
+    : this.violations());
+
   protected readonly canRecord = computed(() =>
-    this.violations().length === 0 && (this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
-  protected readonly canComplete = computed(() => this.violations().length === 0);
+    this.violations().length === 0
+    && (!this.recordGated() || this.gateCleared())
+    && (this.stopMode || this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
+  protected readonly canComplete = computed(() => this.doneViolations().length === 0);
 
   protected toggleScrap(): void {
     this.showScrap.update(v => !v);
@@ -105,6 +147,16 @@ export class OperationQuantityDialogComponent {
     control.setValue(Number(current + digit));
   }
 
+  protected step(amount: number): void {
+    this.replaceOnNextDigit = false;
+    const control = this.form.controls[this.activeField()];
+    control.setValue(toCount(control.value) + amount);
+  }
+
+  protected skip(): void {
+    this.dialogRef.close({ ...this.result(false), skipped: true, addedQuantity: 0, addedScrap: 0, reworkQuantity: 0 });
+  }
+
   protected onBackspace(): void {
     this.replaceOnNextDigit = false;
     const control = this.form.controls[this.activeField()];
@@ -128,7 +180,7 @@ export class OperationQuantityDialogComponent {
 
   protected complete(): void {
     if (!this.canComplete()) return;
-    if (this.isAll()) {
+    if (this.doneCompleted() + this.newScrap() >= this.data.jobQuantity) {
       this.dialogRef.close(this.result(true));
       return;
     }
@@ -150,13 +202,28 @@ export class OperationQuantityDialogComponent {
     });
   }
 
+  private defaultRecordQuantity(): number {
+    const available = this.data.gate?.available;
+    if (available === null || available === undefined) return this.remaining;
+    return Math.min(this.remaining, Math.max(available - this.data.completedQuantity - this.data.scrapQuantity, 0));
+  }
+
+  private exceedsGate(total: number): boolean {
+    const available = this.gate?.available;
+    return available !== null && available !== undefined && total > available && total > this.previousTotal;
+  }
+
   private result(complete: boolean): OperationQuantityDialogResult {
+    const acknowledged = this.gateShown() && this.gateCleared();
     return {
-      completedQuantity: this.newCompleted(),
+      ...(acknowledged ? { acknowledgeGate: true, overrideReason: this.value().gateReason?.trim() || null } : {}),
+      completedQuantity: complete ? this.doneCompleted() : this.newCompleted(),
       scrapQuantity: this.newScrap(),
       reworkQuantity: this.addedRework(),
       reasonCode: this.askReason() ? (this.value().reason ?? null) : null,
       complete,
+      addedQuantity: this.added(),
+      addedScrap: this.addedScrap(),
     };
   }
 }
@@ -168,4 +235,10 @@ function toCount(value: number | null | undefined): number {
 
 function isNegative(value: number | null | undefined): boolean {
   return value !== null && value !== undefined && Number(value) < 0;
+}
+
+function fitsDecimals(value: number | null | undefined, places: number): boolean {
+  if (value === null || value === undefined) return true;
+  const n = Number(value);
+  return !Number.isFinite(n) || Number(n.toFixed(places)) === n;
 }

@@ -11,8 +11,14 @@
   </div>
 
   <div class="worker__content" [appLoadingBlock]="loading()">
-    @if (sortedTasks().length === 0 && !loading()) {
-      <app-empty-state icon="check_circle" [message]="'worker.noTasksAssigned' | translate" />
+    @if (loadFailed() && !loading()) {
+      <app-empty-state icon="error_outline" role="alert" data-testid="worker-load-failed"
+        [message]="'worker.loadFailed' | translate"
+        [actionLabel]="'worker.refresh' | translate"
+        (action)="loadTasks()" />
+    } @else if (sortedTasks().length === 0 && !loading()) {
+      <app-empty-state icon="check_circle" [message]="'worker.noTasksAssigned' | translate"
+        [helpText]="'worker.noTasksAssignedHint' | translate" />
     }
 
     <div class="worker__task-list">
@@ -22,7 +28,7 @@
              (click)="openJob(task)" (keydown.enter)="openJob(task)">
           <div class="task-card__header">
             <span class="task-card__number">{{ task.jobNumber }}</span>
-            <span [class]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+            <span [class]="getPriorityClass(task.priority)">{{ priorityLabel(task.priority) }}</span>
           </div>
 
           <h3 class="task-card__title">{{ task.title }}</h3>
