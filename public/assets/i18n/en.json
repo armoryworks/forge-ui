@@ -6007,7 +6007,22 @@
     "dismissAllConfirmMessage": "Dismiss all {{count}} notifications? Dismissed notifications cannot be brought back.",
     "dailyDigest": "Daily digest",
     "dailyDigestDesc": "A morning email with your overdue jobs, jobs due in the next three days and yesterday's completions",
-    "toggleDailyDigest": "Toggle the daily digest email"
+    "toggleDailyDigest": "Toggle the daily digest email",
+    "sources": {
+      "compliance": "Compliance",
+      "events": "Events",
+      "inventory": "Inventory",
+      "invoices": "Invoices",
+      "jobs": "Jobs",
+      "kanban": "Board",
+      "maintenance_overdue": "Overdue maintenance",
+      "payroll": "Payroll",
+      "purchasing": "Purchasing",
+      "sales_orders": "Sales orders",
+      "scanner": "Scanner",
+      "shipments": "Shipments",
+      "time_tracking": "Time tracking"
+    }
   },
   "auth": {
     "appName": "Armory Works Forge",

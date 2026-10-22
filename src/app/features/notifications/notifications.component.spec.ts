@@ -51,6 +51,15 @@ describe('NotificationsComponent', () => {
     expect(options.find(o => o.value === 'system')?.label).toBe('notifications.sourceSystem');
   });
 
+  it('uses the translated module name when one exists', () => {
+    TestBed.overrideProvider(TranslateService, {
+      useValue: { instant: (k: string) => k === 'notifications.sources.sales_orders' ? 'Órdenes de venta' : k },
+    });
+    const options = create().sourceOptions();
+    expect(options.find(o => o.value === 'sales_orders')?.label).toBe('Órdenes de venta');
+    expect(options.find(o => o.value === 'inventory')?.label).toBe('Inventory');
+  });
+
   it('filters by the chosen source regardless of its stored case', () => {
     const page = create();
     page.sourceControl.setValue('system');

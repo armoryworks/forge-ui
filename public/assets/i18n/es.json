@@ -6000,7 +6000,22 @@
     "dismissAllConfirmMessage": "¿Descartar las {{count}} notificaciones? Las notificaciones descartadas no se pueden recuperar.",
     "dailyDigest": "Resumen diario",
     "dailyDigestDesc": "Un correo cada mañana con sus trabajos vencidos, los que vencen en los próximos tres días y los completados ayer",
-    "toggleDailyDigest": "Activar o desactivar el correo de resumen diario"
+    "toggleDailyDigest": "Activar o desactivar el correo de resumen diario",
+    "sources": {
+      "compliance": "Cumplimiento",
+      "events": "Eventos",
+      "inventory": "Inventario",
+      "invoices": "Facturas",
+      "jobs": "Trabajos",
+      "kanban": "Tablero",
+      "maintenance_overdue": "Mantenimiento vencido",
+      "payroll": "Nómina",
+      "purchasing": "Compras",
+      "sales_orders": "Órdenes de venta",
+      "scanner": "Escáner",
+      "shipments": "Envíos",
+      "time_tracking": "Control de tiempo"
+    }
   },
   "auth": {
     "appName": "Armory Works Forge",

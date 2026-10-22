@@ -136,6 +136,8 @@ export class NotificationsComponent {
     const key = source.toLowerCase();
     if (key === 'system') return this.translate.instant('notifications.sourceSystem');
     if (key === 'user') return this.translate.instant('notifications.sourceUser');
-    return humanizeNotificationSource(source);
+    const labelKey = `notifications.sources.${key.replace(/[^a-z0-9]+/g, '_')}`;
+    const label: string = this.translate.instant(labelKey);
+    return label && label !== labelKey ? label : humanizeNotificationSource(source);
   }
 }
