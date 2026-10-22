@@ -20,6 +20,9 @@ export interface ReorderSuggestion {
   suggestedQuantity: number;
   supplyType: ReorderSupplyType;
   leadTimeDays: number | null;
+  reorderPoint?: number | null;
+  reorderQuantity?: number | null;
+  qcHoldQuantity?: number;
   status: ReorderSuggestionStatus;
   approvedByName: string | null;
   approvedAt: string | null;

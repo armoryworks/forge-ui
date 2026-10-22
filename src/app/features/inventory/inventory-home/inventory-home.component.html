@@ -97,8 +97,8 @@
           <span class="inv-home__stat-label">{{ 'inventory.home.stat.parts' | translate }}</span>
         </div>
         <div class="inv-home__stat">
-          <span class="inv-home__stat-value">{{ totalOnHand() | number }}</span>
-          <span class="inv-home__stat-label">{{ 'inventory.home.stat.onHand' | translate }}</span>
+          <span class="inv-home__stat-value" data-testid="inv-home-parts-in-stock">{{ partsInStock() | number }}</span>
+          <span class="inv-home__stat-label">{{ 'inventory.home.stat.partsInStock' | translate }}</span>
         </div>
         <div class="inv-home__stat" [class.inv-home__stat--warn]="lowStockCount() > 0">
           <span class="inv-home__stat-value">{{ lowStockCount() | number }}</span>
@@ -113,7 +113,7 @@
             <li class="inv-home__lowstock-item">
               <span class="inv-home__lowstock-part">{{ a.partNumber }}</span>
               <span class="inv-home__lowstock-desc">{{ a.description }}</span>
-              <span class="inv-home__lowstock-qty">{{ a.currentStock | number }} / {{ a.minStockThreshold | number }}</span>
+              <span class="inv-home__lowstock-qty">{{ a.currentStock | number }} / {{ (a.minStockThreshold ?? a.reorderPoint) | number }}</span>
               <button class="action-btn action-btn--sm action-btn--create" (click)="openVerb('receive')">
                 {{ 'inventory.home.verbs.receive' | translate }}
               </button>

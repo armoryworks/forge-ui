@@ -1,6 +1,10 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+.sh-content {
+  padding: $sp-md $sp-lg;
+}
+
 .sh-queue-head {
   display: flex;
   align-items: center;

@@ -1892,7 +1892,10 @@
     "clearCreated": "Borrar esta lista",
     "review": "Revisar",
     "taskCompleted": "Tarea completada",
-    "taskDismissed": "Tarea descartada"
+    "taskDismissed": "Tarea descartada",
+    "why": "Motivo",
+    "belowReorderPoint": "Por debajo del punto de reorden {{point}}",
+    "qcHold": "{{quantity}} en retención de calidad, no cuenta como disponible"
   },
   "inventory": {
     "home": {
@@ -1919,7 +1922,8 @@
       "stat": {
         "parts": "Piezas registradas",
         "onHand": "Unidades disponibles",
-        "lowStock": "Stock bajo"
+        "lowStock": "Stock bajo",
+        "partsInStock": "Piezas con stock"
       },
       "dialog": {
         "part": "Pieza",
@@ -1962,7 +1966,10 @@
       "stockOps": "Operaciones de Stock",
       "cycleCounts": "Conteos Cíclicos",
       "reservations": "Reservas",
-      "inspection": "Inspección"
+      "inspection": "Inspección",
+      "label": "Secciones de inventario",
+      "replenishment": "Reabastecimiento",
+      "uom": "Unidades de Medida"
     },
     "subtitle": "Seguimiento de niveles de stock, ubicaciones y movimientos",
     "addLocation": "Agregar Ubicación",
@@ -2023,7 +2030,7 @@
       "barcode": "Código de Barras",
       "createLocation": "Crear Ubicación",
       "receiveGoodsTitle": "Recibir Mercancía",
-      "poLineId": "ID de Línea OC",
+      "poLineId": "Línea de OC",
       "quantityReceived": "Cantidad Recibida",
       "binLocation": "Ubicación",
       "lotNumber": "Número de Lote",
@@ -2040,7 +2047,9 @@
       "reject": "Rechazar",
       "approveAndAdjust": "Aprobar y Ajustar Stock",
       "noItemsAtLocation": "Sin artículos en esta ubicación",
-      "lotAutoAssigned": "Pieza controlada por lote: deje el lote en blanco y se asignará un número de lote."
+      "lotAutoAssigned": "Pieza controlada por lote: deje el lote en blanco y se asignará un número de lote.",
+      "countMustBeZeroOrMore": "Cada conteo real debe ser un número, 0 o más.",
+      "managerApprovesCount": "Un administrador o gerente ingresa las cantidades reales y aprueba este conteo."
     },
     "columns": {
       "partNumber": "Pieza #",
@@ -2064,7 +2073,9 @@
       "job": "Trabajo",
       "reservedDate": "Reservado",
       "expected": "Esperado",
-      "actual": "Real"
+      "actual": "Real",
+      "uom": "UdM",
+      "actualFor": "Conteo real de {{item}}"
     },
     "statuses": {
       "stored": "Almacenado",
@@ -2134,7 +2145,10 @@
       "recordResult": "Registrar resultado",
       "recorded": "Inspección registrada",
       "waived": "Inspección dispensada"
-    }
+    },
+    "partsCount": "{{total}} piezas · {{inStock}} con stock",
+    "collapseLocation": "Contraer {{name}}",
+    "expandLocation": "Expandir {{name}}"
   },
   "contactFields": {
     "mobile": "Móvil",
@@ -6575,7 +6589,13 @@
     "scanLabelField": "Código de la etiqueta",
     "scanLabelPlaceholder": "Escanee, o escriba el código y pulse Intro",
     "shipFailed": "No se pudo marcar el envío como enviado.",
-    "invoiceNumberFallback": "Factura #{{id}}"
+    "invoiceNumberFallback": "Factura #{{id}}",
+    "otherCarrier": "Otro transportista (no está en la lista)",
+    "cancelShipment": "Cancelar envío",
+    "cancelShipmentTitle": "¿Cancelar envío?",
+    "cancelShipmentMessage": "¿Cancelar el envío {{number}}? Sus cantidades vuelven a la orden de venta para que se puedan enviar de nuevo.",
+    "shipmentCancelled": "Envío cancelado",
+    "cancelFailed": "No se pudo cancelar el envío"
   },
   "planning": {
     "title": "Planificación",
@@ -8119,7 +8139,8 @@
     "deleteFileTitle": "¿Eliminar archivo?",
     "deleteFileMessage": "Esto eliminará permanentemente \"{{name}}\".",
     "fileDeleted": "Archivo eliminado",
-    "fileUploaded": "Archivo cargado"
+    "fileUploaded": "Archivo cargado",
+    "expired": "Vencido"
   },
   "partQuality": {
     "recentInspections": "Inspecciones recientes",

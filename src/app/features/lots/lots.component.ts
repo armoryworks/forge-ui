@@ -17,12 +17,14 @@ import { EntityLinkComponent } from '../../shared/components/entity-link/entity-
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { toDateOnly } from '../../shared/utils/date.utils';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 
 @Component({
   selector: 'app-lots',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, DateOnlyPipe,
     PageHeaderComponent, InputComponent,
     DataTableComponent, ColumnCellDirective,
     LotDialogComponent, LoadingBlockDirective, EntityLinkComponent, TranslatePipe, MatTooltipModule,
@@ -52,7 +54,7 @@ export class LotsComponent implements OnInit {
     { field: 'quantity', header: this.translate.instant('lots.quantity'), sortable: true, width: '90px', align: 'right' },
     { field: 'jobNumber', header: this.translate.instant('lots.job'), sortable: true, width: '120px' },
     { field: 'supplierLotNumber', header: this.translate.instant('lots.supplierLot'), sortable: true, width: '140px' },
-    { field: 'expirationDate', header: this.translate.instant('lots.expires'), sortable: true, type: 'date', width: '110px' },
+    { field: 'expirationDate', header: this.translate.instant('lots.expires'), sortable: true, type: 'date', width: '170px' },
     { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
   ];
 
@@ -91,6 +93,11 @@ export class LotsComponent implements OnInit {
   }
 
   protected applySearch(): void { this.load(); }
+
+  protected isExpired(lot: LotListItem): boolean {
+    const expires = toDateOnly(lot.expirationDate);
+    return expires !== null && expires < toDateOnly(new Date())!;
+  }
 
   protected openLotDetail(row: unknown): void {
     const item = row as LotListItem;

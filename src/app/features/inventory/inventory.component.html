@@ -22,10 +22,12 @@
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'inventory.transfer' | translate }}
     </button>
-    <button class="action-btn" data-testid="adjust-btn" (click)="openAdjustDialog()">
-      <span class="material-icons-outlined">tune</span>
-      {{ 'inventory.adjust' | translate }}
-    </button>
+    @if (canAdjustStock) {
+      <button class="action-btn" data-testid="adjust-btn" (click)="openAdjustDialog()">
+        <span class="material-icons-outlined">tune</span>
+        {{ 'inventory.adjust' | translate }}
+      </button>
+    }
   }
   @if (activeTab() === 'cycleCounts') {
     <button class="action-btn action-btn--create" (click)="openCreateCycleCountDialog()">
@@ -37,57 +39,57 @@
 
 <div class="inventory-content">
   <!-- Tabs -->
-  <div class="tab-bar" appTabList appScrollCue>
-    <button class="tab" [appTab]="activeTab() === 'stock'" (click)="switchTab('stock')">
+  <div class="tab-bar" appTabList appScrollCue [attr.aria-label]="'inventory.tabs.label' | translate">
+    <button class="tab" [appTab]="activeTab() === 'stock'" id="inventory-tab-stock" aria-controls="inventory-tabpanel" (click)="switchTab('stock')">
       <span class="material-icons-outlined">inventory</span>
       {{ 'inventory.tabs.stockLevels' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'locations'" (click)="switchTab('locations')">
+    <button class="tab" [appTab]="activeTab() === 'locations'" id="inventory-tab-locations" aria-controls="inventory-tabpanel" (click)="switchTab('locations')">
       <span class="material-icons-outlined">warehouse</span>
       {{ 'inventory.tabs.locations' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'movements'" (click)="switchTab('movements')">
+    <button class="tab" [appTab]="activeTab() === 'movements'" id="inventory-tab-movements" aria-controls="inventory-tabpanel" (click)="switchTab('movements')">
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'inventory.tabs.movements' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'receiving'" (click)="switchTab('receiving')">
+    <button class="tab" [appTab]="activeTab() === 'receiving'" id="inventory-tab-receiving" aria-controls="inventory-tabpanel" (click)="switchTab('receiving')">
       <span class="material-icons-outlined">local_shipping</span>
       {{ 'inventory.tabs.receiving' | translate }}
     </button>
     @if (inspectionEnabled()) {
-      <button class="tab" [appTab]="activeTab() === 'inspection'" data-testid="inventory-tab-inspection" (click)="switchTab('inspection')">
+      <button class="tab" [appTab]="activeTab() === 'inspection'" id="inventory-tab-inspection" aria-controls="inventory-tabpanel" data-testid="inventory-tab-inspection" (click)="switchTab('inspection')">
         <span class="material-icons-outlined">verified</span>
         {{ 'inventory.tabs.inspection' | translate }}
       </button>
     }
-    <button class="tab" [appTab]="activeTab() === 'stockOps'" (click)="switchTab('stockOps')">
+    <button class="tab" [appTab]="activeTab() === 'stockOps'" id="inventory-tab-stockOps" aria-controls="inventory-tabpanel" (click)="switchTab('stockOps')">
       <span class="material-icons-outlined">tune</span>
       {{ 'inventory.tabs.stockOps' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'cycleCounts'" (click)="switchTab('cycleCounts')">
+    <button class="tab" [appTab]="activeTab() === 'cycleCounts'" id="inventory-tab-cycleCounts" aria-controls="inventory-tabpanel" (click)="switchTab('cycleCounts')">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'inventory.tabs.cycleCounts' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'reservations'" (click)="switchTab('reservations')">
+    <button class="tab" [appTab]="activeTab() === 'reservations'" id="inventory-tab-reservations" aria-controls="inventory-tabpanel" (click)="switchTab('reservations')">
       <span class="material-icons-outlined">lock</span>
       {{ 'inventory.tabs.reservations' | translate }}
     </button>
     @if (canReplenish) {
-      <button class="tab" [appTab]="activeTab() === 'replenishment'" (click)="switchTab('replenishment')">
+      <button class="tab" [appTab]="activeTab() === 'replenishment'" id="inventory-tab-replenishment" aria-controls="inventory-tabpanel" (click)="switchTab('replenishment')">
         <span class="material-icons-outlined">shopping_cart</span>
-        Replenishment
+        {{ 'inventory.tabs.replenishment' | translate }}
         @if (pendingSuggestions().length > 0) {
           <span class="tab__badge">{{ pendingSuggestions().length }}</span>
         }
       </button>
     }
-    <button class="tab" [appTab]="activeTab() === 'uom'" (click)="switchTab('uom')">
+    <button class="tab" [appTab]="activeTab() === 'uom'" id="inventory-tab-uom" aria-controls="inventory-tabpanel" (click)="switchTab('uom')">
       <span class="material-icons-outlined">straighten</span>
-      Units of Measure
+      {{ 'inventory.tabs.uom' | translate }}
     </button>
   </div>
 
-  <div class="inventory-content__body" [appLoadingBlock]="loading()">
+  <div class="inventory-content__body" id="inventory-tabpanel" role="tabpanel" [attr.aria-labelledby]="'inventory-tab-' + activeTab()" [appLoadingBlock]="loading()">
     <!-- Stock Levels Tab -->
     @if (activeTab() === 'stock') {
       <div class="tab-panel">
@@ -118,7 +120,7 @@
               <span class="material-icons-outlined">close</span>
             </button>
           }
-          <span class="panel-count">{{ partSummaries().length }} {{ 'inventory.partsWithStock' | translate }}</span>
+          <span class="panel-count" data-testid="stock-count">{{ 'inventory.partsCount' | translate: { total: partSummaries().length, inStock: inStockCount() } }}</span>
         </div>
 
         <app-data-table
@@ -218,8 +220,8 @@
                   role="button" tabindex="0" [attr.aria-label]="'Select location ' + loc.name"
                   (click)="selectLocation(loc)" (keydown.enter)="selectLocation(loc)">
                   @if (loc.children.length > 0) {
-                    <button class="tree-toggle" (click)="toggleLocationExpand(loc.id); $event.stopPropagation()">
-                      <span class="material-icons-outlined">
+                    <button class="tree-toggle" [attr.aria-expanded]="isLocationExpanded(loc.id)" [attr.aria-label]="(isLocationExpanded(loc.id) ? 'inventory.collapseLocation' : 'inventory.expandLocation') | translate: { name: loc.name }" (click)="toggleLocationExpand(loc.id); $event.stopPropagation()">
+                      <span class="material-icons-outlined" aria-hidden="true">
                         {{ isLocationExpanded(loc.id) ? 'expand_more' : 'chevron_right' }}
                       </span>
                     </button>
@@ -238,8 +240,8 @@
                       role="button" tabindex="0" [attr.aria-label]="'Select location ' + child.name"
                       (click)="selectLocation(child)" (keydown.enter)="selectLocation(child)">
                       @if (child.children.length > 0) {
-                        <button class="tree-toggle" (click)="toggleLocationExpand(child.id); $event.stopPropagation()">
-                          <span class="material-icons-outlined">
+                        <button class="tree-toggle" [attr.aria-expanded]="isLocationExpanded(child.id)" [attr.aria-label]="(isLocationExpanded(child.id) ? 'inventory.collapseLocation' : 'inventory.expandLocation') | translate: { name: child.name }" (click)="toggleLocationExpand(child.id); $event.stopPropagation()">
+                          <span class="material-icons-outlined" aria-hidden="true">
                             {{ isLocationExpanded(child.id) ? 'expand_more' : 'chevron_right' }}
                           </span>
                         </button>
@@ -258,8 +260,8 @@
                           role="button" tabindex="0" [attr.aria-label]="'Select location ' + grandchild.name"
                           (click)="selectLocation(grandchild)" (keydown.enter)="selectLocation(grandchild)">
                           @if (grandchild.children.length > 0) {
-                            <button class="tree-toggle" (click)="toggleLocationExpand(grandchild.id); $event.stopPropagation()">
-                              <span class="material-icons-outlined">
+                            <button class="tree-toggle" [attr.aria-expanded]="isLocationExpanded(grandchild.id)" [attr.aria-label]="(isLocationExpanded(grandchild.id) ? 'inventory.collapseLocation' : 'inventory.expandLocation') | translate: { name: grandchild.name }" (click)="toggleLocationExpand(grandchild.id); $event.stopPropagation()">
+                              <span class="material-icons-outlined" aria-hidden="true">
                                 {{ isLocationExpanded(grandchild.id) ? 'expand_more' : 'chevron_right' }}
                               </span>
                             </button>
@@ -383,6 +385,9 @@
 
         <app-data-table tableId="inventory-movements" [columns]="movementColumns" [data]="movements()"
           emptyIcon="swap_horiz" [emptyMessage]="'inventory.noMovementHistory' | translate">
+          <ng-template appColumnCell="uomCode" let-row>
+            <span class="text-muted">{{ $any(row).uomCode ?? '—' }}</span>
+          </ng-template>
           <ng-template appColumnCell="fromLocationName" let-row>
             <span class="text-muted">{{ $any(row).fromLocationName ?? '—' }}</span>
           </ng-template>
@@ -442,11 +447,13 @@
             <div class="stock-ops-card__title">{{ 'inventory.transferStock' | translate }}</div>
             <div class="stock-ops-card__desc">{{ 'inventory.transferStockDesc' | translate }}</div>
           </div>
-          <div class="stock-ops-card" role="button" tabindex="0" [attr.aria-label]="'inventory.adjustStock' | translate" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
-            <span class="material-icons-outlined stock-ops-card__icon">tune</span>
-            <div class="stock-ops-card__title">{{ 'inventory.adjustStock' | translate }}</div>
-            <div class="stock-ops-card__desc">{{ 'inventory.adjustStockDesc' | translate }}</div>
-          </div>
+          @if (canAdjustStock) {
+            <div class="stock-ops-card" role="button" tabindex="0" data-testid="adjust-card" [attr.aria-label]="'inventory.adjustStock' | translate" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
+              <span class="material-icons-outlined stock-ops-card__icon">tune</span>
+              <div class="stock-ops-card__title">{{ 'inventory.adjustStock' | translate }}</div>
+              <div class="stock-ops-card__desc">{{ 'inventory.adjustStockDesc' | translate }}</div>
+            </div>
+          }
         </div>
       </div>
     }
@@ -525,6 +532,220 @@
         </app-data-table>
       </div>
     }
+
+    @if (activeTab() === 'replenishment') {
+      <div class="tab-panel tab-panel--replenishment" [appLoadingBlock]="replenishmentLoading()">
+        <div class="replenishment-settings">
+          <app-select data-testid="replenishment-assignee" [label]="'replenishmentUi.sendSuggestionsTo' | translate" [formControl]="assigneeControl" [options]="assigneeOptions()" />
+          <p class="replenishment-settings__hint">{{ 'replenishmentUi.sendSuggestionsToHint' | translate }}</p>
+        </div>
+
+        @if (createdRecords().length > 0) {
+          <div class="replenishment-created" data-testid="replenishment-created">
+            <span class="replenishment-created__title">{{ 'replenishmentUi.justCreated' | translate }}</span>
+            @for (record of createdRecords(); track record.type + record.id) {
+              <app-entity-link [type]="record.type" [entityId]="record.id">{{ record.label }}</app-entity-link>
+            }
+            <button class="icon-btn" (click)="clearCreatedRecords()" [attr.aria-label]="'replenishmentUi.clearCreated' | translate" [matTooltip]="'replenishmentUi.clearCreated' | translate">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+
+        <!-- Pending Suggestions Queue -->
+        @if (pendingSuggestions().length > 0) {
+          <div class="replenishment-section">
+            <div class="replenishment-section__header">
+              <div class="replenishment-section__title">
+                <span class="material-icons-outlined replenishment-section__icon">notification_important</span>
+                Pending Reorder Suggestions
+                <span class="chip chip--warning">{{ pendingSuggestions().length }}</span>
+              </div>
+              <div class="replenishment-section__actions">
+                @if (selectedSuggestionIds().size > 0) {
+                  <button class="action-btn action-btn--primary action-btn--sm"
+                    [disabled]="replenishmentSaving()"
+                    (click)="approveBulk()">
+                    <span class="material-icons-outlined">shopping_cart</span>
+                    {{ 'replenishmentUi.approveSelected' | translate: { count: selectedSuggestionIds().size } }}
+                  </button>
+                }
+              </div>
+            </div>
+            <app-data-table
+              tableId="replenishment-suggestions"
+              [columns]="suggestionColumns"
+              [data]="pendingSuggestions()"
+              [selectable]="true"
+              emptyIcon="check_circle"
+              emptyMessage="No pending reorder suggestions"
+              (selectionChange)="onSuggestionSelectionChange($event)">
+
+              <ng-template appColumnCell="partNumber" let-row>
+                <span class="mono nowrap">{{ $any(row).partNumber }}</span>
+              </ng-template>
+
+              <ng-template appColumnCell="reorderPoint" let-row>
+                @if (($any(row).reorderPoint ?? null) !== null) {
+                  <span class="text-muted">{{ 'replenishmentUi.belowReorderPoint' | translate: { point: ($any(row).reorderPoint | number:'1.0-4') } }}</span>
+                } @else if (!suggestionQcHold($any(row))) {
+                  <span class="text-muted">—</span>
+                }
+                @if (suggestionQcHold($any(row)); as held) {
+                  <span class="text-muted why-note" data-testid="suggestion-qc-hold">{{ 'replenishmentUi.qcHold' | translate: { quantity: (held | number:'1.0-4') } }}</span>
+                }
+              </ng-template>
+
+              <ng-template appColumnCell="supplyType" let-row>
+                <span class="chip" [class.chip--primary]="$any(row).supplyType === 'Make'" [class.chip--muted]="$any(row).supplyType !== 'Make'">
+                  {{ ($any(row).supplyType === 'Make' ? 'replenishmentUi.supplyMake' : 'replenishmentUi.supplyBuy') | translate }}
+                </span>
+              </ng-template>
+
+              <ng-template appColumnCell="vendorName" let-row>
+                <span class="text-muted">{{ $any(row).vendorName ?? '—' }}</span>
+              </ng-template>
+
+              <ng-template appColumnCell="leadTimeDays" let-row>
+                @if (($any(row).leadTimeDays ?? null) !== null) {
+                  <span class="mono">{{ 'replenishmentUi.leadTimeDays' | translate: { days: $any(row).leadTimeDays } }}</span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </ng-template>
+
+              <ng-template appColumnCell="availableStock" let-row>
+                {{ $any(row).availableStock | number:'1.0-2' }}
+              </ng-template>
+
+              <ng-template appColumnCell="burnRateDailyAvg" let-row>
+                @if (suggestionBurnRate($any(row)); as rate) {
+                  <span class="mono">{{ rate | number:'1.2-2' }}</span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </ng-template>
+
+              <ng-template appColumnCell="daysOfStockRemaining" let-row>
+                @if ($any(row).daysOfStockRemaining !== null) {
+                  <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+                    {{ $any(row).daysOfStockRemaining }}d
+                  </span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </ng-template>
+
+              <ng-template appColumnCell="projectedStockoutDate" let-row>
+                @if ($any(row).projectedStockoutDate) {
+                  <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+                    {{ $any(row).projectedStockoutDate | date:'MM/dd/yyyy' }}
+                  </span>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </ng-template>
+
+              <ng-template appColumnCell="suggestedQuantity" let-row>
+                <span class="mono">{{ $any(row).suggestedQuantity | number:'1.0-2' }}</span>
+              </ng-template>
+
+              <ng-template appColumnCell="actions" let-row>
+                <div class="replenishment-actions">
+                  <button class="action-btn action-btn--sm action-btn--primary"
+                    data-testid="replenishment-approve"
+                    [disabled]="replenishmentSaving()"
+                    (click)="approveSuggestion($any(row)); $event.stopPropagation()"
+                    [attr.aria-label]="(approveLabelKey($any(row)) | translate) + ': ' + $any(row).partNumber">
+                    <span class="material-icons-outlined">{{ $any(row).supplyType === 'Make' ? 'precision_manufacturing' : 'shopping_cart' }}</span>
+                    {{ approveLabelKey($any(row)) | translate }}
+                  </button>
+                  <button class="icon-btn"
+                    (click)="openDismissDialog($any(row)); $event.stopPropagation()"
+                    aria-label="Dismiss suggestion for {{ $any(row).partNumber }}"
+                    matTooltip="Dismiss">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </div>
+              </ng-template>
+
+            </app-data-table>
+          </div>
+        } @else {
+          <div class="replenishment-empty">
+            <span class="material-icons-outlined replenishment-empty__icon">check_circle</span>
+            <span>No pending reorder suggestions — inventory levels look good.</span>
+          </div>
+        }
+
+        <!-- Burn Rates -->
+        <div class="replenishment-section">
+          <div class="replenishment-section__header">
+            <div class="replenishment-section__title">
+              <span class="material-icons-outlined replenishment-section__icon">local_fire_department</span>
+              Burn Rate Analysis
+            </div>
+            <div class="replenishment-section__actions">
+              <app-input label="Search parts"
+                [formControl]="burnRateFilter"
+                (keydown.enter)="loadBurnRates()" />
+              <button class="action-btn action-btn--sm"
+                [class.action-btn--primary]="burnRateNeedsReorderOnly()"
+                (click)="toggleBurnRateFilter()"
+                matTooltip="Show only parts that need reordering">
+                <span class="material-icons-outlined">filter_list</span>
+                Needs Reorder
+              </button>
+              <button class="icon-btn" (click)="loadBurnRates()" aria-label="Refresh burn rates" matTooltip="Refresh">
+                <span class="material-icons-outlined">refresh</span>
+              </button>
+            </div>
+          </div>
+          <app-data-table
+            tableId="inventory-burn-rates"
+            [columns]="burnRateColumns"
+            [data]="burnRates()"
+            [rowClass]="burnRateRowClass"
+            emptyIcon="local_fire_department"
+            emptyMessage="No burn rate data — start receiving and picking parts to build history">
+            <ng-template appColumnCell="partNumber" let-row>
+              <span class="mono nowrap">{{ $any(row).partNumber }}</span>
+            </ng-template>
+            <ng-template appColumnCell="burnRate30Day" let-row>
+              <span class="mono">{{ formatBurnRate($any(row).burnRate30Day) }}</span>
+            </ng-template>
+            <ng-template appColumnCell="burnRate60Day" let-row>
+              <span class="mono">{{ formatBurnRate($any(row).burnRate60Day) }}</span>
+            </ng-template>
+            <ng-template appColumnCell="burnRate90Day" let-row>
+              <span class="mono">{{ formatBurnRate($any(row).burnRate90Day) }}</span>
+            </ng-template>
+            <ng-template appColumnCell="daysOfStockRemaining" let-row>
+              @if ($any(row).daysOfStockRemaining !== null) {
+                <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+                  {{ $any(row).daysOfStockRemaining }}d
+                </span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </ng-template>
+            <ng-template appColumnCell="needsReorder" let-row>
+              @if ($any(row).needsReorder) {
+                <span class="chip chip--error">Yes</span>
+              } @else {
+                <span class="chip chip--success">OK</span>
+              }
+            </ng-template>
+          </app-data-table>
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'uom') {
+      <div class="tab-panel">
+        <app-uom-management />
+      </div>
+    }
   </div>
 </div>
 
@@ -557,15 +778,15 @@
 @if (showLocationDialog()) {
   <app-dialog [title]="'inventory.dialogs.addLocationTitle' | translate" (closed)="closeLocationDialog()">
     <div [formGroup]="locationForm">
-      <app-input data-testid="location-name" [label]="'common.name' | translate" formControlName="name" />
+      <app-input data-testid="location-name" [label]="'common.name' | translate" formControlName="name" [maxlength]="200" />
 
       <app-select data-testid="location-type" [label]="'common.type' | translate" formControlName="locationType" [options]="locationTypeOptions" />
 
       @if (locationForm.controls.locationType.value === 'Bin') {
-        <app-input data-testid="location-barcode" [label]="'inventory.dialogs.barcode' | translate" formControlName="barcode" />
+        <app-input data-testid="location-barcode" [label]="'inventory.dialogs.barcode' | translate" formControlName="barcode" [maxlength]="100" />
       }
 
-      <app-input data-testid="location-description" [label]="'common.description' | translate" formControlName="description" />
+      <app-input data-testid="location-description" [label]="'common.description' | translate" formControlName="description" [maxlength]="500" />
     </div>
 
     <div dialog-footer>
@@ -612,7 +833,7 @@
         <p class="dialog-hint" data-testid="transfer-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
       <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
-      <app-input [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
+      <app-input data-testid="transfer-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" [min]="1" [max]="transferSourceBin()?.availableQuantity ?? null" />
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
@@ -705,10 +926,14 @@
             <td>{{ line.entityName }}</td>
             <td>{{ line.expectedQuantity | number:'1.0-4' }}</td>
             <td>
-              @if (cc.status === 'Pending') {
+              @if (cc.status === 'Pending' && canAdjustStock) {
                 <input type="number" class="inline-input" min="0" step="any"
+                  data-testid="cycle-count-actual"
+                  [class.inline-input--invalid]="invalidCycleCountLineIds().has(line.id)"
+                  [attr.aria-invalid]="invalidCycleCountLineIds().has(line.id)"
+                  [attr.aria-label]="'inventory.columns.actualFor' | translate: { item: line.entityName }"
                   [value]="line.actualQuantity"
-                  (change)="updateCycleCountLine(line.id, +$any($event.target).value)" />
+                  (change)="updateCycleCountLine(line.id, $any($event.target).value)" />
               } @else {
                 {{ line.actualQuantity | number:'1.0-4' }}
               }
@@ -728,211 +953,20 @@
 
     @if (cc.status === 'Pending') {
       <div dialog-footer>
-        <button class="action-btn action-btn--sm action-btn--danger" (click)="rejectCycleCount()">{{ 'inventory.dialogs.reject' | translate }}</button>
-        <button class="action-btn action-btn--primary"
-          [disabled]="saving()"
-          (click)="approveCycleCount()">{{ 'inventory.dialogs.approveAndAdjust' | translate }}</button>
+        @if (canAdjustStock) {
+          @if (invalidCycleCountLineIds().size > 0) {
+            <span class="dialog-hint" data-testid="cycle-count-invalid" role="alert">{{ 'inventory.dialogs.countMustBeZeroOrMore' | translate }}</span>
+          }
+          <button class="action-btn action-btn--sm action-btn--danger" data-testid="cycle-count-reject" [disabled]="saving()" (click)="rejectCycleCount()">{{ 'inventory.dialogs.reject' | translate }}</button>
+          <button class="action-btn action-btn--primary" data-testid="cycle-count-approve"
+            [disabled]="saving() || invalidCycleCountLineIds().size > 0"
+            (click)="approveCycleCount()">{{ 'inventory.dialogs.approveAndAdjust' | translate }}</button>
+        } @else {
+          <span class="dialog-hint" data-testid="cycle-count-approver-hint">{{ 'inventory.dialogs.managerApprovesCount' | translate }}</span>
+        }
       </div>
     }
   </app-dialog>
-}
-
-<!-- ── Replenishment Tab ── -->
-@if (activeTab() === 'replenishment') {
-  <div class="tab-panel tab-panel--replenishment" [appLoadingBlock]="replenishmentLoading()">
-    <div class="replenishment-settings">
-      <app-select data-testid="replenishment-assignee" [label]="'replenishmentUi.sendSuggestionsTo' | translate" [formControl]="assigneeControl" [options]="assigneeOptions()" />
-      <p class="replenishment-settings__hint">{{ 'replenishmentUi.sendSuggestionsToHint' | translate }}</p>
-    </div>
-
-    @if (createdRecords().length > 0) {
-      <div class="replenishment-created" data-testid="replenishment-created">
-        <span class="replenishment-created__title">{{ 'replenishmentUi.justCreated' | translate }}</span>
-        @for (record of createdRecords(); track record.type + record.id) {
-          <app-entity-link [type]="record.type" [entityId]="record.id">{{ record.label }}</app-entity-link>
-        }
-        <button class="icon-btn" (click)="clearCreatedRecords()" [attr.aria-label]="'replenishmentUi.clearCreated' | translate" [matTooltip]="'replenishmentUi.clearCreated' | translate">
-          <span class="material-icons-outlined">close</span>
-        </button>
-      </div>
-    }
-
-    <!-- Pending Suggestions Queue -->
-    @if (pendingSuggestions().length > 0) {
-      <div class="replenishment-section">
-        <div class="replenishment-section__header">
-          <div class="replenishment-section__title">
-            <span class="material-icons-outlined replenishment-section__icon">notification_important</span>
-            Pending Reorder Suggestions
-            <span class="chip chip--warning">{{ pendingSuggestions().length }}</span>
-          </div>
-          <div class="replenishment-section__actions">
-            @if (selectedSuggestionIds().size > 0) {
-              <button class="action-btn action-btn--primary action-btn--sm"
-                [disabled]="replenishmentSaving()"
-                (click)="approveBulk()">
-                <span class="material-icons-outlined">shopping_cart</span>
-                {{ 'replenishmentUi.approveSelected' | translate: { count: selectedSuggestionIds().size } }}
-              </button>
-            }
-          </div>
-        </div>
-        <app-data-table
-          tableId="replenishment-suggestions"
-          [columns]="suggestionColumns"
-          [data]="pendingSuggestions()"
-          [selectable]="true"
-          emptyIcon="check_circle"
-          emptyMessage="No pending reorder suggestions"
-          (selectionChange)="onSuggestionSelectionChange($event)">
-
-          <ng-template appColumnCell="partNumber" let-row>
-            <span class="mono">{{ $any(row).partNumber }}</span>
-          </ng-template>
-
-          <ng-template appColumnCell="supplyType" let-row>
-            <span class="chip" [class.chip--primary]="$any(row).supplyType === 'Make'" [class.chip--muted]="$any(row).supplyType !== 'Make'">
-              {{ ($any(row).supplyType === 'Make' ? 'replenishmentUi.supplyMake' : 'replenishmentUi.supplyBuy') | translate }}
-            </span>
-          </ng-template>
-
-          <ng-template appColumnCell="vendorName" let-row>
-            <span class="text-muted">{{ $any(row).vendorName ?? '—' }}</span>
-          </ng-template>
-
-          <ng-template appColumnCell="leadTimeDays" let-row>
-            @if (($any(row).leadTimeDays ?? null) !== null) {
-              <span class="mono">{{ 'replenishmentUi.leadTimeDays' | translate: { days: $any(row).leadTimeDays } }}</span>
-            } @else {
-              <span class="text-muted">—</span>
-            }
-          </ng-template>
-
-          <ng-template appColumnCell="availableStock" let-row>
-            {{ $any(row).availableStock | number:'1.0-2' }}
-          </ng-template>
-
-          <ng-template appColumnCell="burnRateDailyAvg" let-row>
-            <span class="mono">{{ $any(row).burnRateDailyAvg | number:'1.2-2' }}</span>
-          </ng-template>
-
-          <ng-template appColumnCell="daysOfStockRemaining" let-row>
-            @if ($any(row).daysOfStockRemaining !== null) {
-              <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
-                {{ $any(row).daysOfStockRemaining }}d
-              </span>
-            } @else {
-              <span class="text-muted">—</span>
-            }
-          </ng-template>
-
-          <ng-template appColumnCell="projectedStockoutDate" let-row>
-            @if ($any(row).projectedStockoutDate) {
-              <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
-                {{ $any(row).projectedStockoutDate | date:'MM/dd/yyyy' }}
-              </span>
-            } @else {
-              <span class="text-muted">—</span>
-            }
-          </ng-template>
-
-          <ng-template appColumnCell="suggestedQuantity" let-row>
-            <span class="mono">{{ $any(row).suggestedQuantity | number:'1.0-2' }}</span>
-          </ng-template>
-
-          <ng-template appColumnCell="actions" let-row>
-            <div class="replenishment-actions">
-              <button class="action-btn action-btn--sm action-btn--primary"
-                data-testid="replenishment-approve"
-                [disabled]="replenishmentSaving()"
-                (click)="approveSuggestion($any(row)); $event.stopPropagation()"
-                [attr.aria-label]="(approveLabelKey($any(row)) | translate) + ': ' + $any(row).partNumber">
-                <span class="material-icons-outlined">{{ $any(row).supplyType === 'Make' ? 'precision_manufacturing' : 'shopping_cart' }}</span>
-                {{ approveLabelKey($any(row)) | translate }}
-              </button>
-              <button class="icon-btn"
-                (click)="openDismissDialog($any(row)); $event.stopPropagation()"
-                aria-label="Dismiss suggestion for {{ $any(row).partNumber }}"
-                matTooltip="Dismiss">
-                <span class="material-icons-outlined">close</span>
-              </button>
-            </div>
-          </ng-template>
-
-        </app-data-table>
-      </div>
-    } @else {
-      <div class="replenishment-empty">
-        <span class="material-icons-outlined replenishment-empty__icon">check_circle</span>
-        <span>No pending reorder suggestions — inventory levels look good.</span>
-      </div>
-    }
-
-    <!-- Burn Rates -->
-    <div class="replenishment-section">
-      <div class="replenishment-section__header">
-        <div class="replenishment-section__title">
-          <span class="material-icons-outlined replenishment-section__icon">local_fire_department</span>
-          Burn Rate Analysis
-        </div>
-        <div class="replenishment-section__actions">
-          <app-input label="Search parts"
-            [formControl]="burnRateFilter"
-            (keydown.enter)="loadBurnRates()" />
-          <button class="action-btn action-btn--sm"
-            [class.action-btn--primary]="burnRateNeedsReorderOnly()"
-            (click)="toggleBurnRateFilter()"
-            matTooltip="Show only parts that need reordering">
-            <span class="material-icons-outlined">filter_list</span>
-            Needs Reorder
-          </button>
-          <button class="icon-btn" (click)="loadBurnRates()" aria-label="Refresh burn rates" matTooltip="Refresh">
-            <span class="material-icons-outlined">refresh</span>
-          </button>
-        </div>
-      </div>
-      <app-data-table
-        tableId="inventory-burn-rates"
-        [columns]="burnRateColumns"
-        [data]="burnRates()"
-        [rowClass]="burnRateRowClass"
-        emptyIcon="local_fire_department"
-        emptyMessage="No burn rate data — start receiving and picking parts to build history">
-        <ng-template appColumnCell="burnRate30Day" let-row>
-          <span class="mono">{{ formatBurnRate($any(row).burnRate30Day) }}</span>
-        </ng-template>
-        <ng-template appColumnCell="burnRate60Day" let-row>
-          <span class="mono">{{ formatBurnRate($any(row).burnRate60Day) }}</span>
-        </ng-template>
-        <ng-template appColumnCell="burnRate90Day" let-row>
-          <span class="mono">{{ formatBurnRate($any(row).burnRate90Day) }}</span>
-        </ng-template>
-        <ng-template appColumnCell="daysOfStockRemaining" let-row>
-          @if ($any(row).daysOfStockRemaining !== null) {
-            <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
-              {{ $any(row).daysOfStockRemaining }}d
-            </span>
-          } @else {
-            <span class="text-muted">—</span>
-          }
-        </ng-template>
-        <ng-template appColumnCell="needsReorder" let-row>
-          @if ($any(row).needsReorder) {
-            <span class="chip chip--error">Yes</span>
-          } @else {
-            <span class="chip chip--success">OK</span>
-          }
-        </ng-template>
-      </app-data-table>
-    </div>
-  </div>
-}
-
-<!-- ── UOM Tab ── -->
-@if (activeTab() === 'uom') {
-  <div class="tab-panel">
-    <app-uom-management />
-  </div>
 }
 
 <!-- Dismiss Suggestion Dialog -->

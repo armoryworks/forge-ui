@@ -10,16 +10,17 @@ interface WidgetInternals {
   ngOnInit(): void;
   hasStockLevels: { (): boolean | null };
   partCount: { (): number };
+  lowStock: { (): { partId: number; threshold?: number | null }[] };
 }
 
-function setup() {
+function setup(lowStock: unknown[] = []) {
   TestBed.configureTestingModule({
     providers: [provideHttpClient(), provideHttpClientTesting()],
   });
   const component = TestBed.runInInjectionContext(() => new LowStockWidgetComponent()) as unknown as WidgetInternals;
   const httpMock = TestBed.inject(HttpTestingController);
   component.ngOnInit();
-  httpMock.expectOne(`${environment.apiUrl}/inventory/low-stock`).flush([]);
+  httpMock.expectOne(`${environment.apiUrl}/inventory/low-stock`).flush(lowStock);
   return { component, httpMock };
 }
 
@@ -61,5 +62,15 @@ describe('LowStockWidgetComponent', () => {
     ]);
 
     expect(component.hasStockLevels()).toBe(true);
+  });
+
+  it('shows the reorder point as the threshold for a part with no minimum', () => {
+    const { component, httpMock } = setup([
+      { partId: 1, partNumber: 'P-1', description: 'Bracket', currentStock: 5, minStockThreshold: null, reorderPoint: 8 },
+      { partId: 2, partNumber: 'P-2', description: 'Hinge', currentStock: 1, minStockThreshold: 4, reorderPoint: 8 },
+    ]);
+    httpMock.expectOne(`${environment.apiUrl}/inventory/parts?status=Active`).flush([]);
+
+    expect(component.lowStock().map(r => r.threshold)).toEqual([8, 4]);
   });
 });

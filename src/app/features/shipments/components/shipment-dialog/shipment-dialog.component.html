@@ -77,7 +77,9 @@
             }
           </div>
         }
-        <app-input [label]="'shipments.carrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" data-testid="shipment-carrier" />
+        @if (!usesListedCarrier()) {
+          <app-input [label]="'shipments.otherCarrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" data-testid="shipment-carrier" />
+        }
         <app-input [label]="'shipments.trackingNumber' | translate" formControlName="trackingNumber" [placeholder]="'shipments.optional' | translate" data-testid="shipment-tracking" />
         <div class="weight-field">
           <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" step="0.0001" min="0" data-testid="shipment-weight" />
@@ -94,8 +96,7 @@
       </div>
 
       <div class="dlg-sidebar-section">
-        <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" data-testid="shipment-notes" />
+        <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" data-testid="shipment-notes" />
       </div>
     </div>
 

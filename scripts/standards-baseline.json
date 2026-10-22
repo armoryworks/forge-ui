@@ -221,7 +221,7 @@
     "src/app/features/employees/pages/employee-detail/tabs/employee-overview-tab.component.html": 24,
     "src/app/features/inventory/components/uom-management/uom-management.component.html": 16,
     "src/app/features/inventory/inventory-home/inventory-home.component.html": 1,
-    "src/app/features/inventory/inventory.component.html": 24,
+    "src/app/features/inventory/inventory.component.html": 22,
     "src/app/features/invoices/components/invoice-detail-panel/invoice-detail-panel.component.html": 1,
     "src/app/features/invoices/components/invoice-dialog/invoice-dialog.component.html": 2,
     "src/app/features/kanban/components/cover-photo-upload-dialog.component.html": 1,
