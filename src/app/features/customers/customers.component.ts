@@ -356,7 +356,7 @@ export class CustomersComponent {
   }
 
   protected saveCustomer(): void {
-    if (this.customerForm.invalid) return;
+    if (this.customerForm.invalid || this.saving()) return;
     this.saving.set(true);
     // Drop any prior server messages so a re-submit doesn't accumulate.
     FormValidationService.clearServerErrors(this.customerForm);

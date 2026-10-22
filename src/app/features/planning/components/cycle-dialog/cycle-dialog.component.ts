@@ -84,7 +84,7 @@ export class CycleDialogComponent implements OnInit {
   }
 
   protected save(): void {
-    if (this.formGroup.invalid) return;
+    if (this.formGroup.invalid || this.saving()) return;
 
     const raw = this.formGroup.getRawValue();
 

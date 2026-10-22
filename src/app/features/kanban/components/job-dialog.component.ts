@@ -491,7 +491,7 @@ export class JobDialogComponent implements OnInit {
   }
 
   protected onSubmit(): void {
-    if (this.jobForm.invalid) return;
+    if (this.jobForm.invalid || this.saving()) return;
 
     this.saving.set(true);
 

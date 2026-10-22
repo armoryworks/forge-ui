@@ -175,7 +175,7 @@ export class PartBomStepComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.saving()) return;
     const id = this.entityId();
     if (id == null) return;
     const v = this.form.getRawValue();

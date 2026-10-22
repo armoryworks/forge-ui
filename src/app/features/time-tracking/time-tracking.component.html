@@ -143,7 +143,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeTimerDialog()">{{ 'common.cancel' | translate }}</button>
-      <button data-testid="timer-start-btn" class="action-btn action-btn--primary" (click)="startTimer()">
+      <button data-testid="timer-start-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="startTimer()">
         <span class="material-icons-outlined">play_circle</span>
         {{ 'timeTracking.start' | translate }}
       </button>
@@ -165,7 +165,7 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeStopDialog()">{{ 'common.cancel' | translate }}</button>
-      <button data-testid="timer-stop-btn" class="action-btn action-btn--warn" (click)="stopTimer()">
+      <button data-testid="timer-stop-btn" class="action-btn action-btn--warn" [disabled]="saving()" (click)="stopTimer()">
         <span class="material-icons-outlined">stop_circle</span>
         {{ 'timeTracking.stopTimer' | translate }}
       </button>

@@ -56,7 +56,7 @@
       <div class="create-row create-row--wrap" [formGroup]="periodForm">
         <app-datepicker [label]="'costing.periods.start' | translate" formControlName="start" [required]="true" data-testid="costing-period-start" />
         <app-datepicker [label]="'costing.periods.end' | translate" formControlName="end" [required]="true" data-testid="costing-period-end" />
-        <button class="action-btn action-btn--create" [disabled]="periodForm.invalid" (click)="createPeriod()" data-testid="costing-period-create">
+        <button class="action-btn action-btn--create" [disabled]="periodForm.invalid || saving()" (click)="createPeriod()" data-testid="costing-period-create">
           {{ 'costing.periods.create' | translate }}
         </button>
       </div>
@@ -70,7 +70,7 @@
         <ng-template appColumnCell="actions" let-row>
           <div class="row-actions">
             @if (row.status === 'Open') {
-              <button class="action-btn action-btn--sm action-btn--primary" (click)="freeze(row)"
+              <button class="action-btn action-btn--sm action-btn--primary" [disabled]="saving()" (click)="freeze(row)"
                 [attr.data-testid]="'costing-freeze-' + row.id">{{ 'costing.periods.freeze' | translate }}</button>
             }
             <button class="action-btn action-btn--sm" (click)="viewRates(row.id)"
@@ -105,7 +105,7 @@
         <app-input [label]="'costing.costCenters.sqft' | translate" type="number" formControlName="sqft" data-testid="costing-cc-sqft" />
         <app-input [label]="'costing.costCenters.headcount' | translate" type="number" formControlName="headcount" data-testid="costing-cc-headcount" />
         <app-toggle [label]="'costing.costCenters.inventoriable' | translate" formControlName="isInventoriable" data-testid="costing-cc-inventoriable" />
-        <button class="action-btn action-btn--create" [disabled]="costCenterForm.invalid" (click)="createCostCenter()" data-testid="costing-cc-create">
+        <button class="action-btn action-btn--create" [disabled]="costCenterForm.invalid || saving()" (click)="createCostCenter()" data-testid="costing-cc-create">
           {{ 'costing.costCenters.create' | translate }}
         </button>
       </div>
@@ -124,7 +124,7 @@
         <app-select [label]="'costing.pools.behavior' | translate" formControlName="behavior" [options]="behaviorOptions" data-testid="costing-pool-behavior" />
         <app-input [label]="'costing.pools.fixedPortion' | translate" type="number" formControlName="fixedPortion" data-testid="costing-pool-fixedportion" />
         <app-select [label]="'costing.pools.driver' | translate" formControlName="driver" [options]="driverOptions" data-testid="costing-pool-driver" />
-        <button class="action-btn action-btn--create" [disabled]="poolForm.invalid" (click)="createPool()" data-testid="costing-pool-create">
+        <button class="action-btn action-btn--create" [disabled]="poolForm.invalid || saving()" (click)="createPool()" data-testid="costing-pool-create">
           {{ 'costing.pools.create' | translate }}
         </button>
       </div>
@@ -138,7 +138,7 @@
         <app-select [label]="'costing.budget.period' | translate" formControlName="costingPeriodId" [options]="periodOptions()" data-testid="costing-budget-period" />
         <app-input [label]="'costing.budget.amount' | translate" type="number" formControlName="budgetAmount" [required]="true" data-testid="costing-budget-amount" />
         <app-input [label]="'costing.budget.qty' | translate" type="number" formControlName="budgetDriverQty" [required]="true" data-testid="costing-budget-qty" />
-        <button class="action-btn action-btn--primary" [disabled]="budgetForm.invalid" (click)="setBudget()" data-testid="costing-budget-set">
+        <button class="action-btn action-btn--primary" [disabled]="budgetForm.invalid || saving()" (click)="setBudget()" data-testid="costing-budget-set">
           {{ 'costing.budget.set' | translate }}
         </button>
       </div>

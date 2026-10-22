@@ -464,7 +464,7 @@ export class InvoiceDialogComponent {
   }
 
   protected save(): void {
-    if (this.invoiceForm.invalid || this.lines().length === 0) return;
+    if (this.invoiceForm.invalid || this.lines().length === 0 || this.saving()) return;
     this.saving.set(true);
 
     const f = this.invoiceForm.getRawValue();
