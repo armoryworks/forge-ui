@@ -118,11 +118,11 @@ export class OperationDialogComponent implements OnInit {
     estSeconds: new FormControl<number | null>(this.estParts.seconds, [Validators.min(0), Validators.max(59.999)]),
     setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [
       Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
-      maxDecimalsValidator(2, this.translate.instant('parts.setupTime')),
+      maxDecimalsValidator(2, this.translate.instant('parts.setupTime'), this.translate),
     ]),
     runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [
       Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
-      maxDecimalsValidator(2, this.translate.instant('parts.lotTime')),
+      maxDecimalsValidator(2, this.translate.instant('parts.lotTime'), this.translate),
     ]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
@@ -134,7 +134,7 @@ export class OperationDialogComponent implements OnInit {
     subcontractVendorId: new FormControl<number | null>(this.data.operation?.subcontractVendorId ?? null),
     subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [
       Validators.min(0.1), Validators.max(OperationDialogComponent.MAX_TURN_TIME_DAYS),
-      maxDecimalsValidator(1, this.translate.instant('parts.subcontractTurnTimeDays')),
+      maxDecimalsValidator(1, this.translate.instant('parts.subcontractTurnTimeDays'), this.translate),
     ]),
   });
 

@@ -1075,7 +1075,7 @@
       "noContent": "No content to parse.",
       "readFailed": "Failed to read file.",
       "noDataRows": "No data rows found below the header row.",
-      "importedStatus": "Created",
+      "importedStatus": "Imported",
       "preview": "Preview",
       "commit": "Commit",
       "committed": "Imported {{created}} of {{total}} parts.",
@@ -3388,7 +3388,7 @@
     "workCenter": "Work Center",
     "glAccount": "GL Account (optional)",
     "glAccountLabel": "GL Account",
-    "glAccountSyncHint": "Set by the accounting sync; it can't be edited here.",
+    "glAccountSyncHint": "You can correct it until depreciation has posted for this asset.",
     "depreciation": {
       "StraightLine": "Straight Line",
       "DecliningBalance": "Declining Balance",

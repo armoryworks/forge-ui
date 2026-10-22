@@ -11,9 +11,9 @@
     <div class="cluster__item" data-testid="part-standard-cost">
       <span class="cluster__label">{{ 'parts.detail.clusters.cost.standardCost' | translate }}</span>
       @if (part().standardCost; as std) {
-        <span class="cluster__value">{{ std.amount | currency:'USD':'symbol':'1.2-4' }}</span>
+        <span class="cluster__value"><app-currency-display [value]="std.amount" [maximumFractionDigits]="4" /></span>
         <span class="cluster__value cluster__value--muted">
-          {{ standardSourceKey(std) | translate: { date: (std.calculatedAt | date:'MM/dd/yyyy'), amount: (std.calculatedAmount | currency:'USD':'symbol':'1.2-4') } }}
+          {{ standardSourceKey(std) | translate: { date: (std.calculatedAt | date:'MM/dd/yyyy'), amount: (std.calculatedAmount | currency:baseCurrency():'symbol':'1.2-4') } }}
         </span>
       } @else {
         <span class="cluster__value cluster__value--muted">{{ 'parts.detail.clusters.cost.notCalculated' | translate }}</span>
@@ -22,19 +22,19 @@
     @if (part().standardCost?.materialCost !== null && part().standardCost?.materialCost !== undefined) {
       <div class="cluster__item">
         <span class="cluster__label">{{ 'parts.detail.clusters.cost.material' | translate }}</span>
-        <span class="cluster__value">{{ part().standardCost!.materialCost | currency:'USD':'symbol':'1.2-4' }}</span>
+        <span class="cluster__value"><app-currency-display [value]="part().standardCost!.materialCost!" [maximumFractionDigits]="4" /></span>
       </div>
     }
     @if (part().standardCost?.laborCost !== null && part().standardCost?.laborCost !== undefined) {
       <div class="cluster__item">
         <span class="cluster__label">{{ 'parts.detail.clusters.cost.labor' | translate }}</span>
-        <span class="cluster__value">{{ part().standardCost!.laborCost | currency:'USD':'symbol':'1.2-4' }}</span>
+        <span class="cluster__value"><app-currency-display [value]="part().standardCost!.laborCost!" [maximumFractionDigits]="4" /></span>
       </div>
     }
     @if (part().standardCost?.overheadCost !== null && part().standardCost?.overheadCost !== undefined) {
       <div class="cluster__item">
         <span class="cluster__label">{{ 'parts.detail.clusters.cost.overhead' | translate }}</span>
-        <span class="cluster__value">{{ part().standardCost!.overheadCost | currency:'USD':'symbol':'1.2-4' }}</span>
+        <span class="cluster__value"><app-currency-display [value]="part().standardCost!.overheadCost!" [maximumFractionDigits]="4" /></span>
       </div>
     }
     @if (part().valuationClassLabel) {

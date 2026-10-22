@@ -83,11 +83,11 @@ export class AssetsComponent implements OnInit {
     // Phase 3 F4 — full-record fields. All optional on create.
     acquisitionCost: new FormControl<number | null>(null, [
       Validators.min(0), Validators.max(1_000_000_000),
-      maxDecimalsValidator(2, this.translate.instant('assets.acquisitionCost')),
+      maxDecimalsValidator(2, this.translate.instant('assets.acquisitionCost'), this.translate),
     ]),
     depreciationMethod: new FormControl<'StraightLine' | 'DecliningBalance' | 'UnitsOfProduction' | null>(null),
     workCenterId: new FormControl<number | null>(null),
-    glAccount: new FormControl<string | null>(null),
+    glAccount: new FormControl<string | null>(null, [Validators.maxLength(100)]),
   });
 
   // Depreciation-method options match the server enum exactly.
@@ -240,7 +240,6 @@ export class AssetsComponent implements OnInit {
       acquisitionCost: null, depreciationMethod: null,
       workCenterId: null, glAccount: null,
     });
-    this.assetForm.controls.glAccount.enable();
     this.showDialog.set(true);
   }
 
@@ -265,7 +264,6 @@ export class AssetsComponent implements OnInit {
       workCenterId: asset.workCenterId ?? null,
       glAccount: asset.glAccount ?? null,
     });
-    this.assetForm.controls.glAccount.disable();
     this.showDialog.set(true);
   }
 
@@ -297,6 +295,7 @@ export class AssetsComponent implements OnInit {
         acquisitionCost: form.acquisitionCost ?? undefined,
         depreciationMethod: form.depreciationMethod ?? undefined,
         workCenterId: form.workCenterId ?? undefined,
+        glAccount: form.glAccount?.trim() ?? '',
       }).subscribe({
         next: () => {
           this.saving.set(false);

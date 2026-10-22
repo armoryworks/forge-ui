@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { CurrencyService } from '../../../../shared/services/currency.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { CurrencyPipe, DatePipe } from '@angular/common';
@@ -23,7 +25,7 @@ import { PartStandardCostRollComponent } from './part-standard-cost-roll.compone
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, CurrencyPipe, DatePipe,
-    CurrencyInputComponent, ValidationButtonComponent,
+    CurrencyInputComponent, CurrencyDisplayComponent, ValidationButtonComponent,
     PartLandedCostComponent, PartStandardCostRollComponent,
   ],
   templateUrl: './part-cost-cluster.component.html',
@@ -32,6 +34,7 @@ import { PartStandardCostRollComponent } from './part-standard-cost-roll.compone
 })
 export class PartCostClusterComponent {
   readonly part = input.required<PartDetail>();
+  protected readonly baseCurrency = inject(CurrencyService).baseCurrency;
   readonly editing = input(false);
   readonly saving = input(false);
 

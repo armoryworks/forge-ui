@@ -68,7 +68,7 @@
             @if (asset.acquisitionCost !== null && asset.acquisitionCost !== undefined) {
               <div class="info-item">
                 <span class="info-label">{{ 'assets.acquisitionCost' | translate }}</span>
-                <span class="info-value">{{ asset.acquisitionCost | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span class="info-value"><app-currency-display [value]="asset.acquisitionCost" /></span>
               </div>
             }
             @if (asset.depreciationMethod) {

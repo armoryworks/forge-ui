@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -15,11 +15,12 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-asset-detail-panel',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [CurrencyDisplayComponent, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
   templateUrl: './asset-detail-panel.component.html',
   styleUrl: './asset-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -92,11 +92,11 @@
           <app-data-table tableId="costing-rates" [columns]="rateColumns" [data]="rates()"
             emptyIcon="table_chart" [emptyMessage]="'costing.rates.noneYet' | translate">
             <ng-template appColumnCell="workCenterId" let-row>{{ workCenterRateLabel(row) }}</ng-template>
-            <ng-template appColumnCell="laborRate" let-row>{{ row.laborRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
-            <ng-template appColumnCell="laborOhRate" let-row>{{ row.laborOhRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
-            <ng-template appColumnCell="machineRate" let-row>{{ row.machineRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
-            <ng-template appColumnCell="machineOhVarRate" let-row>{{ row.machineOhVarRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
-            <ng-template appColumnCell="machineOhFixedRate" let-row>{{ row.machineOhFixedRate | currency:'USD':'symbol':'1.2-4' }}</ng-template>
+            <ng-template appColumnCell="laborRate" let-row><app-currency-display [value]="row.laborRate" [maximumFractionDigits]="4" /></ng-template>
+            <ng-template appColumnCell="laborOhRate" let-row><app-currency-display [value]="row.laborOhRate" [maximumFractionDigits]="4" /></ng-template>
+            <ng-template appColumnCell="machineRate" let-row><app-currency-display [value]="row.machineRate" [maximumFractionDigits]="4" /></ng-template>
+            <ng-template appColumnCell="machineOhVarRate" let-row><app-currency-display [value]="row.machineOhVarRate" [maximumFractionDigits]="4" /></ng-template>
+            <ng-template appColumnCell="machineOhFixedRate" let-row><app-currency-display [value]="row.machineOhFixedRate" [maximumFractionDigits]="4" /></ng-template>
           </app-data-table>
         }
       }

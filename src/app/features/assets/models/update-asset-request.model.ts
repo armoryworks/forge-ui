@@ -19,4 +19,5 @@ export interface UpdateAssetRequest {
   acquisitionCost?: number;
   depreciationMethod?: DepreciationMethod;
   workCenterId?: number;
+  glAccount?: string;
 }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -44,6 +44,7 @@ import { CostingTab } from './models/costing-tab.model';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-costing',
@@ -54,7 +55,7 @@ import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive
     TabDirective,
     ScrollCueDirective,
     ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent,
-    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe, CurrencyPipe,
+    ToggleComponent, PageLayoutComponent, DataTableComponent, ColumnCellDirective, DatePipe, CurrencyDisplayComponent,
     ViewModeToggleComponent, CostingRatesVisualComponent, SpacerDirective,
   ],
   templateUrl: './costing.component.html',
@@ -185,7 +186,7 @@ export class CostingComponent {
     behavior: ['Fixed', Validators.required],
     fixedPortion: this.fb.control<number | null>(null, [
       Validators.min(0), Validators.max(1),
-      maxDecimalsValidator(6, this.translate.instant('costing.pools.fixedPortion')),
+      maxDecimalsValidator(6, this.translate.instant('costing.pools.fixedPortion'), this.translate),
     ]),
     driver: ['MachineHour', Validators.required],
   });

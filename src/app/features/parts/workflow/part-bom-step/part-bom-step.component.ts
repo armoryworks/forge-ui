@@ -101,7 +101,7 @@ export class PartBomStepComponent {
 
   protected readonly form = new FormGroup({
     childPartId: new FormControl<number | null>(null, { validators: [Validators.required] }),
-    quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'))] }),
+    quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'), this.translate)] }),
     sourceType: new FormControl<BOMSourceType>('Buy', { nonNullable: true }),
     referenceDesignator: new FormControl(''),
     leadTimeDays: new FormControl<number | null>(null),

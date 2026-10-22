@@ -84,7 +84,7 @@ describe('AssetsComponent', () => {
     expect(calls()).toEqual([[undefined, undefined, 'press'], [undefined, undefined, 'mold']]);
   });
 
-  it('edits acquisition cost, depreciation and work center, and keeps the GL account read-only', () => {
+  it('edits acquisition cost, depreciation, work center and the GL account', () => {
     const assets = create();
     assets.dialogRef = { clearDraft: vi.fn() };
     assets.openEditAssetFromDetail({
@@ -95,15 +95,41 @@ describe('AssetsComponent', () => {
       acquisitionCost: 1501, depreciationMethod: 'StraightLine', workCenterId: 3, workCenterCode: 'WC-3', glAccount: '1500',
     });
 
-    expect(assets.assetForm.get('glAccount')!.disabled).toBe(true);
+    expect(assets.assetForm.get('glAccount')!.enabled).toBe(true);
     expect(assets.assetForm.get('acquisitionCost')!.value).toBe(1501);
 
-    assets.assetForm.patchValue({ acquisitionCost: 1499.5, workCenterId: 4 });
+    assets.assetForm.patchValue({ acquisitionCost: 1499.5, workCenterId: 4, glAccount: ' 1510 ' });
     assets.saveAsset();
 
     const [, request] = assetsService.updateAsset.mock.calls[0];
-    expect(request).toMatchObject({ acquisitionCost: 1499.5, depreciationMethod: 'StraightLine', workCenterId: 4 });
-    expect(request).not.toHaveProperty('glAccount');
+    expect(request).toMatchObject({ acquisitionCost: 1499.5, depreciationMethod: 'StraightLine', workCenterId: 4, glAccount: '1510' });
+  });
+
+  it('sends a cleared GL account as blank so the server clears it', () => {
+    const assets = create();
+    assets.dialogRef = { clearDraft: vi.fn() };
+    assets.openEditAssetFromDetail({
+      id: 11, name: 'Press 1', assetType: 'Machine', status: 'Active', location: null, manufacturer: null,
+      model: null, serialNumber: null, photoFileId: null, currentHours: 0, notes: null, isCustomerOwned: false,
+      cavityCount: null, toolLifeExpectancy: null, currentShotCount: null, sourceJobId: null, sourceJobNumber: null,
+      sourcePartId: null, sourcePartNumber: null, createdAt: new Date(), updatedAt: new Date(),
+      acquisitionCost: null, depreciationMethod: null, workCenterId: null, workCenterCode: null, glAccount: '1500',
+    });
+
+    assets.assetForm.patchValue({ glAccount: null });
+    assets.saveAsset();
+
+    const [, request] = assetsService.updateAsset.mock.calls[0];
+    expect(request.glAccount).toBe('');
+  });
+
+  it('rejects a GL account longer than the server column', () => {
+    const assets = create();
+    const gl = assets.assetForm.get('glAccount')!;
+
+    gl.setValue('1'.repeat(101));
+
+    expect(gl.hasError('maxlength')).toBe(true);
   });
 
   it('rejects an acquisition cost with a third decimal place', () => {

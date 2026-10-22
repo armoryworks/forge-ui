@@ -3,6 +3,7 @@ import { BaseChartDirective } from '../../../../shared/charts/base-chart.directi
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { CurrencyService } from '../../../../shared/services/currency.service';
 import { WorkCenterCostRate, workCenterRateLabel } from '../../models/costing.model';
 
 // One hue per rate component: labour blues, machine teal, overhead ambers — so a
@@ -30,6 +31,7 @@ const MACHINE_OH_FIXED_COLOR = '#b45309';
 })
 export class CostingRatesVisualComponent {
   private readonly translate = inject(TranslateService);
+  private readonly currencyService = inject(CurrencyService);
 
   readonly rates = input.required<WorkCenterCostRate[]>();
 
@@ -37,6 +39,7 @@ export class CostingRatesVisualComponent {
 
   protected readonly chartConfig = computed<ChartConfiguration<'bar'>>(() => {
     const rates = this.rates();
+    const currency = this.currencyService.baseCurrency();
     const labels = rates.map(workCenterRateLabel);
 
     return {
@@ -93,7 +96,7 @@ export class CostingRatesVisualComponent {
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`,
+                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(undefined, { style: 'currency', currency })}`,
             },
           },
         },
@@ -105,7 +108,7 @@ export class CostingRatesVisualComponent {
           },
           y: {
             stacked: true,
-            ticks: { callback: (v) => Number(v).toLocaleString(undefined, { style: 'currency', currency: 'USD' }), font: { size: 10 } },
+            ticks: { callback: (v) => Number(v).toLocaleString(undefined, { style: 'currency', currency }), font: { size: 10 } },
           },
         },
       },

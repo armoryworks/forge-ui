@@ -1075,7 +1075,7 @@
       "noContent": "No hay contenido para analizar.",
       "readFailed": "No se pudo leer el archivo.",
       "noDataRows": "No se encontraron filas de datos debajo del encabezado.",
-      "importedStatus": "Creada",
+      "importedStatus": "Importada",
       "preview": "Vista previa",
       "commit": "Confirmar",
       "committed": "Importadas {{created}} de {{total}} piezas.",
@@ -3415,7 +3415,7 @@
     "workCenter": "Centro de trabajo",
     "glAccount": "Cuenta contable (opcional)",
     "glAccountLabel": "Cuenta contable",
-    "glAccountSyncHint": "La asigna la sincronización contable; no se puede editar aquí.",
+    "glAccountSyncHint": "Puede corregirla hasta que se contabilice la depreciación de este activo.",
     "depreciation": {
       "StraightLine": "Línea recta",
       "DecliningBalance": "Saldo decreciente",
