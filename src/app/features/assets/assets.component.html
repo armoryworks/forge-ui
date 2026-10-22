@@ -51,7 +51,7 @@
   <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" [draftConfig]="draftConfig" [draftFormGroup]="assetForm" (closed)="closeDialog()">
 
     <div [formGroup]="assetForm">
-      <app-input [label]="'assets.name' | translate" formControlName="name" data-testid="asset-name" />
+      <app-input [label]="'assets.name' | translate" formControlName="name" [maxlength]="200" data-testid="asset-name" />
 
       <div class="dialog-row">
         <app-select [label]="'common.type' | translate" formControlName="assetType" [options]="assetTypeOptions" data-testid="asset-type" />

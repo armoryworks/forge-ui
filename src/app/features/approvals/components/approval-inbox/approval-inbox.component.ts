@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -16,6 +16,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-approval-inbox',
@@ -41,7 +42,7 @@ export class ApprovalInboxComponent implements OnInit {
   protected readonly pending = signal<ApprovalRequest[]>([]);
   protected readonly showRejectDialog = signal(false);
   protected readonly rejectTarget = signal<ApprovalRequest | null>(null);
-  protected readonly rejectComments = new FormControl('', { nonNullable: true, validators: [Validators.required] });
+  protected readonly rejectComments = new FormControl('', { nonNullable: true, validators: [requiredTrimmed] });
 
   protected readonly columns: ColumnDef[] = [
     { field: 'entityType', header: this.translate.instant('approvals.cols.type'), sortable: true, width: '120px', type: 'enum',

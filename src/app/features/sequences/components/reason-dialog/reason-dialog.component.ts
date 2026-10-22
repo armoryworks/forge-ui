@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export interface ReasonDialogData {
   title: string;
@@ -32,7 +33,7 @@ export class ReasonDialogComponent {
 
   protected readonly reason = new FormControl<string>('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.minLength(3)],
+    validators: [requiredTrimmed, Validators.minLength(3)],
   });
 
   protected confirm(): void {

@@ -1857,7 +1857,8 @@
       "reason": "Motivo del cambio",
       "effectiveDate": "Fecha de vigencia",
       "submit": "Revisar pieza",
-      "created": "Revisión {{revision}} creada"
+      "created": "Revisión {{revision}} creada",
+      "revisionTaken": "La revisión {{revision}} ya existe para esta pieza"
     },
     "classification": {
       "confirmTitle": "¿Cambiar la clasificación de la pieza?",
@@ -2448,7 +2449,8 @@
       "typeBoth": "Facturación y envío",
       "addAddressAriaLabel": "Agregar dirección",
       "editAddressAriaLabel": "Editar dirección",
-      "deleteAddressAriaLabel": "Eliminar dirección"
+      "deleteAddressAriaLabel": "Eliminar dirección",
+      "missingParts": "Falta en la dirección: {{parts}}"
     },
     "orders": "Pedidos",
     "contacts": "Contactos",
@@ -3505,7 +3507,7 @@
   "assets": {
     "title": "Activos",
     "subtitle": "Seguimiento de equipos, herramental y propiedad de la empresa",
-    "createAsset": "Nuevo Activo",
+    "createAsset": "Crear activo",
     "addAsset": "Agregar Activo",
     "editAsset": "Editar Activo",
     "assetTag": "Etiqueta de Activo",
@@ -5148,7 +5150,7 @@
     "connectionLost": "Conexión Perdida",
     "unableToReachServer": "No se puede comunicar con el servidor. Verifique su conexión de red.",
     "timeout": "La solicitud expiró. Intente de nuevo.",
-    "ruleViolation": "Acción no permitida",
+    "ruleViolation": "No se pudo completar",
     "numberTaken": "Otro registro acaba de tomar ese número. Guarde de nuevo para obtener el siguiente número."
   },
   "confirmDialog": {
@@ -6068,9 +6070,12 @@
       "max": "{{label}} debe ser como máximo {{max}}",
       "pattern": "El formato de {{label}} no es válido",
       "wholeNumber": "{{label}} debe ser un número entero",
-      "invalid": "{{label}} no es válido"
+      "invalid": "{{label}} no es válido",
+      "positive": "{{label}} debe ser mayor que 0"
     },
-    "maxDecimals": "{{field}} puede tener como máximo {{max}} decimales"
+    "maxDecimals": "{{field}} puede tener como máximo {{max}} decimales",
+    "endOnOrAfterStartDate": "La fecha de fin debe ser igual o posterior a la fecha de inicio",
+    "dueOnOrAfterBillDate": "La fecha de vencimiento debe ser igual o posterior a la fecha de la factura"
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",
@@ -12666,7 +12671,8 @@
       "signOut": "Cerrar sesión",
       "confirmSignOutHere": "Toque de nuevo para cerrar sesión",
       "problemCount": "{{count}} / {{max}}",
-      "forgeVersion": "Forge {{version}}"
+      "forgeVersion": "Forge {{version}}",
+      "problemRejected": "No se pudo enviar el informe. Revíselo e inténtelo de nuevo."
     },
     "timer": {
       "running": "En curso: {{jobNumber}} · {{elapsed}}",

@@ -32,6 +32,7 @@ import { WorkCenter } from '../../../scheduling/models/scheduling.model';
 import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -117,7 +118,7 @@ export class OperationDialogComponent implements OnInit {
 
   protected readonly formGroup = new FormGroup({
     stepNumber: new FormControl<number>(this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
-    title: new FormControl(this.data.operation?.title ?? '', [Validators.required, Validators.maxLength(200)]),
+    title: new FormControl(this.data.operation?.title ?? '', [requiredTrimmed, Validators.maxLength(200)]),
     instructions: new FormControl(this.data.operation?.instructions ?? ''),
     workCenterId: new FormControl<number | null>(this.data.operation?.workCenterId ?? null),
     // Composable estimated time — canonically stored in milliseconds; composed on save,

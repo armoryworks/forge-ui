@@ -32,6 +32,7 @@ import { SalesOrderService } from '../../sales-orders/services/sales-order.servi
 import { PartsService } from '../../parts/services/parts.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { JOB_EDIT_ROLES } from '../job-roles';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
 
 export type DialogMode = 'create' | 'edit';
 
@@ -100,7 +101,7 @@ export class JobDialogComponent implements OnInit {
 
   protected readonly jobForm = new FormGroup({
     jobNumber: new FormControl(''),
-    title: new FormControl('', [Validators.required, Validators.maxLength(200)]),
+    title: new FormControl('', [requiredTrimmed, Validators.maxLength(200)]),
     description: new FormControl(''),
     trackTypeId: new FormControl<number>(0, [Validators.required]),
     customerId: new FormControl<number | null>(null),

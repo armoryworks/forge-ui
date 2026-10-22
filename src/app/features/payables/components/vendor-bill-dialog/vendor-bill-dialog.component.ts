@@ -28,6 +28,7 @@ import { ActiveCurrency } from '../../../../shared/models/active-currency.model'
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { MONEY_DECIMALS, roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
+import { onOrAfter } from '../../../../shared/validators/on-or-after.validator';
 
 /** Static (non-form) metadata for one billable PO line row. */
 interface PoLineMeta {
@@ -135,7 +136,10 @@ export class VendorBillDialogComponent {
     vendorInvoiceNumber: new FormControl(''),
     purchaseOrderId: new FormControl<number | null>(null),
     billDate: new FormControl<Date | null>(null, [Validators.required]),
-    dueDate: new FormControl<Date | null>(null, [Validators.required]),
+    dueDate: new FormControl<Date | null>(null, [
+      Validators.required,
+      onOrAfter('billDate', 'validation.dueOnOrAfterBillDate'),
+    ]),
     taxAmount: new FormControl<number | null>(0, [
       Validators.min(0),
       maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.tax'), this.translate),
@@ -270,6 +274,10 @@ export class VendorBillDialogComponent {
         }
       },
     });
+
+    this.billForm.controls.billDate.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.billForm.controls.dueDate.updateValueAndValidity());
 
     // Returning to the base currency resets the booking rate to 1.
     this.billForm.controls.currencyId.valueChanges

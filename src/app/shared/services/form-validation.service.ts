@@ -1,4 +1,4 @@
-import { FormGroup, AbstractControl } from '@angular/forms';
+import { FormGroup, ValidationErrors } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Signal, signal } from '@angular/core';
 import { startWith } from 'rxjs';
@@ -45,6 +45,7 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
   },
   pattern: (label) => `${label} format is invalid`,
   positive: (label) => `${label} must be greater than 0`,
+  wholeNumber: (label) => `${label} must be a whole number`,
 };
 
 type MessageTranslator = (key: string, params: Record<string, unknown>) => string;
@@ -57,6 +58,7 @@ const ERROR_MESSAGE_KEYS: Record<string, (label: string, error: unknown) => [str
   min: (label, err) => ['validation.messages.min', { label, min: (err as { min: number }).min }],
   max: (label, err) => ['validation.messages.max', { label, max: (err as { max: number }).max }],
   pattern: (label) => ['validation.messages.pattern', { label }],
+  positive: (label) => ['validation.messages.positive', { label }],
   wholeNumber: (label) => ['validation.messages.wholeNumber', { label }],
 };
 
@@ -108,19 +110,7 @@ export class FormValidationService {
   static collectViolationItems(form: FormGroup, labels: Record<string, string>): ViolationItem[] {
     const items: ViolationItem[] = [];
 
-    for (const [key, control] of Object.entries(form.controls)) {
-      const errors = (control as AbstractControl).errors;
-      if (!errors) continue;
-
-      const label = labels[key] ?? key;
-
-      for (const [errorKey, errorValue] of Object.entries(errors)) {
-        const message = FormValidationService.messageFor(errorKey, errorValue, label);
-        if (message !== null) {
-          items.push({ controlName: key, message });
-        }
-      }
-    }
+    FormValidationService.collectGroup(items, form, '', labels);
 
     for (const errorValue of Object.values(form.errors ?? {})) {
       const { message, field } = (errorValue ?? {}) as { message?: unknown; field?: unknown };
@@ -132,16 +122,69 @@ export class FormValidationService {
   }
 
   /**
+   * Readable fallback label for a control with no entry in the labels map
+   * ("unitPrice" -> "Unit price").
+   */
+  static labelFromControlName(controlName: string): string {
+    const words = controlName
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .trim()
+      .toLowerCase();
+    return words ? words.charAt(0).toUpperCase() + words.slice(1) : controlName;
+  }
+
+  private static collectGroup(
+    items: ViolationItem[],
+    group: FormGroup,
+    prefix: string,
+    labels: Record<string, string>,
+  ): void {
+    for (const [key, control] of Object.entries(group.controls)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      const label = labels[path] ?? labels[key] ?? FormValidationService.labelFromControlName(key);
+      if (control.errors) {
+        FormValidationService.pushMessages(items, path, control.errors, label);
+      }
+      if (control instanceof FormGroup) {
+        FormValidationService.collectGroup(items, control, path, labels);
+      }
+    }
+  }
+
+  private static pushMessages(
+    items: ViolationItem[],
+    controlName: string,
+    errors: ValidationErrors,
+    label: string,
+  ): void {
+    for (const [errorKey, errorValue] of Object.entries(errors)) {
+      const message = FormValidationService.messageFor(errorKey, errorValue, label);
+      if (message !== null) {
+        items.push({ controlName, message });
+      }
+    }
+  }
+
+  /**
    * Message text for a single validation error on a field labelled `label`.
    * Shared by the violation summary and the per-field error lines on
    * app-input and app-autocomplete so all read the same. Returns null for an
-   * error object whose `message` is not a string.
+   * error object whose `message` is not a string. An error carrying a
+   * `messageKey` is translated here, each time it is shown, so the current
+   * language applies.
    */
   static messageFor(errorKey: string, errorValue: unknown, label: string): string | null {
+    if (errorValue && typeof errorValue === 'object' && 'messageKey' in errorValue) {
+      const messageKey = (errorValue as { messageKey: unknown }).messageKey;
+      if (typeof messageKey !== 'string') return null;
+      return translator ? translator(messageKey, { label }) : messageKey;
+    }
     if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
       const message = (errorValue as { message: unknown }).message;
       if (typeof message !== 'string') return null;
-      return errorKey === 'serverError' ? `${label}: ${message}` : message;
+      if (errorKey !== 'serverError' || message.toLowerCase().startsWith(label.toLowerCase())) return message;
+      return `${label}: ${message}`;
     }
     if (translator) {
       const [key, params] = ERROR_MESSAGE_KEYS[errorKey]?.(label, errorValue) ?? ['validation.messages.invalid', { label }];

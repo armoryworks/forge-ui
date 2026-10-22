@@ -26,6 +26,8 @@ import { EntityPickerComponent } from '../../../shared/components/entity-picker/
 import { AuthService } from '../../../shared/services/auth.service';
 import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from '../quality-roles';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
+import { wholeNumber } from '../../../shared/validators/whole-number.validator';
 
 const PART_ENTITY_TYPES = ['Part', 'BOM'];
 
@@ -127,8 +129,8 @@ export class EcoListComponent implements OnInit {
   ];
 
   protected readonly createForm = new FormGroup({
-    title: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
-    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    title: new FormControl('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(200)] }),
+    description: new FormControl('', { nonNullable: true, validators: [requiredTrimmed] }),
     changeType: new FormControl<EcoChangeType>('Revision', { nonNullable: true }),
     priority: new FormControl<EcoPriority>('Normal', { nonNullable: true }),
     reasonForChange: new FormControl(''),
@@ -138,8 +140,8 @@ export class EcoListComponent implements OnInit {
 
   protected readonly addItemForm = new FormGroup({
     entityType: new FormControl('Part', { nonNullable: true }),
-    entityId: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
-    changeDescription: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
+    entityId: new FormControl<number | null>(null, [Validators.required, Validators.min(1), wholeNumber]),
+    changeDescription: new FormControl('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(500)] }),
     oldValue: new FormControl('', [jsonText]),
     newValue: new FormControl('', [jsonText]),
   });

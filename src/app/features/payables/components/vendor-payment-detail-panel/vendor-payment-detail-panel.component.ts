@@ -24,6 +24,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of PaymentDetailPanel.
 @Component({
@@ -76,7 +77,7 @@ export class VendorPaymentDetailPanelComponent {
   protected readonly voidForm = new FormGroup({
     reason: new FormControl<string>('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(500)],
+      validators: [requiredTrimmed, Validators.minLength(3), Validators.maxLength(500)],
     }),
   });
   protected readonly voidViolations = FormValidationService.getViolations(this.voidForm, {

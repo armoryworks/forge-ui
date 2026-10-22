@@ -1,13 +1,23 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
+  effect,
   forwardRef,
+  inject,
+  Injector,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
+
+import { BoundControl } from '../../utils/bound-control';
 
 @Component({
   selector: 'app-textarea',
@@ -24,7 +34,11 @@ import { MatInputModule } from '@angular/material/input';
     },
   ],
 })
-export class TextareaComponent implements ControlValueAccessor {
+export class TextareaComponent implements ControlValueAccessor, AfterContentInit {
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly bound = new BoundControl();
+
   readonly label = input('');
   readonly rows = input(3);
   readonly maxlength = input<number | null>(null);
@@ -36,9 +50,29 @@ export class TextareaComponent implements ControlValueAccessor {
    *  to editable mode but strips the outlined border + interactive
    *  affordances so the field reads as data, not as a control. */
   readonly isReadonly = input<boolean>(false);
+  readonly required = input<boolean>(false);
 
   protected readonly value = signal('');
   protected readonly disabled = signal(false);
+
+  protected readonly isRequired = computed(() => this.required() || this.bound.isRequired());
+  protected readonly errorMessage = computed(() => this.bound.errorMessage(this.label()));
+  protected readonly errorStateMatcher: ErrorStateMatcher = {
+    isErrorState: () => this.errorMessage() !== null,
+  };
+
+  private readonly matInput = viewChild(MatInput);
+
+  constructor() {
+    effect(() => {
+      this.errorMessage();
+      this.matInput()?.updateErrorState();
+    });
+  }
+
+  ngAfterContentInit(): void {
+    this.bound.attach(this.injector, this.destroyRef);
+  }
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};

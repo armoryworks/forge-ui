@@ -48,6 +48,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -331,7 +332,7 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly shortCloseSaving = signal(false);
   protected readonly shortCloseReasonCtrl = new FormControl<string>('', {
     nonNullable: true,
-    validators: [Validators.required, Validators.minLength(3), Validators.maxLength(2000)],
+    validators: [requiredTrimmed, Validators.minLength(3), Validators.maxLength(2000)],
   });
 
   protected openShortClose(): void {

@@ -1857,7 +1857,8 @@
       "reason": "Reason for change",
       "effectiveDate": "Effective date",
       "submit": "Revise part",
-      "created": "Revision {{revision}} created"
+      "created": "Revision {{revision}} created",
+      "revisionTaken": "Revision {{revision}} already exists for this part"
     },
     "classification": {
       "confirmTitle": "Change part classification?",
@@ -2453,7 +2454,8 @@
       "typeBoth": "Billing & Shipping",
       "addAddressAriaLabel": "Add address",
       "editAddressAriaLabel": "Edit address",
-      "deleteAddressAriaLabel": "Delete address"
+      "deleteAddressAriaLabel": "Delete address",
+      "missingParts": "Address is missing: {{parts}}"
     },
     "orders": "Orders",
     "contacts": "Contacts",
@@ -3505,7 +3507,7 @@
   "assets": {
     "title": "Assets",
     "subtitle": "Track equipment, tooling, and company property",
-    "createAsset": "New Asset",
+    "createAsset": "Create asset",
     "addAsset": "Add Asset",
     "editAsset": "Edit Asset",
     "assetTag": "Asset Tag",
@@ -5148,7 +5150,7 @@
     "connectionLost": "Connection Lost",
     "unableToReachServer": "Unable to reach the server. Check your network connection.",
     "timeout": "Request timed out. Please try again.",
-    "ruleViolation": "Action not allowed",
+    "ruleViolation": "Couldn't complete that",
     "numberTaken": "That number was just taken by another record. Save again to get the next number."
   },
   "confirmDialog": {
@@ -6075,9 +6077,12 @@
       "max": "{{label}} must be at most {{max}}",
       "pattern": "{{label}} format is invalid",
       "wholeNumber": "{{label}} must be a whole number",
-      "invalid": "{{label}} is invalid"
+      "invalid": "{{label}} is invalid",
+      "positive": "{{label}} must be greater than 0"
     },
-    "maxDecimals": "{{field}} can have at most {{max}} decimal places"
+    "maxDecimals": "{{field}} can have at most {{max}} decimal places",
+    "endOnOrAfterStartDate": "End date must be on or after the start date",
+    "dueOnOrAfterBillDate": "Due date must be on or after the bill date"
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
@@ -12666,7 +12671,8 @@
       "signOut": "Sign out",
       "confirmSignOutHere": "Tap again to sign out",
       "problemCount": "{{count}} / {{max}}",
-      "forgeVersion": "Forge {{version}}"
+      "forgeVersion": "Forge {{version}}",
+      "problemRejected": "Could not send that report. Check it and try again."
     },
     "timer": {
       "running": "Running: {{jobNumber}} · {{elapsed}}",

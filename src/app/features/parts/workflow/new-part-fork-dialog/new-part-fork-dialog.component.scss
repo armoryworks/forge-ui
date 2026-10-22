@@ -9,6 +9,14 @@
     display: flex;
     flex-direction: column;
     gap: $sp-sm;
+
+    &--invalid .new-part-fork__step-name {
+      color: var(--error);
+    }
+
+    &--invalid .new-part-fork__card {
+      border-color: var(--error);
+    }
   }
 
   &__heading {

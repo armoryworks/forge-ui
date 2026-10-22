@@ -1,10 +1,15 @@
 import {
+  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
+  effect,
   ElementRef,
   forwardRef,
   inject,
+  Injector,
   input,
   signal,
   viewChild,
@@ -16,11 +21,13 @@ import {
   ValidationErrors,
   Validator,
 } from '@angular/forms';
+import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInput, MatInputModule } from '@angular/material/input';
 import { TranslateService } from '@ngx-translate/core';
 
 import { LanguageService } from '../../services/language.service';
+import { BoundControl } from '../../utils/bound-control';
 import { formatLocaleNumber, parseLocaleNumber } from '../../utils/locale-number';
 import { MONEY_DECIMALS } from '../../utils/money';
 
@@ -67,9 +74,12 @@ import { MONEY_DECIMALS } from '../../utils/money';
     },
   ],
 })
-export class CurrencyInputComponent implements ControlValueAccessor, Validator, AfterViewInit {
+export class CurrencyInputComponent implements ControlValueAccessor, Validator, AfterContentInit, AfterViewInit {
   private readonly translate = inject(TranslateService, { optional: true });
   private readonly language = this.translate ? inject(LanguageService) : null;
+  private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly bound = new BoundControl();
 
   readonly label = input.required<string>();
   readonly placeholder = input<string>('0.00');
@@ -83,9 +93,23 @@ export class CurrencyInputComponent implements ControlValueAccessor, Validator, 
 
   protected readonly disabled = signal(false);
 
+  protected readonly isRequired = computed(() => this.required() || this.bound.isRequired());
+  protected readonly errorMessage = computed(() => this.bound.errorMessage(this.label()));
+  protected readonly errorStateMatcher: ErrorStateMatcher = {
+    isErrorState: () => this.errorMessage() !== null,
+  };
+
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
+  private readonly matInput = viewChild(MatInput);
   private text = '';
   private invalidNumber = false;
+
+  constructor() {
+    effect(() => {
+      this.errorMessage();
+      this.matInput()?.updateErrorState();
+    });
+  }
 
   private onChange: (value: number | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -93,6 +117,10 @@ export class CurrencyInputComponent implements ControlValueAccessor, Validator, 
   protected get inputMode(): string {
     const min = this.min();
     return min !== null && min !== '' && Number(min) >= 0 ? 'decimal' : 'text';
+  }
+
+  ngAfterContentInit(): void {
+    this.bound.attach(this.injector, this.destroyRef);
   }
 
   ngAfterViewInit(): void {
