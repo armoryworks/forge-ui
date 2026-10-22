@@ -10,6 +10,7 @@ import {
   Output,
   signal,
   Type,
+  untracked,
 } from '@angular/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -25,6 +26,8 @@ import { WorkflowStepRegistryService } from '../../services/workflow-step-regist
 import { SlideoutComponent } from '../slideout/slideout.component';
 import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { WorkflowStepStubComponent } from './workflow-step-stub.component';
+
+const SKIPPED_STEPS_KEY = 'skippedStepIds';
 
 /**
  * Workflow Pattern Phase 4 — Generic shell that hosts a workflow run
@@ -98,6 +101,7 @@ export class WorkflowComponent {
   @Output() readonly stepAdvanced = new EventEmitter<string>();
   @Output() readonly stepBacked = new EventEmitter<string>();
   @Output() readonly stepSkipped = new EventEmitter<string>();
+  @Output() readonly skippedStepsChanged = new EventEmitter<string[]>();
   @Output() readonly completeRequested = new EventEmitter<void>();
 
   // ─── Derived state ──────────────────────────────────────────────────
@@ -150,8 +154,15 @@ export class WorkflowComponent {
    */
   private readonly continuedStepIds = signal<ReadonlySet<string>>(new Set());
 
-  /** Steps the user left with Skip in this session. */
+  /**
+   * Steps the user left with Skip and has not continued from since. Seeded
+   * from the run's saved `skippedStepIds` whenever a different run mounts;
+   * every change is emitted through `skippedStepsChanged` for the parent to
+   * save, so a reload or resume still flags them.
+   */
   private readonly skippedStepIds = signal<ReadonlySet<string>>(new Set());
+
+  private readonly runId = computed(() => this.run()?.id ?? null);
 
   constructor() {
     effect(() => {
@@ -159,6 +170,11 @@ export class WorkflowComponent {
       if (current > this.maxReachedIndex()) {
         this.maxReachedIndex.set(current);
       }
+    });
+    effect(() => {
+      this.runId();
+      const saved = untracked(() => this.run()?.draftPayload?.[SKIPPED_STEPS_KEY]);
+      this.skippedStepIds.set(new Set(Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string') : []));
     });
   }
 
@@ -386,8 +402,10 @@ export class WorkflowComponent {
   }
 
   protected isIncomplete(step: WorkflowStepDefinition): boolean {
+    if (this.isCurrent(step)) return false;
+    if (this.skippedStepIds().has(step.id)) return true;
     const idx = this.steps().findIndex(s => s.id === step.id);
-    return idx < this.reachedIndex() && !this.isCurrent(step) && !this.isComplete(step);
+    return idx < this.reachedIndex() && this.gatesPassedMap().get(step.id) === false;
   }
 
   protected isCurrent(step: WorkflowStepDefinition): boolean {
@@ -420,18 +438,23 @@ export class WorkflowComponent {
     const current = this.currentStep();
     if (!current) return;
     this.continuedStepIds.update(ids => new Set(ids).add(current.id));
-    this.skippedStepIds.update(ids => {
-      const next = new Set(ids);
-      next.delete(current.id);
-      return next;
-    });
+    if (this.skippedStepIds().has(current.id)) {
+      const remaining = new Set(this.skippedStepIds());
+      remaining.delete(current.id);
+      this.skippedStepIds.set(remaining);
+      this.skippedStepsChanged.emit([...remaining]);
+    }
     this.stepAdvanced.emit(current.id);
   }
 
   protected skip(): void {
     const current = this.currentStep();
     if (!current || current.required) return;
-    this.skippedStepIds.update(ids => new Set(ids).add(current.id));
+    if (!this.skippedStepIds().has(current.id)) {
+      const skipped = new Set(this.skippedStepIds()).add(current.id);
+      this.skippedStepIds.set(skipped);
+      this.skippedStepsChanged.emit([...skipped]);
+    }
     this.stepSkipped.emit(current.id);
   }
 

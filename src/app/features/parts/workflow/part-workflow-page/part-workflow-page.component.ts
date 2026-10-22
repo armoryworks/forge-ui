@@ -242,8 +242,9 @@ export class PartWorkflowPageComponent {
    * Bound variant: the route is /parts/{id}. A `runId=` in the query string
    * names the run to mount, whoever started it; without one the page looks
    * for the current user's open run on this part. A fresh run starts only
-   * for a Draft part, because the server reopens a finished part's closed
-   * run at step 1 — an Active part without an open run opens its detail.
+   * for a part still being defined (Draft or Prototype), because the server
+   * reopens a finished part's closed run at step 1 — an Active or Obsolete
+   * part without an open run opens its detail.
    */
   private loadWorkflowContext(partId: number, runId: number, definitionId: string): void {
     this.loadError.set(null);
@@ -272,7 +273,7 @@ export class PartWorkflowPageComponent {
           && r.definitionId === definitionId) ?? null;
 
         if (!run) {
-          if (part.status !== 'Draft') {
+          if (part.status === 'Active' || part.status === 'Obsolete') {
             this.router.navigate(['/parts'], { queryParams: { detail: `part:${partId}` }, replaceUrl: true });
             return;
           }
@@ -474,6 +475,12 @@ export class PartWorkflowPageComponent {
     const next = def.steps[idx + 1]?.id;
     if (!next) return;
     this.navigateToStep(next);
+  }
+
+  protected onSkippedStepsChanged(stepIds: string[]): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.saveSkippedSteps(run.id, stepIds).subscribe();
   }
 
   protected onCompleteRequested(): void {

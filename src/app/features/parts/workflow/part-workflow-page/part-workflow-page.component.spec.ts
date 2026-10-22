@@ -138,8 +138,8 @@ describe('PartWorkflowPageComponent on an existing part', () => {
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
   });
 
-  it('opens an active part instead of reopening its finished workflow', () => {
-    const { workflowService, router } = stub('Active');
+  it.each(['Active', 'Obsolete'])('opens a %s part instead of reopening its finished workflow', (status) => {
+    const { workflowService, router } = stub(status);
     vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
     const start = vi.spyOn(workflowService, 'startRun');
 
@@ -147,6 +147,40 @@ describe('PartWorkflowPageComponent on an existing part', () => {
 
     expect(start).not.toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/parts'], { queryParams: { detail: 'part:1' }, replaceUrl: true });
+  });
+
+  it('starts a guided run on a prototype part, which is still being defined', () => {
+    const { workflowService, router } = stub('Prototype');
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([]));
+    const start = vi.spyOn(workflowService, 'startRun').mockReturnValue(of(buildRun({ entityId: 1 })));
+
+    load(1, 0);
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ entityType: 'Part', entityId: 1 }));
+    expect(router.navigate).not.toHaveBeenCalledWith(['/parts'], expect.anything());
+  });
+
+  it('continues the open run on a prototype part', () => {
+    const { workflowService } = stub('Prototype');
+    const open = buildRun({ id: 5, entityId: 1, definitionId: 'part-make-finishedgood-v1' });
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([open]));
+    const start = vi.spyOn(workflowService, 'startRun');
+
+    const page = load(1, 0);
+
+    expect(start).not.toHaveBeenCalled();
+    expect((page as unknown as { run(): WorkflowRun | null }).run()?.id).toBe(5);
+  });
+
+  it('saves the steps the shell reports as skipped on the mounted run', () => {
+    const { workflowService } = stub('Draft');
+    vi.spyOn(workflowService, 'listActive').mockReturnValue(of([buildRun({ id: 5, entityId: 1, definitionId: 'part-make-finishedgood-v1' })]));
+    const save = vi.spyOn(workflowService, 'saveSkippedSteps').mockReturnValue(of(undefined));
+
+    const page = load(1, 0);
+    (page as unknown as { onSkippedStepsChanged(ids: string[]): void }).onSkippedStepsChanged(['quality']);
+
+    expect(save).toHaveBeenCalledWith(5, ['quality']);
   });
 
   it('mounts the run named by ?runId even when someone else started it', () => {

@@ -315,6 +315,12 @@ export class CustomerWorkflowPageComponent {
     this.navigateToStep(next);
   }
 
+  protected onSkippedStepsChanged(stepIds: string[]): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.saveSkippedSteps(run.id, stepIds).subscribe();
+  }
+
   protected onCompleteRequested(): void {
     const run = this.run();
     if (!run) return;
