@@ -11,8 +11,14 @@
   </div>
 
   <div class="worker__content" [appLoadingBlock]="loading()">
-    @if (sortedTasks().length === 0 && !loading()) {
-      <app-empty-state icon="check_circle" [message]="'worker.noTasksAssigned' | translate" />
+    @if (loadFailed() && !loading()) {
+      <app-empty-state icon="error_outline" role="alert" data-testid="worker-load-failed"
+        [message]="'worker.loadFailed' | translate"
+        [actionLabel]="'worker.refresh' | translate"
+        (action)="loadTasks()" />
+    } @else if (sortedTasks().length === 0 && !loading()) {
+      <app-empty-state icon="check_circle" [message]="'worker.noTasksAssigned' | translate"
+        [helpText]="'worker.noTasksAssignedHint' | translate" />
     }
 
     <div class="worker__task-list">

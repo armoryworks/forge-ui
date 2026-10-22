@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, computed, inject, output, signal,
+  ChangeDetectionStrategy, Component, computed, inject, OnDestroy, output, signal,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -12,11 +12,16 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KioskTerminal, Team } from '../../models/kiosk-terminal.model';
 import { randomId } from '../../../../shared/utils/random-id';
+import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail';
 import { MfaChallengeComponent } from '../../../auth/mfa-challenge.component';
 import { MfaValidateResponse } from '../../../account/models/mfa.model';
 import { LanguageToggleComponent } from '../../../../shared/components/language-toggle/language-toggle.component';
 
 type SetupPhase = 'admin-login' | 'mfa' | 'configure';
+
+const SETUP_ROLES = ['Admin', 'Manager'];
+const TERMINAL_NAME_MAX = 100;
+const SETUP_IDLE_MS = 120_000;
 
 @Component({
   selector: 'app-kiosk-setup',
@@ -26,12 +31,17 @@ type SetupPhase = 'admin-login' | 'mfa' | 'configure';
   styleUrl: './kiosk-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KioskSetupComponent {
+export class KioskSetupComponent implements OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly translate = inject(TranslateService);
 
   readonly configured = output<KioskTerminal>();
+
+  protected readonly terminalNameMax = TERMINAL_NAME_MAX;
+  private setupSessionOpen = false;
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly endSetupSession = (): void => this.closeSetupSession();
 
   protected readonly phase = signal<SetupPhase>('admin-login');
   protected readonly teams = signal<Team[]>([]);
@@ -91,8 +101,7 @@ export class KioskSetupComponent {
           this.phase.set('mfa');
           return;
         }
-        this.loadTeams();
-        this.phase.set('configure');
+        this.enterConfigure();
       },
       error: () => {
         this.loggingIn.set(false);
@@ -107,8 +116,7 @@ export class KioskSetupComponent {
     this.authService.completeMfaLogin(result.accessToken, null).subscribe({
       next: () => {
         this.loggingIn.set(false);
-        this.loadTeams();
-        this.phase.set('configure');
+        this.enterConfigure();
       },
       error: () => {
         this.loggingIn.set(false);
@@ -117,6 +125,69 @@ export class KioskSetupComponent {
         this.phase.set('admin-login');
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.closeSetupSession();
+  }
+
+  private enterConfigure(): void {
+    if (!this.authService.hasAnyRole(SETUP_ROLES)) {
+      this.authService.clearAuth();
+      this.loginError.set(this.translate.instant('kioskSetup.needsAdminOrManager'));
+      this.phase.set('admin-login');
+      return;
+    }
+    this.setupSessionOpen = true;
+    window.addEventListener('pagehide', this.endSetupSession);
+    this.loadTeams();
+    this.phase.set('configure');
+    this.startIdleTimer();
+  }
+
+  protected cancelSetup(): void {
+    if (this.saving()) return;
+    this.leaveConfigure();
+    this.loginError.set(null);
+  }
+
+  protected onConfigureActivity(): void {
+    if (this.phase() === 'configure') this.startIdleTimer();
+  }
+
+  private leaveConfigure(): void {
+    this.closeSetupSession();
+    this.configError.set(null);
+    this.passwordControl.reset();
+    this.phase.set('admin-login');
+  }
+
+  private startIdleTimer(): void {
+    this.clearIdleTimer();
+    this.idleTimer = setTimeout(() => {
+      this.idleTimer = null;
+      if (this.saving()) {
+        this.startIdleTimer();
+        return;
+      }
+      this.leaveConfigure();
+      this.loginError.set(this.translate.instant('kioskSetup.signedOutIdle'));
+    }, SETUP_IDLE_MS);
+  }
+
+  private clearIdleTimer(): void {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
+  private closeSetupSession(always = false): void {
+    this.clearIdleTimer();
+    window.removeEventListener('pagehide', this.endSetupSession);
+    if (!this.setupSessionOpen && !always) return;
+    this.setupSessionOpen = false;
+    this.authService.clearAuth();
   }
 
   protected onMfaCancelled(): void {
@@ -167,9 +238,9 @@ export class KioskSetupComponent {
         this.selectCreatedTeam(team);
         this.saveTerminal(terminalName, team.id);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.saving.set(false);
-        this.configError.set(this.translate.instant('shopFloor.createTeamFailed'));
+        this.configError.set(httpProblemDetail(err) ?? this.translate.instant('shopFloor.createTeamFailed'));
       },
     });
   }
@@ -197,16 +268,16 @@ export class KioskSetupComponent {
           this.failSave();
           return;
         }
-        this.authService.clearAuth(); // Clear admin session
+        this.closeSetupSession(true);
         this.configured.emit(terminal);
       },
-      error: () => this.failSave(),
+      error: (err: unknown) => this.failSave(err),
     });
   }
 
-  private failSave(): void {
+  private failSave(err?: unknown): void {
     this.saving.set(false);
-    this.configError.set(this.translate.instant('shopFloor.saveTerminalFailed'));
+    this.configError.set(httpProblemDetail(err) ?? this.translate.instant('shopFloor.saveTerminalFailed'));
   }
 
   private selectCreatedTeam(team: Team): void {

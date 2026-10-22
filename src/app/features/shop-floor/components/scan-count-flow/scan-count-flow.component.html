@@ -14,12 +14,12 @@
       </div>
       <div class="scan-flow__info-row">
         <span class="scan-flow__info-label">{{ 'kioskFlows.count.recordedQty' | translate }}</span>
-        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ context().currentStock }}</span>
+        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
       </div>
 
       <div class="count-flow__input">
         <p class="scan-flow__prompt">{{ 'kioskFlows.count.enterActual' | translate }}</p>
-        <app-input [label]="'kioskFlows.count.actualCount' | translate" type="number" [formControl]="countControl" data-testid="count-qty" />
+        <app-input [label]="'kioskFlows.count.actualCount' | translate" type="number" [min]="0" [formControl]="countControl" data-testid="count-qty" />
       </div>
 
       <div class="scan-flow__action-row">
@@ -28,7 +28,6 @@
           {{ 'common.cancel' | translate }}
         </button>
         <button class="action-btn action-btn--primary"
-                [disabled]="countControl.value === null"
                 (click)="confirmCount()"
                 [attr.aria-label]="'kioskFlows.count.submit' | translate"
                 data-testid="count-submit-btn">
@@ -45,7 +44,7 @@
       <div class="count-flow__discrepancy">
         <div class="count-flow__discrepancy-row">
           <span class="count-flow__discrepancy-label">{{ 'kioskFlows.count.recorded' | translate }}</span>
-          <span class="count-flow__discrepancy-value">{{ context().currentStock }}</span>
+          <span class="count-flow__discrepancy-value">{{ (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
         </div>
         <div class="count-flow__discrepancy-arrow">
           <span class="material-icons-outlined">arrow_forward</span>

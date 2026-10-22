@@ -6,6 +6,7 @@ export interface ScanContext {
   currentLocationName: string | null;
   currentLocationId: number | null;
   availableActions: ScanAvailableAction[];
+  stockUomCode?: string | null;
 }
 
 export interface ScanAvailableAction {

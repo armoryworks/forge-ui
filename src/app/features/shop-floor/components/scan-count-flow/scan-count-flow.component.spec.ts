@@ -23,7 +23,7 @@ interface CountInternals {
   ngOnInit: () => void;
   confirmCount: () => void;
   submit: () => void;
-  countControl: { setValue: (value: number) => void };
+  countControl: { setValue: (value: number | null) => void; touched: boolean; invalid: boolean };
 }
 
 function setup(count: ScanActionService['count'], context: ScanContext = CONTEXT) {
@@ -80,5 +80,20 @@ describe('ScanCountFlowComponent', () => {
     const unplaced = setup(vi.fn(), { ...CONTEXT, currentLocationId: null });
     unplaced.flow.confirmCount();
     expect(unplaced.error).toHaveBeenCalledWith('es:kioskFlows.count.noLocation');
+  });
+
+  it('will not submit a blank or negative count and points at the field instead', () => {
+    const count = vi.fn(() => of(0));
+    const { flow } = setup(count);
+
+    flow.countControl.setValue(null);
+    flow.confirmCount();
+    expect(flow.countControl.touched).toBe(true);
+
+    flow.countControl.setValue(-4);
+    expect(flow.countControl.invalid).toBe(true);
+    flow.confirmCount();
+
+    expect(count).not.toHaveBeenCalled();
   });
 });

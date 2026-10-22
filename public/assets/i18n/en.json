@@ -8128,7 +8128,9 @@
     "overdue": "OVERDUE",
     "due": "Due",
     "openJobAria": "Open job {{jobNumber}}: {{title}}",
-    "operations": "operations"
+    "operations": "operations",
+    "loadFailed": "Couldn't load your tasks.",
+    "noTasksAssignedHint": "Work orders assigned to you appear here."
   },
   "kioskFlows": {
     "common": {
@@ -8148,7 +8150,10 @@
       "selectLocation": "Select Location",
       "scanDestinationPrompt": "Scan destination location or select from list",
       "selectShipmentAria": "Select shipment {{number}}",
-      "reversed": "Reversed"
+      "reversed": "Reversed",
+      "quantityPositive": "Enter a quantity greater than 0.",
+      "quantityAtMost": "Enter no more than {{max}}.",
+      "loadFailed": "Couldn't load this list. Check the connection and try again."
     },
     "actions": {
       "move": "Move",
@@ -8194,7 +8199,8 @@
       "noShipmentLines": "No open shipment lines for this part",
       "noWorkOrderContext": "No work order details available",
       "noRecentShipments": "No recent shipments found for this part",
-      "readyForNext": "Ready for next scan"
+      "readyForNext": "Ready for next scan",
+      "signInNeeded": "Your session has ended. Sign in again to use the scanner."
     },
     "count": {
       "title": "Cycle Count",
@@ -8362,14 +8368,14 @@
     },
     "undo": {
       "title": "Recent Scan Actions",
-      "actionsToday": "{{count}} actions today",
       "closeAria": "Close undo panel",
       "empty": "No scan actions in the last {{hours}} hours",
       "reverseAria": "Reverse scan action",
       "reverse": "Reverse",
       "reversedToast": "Reversed: {{description}}",
       "movedBackTo": "moved back to {{location}}",
-      "reverseFailed": "Failed to reverse action. Check your PIN."
+      "reverseFailed": "Failed to reverse action. Check your PIN.",
+      "actionsRecent": "{{count}} actions in the last {{hours}} hours"
     },
     "pin": {
       "title": "Enter PIN to reverse",
@@ -8447,7 +8453,9 @@
       "undo": "Undo",
       "undone": "Punch undone.",
       "failed": "Could not undo the punch. Ask your supervisor to correct it."
-    }
+    },
+    "needsAdminOrManager": "Only an Admin or Manager can set up this terminal.",
+    "signedOutIdle": "Setup was idle, so you were signed out. Sign in again to finish."
   },
   "shopFloor": {
     "title": "Shop Floor",
@@ -8475,7 +8483,6 @@
     "jobScanned": "Job Scanned",
     "scanBadgeToContinue": "Now scan your badge or RFID to continue",
     "enterPin": "Enter Your PIN",
-    "scanId": "Scan ID",
     "pin": "PIN",
     "enterPinPlaceholder": "Enter PIN...",
     "authenticating": "Authenticating...",
@@ -8553,7 +8560,15 @@
       "shipmentShipped": "{{number}} marked as shipped",
       "shipFailed": "Could not mark the shipment as shipped",
       "noTeamMembers": "No one is on the {{team}} team yet. Add members under Admin > Teams & Kiosks.",
-      "assignFailed": "Could not assign {{jobNumber}}"
+      "assignFailed": "Could not assign {{jobNumber}}",
+      "purchaseOrderScanned": "Purchase Order {{number}}",
+      "partScanned": "Part {{number}}",
+      "lotScanned": "Lot {{number}}",
+      "assetScanned": "Asset: {{name}}",
+      "assetScannedUnnamed": "Asset label scanned",
+      "locationScanned": "Location {{name}}",
+      "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
+      "shippingLoadFailed": "Couldn't load the shipments. Go back and try again."
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -8752,7 +8767,13 @@
       "inputPlaceholder": "Scan or type part number...",
       "recent": "Recent Scans",
       "inStock": "{{count}} in stock"
-    }
+    },
+    "scanBadgeNotRecognized": "That wasn't a badge. Scan your badge or RFID to continue.",
+    "scanCheckFailed": "Couldn't check that scan. Scan it again.",
+    "closedJobScanned": "Work order {{number}} is closed and can't take time.",
+    "scanNotForClock": "{{label}} isn't used for clocking. Scan your badge or a work order.",
+    "kioskMfaUseBadge": "This account needs a second sign-in step. Use your badge and PIN on this kiosk.",
+    "terminalCheckFailed": "Can't reach the server to check this terminal."
   },
   "kioskDisplay": {
     "entryTitle": "Use this browser as a shop-floor terminal?",
@@ -12681,13 +12702,15 @@
         "ClockIn": "Clock in",
         "ClockOut": "Clock out",
         "BreakStart": "Start break",
-        "BreakEnd": "End break"
+        "BreakEnd": "End break",
+        "LunchEnd": "End lunch"
       },
       "done": {
         "ClockIn": "Clocked in",
         "ClockOut": "Clocked out",
         "BreakStart": "Break started",
-        "BreakEnd": "Break ended"
+        "BreakEnd": "Break ended",
+        "LunchEnd": "Lunch ended"
       }
     },
     "move": {
@@ -12900,7 +12923,8 @@
           "ClockIn": "Clock in",
           "ClockOut": "Clock out",
           "BreakStart": "Start a break",
-          "BreakEnd": "End the break"
+          "BreakEnd": "End the break",
+          "LunchEnd": "End lunch"
         },
         "undoClockPunch": "Undo a clock punch",
         "moveStock": "Move {{quantity}} of {{part}}",
@@ -13339,7 +13363,9 @@
       "noReason": "-- None --",
       "shortCloseTitle": "Mark done short?",
       "shortCloseMessage": "Only {{done}} good and {{scrap}} scrapped of {{quantity}} are counted. Mark this step done anyway?",
-      "shortCloseConfirm": "Mark done"
+      "shortCloseConfirm": "Mark done",
+      "wholeNumbers": "Enter whole pieces only (0 or more).",
+      "decimals": "Enter 0 or more, with at most {{places}} decimal places."
     },
     "messages": {
       "completed": "{{operation}} marked done",

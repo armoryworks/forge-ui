@@ -203,7 +203,7 @@ export class MobileApiService {
     });
   }
 
-  clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd'): Observable<ClockPunchResult | QueuedOffline> {
+  clockPunch(eventType: 'ClockIn' | 'ClockOut' | 'BreakStart' | 'BreakEnd' | 'LunchEnd'): Observable<ClockPunchResult | QueuedOffline> {
     return this.mutate<ClockPunchResult>(
       'POST', '/api/v1/mobile/clock/punch', { eventType }, { key: `mobileAppWork.sync.action.clock.${eventType}` });
   }

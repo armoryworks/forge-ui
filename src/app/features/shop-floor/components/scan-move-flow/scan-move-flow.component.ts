@@ -69,9 +69,19 @@ export class ScanMoveFlowComponent implements OnInit {
 
   protected confirmPartial(): void {
     const qty = this.partialQty.value ?? 0;
-    if (qty <= 0 || qty > this.context().currentStock) return;
+    if (!this.acceptPartial(qty, this.context().currentStock)) return;
     this.quantity.set(qty);
     this.step.set('destination');
+  }
+
+  private acceptPartial(qty: number, max: number): boolean {
+    const message = qty <= 0
+      ? this.translate.instant('kioskFlows.common.quantityPositive')
+      : qty > max ? this.translate.instant('kioskFlows.common.quantityAtMost', { max }) : null;
+    if (message === null) return true;
+    this.partialQty.setErrors({ quantity: { message } });
+    this.partialQty.markAsTouched();
+    return false;
   }
 
   protected onDestinationScanned(value: string): void {

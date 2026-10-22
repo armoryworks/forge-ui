@@ -248,6 +248,7 @@ export class OperationTimeTabComponent {
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
           reasons: this.operationsService.reasons(),
+          decimalPlaces: this.data()?.quantityDecimalPlaces ?? null,
         },
       }).afterClosed().subscribe(result => {
       if (!result) return;

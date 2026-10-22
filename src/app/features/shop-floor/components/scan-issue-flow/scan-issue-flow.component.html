@@ -49,7 +49,7 @@
       </div>
       <div class="scan-flow__info-row">
         <span class="scan-flow__info-label">{{ 'kioskFlows.common.available' | translate }}</span>
-        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ context().currentStock }}</span>
+        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
       </div>
 
       <p class="scan-flow__prompt">{{ 'kioskFlows.issue.issueAllPrompt' | translate: { count: selectedJob()?.remainingQuantity } }}</p>

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, output, signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScannerService } from '../../../../shared/services/scanner.service';
@@ -173,26 +174,36 @@ export class ScanActionOverlayComponent {
     this.error.set(null);
     this.jobContext.set(null);
 
+    this.shopFloor.identifyScan(identifier).subscribe({
+      next: (result) => {
+        if (result.scanType === 'job' && result.isClosed) {
+          this.showMessage(this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' }));
+        } else if (result.scanType === 'job' && result.entityId != null) {
+          this.openJob(result);
+        } else {
+          this.loadPartContext(identifier);
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err?.status === 401) {
+          this.showSignInNeeded();
+          return;
+        }
+        this.loadPartContext(identifier);
+      },
+    });
+  }
+
+  private loadPartContext(identifier: string): void {
     this.scanAction.getContext(identifier).subscribe({
       next: (ctx) => {
         this.context.set(ctx);
         this.phase.set('actions');
         this.contextLoaded.emit(ctx);
       },
-      error: () => this.lookupJob(identifier),
-    });
-  }
-
-  private lookupJob(identifier: string): void {
-    this.shopFloor.identifyScan(identifier).subscribe({
-      next: (result) => {
-        if (result.scanType === 'job' && result.entityId != null) {
-          this.openJob(result);
-        } else {
-          this.showNotFound(identifier);
-        }
-      },
-      error: () => this.showNotFound(identifier),
+      error: (err: HttpErrorResponse) => err?.status === 401
+        ? this.showSignInNeeded()
+        : this.showNotFound(identifier),
     });
   }
 
@@ -210,7 +221,15 @@ export class ScanActionOverlayComponent {
   }
 
   private showNotFound(identifier: string): void {
-    this.error.set(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
+    this.showMessage(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
+  }
+
+  private showSignInNeeded(): void {
+    this.showMessage(this.translate.instant('kioskFlows.overlay.signInNeeded'));
+  }
+
+  private showMessage(message: string): void {
+    this.error.set(message);
     this.phase.set('actions');
     setTimeout(() => this.close(), 3000);
   }

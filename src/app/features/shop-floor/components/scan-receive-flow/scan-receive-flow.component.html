@@ -67,7 +67,6 @@
         <div class="scan-flow__partial-input">
           <app-input [label]="'common.quantity' | translate" type="number" [formControl]="partialQty" data-testid="receive-partial-qty" />
           <button class="action-btn action-btn--primary"
-                  [disabled]="(partialQty.value ?? 0) <= 0 || (partialQty.value ?? 0) > (selectedLine()?.remainingQuantity ?? 0)"
                   (click)="confirmPartial()" [attr.aria-label]="'kioskFlows.common.confirmPartialAria' | translate">
             <span class="material-icons-outlined">check</span>
             {{ 'common.next' | translate }}

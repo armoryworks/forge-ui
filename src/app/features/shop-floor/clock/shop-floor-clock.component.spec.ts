@@ -31,6 +31,18 @@ interface ClockInternals {
   scanIdentifying: () => boolean;
   showManualLogin(): void;
   enterClockPhase(): void;
+  scannedEmployeeName: () => string | null;
+  error: () => string | null;
+  manualLoginError: () => string | null;
+  emailControl: { setValue(v: string): void };
+  passwordControl: { setValue(v: string): void };
+  onManualLoginSubmit(): void;
+  onManualLoginTyped(): void;
+  terminal: () => { teamId?: number } | null;
+  kioskAuthError: () => string | null;
+  scannedJob: () => { entityNumber?: string } | null;
+  entryConfirmPending: () => boolean;
+  continueToKiosk(): void;
 }
 
 function worker(userId: number, name: string): ClockWorker {
@@ -49,7 +61,7 @@ const clockIn: ClockEventTypeDef = {
 describe('ShopFloorClockComponent — clock phase', () => {
   const user = signal<AuthUser | null>(null);
   const token = signal<string | null>(null);
-  const auth = { user, token, clearAuth: vi.fn(), scanLogin: vi.fn(), login: vi.fn() };
+  const auth = { user, token, clearAuth: vi.fn(), scanLogin: vi.fn(), login: vi.fn(), isAuthenticated: vi.fn(() => false) };
   const mobileApi = {
     clockState: vi.fn(() => of({ state: 'in', lastEventType: 'ClockIn', lastEventAt: null, lastEventId: 501 })),
     undoClockPunch: vi.fn(() => of({ state: 'out', lastEventType: null, lastEventAt: null, lastEventId: null })),
@@ -146,6 +158,7 @@ describe('ShopFloorClockComponent — clock phase', () => {
     expect(c.kioskPhase()).toBe('clock');
     expect(c.punchError()).toEqual({ detail: 'Already clocked in.' });
     expect(auth.clearAuth).not.toHaveBeenCalled();
+    expect(shopFloor.getClockStatus).toHaveBeenCalledTimes(2);
   });
 
   it('a recorded punch is shown for two seconds before signing out', () => {
@@ -369,5 +382,149 @@ describe('ShopFloorClockComponent — clock phase', () => {
 
     expect(c.scanIdentifying()).toBe(false);
     expect(c.kioskPhase()).toBe('pin');
+  });
+
+  it('identifies the second scan after a work order and only takes a badge as the badge', () => {
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 4, entityNumber: 'J-4' }));
+    const c = create();
+    c.onScanDetected('JOB-4');
+    expect(c.kioskPhase()).toBe('job-scanned');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 7, entityNumber: 'P-7' }));
+    c.onScanDetected('PART-7');
+    expect(c.kioskPhase()).toBe('job-scanned');
+    expect(c.kioskAuthError()).toBe('shopFloor.scanBadgeNotRecognized');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 1 }));
+    c.onScanDetected('BADGE-00123456');
+    expect(c.kioskPhase()).toBe('pin');
+    expect(c.scannedJob()?.entityNumber).toBe('J-4');
+  });
+
+  it('names the identified worker on the PIN card and never the badge value', () => {
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 5, entityTitle: 'Doe, Jan' }));
+    const c = create();
+    c.onScanDetected('BADGE-00123456');
+
+    expect(c.kioskPhase()).toBe('pin');
+    expect(c.scannedEmployeeName()).toBe('Doe, Jan');
+  });
+
+  it('a scan that cannot be checked asks to scan again instead of guessing a badge', () => {
+    const c = create();
+    shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+    c.onScanDetected('BADGE-1');
+
+    expect(c.kioskPhase()).not.toBe('pin');
+    expect(c.error()).toBe('shopFloor.scanCheckFailed');
+  });
+
+  it('a closed work order is named as closed rather than offered for a badge', () => {
+    const c = create();
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 4, entityNumber: 'J-4', isClosed: true }));
+    c.onScanDetected('JOB-4');
+
+    expect(c.kioskPhase()).not.toBe('job-scanned');
+    expect(c.error()).toBe('shopFloor.closedJobScanned:{"number":"J-4"}');
+  });
+
+  it('a part label is recognised but not used for clocking', () => {
+    const c = create();
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 3, entityNumber: 'BRK-100' }));
+    c.onScanDetected('BC-BRK-100');
+
+    expect(c.error()).toBe('shopFloor.scanNotForClock:{"label":"shopFloor.display.partScanned:{\\"number\\":\\"BRK-100\\"}"}');
+  });
+
+  it('a manual sign-in that needs MFA stays on the sign-in card with no session', () => {
+    const c = create();
+    c.showManualLogin();
+    auth.login.mockReturnValueOnce(of({ mfaRequired: true, mfaPendingToken: 'p' }));
+    c.emailControl.setValue('a@forge.local');
+    c.passwordControl.setValue('secret');
+    c.onManualLoginSubmit();
+
+    expect(c.kioskPhase()).toBe('manual-login');
+    expect(c.manualLoginError()).toBe('shopFloor.kioskMfaUseBadge');
+  });
+
+  it('typing keeps the manual sign-in open past its idle window', () => {
+    const c = create();
+    c.showManualLogin();
+    vi.advanceTimersByTime(50_000);
+    c.onManualLoginTyped();
+    vi.advanceTimersByTime(50_000);
+    expect(c.kioskPhase()).toBe('manual-login');
+  });
+
+  it('returns an untouched PIN prompt to the board', () => {
+    const c = create();
+    c.onScanDetected('BADGE-1');
+    expect(c.kioskPhase()).toBe('pin');
+
+    vi.advanceTimersByTime(20_000);
+
+    expect(c.kioskPhase()).toBe('dashboard');
+  });
+
+  it('returns an abandoned manual sign-in and a work order scan with no badge to the board', () => {
+    const c = create();
+    c.showManualLogin();
+    vi.advanceTimersByTime(60_000);
+    expect(c.kioskPhase()).toBe('dashboard');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 4, entityNumber: 'J-4' }));
+    c.onScanDetected('JOB-4');
+    vi.advanceTimersByTime(15_000);
+    expect(c.kioskPhase()).toBe('dashboard');
+  });
+
+  it('keeps the pairing through a server error and unpairs only when the terminal is gone', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify({ id: 1, name: 'T1', teamId: 7, teamName: 'Assembly' }));
+    try {
+      shopFloor.getTerminal.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 503 })));
+      const kept = create();
+      expect(kept.kioskPhase()).toBe('dashboard');
+      expect(kept.terminal()?.teamId).toBe(7);
+      expect(localStorage.getItem('forge-kiosk-device-token')).toBe('tok');
+
+      shopFloor.getTerminal.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 404 })));
+      const gone = create();
+      expect(gone.kioskPhase()).toBe('setup');
+      expect(localStorage.getItem('forge-kiosk-device-token')).toBeNull();
+    } finally {
+      localStorage.removeItem('forge-kiosk-device-token');
+      localStorage.removeItem('forge-kiosk-terminal');
+    }
+  });
+
+  it('with no cached terminal, a network error offers a retry instead of unpairing', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    try {
+      shopFloor.getTerminal.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 0 })));
+      const c = create();
+      expect(c.kioskPhase()).toBe('offline');
+      expect(localStorage.getItem('forge-kiosk-device-token')).toBe('tok');
+    } finally {
+      localStorage.removeItem('forge-kiosk-device-token');
+    }
+  });
+
+  it('asks before signing out someone who opens the clock kiosk on an unpaired browser', () => {
+    localStorage.removeItem('forge-kiosk-device-token');
+    auth.isAuthenticated.mockReturnValue(true);
+    const fixture = TestBed.createComponent(ShopFloorClockComponent);
+    fixture.detectChanges();
+    const c = fixture.componentInstance as unknown as ClockInternals;
+
+    expect(c.entryConfirmPending()).toBe(true);
+    expect(auth.clearAuth).not.toHaveBeenCalled();
+
+    c.continueToKiosk();
+
+    expect(c.entryConfirmPending()).toBe(false);
+    expect(auth.clearAuth).toHaveBeenCalled();
+    auth.isAuthenticated.mockReturnValue(false);
   });
 });

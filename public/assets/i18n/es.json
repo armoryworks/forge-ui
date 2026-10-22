@@ -8121,7 +8121,9 @@
     "overdue": "VENCIDO",
     "due": "Vence",
     "openJobAria": "Abrir trabajo {{jobNumber}}: {{title}}",
-    "operations": "operaciones"
+    "operations": "operaciones",
+    "loadFailed": "No se pudieron cargar sus tareas.",
+    "noTasksAssignedHint": "Aquí aparecen las órdenes de trabajo asignadas a usted."
   },
   "kioskFlows": {
     "common": {
@@ -8141,7 +8143,10 @@
       "selectLocation": "Seleccionar ubicación",
       "scanDestinationPrompt": "Escanee la ubicación de destino o selecciónela de la lista",
       "selectShipmentAria": "Seleccionar envío {{number}}",
-      "reversed": "Revertido"
+      "reversed": "Revertido",
+      "quantityPositive": "Ingrese una cantidad mayor que 0.",
+      "quantityAtMost": "Ingrese como máximo {{max}}.",
+      "loadFailed": "No se pudo cargar esta lista. Revise la conexión e intente de nuevo."
     },
     "actions": {
       "move": "Mover",
@@ -8187,7 +8192,8 @@
       "noShipmentLines": "No hay líneas de envío abiertas para esta pieza",
       "noWorkOrderContext": "No hay detalles de la orden de trabajo disponibles",
       "noRecentShipments": "No se encontraron envíos recientes para esta pieza",
-      "readyForNext": "Listo para el siguiente escaneo"
+      "readyForNext": "Listo para el siguiente escaneo",
+      "signInNeeded": "Su sesión ha terminado. Inicie sesión de nuevo para usar el escáner."
     },
     "count": {
       "title": "Conteo cíclico",
@@ -8355,14 +8361,14 @@
     },
     "undo": {
       "title": "Acciones de escaneo recientes",
-      "actionsToday": "{{count}} acciones hoy",
       "closeAria": "Cerrar el panel de deshacer",
       "empty": "No hay acciones de escaneo en las últimas {{hours}} horas",
       "reverseAria": "Revertir la acción de escaneo",
       "reverse": "Revertir",
       "reversedToast": "Revertido: {{description}}",
       "movedBackTo": "devuelto a {{location}}",
-      "reverseFailed": "No se pudo revertir la acción. Verifique su PIN."
+      "reverseFailed": "No se pudo revertir la acción. Verifique su PIN.",
+      "actionsRecent": "{{count}} acciones en las últimas {{hours}} horas"
     },
     "pin": {
       "title": "Ingrese el PIN para revertir",
@@ -8440,7 +8446,9 @@
       "undo": "Deshacer",
       "undone": "Registro deshecho.",
       "failed": "No se pudo deshacer el registro. Pida a su supervisor que lo corrija."
-    }
+    },
+    "needsAdminOrManager": "Solo un administrador o gerente puede configurar esta terminal.",
+    "signedOutIdle": "La configuración estuvo inactiva y se cerró su sesión. Inicie sesión de nuevo para terminar."
   },
   "shopFloor": {
     "title": "Planta de Producción",
@@ -8468,7 +8476,6 @@
     "jobScanned": "Trabajo Escaneado",
     "scanBadgeToContinue": "Ahora escanee su credencial o RFID para continuar",
     "enterPin": "Ingrese Su PIN",
-    "scanId": "ID de Escaneo",
     "pin": "PIN",
     "enterPinPlaceholder": "Ingrese PIN...",
     "authenticating": "Autenticando...",
@@ -8546,7 +8553,15 @@
       "shipmentShipped": "{{number}} marcado como enviado",
       "shipFailed": "No se pudo marcar el envío como enviado",
       "noTeamMembers": "Todavía no hay nadie en el equipo {{team}}. Agregue miembros en Administración > Equipos y Kioscos.",
-      "assignFailed": "No se pudo asignar {{jobNumber}}"
+      "assignFailed": "No se pudo asignar {{jobNumber}}",
+      "purchaseOrderScanned": "Orden de compra {{number}}",
+      "partScanned": "Pieza {{number}}",
+      "lotScanned": "Lote {{number}}",
+      "assetScanned": "Activo: {{name}}",
+      "assetScannedUnnamed": "Etiqueta de activo escaneada",
+      "locationScanned": "Ubicación {{name}}",
+      "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
+      "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo."
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -8745,7 +8760,13 @@
       "inputPlaceholder": "Escanee o escriba el número de pieza...",
       "recent": "Escaneos recientes",
       "inStock": "{{count}} en existencia"
-    }
+    },
+    "scanBadgeNotRecognized": "Eso no es una credencial. Escanee su credencial o RFID para continuar.",
+    "scanCheckFailed": "No se pudo comprobar ese escaneo. Escanéelo de nuevo.",
+    "closedJobScanned": "La orden de trabajo {{number}} está cerrada y no admite tiempo.",
+    "scanNotForClock": "{{label}} no sirve para fichar. Escanee su credencial o una orden de trabajo.",
+    "kioskMfaUseBadge": "Esta cuenta requiere un segundo paso de inicio de sesión. Use su credencial y PIN en este quiosco.",
+    "terminalCheckFailed": "No se puede contactar con el servidor para comprobar esta terminal."
   },
   "kioskDisplay": {
     "entryTitle": "¿Usar este navegador como terminal de planta?",
@@ -12681,13 +12702,15 @@
         "ClockIn": "Marcar entrada",
         "ClockOut": "Marcar salida",
         "BreakStart": "Iniciar descanso",
-        "BreakEnd": "Terminar descanso"
+        "BreakEnd": "Terminar descanso",
+        "LunchEnd": "Terminar almuerzo"
       },
       "done": {
         "ClockIn": "Entrada registrada",
         "ClockOut": "Salida registrada",
         "BreakStart": "Descanso iniciado",
-        "BreakEnd": "Descanso terminado"
+        "BreakEnd": "Descanso terminado",
+        "LunchEnd": "Almuerzo terminado"
       }
     },
     "move": {
@@ -12900,7 +12923,8 @@
           "ClockIn": "Marcar entrada",
           "ClockOut": "Marcar salida",
           "BreakStart": "Iniciar un descanso",
-          "BreakEnd": "Terminar el descanso"
+          "BreakEnd": "Terminar el descanso",
+          "LunchEnd": "Terminar el almuerzo"
         },
         "undoClockPunch": "Deshacer una marcación",
         "moveStock": "Mover {{quantity}} de {{part}}",
@@ -13339,7 +13363,9 @@
       "noReason": "-- Ninguno --",
       "shortCloseTitle": "¿Marcar como terminada incompleta?",
       "shortCloseMessage": "Solo se cuentan {{done}} buenas y {{scrap}} desechadas de {{quantity}}. ¿Marcar este paso como terminado de todos modos?",
-      "shortCloseConfirm": "Marcar terminada"
+      "shortCloseConfirm": "Marcar terminada",
+      "wholeNumbers": "Ingrese solo piezas enteras (0 o más).",
+      "decimals": "Introduzca 0 o más, con un máximo de {{places}} decimales."
     },
     "messages": {
       "completed": "{{operation}} marcada como terminada",

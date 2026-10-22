@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { A11yModule } from '@angular/cdk/a11y';
 import { NgTemplateOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -28,22 +29,31 @@ import { ScanIdentification } from '../models/scan-identification.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 import { LanguageService } from '../../../shared/services/language.service';
+import { NumericKeypadComponent } from '../../../shared/components/numeric-keypad/numeric-keypad.component';
+import { focusCancelOnOpen } from '../../../shared/utils/focus-dialog-cancel';
+import { describeNonClockScan } from '../utils/describe-scan';
 
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
+const PIN_TIMEOUT_MS = 20_000;
+const JOB_SCANNED_TIMEOUT_MS = 15_000;
+const MANUAL_LOGIN_TIMEOUT_MS = 60_000;
+const PIN_MAX_LENGTH = 8;
+const DEVICE_TOKEN_KEY = 'forge-kiosk-device-token';
+const TERMINAL_KEY = 'forge-kiosk-terminal';
 const PUNCH_FEEDBACK_MS = 2_000;
 const PUNCH_UNDO_MS = 10_000;
 const PUNCH_UNDO_RESULT_MS = 4_000;
 const SUPERVISE_ROLES = ['Admin', 'Manager'];
 const PUNCH_UNDO_CAPABILITIES = ['CAP-MOBILE-CORE', 'CAP-MOBILE-CLOCK'];
 
-type KioskPhase = 'setup' | 'dashboard' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
+type KioskPhase = 'setup' | 'offline' | 'dashboard' | 'pin' | 'job-scanned' | 'manual-login' | 'clock';
 type PunchUndoState = 'offered' | 'undoing' | 'undone' | 'failed';
 
 @Component({
   selector: 'app-shop-floor-clock',
   standalone: true,
-  imports: [ReactiveFormsModule, DateTimePipe, NgTemplateOutlet, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
+  imports: [ReactiveFormsModule, A11yModule, DateTimePipe, NgTemplateOutlet, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent, NumericKeypadComponent],
   templateUrl: './shop-floor-clock.component.html',
   styleUrl: './shop-floor-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +99,11 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   protected readonly kioskAuthError = signal<string | null>(null);
   protected readonly kioskAuthenticating = signal(false);
   protected readonly pinControl = new FormControl('');
+  protected readonly pinMaxLength = PIN_MAX_LENGTH;
+  protected readonly scannedEmployeeName = signal<string | null>(null);
+  protected readonly entryConfirmPending = signal(
+    !localStorage.getItem(DEVICE_TOKEN_KEY) && this.authService.isAuthenticated(),
+  );
 
   // Dual-scan: job context (when job barcode is scanned first)
   protected readonly scannedJob = signal<ScanIdentification | null>(null);
@@ -118,6 +133,8 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   protected readonly punchUndoState = signal<PunchUndoState | null>(null);
 
   private autoLogoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private phaseTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private kioskStarted = false;
   private punchFeedbackTimer: ReturnType<typeof setTimeout> | null = null;
   private punchUndoTimer: ReturnType<typeof setTimeout> | null = null;
   private punchUndoEventId: number | null = null;
@@ -136,6 +153,21 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    if (this.entryConfirmPending()) return;
+    this.startKiosk();
+  }
+
+  protected continueToKiosk(): void {
+    this.entryConfirmPending.set(false);
+    this.startKiosk();
+  }
+
+  protected backToForge(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  private startKiosk(): void {
+    this.kioskStarted = true;
     this.authService.clearAuth();
     this.clockTypes.load();
     this.updateClock();
@@ -152,32 +184,56 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.rfid.disconnect();
+    if (this.kioskStarted) this.rfid.disconnect();
     this.clearAutoLogoutTimer();
+    this.clearPhaseTimeout();
     this.clearPunchFeedbackTimer();
     this.clearPunchUndo();
   }
 
-  private checkTerminalConfig(): void {
-    const deviceToken = localStorage.getItem('forge-kiosk-device-token');
+  protected checkTerminalConfig(): void {
+    const deviceToken = localStorage.getItem(DEVICE_TOKEN_KEY);
     if (!deviceToken) {
       this.kioskPhase.set('setup');
       return;
     }
 
-    // Validate token against backend
     this.shopFloorService.getTerminal(deviceToken).subscribe({
       next: (terminal) => {
         this.terminal.set(terminal);
         this.startDashboard();
       },
-      error: () => {
-        // Terminal not found or deactivated — re-setup
-        localStorage.removeItem('forge-kiosk-device-token');
-        localStorage.removeItem('forge-kiosk-terminal');
-        this.kioskPhase.set('setup');
+      error: (err: HttpErrorResponse) => {
+        if (err?.status === 401 || err?.status === 404) {
+          this.unpair();
+          return;
+        }
+        const cached = this.readCachedTerminal();
+        if (cached) {
+          this.terminal.set(cached);
+          this.startDashboard();
+          return;
+        }
+        this.kioskPhase.set('offline');
       },
     });
+  }
+
+  private readCachedTerminal(): KioskTerminal | null {
+    try {
+      const raw = localStorage.getItem(TERMINAL_KEY);
+      return raw ? JSON.parse(raw) as KioskTerminal : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private unpair(): void {
+    localStorage.removeItem(DEVICE_TOKEN_KEY);
+    localStorage.removeItem(TERMINAL_KEY);
+    this.terminal.set(null);
+    this.resetToDashboard();
+    this.kioskPhase.set('setup');
   }
 
   protected onTerminalConfigured(terminal: KioskTerminal): void {
@@ -202,68 +258,105 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   protected onScanDetected(scanValue: string): void {
     this.dismissPunchUndo();
-    // If we're in the job-scanned phase, this second scan is the employee badge
-    if (this.kioskPhase() === 'job-scanned') {
-      this.scannedBarcode.set(scanValue);
-      this.kioskAuthError.set(null);
-      this.pinControl.reset();
-      this.kioskPhase.set('pin');
-      return;
-    }
+    const secondScan = this.kioskPhase() === 'job-scanned';
+    if (secondScan) this.startPhaseTimeout(JOB_SCANNED_TIMEOUT_MS);
 
-    // First scan from dashboard — identify what was scanned
     this.scanIdentifying.set(true);
     this.error.set(null);
 
     this.shopFloorService.identifyScan(scanValue).subscribe({
       next: (result) => {
         this.scanIdentifying.set(false);
-        this.handleScanIdentified(scanValue, result);
+        if (secondScan) {
+          this.handleSecondScan(scanValue, result);
+        } else {
+          this.handleScanIdentified(scanValue, result);
+        }
       },
-      error: () => {
-        // Identification failed — fall back to treating it as employee badge
+      error: (err: HttpErrorResponse) => {
         this.scanIdentifying.set(false);
-        this.scannedBarcode.set(scanValue);
-        this.kioskAuthError.set(null);
-        this.pinControl.reset();
-        this.kioskPhase.set('pin');
+        if (err?.status === 401) {
+          this.unpair();
+          return;
+        }
+        const message = this.translate.instant('shopFloor.scanCheckFailed');
+        if (secondScan) {
+          this.kioskAuthError.set(message);
+        } else {
+          this.error.set(message);
+        }
       },
     });
+  }
+
+  private handleSecondScan(scanValue: string, result: ScanIdentification): void {
+    if (this.kioskPhase() !== 'job-scanned') return;
+    if (result.scanType === 'employee') {
+      this.enterPinPhase(scanValue, result.entityTitle);
+    } else if (result.scanType === 'job' && !result.isClosed) {
+      this.scannedJob.set(result);
+      this.kioskAuthError.set(null);
+    } else if (result.scanType === 'job') {
+      this.kioskAuthError.set(this.closedJobMessage(result));
+    } else {
+      this.kioskAuthError.set(this.translate.instant('shopFloor.scanBadgeNotRecognized'));
+    }
+  }
+
+  private closedJobMessage(result: ScanIdentification): string {
+    return this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' });
+  }
+
+  private notForClockMessage(result: ScanIdentification, scanValue: string): string {
+    const label = describeNonClockScan(result, this.translate);
+    return label
+      ? this.translate.instant('shopFloor.scanNotForClock', { label })
+      : this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue });
+  }
+
+  private enterPinPhase(scanValue: string, employeeName?: string): void {
+    this.scannedBarcode.set(scanValue);
+    this.scannedEmployeeName.set(employeeName ?? null);
+    this.kioskAuthError.set(null);
+    this.pinControl.reset();
+    this.kioskPhase.set('pin');
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
   }
 
   private handleScanIdentified(scanValue: string, result: ScanIdentification): void {
     switch (result.scanType) {
       case 'employee':
-        // Employee badge scanned — go straight to PIN
-        this.scannedBarcode.set(scanValue);
-        this.kioskAuthError.set(null);
-        this.pinControl.reset();
-        this.kioskPhase.set('pin');
+        this.enterPinPhase(scanValue, result.entityTitle);
         break;
 
       case 'job':
-        // Job barcode scanned — store job context, prompt for employee badge
+        if (result.isClosed) {
+          this.error.set(this.closedJobMessage(result));
+          break;
+        }
         this.scannedJob.set(result);
         this.kioskAuthError.set(null);
         this.kioskPhase.set('job-scanned');
+        this.startPhaseTimeout(JOB_SCANNED_TIMEOUT_MS);
         break;
 
-      case 'unknown':
       default:
-        // Unrecognized — show error on dashboard
-        this.error.set(this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
+        this.error.set(this.notForClockMessage(result, scanValue));
         break;
     }
   }
 
   protected onPinSubmit(): void {
+    if (this.kioskAuthenticating()) return;
     const scanValue = this.scannedBarcode();
     const pin = this.pinControl.value?.trim();
     if (!scanValue || !pin || pin.length < 4) {
       this.kioskAuthError.set(this.translate.instant('shopFloor.pinMinDigits'));
+      this.startPhaseTimeout(PIN_TIMEOUT_MS);
       return;
     }
 
+    this.clearPhaseTimeout();
     this.kioskAuthenticating.set(true);
     this.kioskAuthError.set(null);
 
@@ -275,8 +368,30 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
       error: () => {
         this.kioskAuthenticating.set(false);
         this.kioskAuthError.set(this.translate.instant('shopFloor.badgeOrPinInvalid'));
+        this.startPhaseTimeout(PIN_TIMEOUT_MS);
       },
     });
+  }
+
+  protected onKeypadDigit(digit: string): void {
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
+    const current = this.pinControl.value ?? '';
+    if (current.length >= PIN_MAX_LENGTH) return;
+    this.pinControl.setValue(current + digit);
+  }
+
+  protected onKeypadBackspace(): void {
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
+    this.pinControl.setValue((this.pinControl.value ?? '').slice(0, -1));
+  }
+
+  protected onKeypadClear(): void {
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
+    this.pinControl.setValue('');
+  }
+
+  protected onPinTyped(): void {
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
   }
 
   protected cancelPin(): void {
@@ -294,9 +409,15 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     this.passwordControl.reset();
     this.manualLoginError.set(null);
     this.kioskPhase.set('manual-login');
+    this.startPhaseTimeout(MANUAL_LOGIN_TIMEOUT_MS);
+  }
+
+  protected onManualLoginTyped(): void {
+    this.startPhaseTimeout(MANUAL_LOGIN_TIMEOUT_MS);
   }
 
   protected onManualLoginSubmit(): void {
+    if (this.manualLoggingIn()) return;
     const email = this.emailControl.value?.trim();
     const password = this.passwordControl.value;
     if (!email || !password) {
@@ -304,17 +425,25 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.clearPhaseTimeout();
     this.manualLoggingIn.set(true);
     this.manualLoginError.set(null);
 
     this.authService.login({ email, password }).subscribe({
-      next: () => {
+      next: (response) => {
         this.manualLoggingIn.set(false);
+        if (response.mfaRequired) {
+          this.manualLoginError.set(this.translate.instant('shopFloor.kioskMfaUseBadge'));
+          this.passwordControl.reset();
+          this.startPhaseTimeout(MANUAL_LOGIN_TIMEOUT_MS);
+          return;
+        }
         this.enterClockPhase();
       },
       error: () => {
         this.manualLoggingIn.set(false);
         this.manualLoginError.set(this.translate.instant('shopFloor.invalidCredentials'));
+        this.startPhaseTimeout(MANUAL_LOGIN_TIMEOUT_MS);
       },
     });
   }
@@ -325,6 +454,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   // ─── Clock Phase ───
   private enterClockPhase(): void {
+    this.clearPhaseTimeout();
     this.loadData();
     this.kioskPhase.set('clock');
     this.startAutoLogoutTimer();
@@ -352,6 +482,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
       error: (err: HttpErrorResponse) => {
         this.processing.set(null);
         this.punchError.set({ detail: err?.error?.detail ?? err?.error?.title ?? '' });
+        if (err?.status === 409) this.loadData();
       },
     });
   }
@@ -434,11 +565,13 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   protected resetToDashboard(): void {
     this.clearAutoLogoutTimer();
+    this.clearPhaseTimeout();
     this.clearPunchFeedbackTimer();
     this.punchError.set(null);
     this.punchRecorded.set(null);
     this.authService.clearAuth();
     this.scannedBarcode.set(null);
+    this.scannedEmployeeName.set(null);
     this.scannedJob.set(null);
     this.kioskAuthError.set(null);
     this.manualLoginError.set(null);
@@ -455,7 +588,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   // exiting must re-authenticate. Confirm first so a mis-tap doesn't drop the
   // worker to login.
   protected exitKiosk(): void {
-    this.dialog.open(ConfirmDialogComponent, {
+    const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant('shopFloor.exitKioskConfirmTitle'),
@@ -463,7 +596,9 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
         confirmLabel: this.translate.instant('shopFloor.exitKiosk'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
+    });
+    focusCancelOnOpen(ref);
+    ref.afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       // Tear down kiosk state, then re-authenticate via /login.
       this.rfid.disconnect();
@@ -485,6 +620,22 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     if (this.autoLogoutTimer) {
       clearTimeout(this.autoLogoutTimer);
       this.autoLogoutTimer = null;
+    }
+  }
+
+  private startPhaseTimeout(ms: number): void {
+    this.clearPhaseTimeout();
+    this.phaseTimeoutTimer = setTimeout(() => {
+      this.phaseTimeoutTimer = null;
+      if (this.kioskAuthenticating() || this.manualLoggingIn()) return;
+      this.resetToDashboard();
+    }, ms);
+  }
+
+  private clearPhaseTimeout(): void {
+    if (this.phaseTimeoutTimer) {
+      clearTimeout(this.phaseTimeoutTimer);
+      this.phaseTimeoutTimer = null;
     }
   }
 

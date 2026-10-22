@@ -277,6 +277,8 @@ describe('MobileClockComponent', () => {
 
     expect(mockSnackbar.errorFrom).toHaveBeenCalledWith(expect.any(HttpErrorResponse), 'mobileLegacy.clock.recordFailed');
     expect(component['submitting']()).toBe(false);
+    flushTimers();
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({ isClockedIn: true, status: 'In', clockedInAt: null });
   });
 
   const el = (): HTMLElement => fixture.nativeElement as HTMLElement;

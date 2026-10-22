@@ -9,4 +9,5 @@ export interface JobOperations {
   estimatedRemainingMinutes: number | null;
   serverNow: string;
   operations: JobOperationRow[];
+  quantityDecimalPlaces?: number | null;
 }

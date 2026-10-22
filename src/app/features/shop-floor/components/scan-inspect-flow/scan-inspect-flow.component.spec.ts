@@ -15,6 +15,7 @@ import { QcTemplate } from '../../../quality/models/qc-template.model';
 import { KioskInspectionLookup } from '../../models/kiosk-inspection-lookup.model';
 import { KioskInspectionTarget } from '../../models/kiosk-inspection-target.model';
 import { KioskInspectionService } from '../../services/kiosk-inspection.service';
+import { ShopFloorService } from '../../services/shop-floor.service';
 import { ScanActionOverlayComponent } from '../scan-action-overlay/scan-action-overlay.component';
 import { ScanInspectFlowComponent } from './scan-inspect-flow.component';
 
@@ -106,6 +107,7 @@ function setup(options: SetupOptions = {}) {
       { provide: TranslateService, useValue: { instant: (k: string, p?: Record<string, unknown>) => p ? `${k}:${JSON.stringify(p)}` : k } },
       { provide: WebHidRfidService, useValue: { lastScan: signal(null), clearLastScan: vi.fn(), reconnect: () => Promise.resolve(false) } },
       { provide: ScanActionService, useValue: { getContext } },
+      { provide: ShopFloorService, useValue: { identifyScan: () => of({ scanType: 'unknown' }) } },
       { provide: SnackbarService, useValue: { info: vi.fn(), success: vi.fn(), warn: vi.fn() } },
     ],
   });

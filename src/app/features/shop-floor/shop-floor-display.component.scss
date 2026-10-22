@@ -150,6 +150,14 @@
 // item min-size defaults to its content's intrinsic height, so the body
 // grows to fit the worker grid and pushes the action bar past the viewport
 // (visible at A+ font sizes, where the grid rows get taller).
+.sf-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .sf-body {
   display: flex;
   flex-direction: column;
@@ -547,7 +555,11 @@
 
 .sf-unassigned-card__title {
   font-size: $font-size-base;
-  @include truncate;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .sf-unassigned-card__stage {
@@ -1718,7 +1730,7 @@
 
 // ─── Undo Panel Slide-Out ───
 .sf-undo-panel-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;

@@ -30,7 +30,7 @@
           <div class="scan-overlay__stock-info">
             <div class="scan-overlay__stock-badge">
               <span class="material-icons-outlined">inventory_2</span>
-              <span class="scan-overlay__stock-qty">{{ context()!.currentStock }}</span>
+              <span class="scan-overlay__stock-qty">{{ context()!.currentStock }}{{ context()!.stockUomCode ? ' ' + context()!.stockUomCode : '' }}</span>
               <span class="scan-overlay__stock-label">{{ 'kioskFlows.overlay.inStock' | translate }}</span>
             </div>
             @if (context()!.currentLocationName) {

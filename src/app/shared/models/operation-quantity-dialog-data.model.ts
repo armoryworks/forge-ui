@@ -7,4 +7,5 @@ export interface OperationQuantityDialogData {
   scrapQuantity: number;
   reasons: OperationReason[];
   touch?: boolean;
+  decimalPlaces?: number | null;
 }

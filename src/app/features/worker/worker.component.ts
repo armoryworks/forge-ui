@@ -25,6 +25,7 @@ export class WorkerComponent {
   private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
+  protected readonly loadFailed = signal(false);
   protected readonly tasks = signal<WorkerTask[]>([]);
   protected readonly userName = computed(() => {
     const user = this.authService.user();
@@ -53,9 +54,13 @@ export class WorkerComponent {
     if (!user) return;
 
     this.loading.set(true);
+    this.loadFailed.set(false);
     this.workerService.getMyTasks(user.id).subscribe({
       next: (tasks) => { this.tasks.set(tasks); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.loading.set(false);
+        this.loadFailed.set(true);
+      },
     });
   }
 

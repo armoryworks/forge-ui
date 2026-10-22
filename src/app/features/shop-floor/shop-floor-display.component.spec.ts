@@ -213,6 +213,9 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     onPinSubmit: () => void;
     pinControl: { setValue: (v: string) => void };
     scanFeedback: () => string | null;
+    pinError: () => string | null;
+    enterShipping: () => void;
+    selectShipmentForShipping: (s: unknown) => void;
   }
 
   const terminal = { id: 3, name: 'Bay 2', deviceToken: 'tok', teamId: 7, teamName: 'Assembly', teamColor: null };
@@ -793,6 +796,8 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   });
 
   it('a failed timer start shows the server reason in the actions card', () => {
+    const working = vi.spyOn(clockTypes, 'isWorking').mockReturnValue(true);
+    onTestFinished(() => working.mockRestore());
     shopFloor.startTimer.mockReturnValueOnce(problem('Clock in first.'));
     const c = create();
     c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
@@ -800,6 +805,42 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     const fb = c.actionFeedback();
     expect(fb?.success).toBe(false);
     expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
+  });
+
+  it('leaves the clocked-in check to the server, so a worker on break or who never clocks can still start a timer', () => {
+    const c = create();
+    c.selectedWorker.set({ ...makeWorker('ProductionWorker', [assignment]), status: 'Out' });
+
+    c.startJobTimer(assignment);
+
+    expect(shopFloor.startTimer).toHaveBeenCalledWith(41);
+  });
+
+  it('a recorded punch names the event and the time', () => {
+    const c = create();
+    const worker = makeWorker('ProductionWorker', [assignment]);
+    c.selectedWorker.set(worker);
+
+    c.clockAction(worker, 'IN');
+
+    expect(c.actionFeedback()?.success).toBe(true);
+    expect(c.actionFeedback()?.message).toContain('shopFloor.punchRecorded');
+  });
+
+  it('a refused punch reloads the board so the real clock state shows, and stays until the next action', () => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    shopFloor.clockInOut.mockReturnValueOnce(throwError(() =>
+      new HttpErrorResponse({ status: 409, error: { detail: 'Clock In isn\'t available after Clock In.' } })));
+
+    c.clockAction(worker, 'IN');
+
+    expect(shopFloor.getClockStatus).toHaveBeenCalled();
+    vi.advanceTimersByTime(10_000);
+    expect(c.actionFeedback()?.success).toBe(false);
+    expect(c.actionFeedback()?.detail).toBe('Clock In isn\'t available after Clock In.');
   });
 
   it('a proxy error page or an oversized body never reaches the screen', () => {
@@ -873,9 +914,12 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   });
 
   it('timer start and stop confirm with the work order number', () => {
+    const working = vi.spyOn(clockTypes, 'isWorking').mockReturnValue(true);
+    onTestFinished(() => working.mockRestore());
     const c = create();
     c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
     c.startJobTimer(assignment);
+    expect(shopFloor.startTimer).toHaveBeenCalledWith(41);
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStartedOn {"jobNumber":"JOB-0041"}');
     c.stopJobTimer(assignment);
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStoppedOn {"jobNumber":"JOB-0041"}');
@@ -928,15 +972,56 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     }
   });
 
-  it('an unidentified scan asks for a PIN with no leftover worker and times out', () => {
-    vi.useFakeTimers();
+  it('a scan that cannot be checked asks to scan again instead of guessing a badge', () => {
     shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
     const c = create();
-    c.selectedWorker.set(makeWorker('Admin'));
     c.handleScanValue('BADGE-1');
+    expect(c.phase()).toBe('main');
+    expect(c.scanFeedback()).toBe('shopFloor.scanCheckFailed');
+  });
+
+  it('a revoked pairing seen on a scan unpairs the display', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 401 })));
+    const c = create();
+    c.handleScanValue('BADGE-1');
+    expect(localStorage.getItem('forge-kiosk-device-token')).toBeNull();
+  });
+
+  it('a closed work order scan says it is closed', () => {
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 9, entityNumber: 'J-9', isClosed: true }));
+    const c = create();
+    c.handleScanValue('JOB-9');
+    expect(c.scanFeedback()).toBe('shopFloor.closedJobScanned {"number":"J-9"}');
+  });
+
+  it('a card-tap password sign-in that needs MFA stays on the card with no session', () => {
+    auth.login.mockReturnValueOnce(of({ mfaRequired: true, mfaPendingToken: 'p' }));
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin'));
+    c.phase.set('pin');
+    c.pinControl.setValue('secret');
+    c.onPinSubmit();
     expect(c.phase()).toBe('pin');
-    expect((c as unknown as { selectedWorker: () => unknown }).selectedWorker()).toBeNull();
-    vi.advanceTimersByTime(20_000);
+    expect(c.pinError()).toBe('shopFloor.kioskMfaUseBadge');
+  });
+
+  it('a shipment list that fails to load says so and keeps the sign-out timer running', () => {
+    vi.useFakeTimers();
+    TestBed.overrideProvider(ShipmentService, {
+      useValue: {
+        getShipments: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))),
+        getShipmentById: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))),
+      },
+    });
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin'));
+    c.phase.set('actions');
+    c.enterShipping();
+    expect(c.scanFeedback()).toBe('shopFloor.display.shippingLoadFailed');
+    c.selectShipmentForShipping({ id: 1 });
+    expect(c.scanFeedback()).toBe('shopFloor.display.shippingLoadFailed');
+    vi.advanceTimersByTime(30_000);
     expect(c.phase()).toBe('main');
   });
 
@@ -993,6 +1078,67 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.fontSize()).toBe(28);
     const host = fixture.nativeElement as HTMLElement;
     expect(host.style.getPropertyValue('--sf-zoom')).toBe(`${28 / 12}`);
+  });
+
+  it('keeps the auto sign-out running while a worker is on the receiving or shipping list', () => {
+    vi.useFakeTimers();
+    Object.assign(noop, {
+      getPurchaseOrders: () => of([]),
+      getBinLocations: () => of([]),
+      getShipments: () => of([]),
+    });
+    try {
+      const c = create();
+      const internals = c as unknown as { enterReceiving: () => void; enterShipping: () => void };
+      c.selectedWorker.set(makeWorker('Manager'));
+      c.phase.set('actions');
+
+      internals.enterReceiving();
+      vi.advanceTimersByTime(30_000);
+      expect(c.phase()).toBe('main');
+      expect(auth.clearAuth).toHaveBeenCalled();
+
+      c.selectedWorker.set(makeWorker('Manager'));
+      internals.enterShipping();
+      vi.advanceTimersByTime(30_000);
+      expect(c.phase()).toBe('main');
+    } finally {
+      for (const key of Object.keys(noop)) delete (noop as Record<string, unknown>)[key];
+    }
+  });
+
+  it('offers the scanner panels only to a supervisor who is signed in', () => {
+    const c = create();
+    const internals = c as unknown as { supervisorSignedIn: () => boolean };
+    expect(internals.supervisorSignedIn()).toBe(false);
+
+    c.selectedWorker.set(makeWorker('Manager'));
+    c.phase.set('pin');
+    expect(internals.supervisorSignedIn()).toBe(false);
+
+    auth.isAuthenticated.mockReturnValue(true);
+    c.phase.set('actions');
+    expect(internals.supervisorSignedIn()).toBe(true);
+
+    c.selectedWorker.set(makeWorker('ProductionWorker'));
+    expect(internals.supervisorSignedIn()).toBe(false);
+    auth.isAuthenticated.mockReturnValue(false);
+  });
+
+  it('names a scanned lot, purchase order or part by its number', () => {
+    vi.useFakeTimers();
+    const c = create();
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'lot', entityId: 3, entityNumber: 'LOT-9' }));
+    c.handleScanValue('L9');
+    expect(c.scanFeedback()).toBe('shopFloor.display.lotScanned {"number":"LOT-9"}');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'purchase-order', entityId: 4, entityNumber: 'PO-4' }));
+    c.handleScanValue('PO4');
+    expect(c.scanFeedback()).toBe('shopFloor.display.purchaseOrderScanned {"number":"PO-4"}');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 5, entityNumber: 'BR-100' }));
+    c.handleScanValue('BR');
+    expect(c.scanFeedback()).toBe('shopFloor.display.partScanned {"number":"BR-100"}');
   });
 });
 

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { ScanContext } from '../../../../shared/models/scan-action.model';
@@ -154,5 +155,56 @@ describe('ScanActionOverlayComponent', () => {
     expect(overlay.phase()).toBe('job');
     expect(overlay.jobContext()).toMatchObject({ jobId: 21, jobNumber: 'J-21', currentStage: 'In Production' });
     expect(overlay.error()).toBeNull();
+  });
+
+  it('opens a work order without asking for a part context first', () => {
+    const getContext = vi.fn(() => of(CONTEXT));
+    const identify = vi.fn(() => of<ScanIdentification>({ scanType: 'job', entityId: 21, entityNumber: 'J-21' }));
+    const { overlay } = setup(getContext, identify);
+
+    overlay.triggerScan('J-21');
+
+    expect(overlay.phase()).toBe('job');
+    expect(getContext).not.toHaveBeenCalled();
+  });
+
+  it('still looks up a typed part number the barcode table does not know', () => {
+    const getContext = vi.fn(() => of(STOCKED));
+    const { overlay } = setup(getContext);
+
+    overlay.triggerScan('RM-100');
+
+    expect(getContext).toHaveBeenCalledWith('RM-100');
+    expect(overlay.phase()).toBe('actions');
+  });
+
+  it('falls back to the part lookup when the scan cannot be identified', () => {
+    const getContext = vi.fn(() => of(STOCKED));
+    const { overlay } = setup(getContext, vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))));
+
+    overlay.triggerScan('RM-100');
+
+    expect(getContext).toHaveBeenCalledWith('RM-100');
+  });
+
+  it('says the session has ended instead of not found when the scan is refused for sign-in', () => {
+    const getContext = vi.fn(() => of(STOCKED));
+    const { overlay } = setup(getContext, vi.fn(() => throwError(() => new HttpErrorResponse({ status: 401 }))));
+
+    overlay.triggerScan('RM-100');
+
+    expect(getContext).not.toHaveBeenCalled();
+    expect(overlay.error()).toContain('signInNeeded');
+  });
+
+  it('does not open a closed work order for work', () => {
+    const getContext = vi.fn(() => of(CONTEXT));
+    const identify = vi.fn(() => of<ScanIdentification>({ scanType: 'job', entityId: 21, entityNumber: 'J-21', isClosed: true }));
+    const { overlay } = setup(getContext, identify);
+
+    overlay.triggerScan('J-21');
+
+    expect(overlay.phase()).not.toBe('job');
+    expect(overlay.error()).toContain('closedJobScanned');
   });
 });
