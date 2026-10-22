@@ -32,6 +32,7 @@ interface PageInternals {
   dialogRef: { clearDraft(): void };
   openManualEntry(): void;
   saveEntry(): void;
+  canChange(entry: TimeEntry): boolean;
 }
 
 function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
@@ -55,7 +56,7 @@ function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
   };
 }
 
-function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false) {
+function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false, roles: string[] = []) {
   const service = {
     getTimeEntries: vi.fn().mockReturnValue(of(entries)),
     stopTimer: vi.fn().mockReturnValue(of({})),
@@ -68,7 +69,7 @@ function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnab
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: TimeTrackingService, useValue: service },
       { provide: RunningTimersService, useValue: running },
-      { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
+      { provide: AuthService, useValue: { user: () => ({ id: 1 }), hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       { provide: TimerHubService, useValue: { connect: vi.fn().mockResolvedValue(undefined), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn() } },
       { provide: MatDialog, useValue: { open: vi.fn() } },
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
@@ -170,5 +171,20 @@ describe('TimeTrackingComponent', () => {
 
     component.entryForm.patchValue({ hours: 24, minutes: 0 });
     expect(component.entryViolations()).not.toContain('timeTracking.durationRange');
+  });
+
+  it('offers delete on another user\'s entry only to admins and managers', () => {
+    const own = entry({ id: 8, userId: 1 });
+    const coworker = entry({ id: 9, userId: 2 });
+
+    for (const role of ['OfficeManager', 'Controller', 'ProductionWorker']) {
+      const { component } = setup([own, coworker], of([]), false, [role]);
+      expect(component.canChange(own)).toBe(true);
+      expect(component.canChange(coworker)).toBe(false);
+    }
+    for (const role of ['Admin', 'Manager']) {
+      const { component } = setup([own, coworker], of([]), false, [role]);
+      expect(component.canChange(coworker)).toBe(true);
+    }
   });
 });
