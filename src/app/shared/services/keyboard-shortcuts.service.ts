@@ -6,9 +6,9 @@ export interface KeyboardShortcut {
   modifiers?: ('ctrl' | 'alt' | 'shift' | 'meta')[];
   /** If set, this shortcut requires the chord prefix key to be pressed first (e.g. 'g') */
   chord?: string;
-  description: string;
+  descriptionKey: string;
   action: () => void;
-  context?: string;
+  contextKey?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -130,17 +130,17 @@ export class KeyboardShortcutsService {
 
   private registerGlobal(): void {
     // Navigation — all require 'q' prefix chord to prevent accidental triggers
-    this.register({ key: 'd', chord: 'q', description: 'Go to Dashboard',    action: () => this.router.navigate(['/dashboard']),    context: 'Navigation' });
-    this.register({ key: 'k', chord: 'q', description: 'Go to Kanban',        action: () => this.router.navigate(['/kanban']),       context: 'Navigation' });
-    this.register({ key: 'b', chord: 'q', description: 'Go to Backlog',       action: () => this.router.navigate(['/backlog']),      context: 'Navigation' });
-    this.register({ key: 'p', chord: 'q', description: 'Go to Parts',         action: () => this.router.navigate(['/parts']),        context: 'Navigation' });
-    this.register({ key: 'i', chord: 'q', description: 'Go to Inventory',     action: () => this.router.navigate(['/inventory']),    context: 'Navigation' });
-    this.register({ key: 'r', chord: 'q', description: 'Go to Reports',       action: () => this.router.navigate(['/reports']),      context: 'Navigation' });
-    this.register({ key: 't', chord: 'q', description: 'Go to Time Tracking', action: () => this.router.navigate(['/time-tracking']), context: 'Navigation' });
+    this.register({ key: 'd', chord: 'q', descriptionKey: 'shortcuts.goToDashboard', action: () => this.router.navigate(['/dashboard']),    contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 'k', chord: 'q', descriptionKey: 'shortcuts.goToBoard', action: () => this.router.navigate(['/kanban']),       contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 'b', chord: 'q', descriptionKey: 'shortcuts.goToBacklog', action: () => this.router.navigate(['/backlog']),      contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 'p', chord: 'q', descriptionKey: 'shortcuts.goToParts', action: () => this.router.navigate(['/parts']),        contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 'i', chord: 'q', descriptionKey: 'shortcuts.goToInventory', action: () => this.router.navigate(['/inventory']),    contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 'r', chord: 'q', descriptionKey: 'shortcuts.goToReports', action: () => this.router.navigate(['/reports']),      contextKey: 'shortcuts.groups.navigation' });
+    this.register({ key: 't', chord: 'q', descriptionKey: 'shortcuts.goToTimeTracking', action: () => this.router.navigate(['/time-tracking']), contextKey: 'shortcuts.groups.navigation' });
 
     // General — plain shortcuts remain (non-alpha, low accidental risk)
-    this.register({ key: '/', description: 'Show keyboard shortcuts', action: () => this.toggleHelp(), context: 'General' });
-    this.register({ key: 'Escape', description: 'Close panel/dialog',  action: () => this.closeHelp(), context: 'General' });
+    this.register({ key: '/', descriptionKey: 'shortcuts.showShortcuts', action: () => this.toggleHelp(), contextKey: 'shortcuts.groups.general' });
+    this.register({ key: 'Escape', descriptionKey: 'shortcuts.closePanel', action: () => this.closeHelp(), contextKey: 'shortcuts.groups.general' });
   }
 
   private buildKey(e: KeyboardEvent): string {

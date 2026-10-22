@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -23,6 +24,7 @@ function setup(capabilityOn = true) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
+      provideTranslateService(),
       { provide: JobCostService, useValue: { returnMaterial } },
       { provide: CapabilityService, useValue: { isEnabled: vi.fn((code: string) => capabilityOn && code === 'CAP-MFG-MATL-ISSUE') } },
       { provide: MatDialog, useValue: { open: vi.fn() } },

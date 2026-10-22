@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -21,6 +21,7 @@ export interface MfaRecoveryCodesDialogData {
 })
 export class MfaRecoveryCodesDialogComponent {
   private readonly mfaService = inject(MfaService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialogRef = inject(MatDialogRef<MfaRecoveryCodesDialogComponent>);
   private readonly destroyRef = inject(DestroyRef);
@@ -53,7 +54,7 @@ export class MfaRecoveryCodesDialogComponent {
   protected copyAll(): void {
     const text = this.codes().join('\n');
     navigator.clipboard.writeText(text);
-    this.snackbar.success('Recovery codes copied to clipboard');
+    this.snackbar.success(this.translate.instant('account.mfa.recoveryCodesCopied'));
   }
 
   protected download(): void {

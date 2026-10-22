@@ -74,12 +74,12 @@ export class PriceListEntriesTableComponent implements AfterViewChecked {
   private lastFocusedKey: string | null = null;
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '140px' },
-    { field: 'partName', header: 'Description', sortable: true },
-    { field: 'minQuantity', header: 'Min Qty', sortable: true, type: 'number', width: '90px', align: 'right' },
-    { field: 'unitPrice', header: 'Unit Price', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'currency', header: 'Currency', sortable: true, width: '90px' },
-    { field: 'notes', header: 'Notes' },
+    { field: 'partNumber', header: 'columns.partNumber', sortable: true, width: '140px' },
+    { field: 'partName', header: 'common.description', sortable: true },
+    { field: 'minQuantity', header: 'columns.minQty', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'unitPrice', header: 'priceListEntry.unitPriceLabel', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'currency', header: 'priceListEntry.currencyLabel', sortable: true, width: '90px' },
+    { field: 'notes', header: 'common.notes' },
     { field: 'actions', header: '', width: '104px' },
   ];
 

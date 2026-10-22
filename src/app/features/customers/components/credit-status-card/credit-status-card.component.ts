@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CustomerService } from '../../services/customer.service';
 import { CreditRisk, CreditStatus } from '../../models/credit-status.model';
@@ -12,6 +12,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-credit-status-card',
@@ -23,6 +24,7 @@ import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
 })
 export class CreditStatusCardComponent implements OnInit {
   private readonly customerService = inject(CustomerService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -36,7 +38,7 @@ export class CreditStatusCardComponent implements OnInit {
   // Phase 3 / WU-14 / H3 — collapsible per-payment unapplied-credit list.
   protected readonly creditsExpanded = signal(false);
   protected toggleCreditsExpanded(): void { this.creditsExpanded.update(v => !v); }
-  protected readonly holdReason = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] });
+  protected readonly holdReason = new FormControl('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(500)] });
 
   ngOnInit(): void {
     this.loadCreditStatus();
@@ -54,7 +56,7 @@ export class CreditStatusCardComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.success('Credit hold placed');
+          this.snackbar.success(this.translate.instant('customers.creditMessages.holdPlaced'));
           this.showHoldDialog.set(false);
           this.saving.set(false);
           this.loadCreditStatus();
@@ -70,7 +72,7 @@ export class CreditStatusCardComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.success('Credit hold released');
+          this.snackbar.success(this.translate.instant('customers.creditMessages.holdReleased'));
           this.saving.set(false);
           this.loadCreditStatus();
           this.creditChanged.emit();

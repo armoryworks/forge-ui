@@ -64,7 +64,7 @@
     <ng-template appColumnCell="actions" let-row>
       <div class="action-cell">
         @if (row.formType === 'StateWithholding') {
-          <button class="icon-btn" (click)="openStateWithholdingDialog(); $event.stopPropagation()" aria-label="View state withholding details" matTooltip="View state withholding details" matTooltipPosition="above">
+          <button class="icon-btn" (click)="openStateWithholdingDialog(); $event.stopPropagation()" [attr.aria-label]="'complianceTemplates.viewStateWithholdingDetails' | translate" [matTooltip]="'complianceTemplates.viewStateWithholdingDetails' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">open_in_new</span>
           </button>
         }
@@ -77,7 +77,7 @@
           </button>
         }
         @if (row.isAutoSync && row.sourceUrl) {
-          <button class="icon-btn" (click)="syncTemplate(row); $event.stopPropagation()" aria-label="Sync template" matTooltip="Sync template" matTooltipPosition="above">
+          <button class="icon-btn" (click)="syncTemplate(row); $event.stopPropagation()" [attr.aria-label]="'complianceTemplates.syncTemplate' | translate" [matTooltip]="'complianceTemplates.syncTemplate' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">sync</span>
           </button>
         }

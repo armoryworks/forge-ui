@@ -274,7 +274,7 @@ export class VendorDetailPanelComponent {
       if (!confirmed) return;
       this.vendorPartsService.delete(vp.id).subscribe({
         next: () => {
-          this.snackbar.success('Removed from catalog');
+          this.snackbar.success(this.translate.instant('vendors.messages.removedFromCatalog'));
           this.loadVendorParts();
         },
       });

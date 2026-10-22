@@ -79,6 +79,7 @@ export class WorkflowService {
   private readonly pendingStepSaves = signal(0);
 
   private draftSave: Observable<void> | null = null;
+  private skippedSave: Observable<void> | null = null;
 
   /** True while a step PATCH is in flight, so closing an empty run does not race the save that creates its entity. */
   readonly stepSavePending = computed(() => this.pendingStepSaves() > 0);
@@ -229,9 +230,8 @@ export class WorkflowService {
   patchStep(runId: number, stepId: string, fields: unknown): Observable<WorkflowRun> {
     return defer(() => {
       this.pendingStepSaves.update(n => n + 1);
-      const draftSettled = (this.draftSave ?? EMPTY).pipe(ignoreElements(), catchError(() => EMPTY));
       return concat(
-        draftSettled,
+        this.runWritesSettled(),
         this.http.patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/step`, { stepId, fields }),
       ).pipe(
         tap(run => this.currentRun.set(run)),
@@ -265,6 +265,34 @@ export class WorkflowService {
   }
 
   /**
+   * Keeps the steps the user skipped on the run, so a reload or resume still
+   * flags them on the step rail. Sent silently: a lost flag is not worth an
+   * error message. A step save or jump started while this is in flight waits
+   * for it, so the two never race on the run row. Does not touch
+   * {@link currentRun}.
+   */
+  saveSkippedSteps(runId: number, stepIds: string[]): Observable<void> {
+    const request: Observable<void> = concat(
+      this.runWritesSettled(),
+      this.http.put<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/skipped-steps`, { stepIds }, {
+        context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+      }),
+    ).pipe(
+      map(() => undefined),
+      finalize(() => {
+        if (this.skippedSave === request) this.skippedSave = null;
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    this.skippedSave = request;
+    return request;
+  }
+
+  private runWritesSettled(): Observable<never> {
+    return concat(this.draftSave ?? EMPTY, this.skippedSave ?? EMPTY).pipe(ignoreElements(), catchError(() => EMPTY));
+  }
+
+  /**
    * Jump to a specific step. The server validates that every step between
    * the current pointer and the target has its completion gates satisfied;
    * if not it returns 409 with `{ missing: MissingValidator[] }` where each
@@ -275,8 +303,10 @@ export class WorkflowService {
    * interceptor's generic "Conflict" toast.
    */
   jumpToStep(runId: number, targetStepId: string): Observable<{ success: true; run: WorkflowRun } | { success: false; missing: MissingValidator[] }> {
-    return this.http
-      .patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/jump`, { targetStepId })
+    return concat(
+      this.runWritesSettled(),
+      defer(() => this.http.patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/jump`, { targetStepId })),
+    )
       .pipe(
         tap(run => this.currentRun.set(run)),
         map(run => ({ success: true as const, run })),

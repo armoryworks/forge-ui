@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { SalesOrderDetailPanelComponent } from '../sales-order-detail-panel/sales-order-detail-panel.component';
 import { SalesOrderDetail } from '../../models/sales-order-detail.model';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface SalesOrderDetailDialogData {
   salesOrderId: number;
@@ -28,12 +29,16 @@ export interface SalesOrderDetailDialogResult {
   styles: [`:host { display: block; width: 100%; height: 100%; } app-sales-order-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SalesOrderDetailDialogComponent {
+export class SalesOrderDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<SalesOrderDetailDialogComponent, SalesOrderDetailDialogResult | undefined>);
 
   protected readonly data = inject<SalesOrderDetailDialogData>(MAT_DIALOG_DATA);
 
   protected hasChanges = false;
+
+  onDialogEscape(): void {
+    this.close();
+  }
 
   protected close(): void {
     this.dialogRef.close();

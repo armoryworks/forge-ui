@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, ElementRef, effect, inject } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastService, Toast } from '../../services/toast.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-toast-container',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './toast.component.html',
   styleUrl: './toast.component.scss',

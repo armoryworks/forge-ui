@@ -24,11 +24,11 @@ const AVATAR_COLORS = [
 ];
 
 const GENDER_OPTIONS = [
-  { value: null, label: '-- None --' },
-  { value: 'Male', label: 'Male' },
-  { value: 'Female', label: 'Female' },
-  { value: 'Non-binary', label: 'Non-binary' },
-  { value: 'Prefer not to say', label: 'Prefer not to say' },
+  { value: null, labelKey: 'account.genderNone' },
+  { value: 'Male', labelKey: 'account.genderMale' },
+  { value: 'Female', labelKey: 'account.genderFemale' },
+  { value: 'Non-binary', labelKey: 'account.genderNonBinary' },
+  { value: 'Prefer not to say', labelKey: 'account.genderPreferNot' },
 ];
 
 @Component({
@@ -50,7 +50,7 @@ export class AccountProfileComponent {
   protected readonly profile = this.profileService.profile;
   protected readonly profileLoaded = computed(() => this.profile() !== null);
   protected readonly avatarColors = AVATAR_COLORS;
-  protected readonly genderOptions = GENDER_OPTIONS;
+  protected readonly genderOptions = GENDER_OPTIONS.map(o => ({ value: o.value, label: this.translate.instant(o.labelKey) }));
   protected readonly saving = signal(false);
   protected readonly selectedColor = signal('');
   /** Phase 1l — DOB bounds: 13y to 120y ago (child-labor floor + sanity). */

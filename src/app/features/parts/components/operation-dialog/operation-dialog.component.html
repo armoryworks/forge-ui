@@ -47,6 +47,13 @@
         <app-input data-testid="op-run-minutes-lot" [label]="'parts.lotTime' | translate" type="number" [min]="0" step="any" formControlName="runMinutesLot" />
       </div>
 
+      <app-input data-testid="op-scrap-factor" [label]="'parts.scrapFactor' | translate" [info]="'parts.scrapFactorHint' | translate" type="number" [min]="0" step="any" suffix="%" formControlName="scrapFactorPercent" />
+
+      <app-input data-testid="op-labor-attendance" [label]="'parts.laborAttendance' | translate" [info]="'parts.laborAttendanceHint' | translate" type="number" [min]="0" [max]="100" step="any" suffix="%" formControlName="laborAttendancePercent" />
+      @if (attendanceBelowFull()) {
+        <p class="op-attendance-hint" data-testid="op-labor-attendance-machine-hint">{{ 'parts.laborAttendanceMachineHint' | translate }}</p>
+      }
+
       <app-input data-testid="op-title" [label]="'common.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 
@@ -62,6 +69,22 @@
         </div>
         <app-select data-testid="op-referenced-op" [label]="'parts.referencedOperation' | translate" formControlName="referencedOperationId" [options]="otherOperationOptions()" />
       </div>
+
+      <div class="dialog-row">
+        <app-select data-testid="op-predecessors" [label]="'parts.mustFollow' | translate" [multiple]="true"
+                    [placeholder]="'parts.mustFollowDefault' | translate"
+                    formControlName="predecessorIds" [options]="predecessorOptions()" />
+        @if (completeGateOptions().length > 0) {
+          <app-select data-testid="op-complete-gates" [label]="'parts.waitUntilDone' | translate" [multiple]="true"
+                      formControlName="completeGateIds" [options]="completeGateOptions()" />
+        }
+      </div>
+      <p class="op-attendance-hint">{{ 'parts.mustFollowHint' | translate }}</p>
+
+      <app-toggle data-testid="op-cycle-countdown" [label]="'parts.cycleCountdown' | translate" formControlName="cycleCountdown" />
+      @if (formGroup.controls.cycleCountdown.value) {
+        <p class="op-attendance-hint" data-testid="op-cycle-countdown-hint">{{ 'parts.cycleCountdownHint' | translate }}</p>
+      }
 
       <app-toggle data-testid="op-qc-checkpoint" [label]="'parts.qcCheckpoint' | translate" formControlName="isQcCheckpoint" />
       @if (formGroup.get('isQcCheckpoint')?.value) {

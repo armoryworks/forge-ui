@@ -214,6 +214,7 @@ export class NavTreeService {
             { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements' },
             { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close' },
             { icon: 'sync_alt', label: 'CPA Exports', i18nKey: 'nav.exports', route: '/accounting/exports' },
+            { icon: 'school', label: 'Accounting Training', i18nKey: 'nav.accountingTraining', route: '/accounting/training' },
           ],
         },
       ],

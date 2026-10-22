@@ -27,9 +27,9 @@
           <p class="setup-submit-error" role="alert" data-testid="setup-submit-error">{{ submitErr }}</p>
         }
 
-        <app-validation-button [violations]="violations" [loading]="loading()">
+        <app-validation-button [violations]="violations" [loading]="loading() || submitting()">
           <button class="action-btn action-btn--primary" type="submit"
-            [disabled]="form.invalid || loading()"
+            [disabled]="form.invalid || loading() || submitting()"
             data-testid="setup-submit-btn">
             {{ 'auth.completeSetup' | translate }}
           </button>

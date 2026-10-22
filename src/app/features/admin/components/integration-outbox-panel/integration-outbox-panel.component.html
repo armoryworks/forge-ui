@@ -1,11 +1,11 @@
 <div class="panel-header">
   <span class="panel-header__count">{{ filtered().length }} entries</span>
   <div class="panel-header__actions">
-    <app-select label="Status" [formControl]="statusControl" [options]="statusOptions" />
-    <app-select label="Provider" [formControl]="providerControl" [options]="providerOptions" />
-    <button class="action-btn action-btn--sm" (click)="load()" aria-label="Refresh">
+    <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" />
+    <app-select [label]="'admin.integrationOutboxPanel.provider' | translate" [formControl]="providerControl" [options]="providerOptions" />
+    <button class="action-btn action-btn--sm" (click)="load()" [attr.aria-label]="'common.refresh' | translate">
       <span class="material-icons-outlined">refresh</span>
-      Refresh
+      {{ 'common.refresh' | translate }}
     </button>
   </div>
 </div>
@@ -17,7 +17,7 @@
     [data]="filtered()"
     [clickableRows]="true"
     emptyIcon="outbox"
-    emptyMessage="No outbox entries"
+    [emptyMessage]="'admin.integrationOutboxPanel.noOutboxEntries' | translate"
     (rowClick)="toggleDetail($any($event))">
 
     <ng-template appColumnCell="status" let-row>
@@ -52,16 +52,16 @@
       <div class="action-cell">
         @if (row.status !== 'Sent') {
           <button class="icon-btn"
-            matTooltip="Retry now"
+            [matTooltip]="'admin.integrationOutboxPanel.retryNow' | translate"
             matTooltipPosition="above"
-            aria-label="Retry"
+            [attr.aria-label]="'admin.integrationOutboxPanel.retry' | translate"
             (click)="retry(row, $event)">
             <span class="material-icons-outlined">replay</span>
           </button>
           <button class="icon-btn icon-btn--danger"
-            matTooltip="Discard (dead-letter)"
+            [matTooltip]="'admin.integrationOutboxPanel.discardDeadLetter' | translate"
             matTooltipPosition="above"
-            aria-label="Discard"
+            [attr.aria-label]="'admin.integrationOutboxPanel.discard' | translate"
             (click)="discard(row, $event)">
             <span class="material-icons-outlined">cancel</span>
           </button>
@@ -80,41 +80,41 @@
             <span class="material-icons-outlined">outbox</span>
             {{ entry.provider }} &mdash; {{ entry.operationKey }}
           </h4>
-          <button class="icon-btn" aria-label="Close" (click)="expandedId.set(null)">
+          <button class="icon-btn" [attr.aria-label]="'common.close' | translate" (click)="expandedId.set(null)">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
 
         @if (entry.lastError) {
           <div class="outbox-detail__section">
-            <span class="outbox-detail__label">Last error</span>
+            <span class="outbox-detail__label">{{ 'admin.integrationOutboxPanel.lastError' | translate }}</span>
             <p class="outbox-detail__error">{{ entry.lastError }}</p>
           </div>
         }
 
         <div class="outbox-detail__meta">
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Status</span>
+            <span class="outbox-detail__label">{{ 'common.status' | translate }}</span>
             <span class="chip" [class]="statusClass(entry.status)">{{ entry.status }}</span>
           </div>
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Attempts</span>
+            <span class="outbox-detail__label">{{ 'admin.integrationOutboxPanel.attempts' | translate }}</span>
             <span>{{ entry.attemptCount }} / {{ entry.maxAttempts }}</span>
           </div>
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Entity</span>
+            <span class="outbox-detail__label">{{ 'admin.integrationOutboxPanel.entity' | translate }}</span>
             <span>{{ entry.entityType ? entry.entityType + ' #' + entry.entityId : '—' }}</span>
           </div>
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Created</span>
+            <span class="outbox-detail__label">{{ 'common.createdAt' | translate }}</span>
             <span>{{ entry.createdAt | dateTime }}</span>
           </div>
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Last attempt</span>
+            <span class="outbox-detail__label">{{ 'admin.integrationOutboxPanel.lastAttempt' | translate }}</span>
             <span>{{ entry.lastAttemptAt ? (entry.lastAttemptAt | dateTime) : '—' }}</span>
           </div>
           <div class="outbox-detail__meta-item">
-            <span class="outbox-detail__label">Sent at</span>
+            <span class="outbox-detail__label">{{ 'admin.integrationOutboxPanel.sentAt' | translate }}</span>
             <span>{{ entry.sentAt ? (entry.sentAt | dateTime) : '—' }}</span>
           </div>
         </div>

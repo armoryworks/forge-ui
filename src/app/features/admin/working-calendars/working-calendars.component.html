@@ -144,10 +144,10 @@
                 data-testid="holiday-observed-date" />
               <app-toggle [label]="'workingCalendars.recurring' | translate" formControlName="isRecurring"
                 data-testid="holiday-recurring" />
-              <app-validation-button [violations]="holidayViolations">
+              <app-validation-button [violations]="holidayViolations" [loading]="savingHoliday()">
                 <button class="action-btn action-btn--create" type="button"
                   data-testid="holiday-add-btn"
-                  [disabled]="holidayForm.invalid"
+                  [disabled]="holidayForm.invalid || savingHoliday()"
                   (click)="addHoliday()">
                   <span class="material-icons-outlined">add</span>
                   <span>{{ 'workingCalendars.addHoliday' | translate }}</span>
@@ -251,11 +251,11 @@
                 @if (editingShiftId() !== null) {
                   <button type="button" class="action-btn" data-testid="shift-cancel-btn" (click)="resetShiftForm()">{{ 'common.cancel' | translate }}</button>
                 }
-                <app-validation-button [violations]="shiftViolations">
+                <app-validation-button [violations]="shiftViolations" [loading]="savingShift()">
                   <button type="button"
                     data-testid="shift-save-btn"
                     [class]="editingShiftId() === null ? 'action-btn action-btn--create' : 'action-btn action-btn--primary'"
-                    [disabled]="shiftForm.invalid"
+                    [disabled]="shiftForm.invalid || savingShift()"
                     (click)="saveShift()">
                     <span class="material-icons-outlined">{{ editingShiftId() === null ? 'add' : 'save' }}</span>
                     <span>{{ (editingShiftId() === null ? 'workingCalendars.addShift' : 'workingCalendars.saveShift') | translate }}</span>

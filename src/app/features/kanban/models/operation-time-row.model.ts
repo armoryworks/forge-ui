@@ -17,6 +17,8 @@ export interface OperationTimeRow {
   actualSetupMinutes: number;
   actualRunMinutes: number;
   actualTotalMinutes: number;
+  laborMinutes?: number | null;
+  operationId?: number | null;
   setupVarianceMinutes: number;
   runVarianceMinutes: number;
   efficiencyPercent: number | null;

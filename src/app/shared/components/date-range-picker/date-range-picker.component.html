@@ -34,7 +34,7 @@
           class="date-range__preset"
           [disabled]="disabled()"
           (click)="applyPreset(preset)">
-          {{ preset }}
+          {{ presetKey(preset) | translate }}
         </button>
       }
     </div>

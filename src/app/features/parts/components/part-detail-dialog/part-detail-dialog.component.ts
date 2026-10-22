@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { filter } from 'rxjs';
 
 import { PartDetailPanelComponent } from '../part-detail-panel/part-detail-panel.component';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface PartDetailDialogData {
   partId: number;
@@ -19,7 +20,7 @@ const NESTED_ESCAPE_OWNERS = 'input, textarea, select, [contenteditable="true"],
   styleUrl: './part-detail-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PartDetailDialogComponent {
+export class PartDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<PartDetailDialogComponent>);
   protected readonly data = inject<PartDetailDialogData>(MAT_DIALOG_DATA);
   readonly partCreated = output<void>();
@@ -31,6 +32,10 @@ export class PartDetailDialogComponent {
         takeUntilDestroyed(),
       )
       .subscribe(() => this.close());
+  }
+
+  onDialogEscape(): void {
+    this.close();
   }
 
   protected close(): void {

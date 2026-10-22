@@ -9,6 +9,10 @@
   overflow: hidden;
 }
 
+.app-shell {
+  display: contents;
+}
+
 .app-standalone {
   display: flex;
   flex-direction: column;

@@ -1,9 +1,44 @@
+@if (entryConfirmPending()) {
+  <section class="sf-entry" aria-labelledby="sf-clock-entry-title" data-testid="sf-clock-entry-confirm">
+    <div class="sf-entry__card">
+      <span class="material-icons-outlined sf-entry__icon">precision_manufacturing</span>
+      <h1 id="sf-clock-entry-title" class="sf-entry__title">{{ 'kioskDisplay.entryTitle' | translate }}</h1>
+      <p class="sf-entry__message">{{ 'kioskDisplay.entryMessage' | translate }}</p>
+      <div class="sf-entry__actions">
+        <button type="button" class="action-btn" (click)="backToForge()" data-testid="sf-clock-entry-back">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'kioskDisplay.backToForge' | translate }}
+        </button>
+        <button type="button" class="action-btn action-btn--primary" (click)="continueToKiosk()" data-testid="sf-clock-entry-continue">
+          <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'kioskDisplay.continue' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+} @else {
+
 <!-- Setup Phase (first-time terminal configuration) -->
 @if (kioskPhase() === 'setup') {
   <app-kiosk-setup (configured)="onTerminalConfigured($event)" />
 }
 
-@if (kioskPhase() !== 'setup') {
+@if (kioskPhase() === 'offline') {
+  <section class="sf-entry" aria-labelledby="sf-clock-offline-title" data-testid="sf-clock-offline">
+    <div class="sf-entry__card">
+      <span class="material-icons-outlined sf-entry__icon">cloud_off</span>
+      <h1 id="sf-clock-offline-title" class="sf-entry__title">{{ 'shopFloor.terminalCheckFailed' | translate }}</h1>
+      <div class="sf-entry__actions">
+        <button type="button" class="action-btn action-btn--primary" (click)="checkTerminalConfig()" data-testid="sf-clock-offline-retry">
+          <span class="material-icons-outlined">refresh</span>
+          {{ 'kioskSetup.retry' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+}
+
+@if (kioskPhase() !== 'setup' && kioskPhase() !== 'offline') {
 
 @if (error()) {
   <div class="clock-error">
@@ -185,7 +220,7 @@
 <!-- Identifying Scan Overlay (brief flash while detecting scan type) -->
 @if (kioskPhase() === 'dashboard' && scanIdentifying()) {
   <div class="sf-auth-overlay" data-testid="sf-identifying-scan">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="status">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__spinner">sync</span>
       <h2 class="sf-auth-card__title">{{ 'shopFloor.identifyingScan' | translate }}</h2>
     </div>
@@ -195,9 +230,10 @@
 <!-- Job Scanned Phase (job barcode scanned first — now prompt for employee badge) -->
 @if (kioskPhase() === 'job-scanned') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-job-scanned-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelJobScanned()" data-testid="sf-job-scanned-card">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__icon--job">work</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.jobScanned' | translate }}</h2>
+      <h2 id="sf-clock-job-scanned-title" class="sf-auth-card__title">{{ 'shopFloor.jobScanned' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card">
@@ -215,6 +251,13 @@
       }
 
       <p class="sf-auth-card__subtitle">{{ 'shopFloor.scanBadgeToContinue' | translate }}</p>
+
+      @if (kioskAuthError()) {
+        <div class="sf-auth-card__error" role="alert" data-testid="sf-job-scanned-error">
+          <span class="material-icons-outlined">warning</span>
+          {{ kioskAuthError() }}
+        </div>
+      }
 
       <div class="sf-auth-card__scan-prompt">
         <app-barcode-scan-input
@@ -237,10 +280,13 @@
 <!-- PIN Phase -->
 @if (kioskPhase() === 'pin') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-pin-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelPin()" data-testid="sf-pin-card">
       <span class="material-icons-outlined sf-auth-card__icon">lock</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.enterPin' | translate }}</h2>
-      <p class="sf-auth-card__subtitle">{{ 'shopFloor.scanId' | translate }}: {{ scannedBarcode() }}</p>
+      <h2 id="sf-clock-pin-title" class="sf-auth-card__title">{{ 'shopFloor.enterPin' | translate }}</h2>
+      @if (scannedEmployeeName(); as name) {
+        <p class="sf-auth-card__subtitle" data-testid="sf-pin-badge">{{ name }}</p>
+      }
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--compact">
@@ -259,28 +305,36 @@
         </div>
       }
 
-      <div class="sf-auth-card__field">
-        <app-input [label]="'shopFloor.pin' | translate" type="password" [formControl]="pinControl"
-          [placeholder]="'shopFloor.enterPinPlaceholder' | translate" [maxlength]="8" />
-      </div>
+      <form class="sf-auth-card__form" (ngSubmit)="onPinSubmit()" data-testid="sf-pin-form">
+        <div class="sf-auth-card__field" (input)="onPinTyped()">
+          <app-input [label]="'shopFloor.pin' | translate" type="password" [formControl]="pinControl"
+            [placeholder]="'shopFloor.enterPinPlaceholder' | translate" [maxlength]="pinMaxLength" data-testid="sf-pin-input" />
+        </div>
 
-      <div class="sf-auth-card__actions">
-        <button class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
-          <span class="material-icons-outlined">arrow_back</span>
-          {{ 'common.back' | translate }}
-        </button>
-        <button class="action-btn action-btn--primary"
-          [disabled]="kioskAuthenticating() || !pinControl.value"
-          (click)="onPinSubmit()">
-          @if (kioskAuthenticating()) {
-            <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            {{ 'shopFloor.authenticating' | translate }}
-          } @else {
-            <span class="material-icons-outlined">login</span>
-            {{ 'shopFloor.submit' | translate }}
-          }
-        </button>
-      </div>
+        <app-numeric-keypad
+          [disabled]="kioskAuthenticating()"
+          (digit)="onKeypadDigit($event)"
+          (backspace)="onKeypadBackspace()"
+          (clear)="onKeypadClear()" />
+
+        <div class="sf-auth-card__actions">
+          <button type="button" class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
+            <span class="material-icons-outlined">arrow_back</span>
+            {{ 'common.back' | translate }}
+          </button>
+          <button type="submit" class="action-btn action-btn--primary"
+            [disabled]="kioskAuthenticating() || !pinControl.value"
+            data-testid="sf-pin-submit">
+            @if (kioskAuthenticating()) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+              {{ 'shopFloor.authenticating' | translate }}
+            } @else {
+              <span class="material-icons-outlined">login</span>
+              {{ 'shopFloor.submit' | translate }}
+            }
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }
@@ -288,9 +342,10 @@
 <!-- Manual Login Phase -->
 @if (kioskPhase() === 'manual-login') {
   <div class="sf-auth-overlay">
-    <div class="sf-auth-card">
+    <div class="sf-auth-card" role="dialog" aria-modal="true" aria-labelledby="sf-clock-manual-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="cancelManualLogin()" data-testid="sf-manual-login-card">
       <span class="material-icons-outlined sf-auth-card__icon">person</span>
-      <h2 class="sf-auth-card__title">{{ 'shopFloor.clockInManually' | translate }}</h2>
+      <h2 id="sf-clock-manual-title" class="sf-auth-card__title">{{ 'shopFloor.clockInManually' | translate }}</h2>
       <p class="sf-auth-card__subtitle">{{ 'shopFloor.enterCredentials' | translate }}</p>
 
       @if (manualLoginError()) {
@@ -300,32 +355,34 @@
         </div>
       }
 
-      <div class="sf-auth-card__field">
-        <app-input [label]="'common.email' | translate" type="email" [formControl]="emailControl"
-          placeholder="you@company.com" />
-      </div>
-      <div class="sf-auth-card__field">
-        <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
-          [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" />
-      </div>
+      <form class="sf-auth-card__form" (ngSubmit)="onManualLoginSubmit()" (input)="onManualLoginTyped()" data-testid="sf-manual-login-form">
+        <div class="sf-auth-card__field">
+          <app-input [label]="'common.email' | translate" type="email" [formControl]="emailControl"
+            placeholder="you@company.com" autocomplete="username" data-testid="sf-manual-email" />
+        </div>
+        <div class="sf-auth-card__field">
+          <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
+            [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" autocomplete="current-password" data-testid="sf-manual-password" />
+        </div>
 
-      <div class="sf-auth-card__actions">
-        <button class="action-btn" (click)="cancelManualLogin()" [disabled]="manualLoggingIn()">
-          <span class="material-icons-outlined">arrow_back</span>
-          {{ 'common.back' | translate }}
-        </button>
-        <button class="action-btn action-btn--primary"
-          [disabled]="manualLoggingIn() || !emailControl.value || !passwordControl.value"
-          (click)="onManualLoginSubmit()">
-          @if (manualLoggingIn()) {
-            <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            {{ 'shopFloor.signingIn' | translate }}
-          } @else {
-            <span class="material-icons-outlined">login</span>
-            {{ 'shopFloor.signIn' | translate }}
-          }
-        </button>
-      </div>
+        <div class="sf-auth-card__actions">
+          <button type="button" class="action-btn" (click)="cancelManualLogin()" [disabled]="manualLoggingIn()">
+            <span class="material-icons-outlined">arrow_back</span>
+            {{ 'common.back' | translate }}
+          </button>
+          <button type="submit" class="action-btn action-btn--primary"
+            [disabled]="manualLoggingIn() || !emailControl.value || !passwordControl.value"
+            data-testid="sf-manual-submit">
+            @if (manualLoggingIn()) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+              {{ 'shopFloor.signingIn' | translate }}
+            } @else {
+              <span class="material-icons-outlined">login</span>
+              {{ 'shopFloor.signIn' | translate }}
+            }
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }
@@ -333,8 +390,9 @@
 <!-- Clock Action Phase (after auth) -->
 @if (kioskPhase() === 'clock') {
   <div class="sf-auth-overlay">
-    <div class="sf-clock-actions">
-      <h2 class="sf-clock-actions__title">{{ 'shopFloor.selectAction' | translate }}</h2>
+    <div class="sf-clock-actions" role="dialog" aria-modal="true" aria-labelledby="sf-clock-actions-title" tabindex="-1"
+         cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="resetToDashboard()" data-testid="sf-clock-actions-card">
+      <h2 id="sf-clock-actions-title" class="sf-clock-actions__title">{{ 'shopFloor.selectAction' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--banner">
@@ -412,3 +470,4 @@
 }
 
 } <!-- end kioskPhase !== 'setup' -->
+}

@@ -13,6 +13,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingModuleRow } from './training-panel.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface TrainingModuleDetail extends TrainingModuleRow {
   slug?: string;
@@ -31,6 +32,7 @@ interface TrainingModuleDetail extends TrainingModuleRow {
     TextareaComponent,
     ToggleComponent,
     ValidationButtonComponent,
+    TranslatePipe,
   ],
   templateUrl: './training-module-dialog.component.html',
   styleUrl: './training-module-dialog.component.scss',
@@ -40,6 +42,8 @@ export class TrainingModuleDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly matDialogRef = inject(MatDialogRef<TrainingModuleDialogComponent>);
+
+  private readonly translate = inject(TranslateService);
   private readonly data = inject<TrainingModuleDetail | null>(MAT_DIALOG_DATA);
   private readonly http = inject(HttpClient);
   private readonly snackbar = inject(SnackbarService);
@@ -129,7 +133,7 @@ export class TrainingModuleDialogComponent implements OnInit {
     try {
       JSON.parse(v.contentJson ?? '{}');
     } catch {
-      this.snackbar.error('Content JSON is not valid JSON');
+      this.snackbar.error(this.translate.instant('trainingAdmin.messages.invalidJson'));
       this.saving.set(false);
       return;
     }

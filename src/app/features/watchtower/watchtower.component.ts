@@ -27,6 +27,31 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 
+const DOMAIN_LABEL_KEYS: Readonly<Record<string, string>> = {
+  'cross-cutting': 'watchtower.domain.crossCutting',
+  environmental: 'watchtower.domain.environmental',
+  firearms: 'watchtower.domain.firearms',
+  food: 'watchtower.domain.food',
+  labor: 'watchtower.domain.labor',
+  'product-safety': 'watchtower.domain.productSafety',
+  safety: 'watchtower.domain.safety',
+  tax: 'watchtower.domain.tax',
+};
+
+const FEED_TYPE_LABEL_KEYS: Readonly<Record<string, string>> = {
+  Api: 'watchtower.feedType.api',
+  Rss: 'watchtower.feedType.rss',
+  Email: 'watchtower.feedType.email',
+  Bulk: 'watchtower.feedType.bulk',
+  Scrape: 'watchtower.feedType.scrape',
+};
+
+const STATUS_LABEL_KEYS: Readonly<Record<string, string>> = {
+  Pending: 'watchtower.status.pending',
+  Applied: 'watchtower.status.applied',
+  Dismissed: 'watchtower.status.dismissed',
+};
+
 /**
  * Regulatory Watchtower workspace — the review surface for the CAP-EXT-WATCHTOWER backend.
  * Proposals inbox (apply → optional compliance-calendar deadline / dismiss), monitored-sources
@@ -58,6 +83,8 @@ export class WatchtowerComponent {
   protected readonly proposals = signal<RegulatoryProposal[]>([]);
   protected readonly sources = signal<RegulatorySource[]>([]);
   protected readonly loading = signal(false);
+  protected readonly proposalsLoadError = signal(false);
+  protected readonly sourcesLoadError = signal(false);
   protected readonly polling = signal(false);
   private readonly eventTypeOptions = signal<SelectOption[]>([]);
 
@@ -92,22 +119,47 @@ export class WatchtowerComponent {
     });
   }
 
+  protected domainLabel(domain: string): string {
+    const key = DOMAIN_LABEL_KEYS[domain];
+    if (key) return this.translate.instant(key);
+    return domain.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  protected feedTypeLabel(feedType: string): string {
+    const key = FEED_TYPE_LABEL_KEYS[feedType];
+    return key ? this.translate.instant(key) : feedType;
+  }
+
+  protected statusLabel(status: string): string {
+    const key = STATUS_LABEL_KEYS[status];
+    return key ? this.translate.instant(key) : status;
+  }
+
   protected switchTab(tab: WatchtowerTab): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
-  private loadProposals(): void {
+  protected loadProposals(): void {
     this.loading.set(true);
+    this.proposalsLoadError.set(false);
     this.service.getProposals().subscribe({
       next: (p) => { this.proposals.set(p); this.loading.set(false); },
-      error: () => this.loading.set(false),
+      error: () => {
+        this.proposals.set([]);
+        this.proposalsLoadError.set(true);
+        this.loading.set(false);
+      },
     });
   }
 
-  private loadSources(): void {
+  protected loadSources(): void {
+    this.sourcesLoadError.set(false);
     this.service.getSources().subscribe({
       next: (s) => this.sources.set(s),
-      error: () => this.sources.set([]),
+      error: () => {
+        this.sources.set([]);
+        this.sourcesLoadError.set(true);
+      },
     });
   }
 
@@ -116,7 +168,13 @@ export class WatchtowerComponent {
     this.service.poll().subscribe({
       next: (r) => {
         this.polling.set(false);
-        this.snackbar.success(this.translate.instant('watchtower.polled', { count: r.created }));
+        if (r.activeSources === 0) {
+          this.snackbar.info(this.translate.instant('watchtower.noActiveSources'));
+        } else if (r.failedSources > 0) {
+          this.snackbar.warn(this.translate.instant('watchtower.polledWithFailures', { count: r.created, failed: r.failedSources }));
+        } else {
+          this.snackbar.success(this.translate.instant('watchtower.polled', { count: r.created }));
+        }
         this.loadProposals();
         this.loadSources();
       },
@@ -127,7 +185,7 @@ export class WatchtowerComponent {
   protected applyProposal(proposal: RegulatoryProposal): void {
     this.dialog.open<ApplyProposalDialogComponent, ApplyProposalDialogData, ApplyProposalDialogResult>(
       ApplyProposalDialogComponent,
-      { width: '480px', autoFocus: false, data: { proposalTitle: proposal.title, eventTypeOptions: this.eventTypeOptions() } },
+      { width: '480px', autoFocus: 'input', data: { proposalTitle: proposal.title, eventTypeOptions: this.eventTypeOptions() } },
     ).afterClosed().subscribe(result => {
       if (!result) return;
       this.service.applyProposal(proposal.id, result).subscribe({

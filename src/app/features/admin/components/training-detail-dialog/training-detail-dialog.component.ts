@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { TrainingDetailPanelComponent } from '../training-detail-panel/training-detail-panel.component';
+import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
 
 export interface TrainingDetailDialogData {
   moduleId?: number;
@@ -21,10 +22,14 @@ export interface TrainingDetailDialogData {
   styles: [`:host { display: block; width: 100%; height: 100%; } app-training-detail-panel { height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrainingDetailDialogComponent {
+export class TrainingDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<TrainingDetailDialogComponent>);
 
   protected readonly data = inject<TrainingDetailDialogData>(MAT_DIALOG_DATA);
+
+  onDialogEscape(): void {
+    this.close();
+  }
 
   protected close(): void {
     this.dialogRef.close();

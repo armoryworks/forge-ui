@@ -14,11 +14,12 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { MentionUser } from '../../models/mention-user.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-rich-text-editor',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './rich-text-editor.component.html',
   styleUrl: './rich-text-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

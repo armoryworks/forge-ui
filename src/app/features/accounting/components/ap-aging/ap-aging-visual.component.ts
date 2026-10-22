@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, inject, LOCALE_ID } from '@angular/core';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -24,6 +24,7 @@ const AGING_RAMP = ['#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#7f1
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApAgingVisualComponent {
+  private readonly locale = inject(LOCALE_ID);
   readonly report = input.required<ApAging>();
 
   protected readonly chartConfig = computed<ChartConfiguration<'bar'>>(() => {
@@ -50,7 +51,7 @@ export class ApAgingVisualComponent {
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                `${ctx.label}: ${(ctx.raw as number).toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`,
+                `${ctx.label}: ${(ctx.raw as number).toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`,
             },
           },
         },

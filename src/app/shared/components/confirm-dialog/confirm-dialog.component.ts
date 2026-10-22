@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, ChangeDetectorRef, OnInit }
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslateService } from '@ngx-translate/core';
+import { DialogEscapeHandler } from '../../models/dialog-escape.model';
 
 export interface ConfirmDialogData {
   title: string;
@@ -20,7 +21,7 @@ export interface ConfirmDialogData {
   styleUrl: './confirm-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfirmDialogComponent implements OnInit {
+export class ConfirmDialogComponent implements OnInit, DialogEscapeHandler {
   readonly dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
   readonly data: ConfirmDialogData = inject(MAT_DIALOG_DATA);
   private readonly translate = inject(TranslateService);
@@ -46,6 +47,10 @@ export class ConfirmDialogComponent implements OnInit {
 
   confirm(): void {
     this.dialogRef.close(true);
+  }
+
+  onDialogEscape(): void {
+    this.cancel();
   }
 
   cancel(): void {

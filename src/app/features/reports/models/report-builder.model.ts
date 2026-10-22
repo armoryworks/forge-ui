@@ -7,7 +7,7 @@ export interface ReportEntityDefinition {
 export interface ReportFieldDefinition {
   field: string;
   label: string;
-  type: 'string' | 'number' | 'date' | 'boolean' | 'enum';
+  type: 'string' | 'number' | 'currency' | 'date' | 'boolean' | 'enum';
   isFilterable: boolean;
   isSortable: boolean;
   isGroupable: boolean;

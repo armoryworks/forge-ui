@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -15,6 +15,7 @@ import { todayStart, toIsoDate } from '../../../../shared/utils/date.utils';
 import { PartsService } from '../../services/parts.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartRevision } from '../../models/part-revision.model';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 export interface PartReviseDialogData {
   part: PartDetail;
@@ -87,9 +88,16 @@ export class PartReviseDialogComponent {
   protected readonly form = new FormGroup({
     revision: new FormControl<string>(
       nextRevisionCode(this.data.part.revision, this.data.revisions.map((r) => r.revision)),
-      { nonNullable: true, validators: [Validators.required, Validators.maxLength(REVISION_CODE_MAX_LENGTH)] },
+      {
+        nonNullable: true,
+        validators: [
+          requiredTrimmed,
+          Validators.maxLength(REVISION_CODE_MAX_LENGTH),
+          (control: AbstractControl) => this.revisionTaken(control),
+        ],
+      },
     ),
-    changeReason: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
+    changeReason: new FormControl<string>('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(500)] }),
     effectiveDate: new FormControl<Date | null>(todayStart(), { validators: [Validators.required] }),
   });
 
@@ -101,6 +109,19 @@ export class PartReviseDialogComponent {
 
   close(): void {
     this.dialogRef.close(null);
+  }
+
+  private revisionTaken(control: AbstractControl): ValidationErrors | null {
+    const requested = String(control.value ?? '').trim().toUpperCase();
+    if (!requested) return null;
+    const taken = [this.data.part.revision, ...this.data.revisions.map((r) => r.revision)]
+      .some((r) => (r ?? '').trim().toUpperCase() === requested);
+    if (!taken) return null;
+    return {
+      revisionTaken: {
+        message: this.translate.instant('partRevisions.dialog.revisionTaken', { revision: String(control.value).trim() }) as string,
+      },
+    };
   }
 
   save(): void {

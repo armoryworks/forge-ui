@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
-import { filter, forkJoin, switchMap } from 'rxjs';
+import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -16,8 +16,9 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
-import { JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
+import { GlAccount, JournalEntryExplanation, LedgerRegisterEntry, LedgerRegisterPage, ReverseJournalEntryInput, TrialBalanceRow } from '../../models/accounting.models';
 import { ReverseEntryDialogComponent, ReverseEntryDialogData } from '../reverse-entry-dialog/reverse-entry-dialog.component';
 
 /** Default book; overridable via ?bookId= (the training sandbox is its own book — §5A.4). */
@@ -63,6 +64,8 @@ export class LedgerViewComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -70,6 +73,12 @@ export class LedgerViewComponent implements OnInit {
   protected readonly page = signal<LedgerRegisterPage | null>(null);
   /** Account lens (§5A.1 `:accountId`): when set, the register is scoped to one account. */
   private readonly accountId = signal<number | null>(null);
+  /** The `:accountId` in the URL is malformed or names no account in the book; nothing is shown. */
+  protected readonly accountNotFound = signal(false);
+  /** Shows the never-posted Draft entries (where rejected entries land) instead of the journal. */
+  protected readonly showDrafts = signal(false);
+  /** Narrows the loaded register to the entries the anomaly scan flagged. */
+  protected readonly flaggedOnly = signal(false);
   /** Book context (?bookId=): defaults to the operating book; the training sandbox passes its own. */
   protected readonly bookId = signal<number>(DEFAULT_BOOK_ID);
   protected readonly lensAccount = signal<TrialBalanceRow | null>(null);
@@ -84,6 +93,8 @@ export class LedgerViewComponent implements OnInit {
     // convention the trial balance reports: the newest row carries the account's current
     // netBalance; each older row subtracts the newer entry's net effect on this account.
     let balance = lens?.netBalance ?? 0;
+    const flags = this.anomalyFlags();
+    const flaggedOnly = this.flaggedOnly();
     return (this.page()?.data ?? []).map((e, i, rows) => {
       const [y, m, d] = e.entryDate.split('-');
       const row: LedgerRow = {
@@ -100,7 +111,7 @@ export class LedgerViewComponent implements OnInit {
         row.balanceAfter = balance;
       }
       return row;
-    });
+    }).filter((e) => !flaggedOnly || !!flags[e.id]);
   });
 
   /** This entry's net (Dr - Cr) effect on one account. */
@@ -118,6 +129,11 @@ export class LedgerViewComponent implements OnInit {
   protected readonly scanning = signal(false);
   protected readonly anomalyFlags = signal<Record<number, string[]>>({});
   protected readonly anomalyCount = computed(() => Object.keys(this.anomalyFlags()).length);
+  /** Flagged entries older than the loaded page, so they cannot be shown here. */
+  protected readonly flaggedOffPage = computed(() => {
+    const loaded = new Set((this.page()?.data ?? []).map((e) => e.id));
+    return Object.keys(this.anomalyFlags()).filter((id) => !loaded.has(Number(id))).length;
+  });
 
   // ── Find-in-context (§5A.1): matches are highlighted and navigated to, never filtered out. ──
   private readonly table = viewChild(DataTableComponent);
@@ -173,14 +189,36 @@ export class LedgerViewComponent implements OnInit {
   }
 
   /** Drill-back click-to-center (§5A.6 item 3): locate a related entry (reversal counterpart) in the register. */
-  protected locateEntry(entryId: number): void {
+  protected locateEntry(entryId: number, entryNumber?: number | null): void {
     const target = this.entries().find((e) => e.id === entryId);
     if (target) {
       this.table()?.scrollToRow(target);
       return;
     }
     // Older than the loaded page — tell the user instead of silently doing nothing.
-    this.snackbar.error(this.translate.instant('accounting.ledger.entryNotLoaded', { number: entryId }));
+    this.snackbar.error(this.translate.instant('accounting.ledger.entryNotLoaded', { number: entryNumber ?? entryId }));
+  }
+
+  protected toggleFlaggedOnly(): void {
+    this.flaggedOnly.update((on) => !on);
+  }
+
+  protected toggleDrafts(): void {
+    this.showDrafts.update((on) => !on);
+    this.flaggedOnly.set(false);
+    this.load();
+  }
+
+  protected resubmitDraft(entry: LedgerRegisterEntry): void {
+    this.router.navigate(['/accounting/journal-entries/new'], {
+      queryParams: { resubmitOf: entry.id, bookId: this.bookId() === DEFAULT_BOOK_ID ? null : this.bookId() },
+    });
+  }
+
+  /** A rejected draft can be edited and resubmitted only by the user who submitted it. */
+  protected canResubmit(entry: LedgerRegisterEntry): boolean {
+    const me = this.auth.user()?.id ?? null;
+    return entry.status === 'Draft' && me !== null && entry.postedBy === me;
   }
 
   /** Browser-find semantics: the first Enter after a term change locates match 1; repeats cycle. */
@@ -228,10 +266,18 @@ export class LedgerViewComponent implements OnInit {
   ngOnInit(): void {
     // URL is the source of truth for the lens: /accounting/ledger/:accountId scopes to one account.
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const id = Number(params.get('accountId'));
-      this.accountId.set(id > 0 ? id : null);
+      const raw = params.get('accountId');
+      const id = Number(raw);
+      const valid = Number.isInteger(id) && id > 0;
+      this.accountNotFound.set(raw !== null && !valid);
+      this.accountId.set(valid ? id : null);
       const book = Number(this.route.snapshot.queryParamMap.get('bookId'));
       this.bookId.set(book > 0 ? book : DEFAULT_BOOK_ID);
+      if (this.accountNotFound()) {
+        this.page.set(null);
+        this.lensAccount.set(null);
+        return;
+      }
       this.load();
     });
 
@@ -240,12 +286,14 @@ export class LedgerViewComponent implements OnInit {
   }
 
   protected load(): void {
+    if (this.accountNotFound()) return;
     this.loading.set(true);
     this.error.set(null);
     const accountId = this.accountId();
     const register$ = this.gl.getLedgerRegister(this.bookId(), {
       pageSize: PAGE_SIZE,
       glAccountId: accountId,
+      status: this.showDrafts() ? 'Draft' : null,
     });
 
     if (accountId === null) {
@@ -267,10 +315,29 @@ export class LedgerViewComponent implements OnInit {
     // Lens: the trial balance supplies the account's label + current net balance, which seeds the
     // running-balance walk. Loaded together so the balance column never renders from stale data.
     forkJoin([register$, this.gl.getTrialBalance(this.bookId())])
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        switchMap(([p, tb]) => {
+          const row = tb.rows.find((r) => r.glAccountId === accountId);
+          if (row) return of({ p, lens: row });
+          return this.gl.getChartOfAccounts(this.bookId()).pipe(
+            map((accounts) => {
+              const account = accounts.find((a) => a.id === accountId);
+              return { p, lens: account ? this.zeroBalanceRow(account) : null };
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
-        next: ([p, tb]) => {
-          this.lensAccount.set(tb.rows.find((r) => r.glAccountId === accountId) ?? null);
+        next: ({ p, lens }) => {
+          if (!lens) {
+            this.accountNotFound.set(true);
+            this.lensAccount.set(null);
+            this.page.set(null);
+            this.loading.set(false);
+            return;
+          }
+          this.lensAccount.set(lens);
           this.page.set(p);
           this.explanations.set({});
           this.loading.set(false);
@@ -280,6 +347,14 @@ export class LedgerViewComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  /** Lens row for an account with no postings, which the trial balance leaves out. */
+  private zeroBalanceRow(account: GlAccount): TrialBalanceRow {
+    return {
+      glAccountId: account.id, accountNumber: account.accountNumber, accountName: account.name,
+      debitTotal: 0, creditTotal: 0, netBalance: 0, debitBalance: 0, creditBalance: 0,
+    };
   }
 
   protected explain(entry: LedgerRegisterEntry): void {

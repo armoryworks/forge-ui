@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import {
@@ -8,19 +8,42 @@ import {
   PresetApplyDialogData,
   PresetApplyDialogResult,
 } from './preset-apply-dialog.component';
+import { DialogEscapeService } from '../../services/dialog-escape.service';
 
-function setupDialog(data: PresetApplyDialogData) {
+function escapeStub(confirmed: boolean) {
+  return {
+    closeUnlessDirty: vi.fn((dirty: boolean, close: () => void) => {
+      if (!dirty || confirmed) close();
+    }),
+  };
+}
+
+function setupDialog(data: PresetApplyDialogData, escape = escapeStub(false)) {
   const dialogRef = { close: vi.fn() } as unknown as MatDialogRef<PresetApplyDialogComponent, PresetApplyDialogResult>;
   TestBed.configureTestingModule({
     imports: [PresetApplyDialogComponent, TranslateModule.forRoot()],
     providers: [
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
+      { provide: DialogEscapeService, useValue: escape },
     ],
   });
+  const translate = TestBed.inject(TranslateService);
+  translate.setTranslation('en', {
+    shared: {
+      presetApplyDialog: {
+        applyPresetname: 'Apply {{presetName}}',
+        alreadyAtThisPreset: 'Already at this preset.',
+        toEnableCount: 'To enable ({{count}})',
+        toDisableCount: 'To disable ({{count}})',
+        constraintViolationsCount: 'Constraint violations ({{count}})',
+      },
+    },
+  });
+  translate.use('en');
   const fixture = TestBed.createComponent(PresetApplyDialogComponent);
   fixture.detectChanges();
-  return { fixture, dialogRef };
+  return { fixture, dialogRef, escape };
 }
 
 describe('PresetApplyDialogComponent', () => {
@@ -135,5 +158,47 @@ describe('PresetApplyDialogComponent', () => {
     );
     confirmBtn.click();
     expect(dialogRef.close).toHaveBeenCalledWith({ confirmed: true, reason: undefined });
+  });
+
+  describe('Escape', () => {
+    const applyData: PresetApplyDialogData = {
+      presetId: 'PRESET-04',
+      presetName: 'Production Manufacturer',
+      isCustom: false,
+      deltas: [{ code: 'CAP-QC-INSPECTION', name: 'QC inspection', area: 'QC', currentlyEnabled: false, willBeEnabled: true }],
+      violations: [],
+    };
+
+    function reasonControl(fixture: { componentInstance: PresetApplyDialogComponent }): { setValue(v: string): void } {
+      return (fixture.componentInstance as unknown as { reasonControl: { setValue(v: string): void } }).reasonControl;
+    }
+
+    it('cancels straight away while no reason is typed', () => {
+      const { fixture, dialogRef, escape } = setupDialog(applyData);
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(escape.closeUnlessDirty).toHaveBeenCalledWith(false, expect.any(Function));
+      expect(dialogRef.close).toHaveBeenCalledWith({ confirmed: false });
+    });
+
+    it('keeps a typed reason when the discard prompt is declined', () => {
+      const { fixture, dialogRef, escape } = setupDialog(applyData);
+      reasonControl(fixture).setValue('Quarterly review');
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(escape.closeUnlessDirty).toHaveBeenCalledWith(true, expect.any(Function));
+      expect(dialogRef.close).not.toHaveBeenCalled();
+    });
+
+    it('cancels with a typed reason once the discard is confirmed', () => {
+      const { fixture, dialogRef } = setupDialog(applyData, escapeStub(true));
+      reasonControl(fixture).setValue('Quarterly review');
+
+      fixture.componentInstance.onDialogEscape();
+
+      expect(dialogRef.close).toHaveBeenCalledWith({ confirmed: false });
+    });
   });
 });

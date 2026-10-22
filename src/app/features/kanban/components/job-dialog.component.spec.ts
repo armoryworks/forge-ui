@@ -198,6 +198,16 @@ describe('JobDialogComponent', () => {
     expect(payload.quantity).toBe(500);
   });
 
+  it('creates one work order when Save fires twice before the server answers', () => {
+    render('create');
+    component.jobForm.controls.title.setValue('Bracket run');
+
+    component.onSubmit();
+    component.onSubmit();
+
+    expect(createJob).toHaveBeenCalledOnce();
+  });
+
   it('does not send a quantity without a part', () => {
     render('create');
     component.jobForm.controls.title.setValue('Internal fixture');

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { TimeTrackingComponent } from './time-tracking.component';
 import { TimeEntry } from './models/time-entry.model';
@@ -32,6 +32,8 @@ interface PageInternals {
   dialogRef: { clearDraft(): void };
   openManualEntry(): void;
   saveEntry(): void;
+  startTimer(): void;
+  canChange(entry: TimeEntry): boolean;
 }
 
 function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
@@ -55,11 +57,12 @@ function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
   };
 }
 
-function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false) {
+function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false, roles: string[] = []) {
   const service = {
     getTimeEntries: vi.fn().mockReturnValue(of(entries)),
     stopTimer: vi.fn().mockReturnValue(of({})),
     createTimeEntry: vi.fn().mockReturnValue(of({})),
+    startTimer: vi.fn().mockReturnValue(of({})),
   };
   const running = { getMine: vi.fn().mockReturnValue(mine) };
   TestBed.resetTestingModule();
@@ -68,7 +71,7 @@ function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnab
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: TimeTrackingService, useValue: service },
       { provide: RunningTimersService, useValue: running },
-      { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
+      { provide: AuthService, useValue: { user: () => ({ id: 1 }), hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       { provide: TimerHubService, useValue: { connect: vi.fn().mockResolvedValue(undefined), onTimerStartedEvent: vi.fn(), onTimerStoppedEvent: vi.fn(), clearCallbacks: vi.fn() } },
       { provide: MatDialog, useValue: { open: vi.fn() } },
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
@@ -170,5 +173,65 @@ describe('TimeTrackingComponent', () => {
 
     component.entryForm.patchValue({ hours: 24, minutes: 0 });
     expect(component.entryViolations()).not.toContain('timeTracking.durationRange');
+  });
+
+  it('starts one timer when Start is pressed twice before the server answers', () => {
+    const { component, service } = setup([], of([]));
+    service.startTimer.mockReturnValue(new Subject());
+
+    component.startTimer();
+    component.startTimer();
+
+    expect(service.startTimer).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets Start be retried after the server rejects the first press', () => {
+    const { component, service } = setup([], of([]));
+    service.startTimer.mockReturnValue(throwError(() => new Error('409')));
+
+    component.startTimer();
+    component.startTimer();
+
+    expect(service.startTimer).toHaveBeenCalledTimes(2);
+  });
+
+  it('stops a timer once when Stop is pressed twice before the server answers', () => {
+    const general = entry({ id: 5 });
+    const { component, service } = setup([general], of([general]));
+    service.stopTimer.mockReturnValue(new Subject());
+
+    component.openStopTimer();
+    component.stopTimer();
+    component.stopTimer();
+
+    expect(service.stopTimer).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs one manual entry when Save fires twice before the server answers', () => {
+    const { component, service } = setup([], of([]));
+    service.createTimeEntry.mockReturnValue(new Subject());
+    component.dialogRef = { clearDraft: vi.fn() };
+
+    component.openManualEntry();
+    component.entryForm.patchValue({ hours: 1, minutes: 0 });
+    component.saveEntry();
+    component.saveEntry();
+
+    expect(service.createTimeEntry).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers delete on another user\'s entry only to admins and managers', () => {
+    const own = entry({ id: 8, userId: 1 });
+    const coworker = entry({ id: 9, userId: 2 });
+
+    for (const role of ['OfficeManager', 'Controller', 'ProductionWorker']) {
+      const { component } = setup([own, coworker], of([]), false, [role]);
+      expect(component.canChange(own)).toBe(true);
+      expect(component.canChange(coworker)).toBe(false);
+    }
+    for (const role of ['Admin', 'Manager']) {
+      const { component } = setup([own, coworker], of([]), false, [role]);
+      expect(component.canChange(coworker)).toBe(true);
+    }
   });
 });

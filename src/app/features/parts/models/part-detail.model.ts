@@ -8,6 +8,7 @@ import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.t
 import { TraceabilityType } from './traceability-type.type';
 import { BOMLine } from './bom-line.model';
 import { BOMUsage } from './bom-usage.model';
+import { StepGatingMode } from '../../../shared/models/step-gating-mode.type';
 
 export interface PartDetail {
   id: number;
@@ -51,6 +52,7 @@ export interface PartDetail {
   // hasCost predicate can read the part's current cost state.
   manualCostOverride: number | null;
   currentCostCalculationId: number | null;
+  standardCost?: PartStandardCost | null;
   // Pillar 2 — Tier 2 measurement profile (canonical SI; *DisplayUnit
   // round-trips the unit the user originally typed).
   weightEach: number | null;
@@ -69,6 +71,7 @@ export interface PartDetail {
   hazmatClass: string | null;
   shelfLifeDays: number | null;
   backflushPolicy: BackflushPolicy | null;
+  stepGating?: StepGatingMode | null;
   isKit: boolean;
   isConfigurable: boolean;
   defaultBinId: number | null;
@@ -109,4 +112,18 @@ export interface PartDetail {
   effectivePrice: number;
   effectivePriceCurrency: string;
   effectivePriceSource: 'PriceListEntry' | 'PartPrice' | 'VendorPartTier' | 'Default';
+}
+
+/**
+ * The standard unit cost the books carry: the manual override when set, otherwise the current cost
+ * calculation's result. The calculation's amount, date and breakdown are filled whenever one exists.
+ */
+export interface PartStandardCost {
+  amount: number;
+  source: 'Override' | 'Calculation';
+  calculatedAmount: number | null;
+  calculatedAt: string | null;
+  materialCost: number | null;
+  laborCost: number | null;
+  overheadCost: number | null;
 }

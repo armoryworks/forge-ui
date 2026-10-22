@@ -54,6 +54,14 @@ export interface WorkCenterCostRate {
   machineOhFixedRate: number;
   frozenAt: string | null;
   frozenBy: string | null;
+  workCenterCode?: string | null;
+  workCenterName?: string | null;
+}
+
+/** "CODE — Name" for a rated work center, falling back to its id when the server sent neither. */
+export function workCenterRateLabel(rate: WorkCenterCostRate): string {
+  if (rate.workCenterCode && rate.workCenterName) return `${rate.workCenterCode} — ${rate.workCenterName}`;
+  return rate.workCenterCode || rate.workCenterName || `#${rate.workCenterId}`;
 }
 
 /** Outcome of freezing a period. */

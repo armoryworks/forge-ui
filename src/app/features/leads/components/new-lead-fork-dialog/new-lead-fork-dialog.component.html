@@ -155,10 +155,10 @@
       <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     } @else {
       <button class="action-btn" (click)="back()">{{ 'leads.fork.back' | translate }}</button>
-      <app-validation-button [violations]="violations">
+      <app-validation-button [violations]="violations" [loading]="submitted()">
         <button class="action-btn action-btn--primary"
           data-testid="lead-fork-create-btn"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || submitted()"
           (click)="create()">
           <span class="material-icons-outlined">person_add</span>
           {{ 'leads.fork.create' | translate }}

@@ -110,3 +110,17 @@
   cursor: pointer;
   font: inherit;
 }
+
+.ledger-flag-filter {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+
+  &[aria-pressed='true'] {
+    outline: 2px solid var(--warning);
+  }
+}
+
+.ledger-note {
+  margin: 0 0 $sp-sm;
+}

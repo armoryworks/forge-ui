@@ -102,7 +102,7 @@
                     <td data-testid="bill-line-account">{{ line.glAccountName ?? getAccountKeyLabel(line.accountDeterminationKey) }}</td>
                   }
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
               }

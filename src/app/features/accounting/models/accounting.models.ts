@@ -21,6 +21,8 @@ export interface TrialBalanceRow {
   debitTotal: number;
   creditTotal: number;
   netBalance: number;
+  debitBalance: number;
+  creditBalance: number;
 }
 
 export interface TrialBalance {
@@ -30,6 +32,8 @@ export interface TrialBalance {
   rows: TrialBalanceRow[];
   totalDebit: number;
   totalCredit: number;
+  totalDebitBalance: number;
+  totalCreditBalance: number;
   isBalanced: boolean;
 }
 
@@ -110,6 +114,8 @@ export interface CashFlowStatement {
   netCashFromFinancing: number;
   netChangeInCash: number;
   actualCashChange: number;
+  beginningCash: number;
+  endingCash: number;
   roundingTolerance: number;
   isReconciled: boolean;
 }
@@ -209,6 +215,7 @@ export interface Form1099Report {
   vendors: Form1099VendorRow[];
   totalPayments: number;
   reportableVendorCount: number;
+  zeroPaymentVendorCount: number;
 }
 
 // ── GRNI reconciliation ────────────────────────────────────────────────────
@@ -414,6 +421,9 @@ export interface LedgerRegisterEntry {
   reversedByEntryId: number | null;
   postedAt: string | null;
   lines: LedgerRegisterLine[];
+  reversalOfEntryNumber?: number | null;
+  reversedByEntryNumber?: number | null;
+  postedBy?: number | null;
 }
 
 export interface LedgerRegisterPage {
@@ -623,6 +633,8 @@ export interface BudgetVsActualLine {
   glAccountId: number;
   accountNumber: string;
   accountName: string;
+  isIncome: boolean;
+  isFavorable: boolean;
   budgetAmount: number;
   actualAmount: number;
   variance?: number | null;
@@ -641,4 +653,11 @@ export interface BudgetVsActual {
   totalActual: number;
   totalVariance?: number | null;
   totalVariancePercent?: number | null;
+  totalBudgetIncome: number;
+  totalBudgetExpense: number;
+  totalActualIncome: number;
+  totalActualExpense: number;
+  netBudget: number;
+  netActual: number;
+  netVariance?: number | null;
 }

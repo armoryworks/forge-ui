@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
@@ -16,7 +16,7 @@ const CHALLENGE_LIFETIME_MS = 5 * 60 * 1000;
 @Component({
   selector: 'app-mfa-challenge',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, ValidationButtonComponent],
   templateUrl: './mfa-challenge.component.html',
   styleUrl: './mfa-challenge.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,11 +49,11 @@ export class MfaChallengeComponent implements OnInit {
   });
 
   protected readonly codeViolations = FormValidationService.getViolations(this.codeForm, {
-    code: 'Verification Code',
+    code: this.translate.instant('account.mfa.verificationCode'),
   });
 
   protected readonly recoveryViolations = FormValidationService.getViolations(this.recoveryForm, {
-    recoveryCode: 'Recovery Code',
+    recoveryCode: this.translate.instant('auth.mfa.recoveryCode'),
   });
 
   ngOnInit(): void {

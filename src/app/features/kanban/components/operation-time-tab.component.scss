@@ -160,3 +160,13 @@
     background-color: var(--success);
   }
 }
+
+.op-time__available {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--warning-text);
+}
+
+.op-time__available--block {
+  color: var(--error-text);
+}

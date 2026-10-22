@@ -19,7 +19,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 
 @Component({
@@ -36,6 +36,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 })
 export class SerialNumbersTabComponent {
   private readonly serialService = inject(SerialService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly capabilities = inject(CapabilityService);
 
@@ -72,8 +73,8 @@ export class SerialNumbersTabComponent {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'serialValue', header: 'Serial #', sortable: true, width: '140px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '110px',
+    { field: 'serialValue', header: 'columns.serialNumber', sortable: true, width: '140px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', width: '110px',
       filterOptions: [
         { value: 'Available', label: 'Available' },
         { value: 'InUse', label: 'In Use' },
@@ -82,10 +83,10 @@ export class SerialNumbersTabComponent {
         { value: 'Scrapped', label: 'Scrapped' },
         { value: 'Quarantined', label: 'Quarantined' },
       ] },
-    { field: 'currentLocationName', header: 'Location', sortable: true },
-    { field: 'jobNumber', header: 'Job', sortable: true, width: '100px' },
-    { field: 'manufacturedAt', header: 'Manufactured', sortable: true, type: 'date', width: '110px' },
-    { field: 'childCount', header: 'Children', sortable: true, type: 'number', width: '80px' },
+    { field: 'currentLocationName', header: 'columns.location', sortable: true },
+    { field: 'jobNumber', header: 'columns.job', sortable: true, width: '100px' },
+    { field: 'manufacturedAt', header: 'columns.manufactured', sortable: true, type: 'date', width: '110px' },
+    { field: 'childCount', header: 'columns.children', sortable: true, type: 'number', width: '80px' },
   ];
 
   protected readonly statusOptions: SelectOption[] = [
@@ -133,7 +134,7 @@ export class SerialNumbersTabComponent {
   }
 
   protected saveSerial(): void {
-    if (this.createForm.invalid) return;
+    if (this.createForm.invalid || this.saving()) return;
     this.saving.set(true);
     const f = this.createForm.getRawValue();
     this.serialService.createSerialNumber(this.partId(), {
@@ -146,7 +147,7 @@ export class SerialNumbersTabComponent {
         this.saving.set(false);
         this.closeCreate();
         this.loadSerials(this.partId());
-        this.snackbar.success('Serial number created');
+        this.snackbar.success(this.translate.instant('serialNumbers.messages.created'));
       },
       error: () => this.saving.set(false),
     });

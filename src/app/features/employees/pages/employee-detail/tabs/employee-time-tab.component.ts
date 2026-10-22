@@ -6,11 +6,12 @@ import { EmployeeTimeEntry } from '../../../models/employee.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-time-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent],
+  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent, TranslatePipe],
   templateUrl: './employee-time-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,13 +32,13 @@ export class EmployeeTimeTabComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'date', header: 'Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'durationMinutes', header: 'Duration', sortable: true, width: '90px', align: 'right' },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '90px' },
-    { field: 'jobTitle', header: 'Job Title', sortable: true },
-    { field: 'notes', header: 'Notes', sortable: false },
-    { field: 'isManual', header: 'Type', sortable: true, width: '80px' },
+    { field: 'date', header: 'common.date', sortable: true, type: 'date', width: '100px' },
+    { field: 'durationMinutes', header: 'columns.duration', sortable: true, width: '90px', align: 'right' },
+    { field: 'category', header: 'common.category', sortable: true, width: '120px' },
+    { field: 'jobNumber', header: 'columns.jobNumber', sortable: true, width: '90px' },
+    { field: 'jobTitle', header: 'columns.jobTitle', sortable: true },
+    { field: 'notes', header: 'common.notes', sortable: false },
+    { field: 'isManual', header: 'common.type', sortable: true, width: '80px' },
   ];
 
   ngOnInit(): void {

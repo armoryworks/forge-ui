@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { MatSlideToggle, MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { DetailLoadErrorComponent } from '../../../shared/components/detail-load-error/detail-load-error.component';
@@ -78,6 +78,7 @@ interface CapabilityViolation {
 })
 export class CapabilityDetailComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
+  private readonly translate = inject(TranslateService);
   private readonly consultantMode = inject(ConsultantModeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly route = inject(ActivatedRoute);
@@ -162,7 +163,7 @@ export class CapabilityDetailComponent implements OnInit {
     this.togglePending.set(true);
     this.capabilityService.setEnabled(entry.code, target).subscribe({
       next: () => {
-        this.snackbar.success(`Capability ${target ? 'enabled' : 'disabled'}: ${entry.name}`);
+        this.snackbar.success(this.translate.instant(target ? 'admin.capabilityMessages.enabled' : 'admin.capabilityMessages.disabled', { name: entry.name }));
         this.togglePending.set(false);
         this.glOpeningReason.set(null);
         this.capabilityService.load().subscribe();
@@ -239,30 +240,24 @@ export class CapabilityDetailComponent implements OnInit {
   private surfaceError(entry: CapabilityDescriptorEntry, err: HttpErrorResponse): void {
     const violation = this.extractFirstViolation(err);
     if (!violation) {
-      this.snackbar.error(`Failed to update ${entry.name}.`);
+      this.snackbar.error(this.translate.instant('admin.capabilityMessages.updateFailed', { name: entry.name }));
       return;
     }
     switch (violation.code) {
       case 'capability-has-dependents':
-        this.snackbar.error(
-          `Cannot disable ${entry.name} — disable these dependents first: ${(violation.dependents ?? []).join(', ')}.`,
-        );
+        this.snackbar.error(this.translate.instant('admin.capabilityMessages.dependents', { name: entry.name, list: (violation.dependents ?? []).join(', ') }));
         break;
       case 'capability-missing-dependencies':
-        this.snackbar.error(
-          `Cannot enable ${entry.name} — enable these dependencies first: ${(violation.missing ?? []).join(', ')}.`,
-        );
+        this.snackbar.error(this.translate.instant('admin.capabilityMessages.missing', { name: entry.name, list: (violation.missing ?? []).join(', ') }));
         break;
       case 'capability-mutex-violation':
-        this.snackbar.error(
-          `${entry.name} conflicts with: ${(violation.conflicts ?? []).join(', ')}. Disable the peer first.`,
-        );
+        this.snackbar.error(this.translate.instant('admin.capabilityMessages.conflicts', { name: entry.name, list: (violation.conflicts ?? []).join(', ') }));
         break;
       case 'capability-gl-opening-balances':
         this.glOpeningReason.set(violation.message ?? '');
         break;
       default:
-        this.snackbar.error(violation.message ?? `Failed to update ${entry.name}.`);
+        this.snackbar.error(violation.message ?? this.translate.instant('admin.capabilityMessages.updateFailed', { name: entry.name }));
         break;
     }
   }

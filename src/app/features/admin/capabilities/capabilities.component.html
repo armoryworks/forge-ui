@@ -1,17 +1,17 @@
 <app-page-layout pageTitle="Capabilities" pageSubtitle="What this installation does and doesn't do">
   <ng-container toolbar>
     <app-input
-      label="Search"
+      [label]="'common.search' | translate"
       [formControl]="searchControl"
-      placeholder="Search by name, code, description"
+      [placeholder]="'capabilityAreas.settingsSearch.searchByNameCodeDescription' | translate"
       data-testid="capability-search" />
     <app-select
-      label="Area"
+      [label]="'capabilityAreas.settingsSearch.area' | translate"
       [formControl]="areaControl"
       [options]="areaOptions()"
       data-testid="capability-area-filter" />
     <app-toggle
-      label="Enabled only"
+      [label]="'capabilityAreas.settingsSearch.enabledOnly' | translate"
       [formControl]="enabledOnlyControl"
       data-testid="capability-enabled-filter" />
     <span appSpacer></span>
@@ -24,19 +24,19 @@
       [matTooltip]="consultantModeEnabled() ? 'Hide capability codes' : 'Show capability codes and consultant-tier affordances'"
       matTooltipPosition="below"
       [attr.aria-pressed]="consultantModeEnabled()"
-      aria-label="Toggle consultant mode">
+      [attr.aria-label]="'capabilityAreas.settingsSearch.toggleConsultantMode' | translate">
       <span class="material-icons-outlined">{{ consultantModeEnabled() ? 'engineering' : 'person' }}</span>
-      Consultant mode
+      {{ 'capabilityAreas.settingsSearch.consultantMode' | translate }}
     </button>
     <button
       class="action-btn"
       type="button"
       (click)="refresh()"
       [disabled]="loading()"
-      aria-label="Refresh capabilities"
+      [attr.aria-label]="'capabilityAreas.settingsSearch.refreshCapabilities' | translate"
       data-testid="capability-refresh-btn">
       <span class="material-icons-outlined">refresh</span>
-      Refresh
+      {{ 'common.refresh' | translate }}
     </button>
   </ng-container>
 
@@ -75,10 +75,10 @@
       }
 
       <div class="capabilities-page__summary">
-        <span><strong>{{ enabledCount() }}</strong> of <strong>{{ capabilities().length }}</strong> enabled</span>
+        <span><strong>{{ enabledCount() }}</strong> of <strong>{{ capabilities().length }}</strong> {{ 'capabilityAreas.settingsSearch.enabled' | translate }}</span>
         @if (filtered().length !== capabilities().length) {
           <span class="capabilities-page__summary-filter">
-            ({{ filtered().length }} after filter)
+            {{ 'capabilityAreas.settingsSearch.countAfterFilter' | translate:{ count: filtered().length } }}
           </span>
         }
       </div>
@@ -106,7 +106,7 @@
       @if (filtered().length === 0) {
         <div class="capabilities-page__empty">
           <span class="material-icons-outlined">search_off</span>
-          <span>No capabilities match the current filter.</span>
+          <span>{{ 'capabilityAreas.settingsSearch.noCapabilitiesMatchTheCurrentFilter' | translate }}</span>
         </div>
       } @else {
         <div class="capabilities-page__groups" data-testid="capability-groups">
@@ -181,7 +181,7 @@
                         class="icon-btn capability-row__open"
                         type="button"
                         (click)="openDetail(cap); $event.stopPropagation()"
-                        aria-label="Open detail page">
+                        [attr.aria-label]="'capabilityAreas.settingsSearch.openDetailPage' | translate">
                         <span class="material-icons-outlined">chevron_right</span>
                       </button>
                     </li>

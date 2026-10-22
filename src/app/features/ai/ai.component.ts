@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -25,7 +26,7 @@ export interface AiAssistantListItem {
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'error';
   content: string;
   timestamp: Date;
 }
@@ -116,10 +117,7 @@ export class AiComponent {
     const assistant = this.activeAssistant();
     if (!text || !assistant || this.sending()) return;
 
-    const history: AiHelpMessage[] = (this.conversations().get(assistant.id) ?? [])
-      .filter(m => m.role === 'user' || m.role === 'assistant')
-      .slice(-10)
-      .map(m => ({ role: m.role, content: m.content }));
+    const history = answeredHistory(this.conversations().get(assistant.id) ?? []).slice(-10);
 
     this.messageInput.reset();
     this.addMessage(assistant.id, { role: 'user', content: text, timestamp: new Date() });
@@ -130,8 +128,9 @@ export class AiComponent {
         this.addMessage(assistant.id, { role: 'assistant', content: response.answer, timestamp: new Date() });
         this.sending.set(false);
       },
-      error: () => {
-        this.addMessage(assistant.id, { role: 'assistant', content: this.translate.instant('ai.errorMessage'), timestamp: new Date() });
+      error: (err: unknown) => {
+        const key = err instanceof HttpErrorResponse && err.status === 503 ? 'ai.unavailableMessage' : 'ai.errorMessage';
+        this.addMessage(assistant.id, { role: 'error', content: this.translate.instant(key), timestamp: new Date() });
         this.sending.set(false);
       },
     });
@@ -158,4 +157,14 @@ export class AiComponent {
   private addMessage(assistantId: number, message: ChatMessage): void {
     this.conversations.update(m => new Map(m).set(assistantId, [...(m.get(assistantId) ?? []), message]));
   }
+}
+
+function answeredHistory(messages: readonly ChatMessage[]): AiHelpMessage[] {
+  const history: AiHelpMessage[] = [];
+  messages.forEach((m, i) => {
+    if (m.role === 'error') return;
+    if (m.role === 'user' && messages[i + 1]?.role === 'error') return;
+    history.push({ role: m.role, content: m.content });
+  });
+  return history;
 }

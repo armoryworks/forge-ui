@@ -28,7 +28,7 @@
       </ng-template>
       <ng-template appColumnCell="shiftDifferentialRate" let-row>
         @if (row.shiftDifferentialRate !== null) {
-          {{ 'scheduling.assignments.perHour' | translate:{ amount: row.shiftDifferentialRate.toFixed(2) } }}
+          {{ 'scheduling.assignments.perHour' | translate:{ amount: (row.shiftDifferentialRate | currency) } }}
         } @else {
           <span class="text-muted">—</span>
         }

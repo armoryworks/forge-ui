@@ -5,7 +5,7 @@
     [data]="expenses()"
     [loading]="loading()"
     emptyIcon="receipt_long"
-    emptyMessage="No expenses found">
+    [emptyMessage]="'employees.employeeExpensesTab.noExpensesFound' | translate">
 
     <ng-template appColumnCell="expenseDate" let-row>
       {{ row.expenseDate | date:'MM/dd/yyyy' }}

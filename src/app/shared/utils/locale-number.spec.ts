@@ -18,16 +18,16 @@ describe('parseLocaleNumber', () => {
     expect(parseLocaleNumber('5.', 'en')).toBe(5);
   });
 
-  it('reads es text with a comma decimal and dot groups', () => {
-    expect(parseLocaleNumber('1,5', 'es')).toBe(1.5);
-    expect(parseLocaleNumber('1.500', 'es')).toBe(1500);
-    expect(parseLocaleNumber('1.234.567,25', 'es')).toBe(1234567.25);
-    expect(parseLocaleNumber('-0,25', 'es')).toBe(-0.25);
+  it('reads es text with US conventions (es-US): dot decimal and comma groups', () => {
+    expect(parseLocaleNumber('1.5', 'es')).toBe(1.5);
+    expect(parseLocaleNumber('1,500', 'es')).toBe(1500);
+    expect(parseLocaleNumber('1,234,567.25', 'es')).toBe(1234567.25);
+    expect(parseLocaleNumber('-0.25', 'es')).toBe(-0.25);
   });
 
   it('rejects a separator in the wrong place instead of dropping it', () => {
     expect(parseLocaleNumber('1,5', 'en')).toBeNaN();
-    expect(parseLocaleNumber('1.5', 'es')).toBeNaN();
+    expect(parseLocaleNumber('1,5', 'es')).toBeNaN();
     expect(parseLocaleNumber('0,500', 'en')).toBeNaN();
     expect(parseLocaleNumber('12,34,567', 'en')).toBeNaN();
   });
@@ -42,9 +42,15 @@ describe('parseLocaleNumber', () => {
 describe('formatLocaleNumber', () => {
   it('formats without rounding and only groups on request', () => {
     expect(formatLocaleNumber(1500.1234, 'en')).toBe('1500.1234');
-    expect(formatLocaleNumber(1500.25, 'es')).toBe('1500,25');
+    expect(formatLocaleNumber(1500.25, 'es')).toBe('1500.25');
     expect(formatLocaleNumber(1234567.5, 'en', true)).toBe('1,234,567.5');
-    expect(formatLocaleNumber(1234567.5, 'es', true)).toBe('1.234.567,5');
+    expect(formatLocaleNumber(1234567.5, 'es', true)).toBe('1,234,567.5');
+  });
+
+  it('pads to the minimum fraction digits without rounding longer values', () => {
+    expect(formatLocaleNumber(74, 'en', false, 2)).toBe('74.00');
+    expect(formatLocaleNumber(42.5, 'es', false, 2)).toBe('42.50');
+    expect(formatLocaleNumber(0.3334, 'en', false, 2)).toBe('0.3334');
   });
 
   it('round-trips through parseLocaleNumber', () => {

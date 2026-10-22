@@ -11,6 +11,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingPathRow } from './training-panel.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface TrainingPathDetail extends TrainingPathRow {
   slug?: string;
@@ -27,6 +28,7 @@ interface TrainingPathDetail extends TrainingPathRow {
     TextareaComponent,
     ToggleComponent,
     ValidationButtonComponent,
+    TranslatePipe,
   ],
   templateUrl: './training-path-dialog.component.html',
   styleUrl: './training-path-dialog.component.scss',

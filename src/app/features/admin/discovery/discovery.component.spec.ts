@@ -182,7 +182,7 @@ describe('DiscoveryComponent', () => {
     });
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('en', {
-      discoveryWizard: { applied: 'Discovery applied — {{preset}}.', reviewCapabilities: 'Review capabilities' },
+      discoveryWizard: { applied: 'Discovery applied — {{preset}}.', reviewCapabilities: 'Review capabilities', branchBranch: 'Branch {{branch}}' },
     });
     translate.use('en');
   });

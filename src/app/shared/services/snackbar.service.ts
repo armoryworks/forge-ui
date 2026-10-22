@@ -104,6 +104,13 @@ export class SnackbarService {
     }).onAction();
   }
 
+  infoWithAction(message: string, actionLabel: string): Observable<void> {
+    return this.snackBar.open(message, actionLabel, {
+      duration: 10000,
+      panelClass: ['snackbar--info'],
+    }).onAction();
+  }
+
   private dismissLabel(): string {
     return this.translate.instant('common.dismiss');
   }

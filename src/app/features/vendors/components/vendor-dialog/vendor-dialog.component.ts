@@ -18,6 +18,7 @@ import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
   selector: 'app-vendor-dialog',
@@ -54,7 +55,7 @@ export class VendorDialogComponent implements OnInit {
   }
 
   readonly form = new FormGroup({
-    companyName: new FormControl('', [Validators.required]),
+    companyName: new FormControl('', [requiredTrimmed]),
     vendorNumber: new FormControl('', [Validators.maxLength(50)]),
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
@@ -125,7 +126,7 @@ export class VendorDialogComponent implements OnInit {
       value?.trim() || (v ? '' : undefined);
 
     const payload = {
-      companyName: f.companyName || undefined,
+      companyName: f.companyName?.trim() || undefined,
       contactName: f.contactName || undefined,
       email: contactValue(f.email),
       phone: contactValue(f.phone),
@@ -155,7 +156,7 @@ export class VendorDialogComponent implements OnInit {
     } else {
       this.vendorService.createVendor({
         ...payload,
-        companyName: f.companyName!,
+        companyName: f.companyName!.trim(),
         vendorNumber: this.allowManualVendorNumbers() ? (f.vendorNumber?.trim() || undefined) : undefined,
       }).subscribe({
         next: () => {

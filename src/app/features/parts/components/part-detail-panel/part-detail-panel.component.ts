@@ -23,6 +23,7 @@ import { PartInventorySummary } from '../../models/part-inventory-summary.model'
 import { PartPurchaseHistoryItem } from '../../models/part-purchase-history-item.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -150,6 +151,7 @@ export class PartDetailPanelComponent {
   protected readonly detailLoading = signal(false);
   protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
+  protected readonly savingBomLine = signal(false);
   /** Whether the global edit toggle is on; clusters render edit forms. */
   protected readonly editing = signal(false);
 
@@ -210,7 +212,7 @@ export class PartDetailPanelComponent {
 
   protected readonly bomForm = new FormGroup({
     childPartId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl(1, [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'), this.translate)]),
     uomId: new FormControl<number | null>(null),
     sourceType: new FormControl('Buy'),
     referenceDesignator: new FormControl(''),
@@ -229,7 +231,7 @@ export class PartDetailPanelComponent {
   private bomLineCommitQueued: { close: boolean } | null = null;
 
   protected readonly bomLineEditForm = new FormGroup({
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'), this.translate)]),
     sourceType: new FormControl<BOMSourceType>('Buy', { nonNullable: true }),
     referenceDesignator: new FormControl<string>('', { nonNullable: true }),
   });
@@ -244,8 +246,8 @@ export class PartDetailPanelComponent {
   protected readonly bomColumns: ColumnDef[] = [
     { field: 'sortOrder', header: '#', width: '40px', align: 'center' },
     { field: 'childPartNumber', header: this.translate.instant('parts.bomPart'), sortable: true },
-    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '90px', align: 'center', sortable: true },
-    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '120px', sortable: true, filterable: true, type: 'enum',
+    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '140px', align: 'center', sortable: true },
+    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '150px', sortable: true, filterable: true, type: 'enum',
       filterOptions: this.sourceTypeOptions },
     { field: 'leadTimeDays', header: this.translate.instant('parts.bomLeadTime'), width: '90px' },
     { field: 'referenceDesignator', header: this.translate.instant('parts.bomRefDes') },
@@ -485,7 +487,7 @@ export class PartDetailPanelComponent {
         // Plain "Save" keeps the panel in edit mode (preferred when editing
         // across multiple tabs); only "Save & Close" exits edit mode.
         if (closeAfterSave) this.editing.set(false);
-        this.snackbar.success('Part updated');
+        this.snackbar.success(this.translate.instant('parts.messages.updated'));
       },
       error: () => this.saving.set(false),
     });
@@ -621,10 +623,11 @@ export class PartDetailPanelComponent {
   }
 
   protected saveBomLine(): void {
-    if (this.bomForm.invalid) return;
+    if (this.savingBomLine() || this.bomForm.invalid) return;
     const p = this.part();
     if (!p) return;
     const form = this.bomForm.getRawValue();
+    this.savingBomLine.set(true);
     this.partsService.createBOMLine(p.id, {
       childPartId: form.childPartId!,
       quantity: form.quantity!,
@@ -635,11 +638,13 @@ export class PartDetailPanelComponent {
       notes: form.notes || undefined,
     }).subscribe({
       next: (detail) => {
+        this.savingBomLine.set(false);
         this.part.set(detail);
         this.closeBomDialog();
         this.bomRefreshToken.update(v => v + 1);
         this.snackbar.success(this.translate.instant('parts.bomLineAdded'));
       },
+      error: () => this.savingBomLine.set(false),
     });
   }
 

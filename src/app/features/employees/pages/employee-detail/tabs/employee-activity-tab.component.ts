@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } fro
 
 import { EmployeeService } from '../../../services/employee.service';
 import { ActivityTimelineComponent } from '../../../../../shared/components/activity-timeline/activity-timeline.component';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-employee-activity-tab',
   standalone: true,
-  imports: [ActivityTimelineComponent],
+  imports: [ActivityTimelineComponent, TranslatePipe],
   templateUrl: './employee-activity-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

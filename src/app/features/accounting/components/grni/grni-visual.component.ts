@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, inject, LOCALE_ID } from '@angular/core';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -27,6 +27,7 @@ const MAX_VENDORS = 12;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GrniVisualComponent {
+  private readonly locale = inject(LOCALE_ID);
   readonly report = input.required<GrniReconciliation>();
 
   /** Open GRNI summed per vendor, largest first, capped so the axis stays legible. */
@@ -65,7 +66,7 @@ export class GrniVisualComponent {
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                `${ctx.label}: ${(ctx.raw as number).toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`,
+                `${ctx.label}: ${(ctx.raw as number).toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`,
             },
           },
         },

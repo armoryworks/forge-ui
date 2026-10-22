@@ -16,10 +16,10 @@
       }
     </div>
     <div class="toast__actions">
-      <button class="toast__btn" (click)="copy(toast)" title="Copy">
+      <button class="toast__btn" (click)="copy(toast)" [title]="'shared.toast.copy' | translate">
         <span class="material-icons-outlined">content_copy</span>
       </button>
-      <button class="toast__btn" (click)="toastService.dismiss(toast.id)" title="Dismiss">
+      <button class="toast__btn" (click)="toastService.dismiss(toast.id)" [title]="'common.dismiss' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>

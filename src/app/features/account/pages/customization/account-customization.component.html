@@ -86,7 +86,7 @@
         [class.toggle-option--active]="chatSoundEnabled()"
         (click)="toggleChatSound()"
         [attr.aria-pressed]="chatSoundEnabled()"
-        aria-label="Toggle chat notification sound">
+        [attr.aria-label]="'account.toggleChatNotificationSound' | translate">
         <span class="material-icons-outlined toggle-option__icon">volume_up</span>
         <span class="toggle-option__label">{{ 'account.chatSound' | translate }}</span>
         <span class="toggle-option__status">{{ chatSoundEnabled() ? 'On' : 'Off' }}</span>
@@ -95,7 +95,7 @@
         [class.toggle-option--active]="chatVibrateEnabled()"
         (click)="toggleChatVibrate()"
         [attr.aria-pressed]="chatVibrateEnabled()"
-        aria-label="Toggle chat vibration">
+        [attr.aria-label]="'account.toggleChatVibration' | translate">
         <span class="material-icons-outlined toggle-option__icon">vibration</span>
         <span class="toggle-option__label">{{ 'account.chatVibrate' | translate }}</span>
         <span class="toggle-option__status">{{ chatVibrateEnabled() ? 'On' : 'Off' }}</span>
@@ -104,7 +104,7 @@
         [class.toggle-option--active]="chatPreviewPopupEnabled()"
         (click)="toggleChatPreviewPopup()"
         [attr.aria-pressed]="chatPreviewPopupEnabled()"
-        aria-label="Toggle desktop preview popups">
+        [attr.aria-label]="'account.toggleDesktopPreviewPopups' | translate">
         <span class="material-icons-outlined toggle-option__icon">picture_in_picture</span>
         <span class="toggle-option__label">{{ 'account.previewPopups' | translate }}</span>
         <span class="toggle-option__status">{{ chatPreviewPopupEnabled() ? 'On' : 'Off' }}</span>
@@ -119,7 +119,7 @@
           [class.font-scale-option--active]="chatSoundType() === opt.value"
           (click)="setChatSoundType(opt.value)"
           [attr.aria-pressed]="chatSoundType() === opt.value"
-          [attr.aria-label]="'Select notification sound: ' + opt.value">
+          [attr.aria-label]="'account.selectNotificationSound' | translate: { name: (opt.labelKey | translate) }">
           <span class="font-scale-option__label">{{ opt.labelKey | translate }}</span>
         </button>
       }
@@ -138,8 +138,8 @@
 
   <!-- Draft Retention -->
   <div class="account-page__card">
-    <span class="account-page__section-label">Keep unsaved work for</span>
-    <p class="customization__hint">When a form has unsaved changes, they are saved automatically. Choose how long to keep them before they expire.</p>
+    <span class="account-page__section-label">{{ 'account.draftRetention.title' | translate }}</span>
+    <p class="customization__hint">{{ 'account.draftRetention.hint' | translate }}</p>
 
     <div class="font-scale-picker">
       @for (opt of draftTtlOptions; track opt.value) {
@@ -148,7 +148,7 @@
           [class.font-scale-option--active]="draftTtl() === opt.value"
           (click)="setDraftTtl(opt.value)"
           [attr.aria-pressed]="draftTtl() === opt.value">
-          <span class="font-scale-option__label">{{ opt.label }}</span>
+          <span class="font-scale-option__label">{{ opt.labelKey | translate }}</span>
         </button>
       }
     </div>

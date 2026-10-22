@@ -15,11 +15,12 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-asset-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [CurrencyDisplayComponent, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
   templateUrl: './asset-detail-panel.component.html',
   styleUrl: './asset-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -91,6 +92,11 @@ export class AssetDetailPanelComponent {
         this.snackbar.success(this.translate.instant('assets.assetUpdated'));
       },
     });
+  }
+
+  protected hasAcquisitionDetails(asset: AssetItem): boolean {
+    return (asset.acquisitionCost !== null && asset.acquisitionCost !== undefined)
+      || !!asset.depreciationMethod || !!asset.workCenterId || !!asset.glAccount;
   }
 
   protected getTypeIcon(type: string): string {

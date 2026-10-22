@@ -174,6 +174,56 @@ describe('ScannerService', () => {
     });
   });
 
+  describe('scan timing', () => {
+    function keys(text: string, gapMs: number): void {
+      [...text].forEach((k, i) => {
+        if (i > 0) vi.advanceTimersByTime(gapMs);
+        document.body.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+      });
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      service.start();
+    });
+
+    afterEach(() => vi.useRealTimers());
+
+    it('keeps a scan whole across one 60 ms gap inside the burst', () => {
+      keys('J-2', 8);
+      vi.advanceTimersByTime(60);
+      keys('403', 8);
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
+    it('starts over after a 120 ms gap', () => {
+      keys('XYZ', 8);
+      vi.advanceTimersByTime(120);
+      keys('J-2403', 8);
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+
+    it('does not treat slow typing on the board as a scan', () => {
+      keys('J-2403', 120);
+      vi.advanceTimersByTime(120);
+      document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      vi.advanceTimersByTime(200);
+
+      expect(service.lastScan()).toBeNull();
+    });
+
+    it('sends a fast burst with no Enter through the fallback timer', () => {
+      keys('J-2403', 8);
+      vi.advanceTimersByTime(80);
+
+      expect(service.lastScan()?.value).toBe('J-2403');
+    });
+  });
+
   describe('ngOnDestroy', () => {
     it('should stop listening on destroy', () => {
       service.start();

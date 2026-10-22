@@ -64,15 +64,15 @@
           <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
-          <app-currency-display [value]="row.total" [currency]="null" />
+          <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="amountPaid" let-row>
-          <app-currency-display [value]="row.amountPaid" [currency]="null" />
+          <app-currency-display [value]="row.amountPaid" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="balanceDue" let-row>
           <span [class.text-warning]="row.balanceDue > 0 && row.status !== 'Overdue'"
                 [class.text-error]="row.status === 'Overdue'">
-            <app-currency-display [value]="row.balanceDue" [currency]="null" />
+            <app-currency-display [value]="row.balanceDue" [currency]="row.currencyCode ?? null" />
           </span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>

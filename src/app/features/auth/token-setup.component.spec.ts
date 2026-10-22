@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { TokenSetupComponent } from './token-setup.component';
@@ -114,5 +114,25 @@ describe('TokenSetupComponent', () => {
     setup.onSubmit();
 
     expect(setup.error()).toBe('Invalid or expired setup token');
+  });
+
+  it('posts the setup once when Enter submits twice before the server answers', () => {
+    completeSetup.mockReturnValue(new Subject());
+    const setup = filledForm();
+
+    setup.onSubmit();
+    setup.onSubmit();
+
+    expect(completeSetup).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the user retry after the server rejects the setup', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 400, error: { detail: 'nope' } })));
+    const setup = filledForm();
+
+    setup.onSubmit();
+    setup.onSubmit();
+
+    expect(completeSetup).toHaveBeenCalledTimes(2);
   });
 });

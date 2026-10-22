@@ -226,7 +226,7 @@ export class CustomerPricingTabComponent implements OnInit {
       if (!confirmed) return;
       this.priceListsService.deleteEntry(entry.id).subscribe({
         next: () => {
-          this.snackbar.success('Price entry removed');
+          this.snackbar.success(this.translate.instant('priceListEntry.messages.removed'));
           if (this.selectedList()) this.loadEntries(this.selectedList()!.id);
         },
       });

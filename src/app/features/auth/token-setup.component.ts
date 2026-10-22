@@ -39,6 +39,7 @@ export class TokenSetupComponent implements OnInit {
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);
   protected readonly submitError = signal<string | null>(null);
+  protected readonly submitting = signal(false);
   protected readonly tokenInfo = signal<SetupTokenInfo | null>(null);
 
   /**
@@ -94,7 +95,7 @@ export class TokenSetupComponent implements OnInit {
   protected readonly loading = this.loadingService.isLoading;
 
   protected onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting()) return;
 
     const { password } = this.form.getRawValue();
 
@@ -104,6 +105,7 @@ export class TokenSetupComponent implements OnInit {
     }
 
     this.submitError.set(null);
+    this.submitting.set(true);
     this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.completeSetup({
       token: this.token,
       password: password!,
@@ -113,6 +115,7 @@ export class TokenSetupComponent implements OnInit {
         this.router.navigate([this.layout.getDefaultRoute()]);
       },
       error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
         const detail: string = err.error?.detail ?? err.error?.title ?? this.translate.instant('errorFallbacksA.setupFailed');
         if (err.status >= 500 || err.status === 0) {
           this.toast.show({ severity: 'error', title: this.translate.instant('auth.setupFailedTitle'), message: detail });

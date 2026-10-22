@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { Observable, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 
@@ -67,6 +68,28 @@ describe('AiComponent chat', () => {
     const secondHistory = assistantChat.mock.calls[1][2] as AiHelpMessage[];
     expect(firstHistory).toEqual([]);
     expect(secondHistory.map(m => m.content)).toEqual(['First question', 'Use fixture QF-FX-12.']);
+  });
+
+  it('shows a failed reply as an error and leaves it and its question out of the next history', () => {
+    assistantChat.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+    send('Broken question');
+    send('Next question');
+
+    const el: HTMLElement = fixture.nativeElement;
+    const error = el.querySelector('.chat-message--error');
+    expect(error?.textContent).toContain('ai.errorMessage');
+    expect(error?.getAttribute('role')).toBe('alert');
+    expect(el.querySelectorAll('.chat-message--assistant').length).toBe(1);
+    const secondHistory = assistantChat.mock.calls[1][2] as AiHelpMessage[];
+    expect(secondHistory).toEqual([]);
+  });
+
+  it('says the AI service is unavailable when the server answers 503', () => {
+    assistantChat.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 503 })));
+    send('Anyone there?');
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('.chat-message--error')?.textContent).toContain('ai.unavailableMessage');
   });
 
   it('clear chat brings the welcome panel back', () => {

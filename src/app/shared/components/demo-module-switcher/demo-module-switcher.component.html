@@ -1,18 +1,18 @@
 @if (show) {
   <div class="demo-switcher">
     @if (open()) {
-      <div class="demo-switcher__panel" role="dialog" aria-label="Demo module switcher">
+      <div class="demo-switcher__panel" role="dialog" [attr.aria-label]="'shared.demoModuleSwitcher.demoModuleSwitcher' | translate">
         <div class="demo-switcher__head">
-          <span class="demo-switcher__title">Demo modules</span>
-          <button type="button" class="demo-switcher__close" aria-label="Close" (click)="togglePanel()">
+          <span class="demo-switcher__title">{{ 'shared.demoModuleSwitcher.demoModules' | translate }}</span>
+          <button type="button" class="demo-switcher__close" [attr.aria-label]="'common.close' | translate" (click)="togglePanel()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
-        <p class="demo-switcher__hint">Switch what's turned on to show the modular build live.</p>
+        <p class="demo-switcher__hint">{{ 'shared.demoModuleSwitcher.switchWhatSTurnedOnTo' | translate }}</p>
 
         <div class="demo-switcher__presets">
-          <button type="button" class="demo-switcher__preset" (click)="selectFull()">Full suite</button>
-          <button type="button" class="demo-switcher__preset" (click)="selectInventory()">Inventory only</button>
+          <button type="button" class="demo-switcher__preset" (click)="selectFull()">{{ 'shared.demoModuleSwitcher.fullSuite' | translate }}</button>
+          <button type="button" class="demo-switcher__preset" (click)="selectInventory()">{{ 'shared.demoModuleSwitcher.inventoryOnly' | translate }}</button>
         </div>
 
         <ul class="demo-switcher__list">
@@ -25,7 +25,7 @@
                 </span>
                 <span class="demo-switcher__item-name">{{ m.name }}</span>
                 @if (m.preview) {
-                  <span class="demo-switcher__tag">preview</span>
+                  <span class="demo-switcher__tag">{{ 'shared.demoModuleSwitcher.preview' | translate }}</span>
                 }
               </button>
             </li>
@@ -36,7 +36,7 @@
 
     <button type="button" class="demo-switcher__chip" (click)="togglePanel()" [attr.aria-expanded]="open()">
       <span class="material-icons-outlined">tune</span>
-      <span class="demo-switcher__chip-label">Modules: {{ summary() }}</span>
+      <span class="demo-switcher__chip-label">{{ 'shared.demoModuleSwitcher.modulesSummary' | translate:{ summary: summary() } }}</span>
     </button>
   </div>
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { FormGroup } from '@angular/forms';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
@@ -23,6 +24,7 @@ describe('SerialNumbersTabComponent', () => {
   function setup(lotsOn = true): TabInternals {
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: SerialService, useValue: { getPartSerials: vi.fn(() => of([])), createSerialNumber } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-INV-LOTS' && lotsOn } },

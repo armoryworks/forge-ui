@@ -1,13 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 import { RoutingComponent } from './routing.component';
 import { PartsService } from '../../services/parts.service';
 import { Operation } from '../../models/operation.model';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -21,6 +24,9 @@ interface RoutingInternals {
   totalSetupMs(): number;
   totalLotMs(): number;
   openCopyRouting(): void;
+  onReorderOperation(event: { previousIndex: number; currentIndex: number }): void;
+  followsByOperation(): Map<number, string>;
+  gatingControl: { setValue(value: string | null): void; disabled: boolean };
 }
 
 function operation(id: number, stepNumber: number, estimatedMs: number | null, setupMinutes: number, runMinutesLot: number): Operation {
@@ -30,17 +36,20 @@ function operation(id: number, stepNumber: number, estimatedMs: number | null, s
     isQcCheckpoint: false, qcCriteria: null, referencedOperationId: null, referencedOperationTitle: null,
     materials: [], createdAt: new Date(), updatedAt: new Date(),
     isSubcontract: false, subcontractVendorId: null, subcontractVendorName: null, subcontractTurnTimeDays: null,
+    scrapFactor: 0,
   };
 }
 
-function setup(dialogOpen = vi.fn()): RoutingInternals {
+function setup(dialogOpen = vi.fn(), partsService: Record<string, unknown> = {}, roles = ['Engineer']): RoutingInternals {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: MatDialog, useValue: { open: dialogOpen } },
-      { provide: PartsService, useValue: { getOperations: vi.fn(() => of([])) } },
+      { provide: PartsService, useValue: { getOperations: vi.fn(() => of([])), ...partsService } },
       { provide: DraftResumeService, useValue: { consume: vi.fn(() => false) } },
+      { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new RoutingComponent());
@@ -108,5 +117,112 @@ describe('RoutingComponent — totals and copy', () => {
     component.openCopyRouting();
 
     expect(component.operations()).toEqual([]);
+  });
+});
+
+describe('RoutingComponent — step links and gating', () => {
+  function conflict(): HttpErrorResponse {
+    return new HttpErrorResponse({
+      status: 409,
+      error: { code: 'predecessor-conflict', conflicts: [{ operationId: 3, stepNumber: 10, predecessorOperationId: 1, predecessorStepNumber: 20 }] },
+    });
+  }
+
+  it('saves a drag as one reorder that keeps the step numbers', () => {
+    const reorderOperations = vi.fn(() => of([operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)]));
+    const component = setup(vi.fn(), { reorderOperations });
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(reorderOperations).toHaveBeenCalledWith(7, { operationIds: [2, 1], removeConflictingPredecessors: false });
+    expect(component.operations().map(op => [op.id, op.stepNumber])).toEqual([[2, 10], [1, 20]]);
+  });
+
+  it('asks before removing links a reorder breaks, then saves again without them', () => {
+    const reorderOperations = vi.fn()
+      .mockReturnValueOnce(throwError(() => conflict()))
+      .mockReturnValueOnce(of([]));
+    const dialogOpen = vi.fn(() => ({ afterClosed: () => of(true) }));
+    const component = setup(dialogOpen, { reorderOperations });
+    component.operations.set([operation(1, 10, null, 0, 0), operation(3, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(dialogOpen).toHaveBeenCalledTimes(1);
+    expect(reorderOperations).toHaveBeenLastCalledWith(7, { operationIds: [3, 1], removeConflictingPredecessors: true });
+  });
+
+  it('labels only the steps whose links differ from the previous step', () => {
+    const component = setup();
+    component.operations.set([
+      operation(1, 10, null, 0, 0),
+      { ...operation(2, 20, null, 0, 0), predecessors: [{ operationId: 1, stepNumber: 10, gate: 'Quantity' }] },
+      { ...operation(3, 30, null, 0, 0), predecessors: [{ operationId: 1, stepNumber: 10, gate: 'Complete' }] },
+      operation(4, 40, null, 0, 0),
+    ]);
+
+    const follows = component.followsByOperation();
+
+    expect(follows.has(1)).toBe(false);
+    expect(follows.get(2)).toBe('Op 10');
+    expect(follows.get(3)).toBe('parts.followsDone');
+    expect(follows.has(4)).toBe(false);
+  });
+
+  it('saves the part step gating when it changes', () => {
+    const updateStepGating = vi.fn(() => of(void 0));
+    const component = setup(vi.fn(), { updateStepGating });
+
+    component.gatingControl.setValue('Block');
+
+    expect(updateStepGating).toHaveBeenCalledWith(7, 'Block');
+  });
+
+  it('shows step gating read-only to roles that cannot edit routings', () => {
+    const component = setup(vi.fn(), {}, ['ProductionWorker']);
+
+    expect(component.gatingControl.disabled).toBe(true);
+  });
+});
+
+describe('RoutingComponent — flow editor', () => {
+  interface FlowInternals {
+    canEditFlow: boolean;
+    flowDirty: { (): boolean; set(value: boolean): void };
+    routingViewMode(): string;
+    showView(mode: 'list' | 'flow'): void;
+    onFlowSaved(operations: Operation[]): void;
+    operations(): Operation[];
+  }
+
+  it('lets engineers, managers and admins edit the flow, and not other roles', () => {
+    expect((setup(vi.fn(), {}, ['Engineer']) as unknown as FlowInternals).canEditFlow).toBe(true);
+    expect((setup(vi.fn(), {}, ['ProductionWorker']) as unknown as FlowInternals).canEditFlow).toBe(false);
+  });
+
+  it('asks before leaving the flow with unsaved changes and stays when the user declines', () => {
+    const open = vi.fn(() => ({ afterClosed: () => of(false) }));
+    const component = setup(open) as unknown as FlowInternals;
+    component.showView('flow');
+    component.flowDirty.set(true);
+
+    component.showView('list');
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(component.routingViewMode()).toBe('flow');
+  });
+
+  it('switches without asking when nothing is unsaved, and takes the saved order from the editor', () => {
+    const open = vi.fn();
+    const component = setup(open) as unknown as FlowInternals;
+    component.showView('flow');
+
+    component.onFlowSaved([operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)]);
+    component.showView('list');
+
+    expect(open).not.toHaveBeenCalled();
+    expect(component.routingViewMode()).toBe('list');
+    expect(component.operations().map(op => op.id)).toEqual([1, 2]);
   });
 });

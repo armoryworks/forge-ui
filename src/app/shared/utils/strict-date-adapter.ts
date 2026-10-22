@@ -1,6 +1,8 @@
 import { Injectable, Provider } from '@angular/core';
 import { DateAdapter, MAT_DATE_FORMATS, MatDateFormats, NativeDateAdapter } from '@angular/material/core';
 
+import { formatDate } from './date.utils';
+
 /** Date formats enforcing MM/dd/yyyy display (project standard). */
 export const QBE_DATE_FORMATS: MatDateFormats = {
   parse: { dateInput: 'MM/dd/yyyy' },
@@ -41,9 +43,21 @@ export function parseStrictDate(text: string): Date | null {
   return date ?? new Date(NaN);
 }
 
-/** NativeDateAdapter whose parse rejects impossible or ambiguous typed dates instead of rolling them over. */
+/**
+ * NativeDateAdapter whose parse rejects impossible or ambiguous typed dates instead of rolling them over.
+ * Month and weekday names follow the adapter locale (MAT_DATE_LOCALE, which defaults to the app LOCALE_ID),
+ * while the typed date stays MM/dd/yyyy in every language.
+ */
 @Injectable()
 export class StrictDateAdapter extends NativeDateAdapter {
+  override format(date: Date, displayFormat: object): string {
+    if (displayFormat === QBE_DATE_FORMATS.display.dateInput) {
+      if (!this.isValid(date)) throw Error('NativeDateAdapter: Cannot format invalid date.');
+      return formatDate(date);
+    }
+    return super.format(date, displayFormat);
+  }
+
   override parse(value: unknown, parseFormat?: unknown): Date | null {
     if (typeof value === 'string') return parseStrictDate(value);
     return super.parse(value, parseFormat);

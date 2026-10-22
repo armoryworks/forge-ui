@@ -29,6 +29,9 @@
 
   <!-- Main content -->
   <main class="reports-main">
+    <app-select class="reports-picker" data-testid="report-select-mobile"
+                [label]="'reports.chooseReport' | translate" [options]="reportPickerOptions" [formControl]="reportPicker" />
+
     <div class="report-header">
       <h2 class="report-header__title">{{ activeReportDef().label }}</h2>
 
@@ -49,6 +52,11 @@
         <span class="material-icons-outlined spin">sync</span>
         {{ 'reports.loadingReport' | translate }}
       </div>
+    } @else if (loadError()) {
+      <app-empty-state data-testid="report-load-error" icon="error_outline"
+                       [message]="'reports.loadFailed' | translate"
+                       [actionLabel]="'reports.retry' | translate"
+                       (action)="loadReport()" />
     } @else {
       <!-- Jobs by Stage -->
       @if (activeReport() === 'jobs-by-stage') {
@@ -57,7 +65,7 @@
             initialChartType="bar"
             [initialData]="jobsByStageChart()"
             [initialOptions]="barOptions"
-            initialLabel="All Stages" />
+            [initialLabel]="'reports.chart.allStages' | translate" />
         </div>
         <app-data-table tableId="report-jobs-by-stage" [columns]="stageColumns" [data]="jobsByStageData()"
                         emptyIcon="view_kanban" [emptyMessage]="'reports.emptyNoJobsFound' | translate" />
@@ -78,7 +86,9 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-time-by-user" [columns]="timeColumns" [data]="timeByUserData()"
-                        emptyIcon="schedule" [emptyMessage]="'reports.emptyNoTimeEntries' | translate" />
+                        emptyIcon="schedule" [emptyMessage]="'reports.emptyNoTimeEntries' | translate">
+          <ng-template appColumnCell="totalHours" let-row>{{ formatMinutes(row.totalMinutes) }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Expense Summary -->
@@ -88,11 +98,13 @@
             initialChartType="pie"
             [initialData]="expenseSummaryChart()"
             [initialOptions]="pieOptions"
-            initialLabel="All Categories"
+            [initialLabel]="'reports.chart.allCategories' | translate"
             [drillDataFn]="expenseDrillFn" />
         </div>
         <app-data-table tableId="report-expense-summary" [columns]="expenseColumns" [data]="expenseSummaryData()"
-                        emptyIcon="receipt_long" [emptyMessage]="'reports.emptyNoExpenses' | translate" />
+                        emptyIcon="receipt_long" [emptyMessage]="'reports.emptyNoExpenses' | translate">
+          <ng-template appColumnCell="totalAmount" let-row>{{ row.totalAmount | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Lead Pipeline -->
@@ -211,7 +223,11 @@
           }
         </div>
         <app-data-table tableId="report-ar-aging" [columns]="arAgingColumns" [data]="arAgingData()"
-                        emptyIcon="account_balance" [emptyMessage]="'reports.emptyNoOutstandingInvoices' | translate" />
+                        emptyIcon="account_balance" [emptyMessage]="'reports.emptyNoOutstandingInvoices' | translate">
+          <ng-template appColumnCell="total" let-row>{{ row.total | currency }}</ng-template>
+          <ng-template appColumnCell="amountPaid" let-row>{{ row.amountPaid | currency }}</ng-template>
+          <ng-template appColumnCell="balanceDue" let-row>{{ row.balanceDue | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Revenue -->
@@ -224,7 +240,12 @@
             initialLabel="Revenue" />
         </div>
         <app-data-table tableId="report-revenue" [columns]="revenueColumns" [data]="revenueData()"
-                        emptyIcon="attach_money" [emptyMessage]="'reports.emptyNoRevenueData' | translate" />
+                        emptyIcon="attach_money" [emptyMessage]="'reports.emptyNoRevenueData' | translate">
+          <ng-template appColumnCell="subtotal" let-row>{{ row.subtotal | currency }}</ng-template>
+          <ng-template appColumnCell="taxAmount" let-row>{{ row.taxAmount | currency }}</ng-template>
+          <ng-template appColumnCell="total" let-row>{{ row.total | currency }}</ng-template>
+          <ng-template appColumnCell="amountPaid" let-row>{{ row.amountPaid | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Simple P&L -->
@@ -244,13 +265,17 @@
           </div>
         </div>
         <app-data-table tableId="report-pnl" [columns]="pnlColumns" [data]="simplePnlData()"
-                        emptyIcon="balance" [emptyMessage]="'reports.emptyNoFinancialData' | translate" />
+                        emptyIcon="balance" [emptyMessage]="'reports.emptyNoFinancialData' | translate">
+          <ng-template appColumnCell="amount" let-row>{{ row.amount | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- My Expense History -->
       @if (activeReport() === 'my-expense-history') {
         <app-data-table tableId="report-my-expenses" [columns]="myExpenseColumns" [data]="myExpenseHistoryData()"
-                        emptyIcon="receipt" [emptyMessage]="'reports.emptyNoExpenses' | translate" />
+                        emptyIcon="receipt" [emptyMessage]="'reports.emptyNoExpenses' | translate">
+          <ng-template appColumnCell="amount" let-row>{{ row.amount | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Quote-to-Close -->
@@ -262,7 +287,9 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-quote-to-close" [columns]="quoteToCloseColumns" [data]="quoteToCloseData()"
-                        emptyIcon="handshake" [emptyMessage]="'reports.emptyNoQuoteData' | translate" />
+                        emptyIcon="handshake" [emptyMessage]="'reports.emptyNoQuoteData' | translate">
+          <ng-template appColumnCell="totalValue" let-row>{{ row.totalValue | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Shipping Summary -->
@@ -315,7 +342,9 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-maintenance" [columns]="maintenanceColumns" [data]="maintenanceData()"
-                        emptyIcon="build" [emptyMessage]="'reports.emptyNoMaintenanceData' | translate" />
+                        emptyIcon="build" [emptyMessage]="'reports.emptyNoMaintenanceData' | translate">
+          <ng-template appColumnCell="totalCost" let-row>{{ row.totalCost | currency }}</ng-template>
+        </app-data-table>
       }
 
       <!-- Quality / Scrap Rate -->
@@ -402,10 +431,18 @@
           <div class="kpi-card" [class.kpi-card--success]="jobMarginTotals().totalMargin >= 0" [class.kpi-card--error]="jobMarginTotals().totalMargin < 0">
             <span class="kpi-card__value">{{ jobMarginTotals().totalMargin | currency }}</span>
             <span class="kpi-card__label">{{ 'reports.totalMargin' | translate }}</span>
+            <span class="kpi-card__note">{{ 'reports.marginCoverage' | translate: { measured: jobMarginTotals().measuredCount, total: jobMarginTotals().jobCount } }}</span>
           </div>
-          <div class="kpi-card">
-            <span class="kpi-card__value">{{ jobMarginTotals().avgMarginPct }}%</span>
+          <div class="kpi-card" data-testid="job-margin-avg">
+            <span class="kpi-card__value">
+              @if (jobMarginTotals().avgMarginPct !== null) {
+                {{ jobMarginTotals().avgMarginPct | number:'1.1-1' }}%
+              } @else {
+                &mdash;
+              }
+            </span>
             <span class="kpi-card__label">{{ 'reports.avgMargin' | translate }}</span>
+            <span class="kpi-card__note">{{ 'reports.marginCoverage' | translate: { measured: jobMarginTotals().measuredCount, total: jobMarginTotals().jobCount } }}</span>
           </div>
         </div>
         <div class="chart-container">
@@ -415,7 +452,24 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-job-margin" [columns]="jobMarginColumns" [data]="jobMarginData()"
-                        emptyIcon="trending_up" [emptyMessage]="'reports.emptyNoJobMarginData' | translate" />
+                        emptyIcon="trending_up" [emptyMessage]="'reports.emptyNoJobMarginData' | translate">
+          <ng-template appColumnCell="margin" let-row>
+            @if (row.margin === null) {
+              <span class="text-muted" [title]="'reports.costNotRecorded' | translate" data-testid="margin-uncosted">&mdash;</span>
+            } @else {
+              {{ row.margin | currency }}
+            }
+          </ng-template>
+          <ng-template appColumnCell="marginPercentage" let-row>
+            @if (!row.costRecorded) {
+              <span class="text-muted" [title]="'reports.costNotRecorded' | translate" data-testid="margin-pct-uncosted">&mdash;</span>
+            } @else if (row.revenue === 0) {
+              <span class="text-muted" [title]="'reports.notInvoiced' | translate">&mdash;</span>
+            } @else {
+              {{ row.marginPercentage | number:'1.1-1' }}%
+            }
+          </ng-template>
+        </app-data-table>
       }
     }
   </main>

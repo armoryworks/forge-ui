@@ -10,16 +10,16 @@
     <div class="shortcuts-dialog__body">
       @for (group of groups(); track group.context) {
         <div class="shortcuts-group">
-          <h3 class="shortcuts-group__title">{{ group.context }}</h3>
+          <h3 class="shortcuts-group__title">{{ group.context | translate }}</h3>
           @for (shortcut of group.shortcuts; track shortcut.key) {
             <div class="shortcuts-group__item">
-              <span class="shortcuts-group__description">{{ shortcut.description }}</span>
+              <span class="shortcuts-group__description">{{ shortcut.descriptionKey | translate }}</span>
               @let fmt = formatKeys(shortcut);
               <span class="shortcuts-group__keys">
                 @for (k of fmt.keys; track $index; let last = $last) {
                   <kbd class="shortcuts-group__key">{{ k }}</kbd>
                   @if (!last) {
-                    <span class="shortcuts-group__sep">{{ fmt.separator }}</span>
+                    <span class="shortcuts-group__sep">{{ fmt.separator === 'then' ? ('shortcuts.then' | translate) : fmt.separator }}</span>
                   }
                 }
               </span>

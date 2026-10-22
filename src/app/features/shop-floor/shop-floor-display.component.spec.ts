@@ -12,6 +12,7 @@ import { provideTranslateService, TranslatePipe, TranslateService } from '@ngx-t
 import { ShopFloorDisplayComponent } from './shop-floor-display.component';
 import { KioskSessionService } from '../../shared/services/kiosk-session.service';
 import { ShopFloorService } from './services/shop-floor.service';
+import { KioskCycleTrackerService } from './services/kiosk-cycle-tracker.service';
 import { ClockEventTypeService } from '../../shared/services/clock-event-type.service';
 import { EventsService } from '../events/services/events.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -89,7 +90,7 @@ describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => 
         { provide: InventoryService, useValue: noop },
         { provide: ShipmentService, useValue: noop },
         { provide: Router, useValue: router },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn(), closeAll: vi.fn() } },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
       ],
     });
@@ -213,6 +214,9 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     onPinSubmit: () => void;
     pinControl: { setValue: (v: string) => void };
     scanFeedback: () => string | null;
+    pinError: () => string | null;
+    enterShipping: () => void;
+    selectShipmentForShipping: (s: unknown) => void;
   }
 
   const terminal = { id: 3, name: 'Bay 2', deviceToken: 'tok', teamId: 7, teamName: 'Assembly', teamColor: null };
@@ -226,6 +230,13 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     statusSince: null, role, assignments,
   });
   const problem = (detail: string) => throwError(() => new HttpErrorResponse({ status: 400, error: { detail } }));
+  const gateConflict = (mode: 'Warn' | 'Block') => new HttpErrorResponse({
+    status: 409,
+    error: {
+      code: 'step-gate', detail: 'Op 2 would report 16 pieces.',
+      gate: { mode, gate: 'Quantity', predecessorStep: 1, available: 12, requested: 16, waitingOnSteps: [], canOverride: mode === 'Warn' },
+    },
+  });
 
   const auth = { clearAuth: vi.fn(), isAuthenticated: vi.fn(() => false), scanLogin: vi.fn(), login: vi.fn() };
   const scanner = {
@@ -250,6 +261,11 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     completeJob: vi.fn(() => of(undefined)),
     identifyScan: vi.fn(() => of({})),
     getConfig: vi.fn(() => of({ operationTracking: false })),
+    stopOperationTimer: vi.fn((_jobId: number, _operationId: number, _request?: unknown) => of({ stopped: true, entry: null })),
+    getOperations: vi.fn(() => of({
+      jobId: 41, jobQuantity: 40, operations: [{ operationId: 401, completedQuantity: 10, scrapQuantity: 1, version: 3 }],
+    })),
+    updateOperationProgress: vi.fn((_jobId: number, _operationId: number, _request: unknown) => of({ operation: {}, allOperationsComplete: false })),
   };
   const events = { getUpcomingEvents: vi.fn(() => of([])) };
   const clockTypes = {
@@ -264,7 +280,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     ],
   };
   const dialogClose = vi.fn();
-  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })) };
+  const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true), close: dialogClose })), closeAll: vi.fn() };
   const loading = { track: (_label: string, obs: unknown) => obs };
   const translate = {
     instant: (k: string, p?: Record<string, unknown>) => (p ? `${k} ${JSON.stringify(p)}` : k),
@@ -285,6 +301,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     localStorage.removeItem('forge-kiosk-device-token');
     localStorage.removeItem('forge-kiosk-terminal');
     localStorage.removeItem('sf-font-index');
+    localStorage.removeItem('forge-kiosk-cycle-baselines');
 
     TestBed.configureTestingModule({
       imports: [ShopFloorDisplayComponent],
@@ -793,6 +810,8 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   });
 
   it('a failed timer start shows the server reason in the actions card', () => {
+    const working = vi.spyOn(clockTypes, 'isWorking').mockReturnValue(true);
+    onTestFinished(() => working.mockRestore());
     shopFloor.startTimer.mockReturnValueOnce(problem('Clock in first.'));
     const c = create();
     c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
@@ -800,6 +819,42 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     const fb = c.actionFeedback();
     expect(fb?.success).toBe(false);
     expect(fb?.message).toBe('shopFloor.timerStartFailed {"jobNumber":"JOB-0041","reason":"Clock in first."}');
+  });
+
+  it('leaves the clocked-in check to the server, so a worker on break or who never clocks can still start a timer', () => {
+    const c = create();
+    c.selectedWorker.set({ ...makeWorker('ProductionWorker', [assignment]), status: 'Out' });
+
+    c.startJobTimer(assignment);
+
+    expect(shopFloor.startTimer).toHaveBeenCalledWith(41);
+  });
+
+  it('a recorded punch names the event and the time', () => {
+    const c = create();
+    const worker = makeWorker('ProductionWorker', [assignment]);
+    c.selectedWorker.set(worker);
+
+    c.clockAction(worker, 'IN');
+
+    expect(c.actionFeedback()?.success).toBe(true);
+    expect(c.actionFeedback()?.message).toContain('shopFloor.punchRecorded');
+  });
+
+  it('a refused punch reloads the board so the real clock state shows, and stays until the next action', () => {
+    vi.useFakeTimers();
+    const c = create();
+    const worker = makeWorker('ProductionWorker');
+    c.selectedWorker.set(worker);
+    shopFloor.clockInOut.mockReturnValueOnce(throwError(() =>
+      new HttpErrorResponse({ status: 409, error: { detail: 'Clock In isn\'t available after Clock In.' } })));
+
+    c.clockAction(worker, 'IN');
+
+    expect(shopFloor.getClockStatus).toHaveBeenCalled();
+    vi.advanceTimersByTime(10_000);
+    expect(c.actionFeedback()?.success).toBe(false);
+    expect(c.actionFeedback()?.detail).toBe('Clock In isn\'t available after Clock In.');
   });
 
   it('a proxy error page or an oversized body never reaches the screen', () => {
@@ -873,9 +928,12 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
   });
 
   it('timer start and stop confirm with the work order number', () => {
+    const working = vi.spyOn(clockTypes, 'isWorking').mockReturnValue(true);
+    onTestFinished(() => working.mockRestore());
     const c = create();
     c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
     c.startJobTimer(assignment);
+    expect(shopFloor.startTimer).toHaveBeenCalledWith(41);
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStartedOn {"jobNumber":"JOB-0041"}');
     c.stopJobTimer(assignment);
     expect(c.actionFeedback()?.message).toBe('shopFloor.timerStoppedOn {"jobNumber":"JOB-0041"}');
@@ -928,15 +986,56 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     }
   });
 
-  it('an unidentified scan asks for a PIN with no leftover worker and times out', () => {
-    vi.useFakeTimers();
+  it('a scan that cannot be checked asks to scan again instead of guessing a badge', () => {
     shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
     const c = create();
-    c.selectedWorker.set(makeWorker('Admin'));
     c.handleScanValue('BADGE-1');
+    expect(c.phase()).toBe('main');
+    expect(c.scanFeedback()).toBe('shopFloor.scanCheckFailed');
+  });
+
+  it('a revoked pairing seen on a scan unpairs the display', () => {
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    shopFloor.identifyScan.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 401 })));
+    const c = create();
+    c.handleScanValue('BADGE-1');
+    expect(localStorage.getItem('forge-kiosk-device-token')).toBeNull();
+  });
+
+  it('a closed work order scan says it is closed', () => {
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'job', entityId: 9, entityNumber: 'J-9', isClosed: true }));
+    const c = create();
+    c.handleScanValue('JOB-9');
+    expect(c.scanFeedback()).toBe('shopFloor.closedJobScanned {"number":"J-9"}');
+  });
+
+  it('a card-tap password sign-in that needs MFA stays on the card with no session', () => {
+    auth.login.mockReturnValueOnce(of({ mfaRequired: true, mfaPendingToken: 'p' }));
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin'));
+    c.phase.set('pin');
+    c.pinControl.setValue('secret');
+    c.onPinSubmit();
     expect(c.phase()).toBe('pin');
-    expect((c as unknown as { selectedWorker: () => unknown }).selectedWorker()).toBeNull();
-    vi.advanceTimersByTime(20_000);
+    expect(c.pinError()).toBe('shopFloor.kioskMfaUseBadge');
+  });
+
+  it('a shipment list that fails to load says so and keeps the sign-out timer running', () => {
+    vi.useFakeTimers();
+    TestBed.overrideProvider(ShipmentService, {
+      useValue: {
+        getShipments: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))),
+        getShipmentById: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))),
+      },
+    });
+    const c = create();
+    c.selectedWorker.set(makeWorker('Admin'));
+    c.phase.set('actions');
+    c.enterShipping();
+    expect(c.scanFeedback()).toBe('shopFloor.display.shippingLoadFailed');
+    c.selectShipmentForShipping({ id: 1 });
+    expect(c.scanFeedback()).toBe('shopFloor.display.shippingLoadFailed');
+    vi.advanceTimersByTime(30_000);
     expect(c.phase()).toBe('main');
   });
 
@@ -994,6 +1093,290 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     const host = fixture.nativeElement as HTMLElement;
     expect(host.style.getPropertyValue('--sf-zoom')).toBe(`${28 / 12}`);
   });
+
+  it('keeps the auto sign-out running while a worker is on the receiving or shipping list', () => {
+    vi.useFakeTimers();
+    Object.assign(noop, {
+      getPurchaseOrders: () => of([]),
+      getBinLocations: () => of([]),
+      getShipments: () => of([]),
+    });
+    try {
+      const c = create();
+      const internals = c as unknown as { enterReceiving: () => void; enterShipping: () => void };
+      c.selectedWorker.set(makeWorker('Manager'));
+      c.phase.set('actions');
+
+      internals.enterReceiving();
+      vi.advanceTimersByTime(30_000);
+      expect(c.phase()).toBe('main');
+      expect(auth.clearAuth).toHaveBeenCalled();
+
+      c.selectedWorker.set(makeWorker('Manager'));
+      internals.enterShipping();
+      vi.advanceTimersByTime(30_000);
+      expect(c.phase()).toBe('main');
+    } finally {
+      for (const key of Object.keys(noop)) delete (noop as Record<string, unknown>)[key];
+    }
+  });
+
+  it('offers the scanner panels only to a supervisor who is signed in', () => {
+    const c = create();
+    const internals = c as unknown as { supervisorSignedIn: () => boolean };
+    expect(internals.supervisorSignedIn()).toBe(false);
+
+    c.selectedWorker.set(makeWorker('Manager'));
+    c.phase.set('pin');
+    expect(internals.supervisorSignedIn()).toBe(false);
+
+    auth.isAuthenticated.mockReturnValue(true);
+    c.phase.set('actions');
+    expect(internals.supervisorSignedIn()).toBe(true);
+
+    c.selectedWorker.set(makeWorker('ProductionWorker'));
+    expect(internals.supervisorSignedIn()).toBe(false);
+    auth.isAuthenticated.mockReturnValue(false);
+  });
+
+  it('names a scanned lot, purchase order or part by its number', () => {
+    vi.useFakeTimers();
+    const c = create();
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'lot', entityId: 3, entityNumber: 'LOT-9' }));
+    c.handleScanValue('L9');
+    expect(c.scanFeedback()).toBe('shopFloor.display.lotScanned {"number":"LOT-9"}');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'purchase-order', entityId: 4, entityNumber: 'PO-4' }));
+    c.handleScanValue('PO4');
+    expect(c.scanFeedback()).toBe('shopFloor.display.purchaseOrderScanned {"number":"PO-4"}');
+
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'part', entityId: 5, entityNumber: 'BR-100' }));
+    c.handleScanValue('BR');
+    expect(c.scanFeedback()).toBe('shopFloor.display.partScanned {"number":"BR-100"}');
+  });
+  describe('with operation tracking on', () => {
+    interface StepInternals {
+      operationTracking: { set: (v: boolean) => void };
+      stepsOpen: () => boolean;
+      openJobSteps: (job: unknown, focus?: number | null) => void;
+      onOverlayDismissed: () => void;
+      selectedWorkerTimers: () => { id: number; operationStepNumber: number | null; entryType: string | null }[];
+      scanOverlay: () => unknown;
+    }
+    const running = (id: number, jobId: number | null, operationId: number | null, stepNumber: number | null) => ({
+      timeEntryId: id, jobId, jobNumber: jobId ? `J-${jobId}` : null, jobOperationId: operationId ? id * 10 : null,
+      operationId, stepNumber, operationTitle: stepNumber ? `Step ${stepNumber}` : null, entryType: 'Run',
+      timerStart: '2026-10-22T13:00:00Z', attendancePercent: 100,
+    });
+
+    function tracked(): { c: Internals & StepInternals; overlay: { openJobById: ReturnType<typeof vi.fn>; dismiss: ReturnType<typeof vi.fn> } } {
+      const c = create() as Internals & StepInternals;
+      const overlay = { openJobById: vi.fn(), dismiss: vi.fn() };
+      (c as unknown as { scanOverlay: () => unknown }).scanOverlay = () => overlay;
+      c.operationTracking.set(true);
+      return { c, overlay };
+    }
+
+    it('a My jobs row opens the job\'s steps — never a job-level start', () => {
+      const { c, overlay } = tracked();
+      c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+      c.phase.set('actions');
+
+      c.openJobSteps(assignment);
+
+      expect(overlay.openJobById).toHaveBeenCalledWith(41, { jobNumber: 'JOB-0041', title: 'Bracket', stageName: 'In Production' }, null);
+      expect(c.stepsOpen()).toBe(true);
+      expect(shopFloor.startTimer).not.toHaveBeenCalled();
+    });
+
+    it('the step view still signs the worker out when the kiosk sits idle, and any tap keeps it signed in', () => {
+      vi.useFakeTimers();
+      const { c, overlay } = tracked();
+      c.selectedWorker.set(makeWorker('ProductionWorker', [assignment]));
+      c.phase.set('actions');
+      c.openJobSteps(assignment);
+
+      vi.advanceTimersByTime(25_000);
+      (c as unknown as { onKioskActivity: () => void }).onKioskActivity();
+      vi.advanceTimersByTime(25_000);
+      expect(c.selectedWorker()?.userId).toBe(5);
+      expect(overlay.dismiss).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(10_000);
+      expect(c.selectedWorker()).toBeNull();
+      expect(c.phase()).toBe('main');
+      expect(c.stepsOpen()).toBe(false);
+      expect(overlay.dismiss).toHaveBeenCalled();
+      expect(dialog.closeAll).toHaveBeenCalled();
+    });
+
+    it('picking a job opens its steps instead of claiming it at its next step', () => {
+      const { c, overlay } = tracked();
+      const worker = makeWorker('ProductionWorker');
+      c.selectedWorker.set(worker);
+      c.jobSelectWorker.set(worker);
+      c.phase.set('job-select');
+
+      c.claimJob(availableJob);
+
+      expect(shopFloor.claimJob).not.toHaveBeenCalled();
+      expect(overlay.openJobById).toHaveBeenCalledWith(2403, expect.objectContaining({ jobNumber: 'J-2403' }), null);
+
+      c.onOverlayDismissed();
+      expect(c.stepsOpen()).toBe(false);
+      expect(c.phase()).toBe('actions');
+      expect(shopFloor.getClockStatus).toHaveBeenCalled();
+    });
+
+    it('the running strip shows every timer the worker has open', () => {
+      const { c } = tracked();
+      c.selectedWorker.set({ ...makeWorker('ProductionWorker'), runningTimers: [
+        running(1, 41, 401, 2), running(2, 42, 408, 8), running(3, null, null, null),
+      ] });
+
+      const timers = c.selectedWorkerTimers();
+
+      expect(timers.map(t => t.id)).toEqual([1, 2, 3]);
+      expect(timers.map(t => t.operationStepNumber)).toEqual([2, 8, null]);
+    });
+
+    it('clocking out with timers running shows the sheet and records its pieces before the punch', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2), running(2, 42, 408, 8)] };
+      c.selectedWorker.set(worker);
+      const lines = [
+        { timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: 1 },
+        { timer: worker.runningTimers[1], goodQuantity: null, scrapQuantity: null },
+      ];
+      dialog.open.mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(1);
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledWith(41, 401, { goodQuantity: 6, scrapQuantity: 1 });
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+      expect(shopFloor.stopOperationTimer.mock.invocationCallOrder[0])
+        .toBeLessThan(shopFloor.clockInOut.mock.invocationCallOrder[0]);
+    });
+
+    it('closing the clock-out sheet does not clock out', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      dialog.open.mockReturnValueOnce({ afterClosed: () => of(undefined), close: dialogClose } as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(shopFloor.clockInOut).not.toHaveBeenCalled();
+      expect(shopFloor.stopOperationTimer).not.toHaveBeenCalled();
+    });
+
+    it('a finished cycle on the running strip records its pieces on that step', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+
+      (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+
+      expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401,
+        { completedQuantity: 13, scrapQuantity: 1, expectedVersion: 3 });
+    });
+
+    it('cycles over what the step gate allows open the pieces dialog with the cycle count instead of saving straight away', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+      shopFloor.getOperations.mockReturnValueOnce(of({
+        jobId: 41, jobQuantity: 40, stepGating: 'Warn',
+        operations: [{ operationId: 401, stepNumber: 2, title: 'Press', completedQuantity: 10, scrapQuantity: 1, version: 3, available: 12, availableFromStep: 1 }],
+      }) as never);
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of({
+          completedQuantity: 13, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false,
+          addedQuantity: 3, addedScrap: 0, acknowledgeGate: true, overrideReason: null,
+        }),
+        close: dialogClose,
+      } as never);
+
+      (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+
+      expect(dialog.open).toHaveBeenCalledTimes(1);
+      expect((dialog.open.mock.calls[0] as unknown[])[1]).toEqual(expect.objectContaining({
+        data: expect.objectContaining({ initialQuantity: 3, gate: expect.objectContaining({ mode: 'Warn', available: 12 }) }),
+      }));
+      expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401, expect.objectContaining({
+        completedQuantity: 13, acknowledgeGate: true,
+      }));
+    });
+
+    it('recorded cycles move the countdown on only once the pieces are saved', () => {
+      const { c } = tracked();
+      const tracker = TestBed.inject(KioskCycleTrackerService);
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+      tracker.seed([{ timerId: 1, cycle: 0 }], Date.now());
+      const chipCycles = (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles.bind(c);
+
+      shopFloor.updateOperationProgress.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 409, error: { detail: 'Stale' } })) as never);
+      chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+      expect(tracker.baselines().get(1)).toBe(0);
+
+      chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+      expect(tracker.baselines().get(1)).toBe(3);
+    });
+
+    it('a Warn gate on a clock-out count asks, then records the pieces with the acknowledgement and clocks out', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      const lines = [{ timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: null }];
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(true), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Warn')) as never);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).toHaveBeenCalledTimes(2);
+      expect(shopFloor.stopOperationTimer).toHaveBeenLastCalledWith(41, 401, { goodQuantity: 6, scrapQuantity: null, acknowledgeGate: true });
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+    });
+
+    it('a Block gate on a clock-out count can clock out without those pieces, and backing out keeps the worker clocked in', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [running(1, 41, 401, 2)] };
+      c.selectedWorker.set(worker);
+      const lines = [{ timer: worker.runningTimers[0], goodQuantity: 6, scrapQuantity: null }];
+
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(false), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Block')) as never);
+      c.clockAction(worker, 'OUT');
+      expect(shopFloor.clockInOut).not.toHaveBeenCalled();
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(1);
+
+      dialog.open
+        .mockReturnValueOnce({ afterClosed: () => of(lines), close: dialogClose } as never)
+        .mockReturnValueOnce({ afterClosed: () => of(true), close: dialogClose } as never);
+      shopFloor.stopOperationTimer.mockReturnValueOnce(throwError(() => gateConflict('Block')) as never);
+      c.clockAction(worker, 'OUT');
+      expect(shopFloor.stopOperationTimer).toHaveBeenCalledTimes(2);
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+    });
+
+    it('clocking out with nothing running goes straight to the punch', () => {
+      const { c } = tracked();
+      const worker = makeWorker('ProductionWorker');
+      c.selectedWorker.set(worker);
+
+      c.clockAction(worker, 'OUT');
+
+      expect(dialog.open).not.toHaveBeenCalled();
+      expect(shopFloor.clockInOut).toHaveBeenCalledWith(5, 'OUT');
+    });
+  });
 });
 
 describe('ShopFloorDisplayComponent — header', () => {
@@ -1029,7 +1412,7 @@ describe('ShopFloorDisplayComponent — header', () => {
         { provide: InventoryService, useValue: {} },
         { provide: ShipmentService, useValue: {} },
         { provide: Router, useValue: { navigate: vi.fn() } },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn(), closeAll: vi.fn() } },
       ],
     });
     TestBed.overrideComponent(ShopFloorDisplayComponent, {

@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+
+.clock-out-sheet__hint {
+  margin: 0 0 $sp-md;
+  color: var(--text-muted);
+  font-size: $font-size-md;
+}
+
+.clock-out-sheet__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clock-out-sheet__row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-sm;
+  border: $border-width-thin solid var(--border);
+}
+
+.clock-out-sheet__label {
+  display: flex;
+  gap: $sp-sm;
+  font-size: $font-size-lg;
+}
+
+.clock-out-sheet__job {
+  font-family: $font-family-mono;
+  font-weight: 700;
+}
+
+.clock-out-sheet__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-sm;
+}
+
+.clock-out-sheet__confirm {
+  min-height: $tap-target-min;
+}

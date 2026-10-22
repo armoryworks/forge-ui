@@ -27,6 +27,7 @@ interface PanelInternals {
   canCancel(status: string): boolean;
   incotermLabel(): string;
   showFxRate(): boolean;
+  amountCurrency(): string | null;
   originLabel(): string;
   originTooltip(): string;
   addLineForm: FormGroup;
@@ -124,6 +125,10 @@ describe('PoDetailPanelComponent', () => {
 
     it('shows the FX rate for a foreign-currency PO', () => {
       expect(create(detail({ quoteCurrency: 'EUR', fxRate: 1.08 })).showFxRate()).toBe(true);
+    });
+
+    it('prices lines, line totals and the agreed price in the PO quote currency', () => {
+      expect(create(detail({ quoteCurrency: 'CAD', fxRate: 0.73 })).amountCurrency()).toBe('CAD');
     });
 
     it('labels a manual PO Manual and names the creator in the tooltip', () => {

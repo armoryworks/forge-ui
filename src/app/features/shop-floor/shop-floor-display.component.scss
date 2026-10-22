@@ -150,6 +150,14 @@
 // item min-size defaults to its content's intrinsic height, so the body
 // grows to fit the worker grid and pushes the action bar past the viewport
 // (visible at A+ font sizes, where the grid rows get taller).
+.sf-main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .sf-body {
   display: flex;
   flex-direction: column;
@@ -547,7 +555,11 @@
 
 .sf-unassigned-card__title {
   font-size: $font-size-base;
-  @include truncate;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .sf-unassigned-card__stage {
@@ -850,6 +862,33 @@
     border-top: $border-width-accent solid var(--success);
     background: color-mix(in srgb, var(--success) 5%, var(--surface));
   }
+}
+
+.sf-actions-card__job--open {
+  flex-direction: row;
+  align-items: center;
+  min-height: $tap-target-min + $sp-lg + $sp-sm;
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sf-actions-card__job--overdue {
+  border-left: $border-width-accent solid var(--error);
+}
+
+.sf-actions-card__job-next {
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.sf-actions-card__job-tag {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+  text-transform: uppercase;
 }
 
 .sf-actions-card__job-dot {
@@ -1718,7 +1757,7 @@
 
 // ─── Undo Panel Slide-Out ───
 .sf-undo-panel-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;

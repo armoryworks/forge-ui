@@ -84,9 +84,19 @@ export class ScanReceiveFlowComponent implements OnInit {
   protected confirmPartial(): void {
     const qty = this.partialQty.value ?? 0;
     const max = this.selectedLine()?.remainingQuantity ?? 0;
-    if (qty <= 0 || qty > max) return;
+    if (!this.acceptPartial(qty, max)) return;
     this.quantity.set(qty);
     this.step.set('destination');
+  }
+
+  private acceptPartial(qty: number, max: number): boolean {
+    const message = qty <= 0
+      ? this.translate.instant('kioskFlows.common.quantityPositive')
+      : qty > max ? this.translate.instant('kioskFlows.common.quantityAtMost', { max }) : null;
+    if (message === null) return true;
+    this.partialQty.setErrors({ quantity: { message } });
+    this.partialQty.markAsTouched();
+    return false;
   }
 
   protected confirmDestination(): void {

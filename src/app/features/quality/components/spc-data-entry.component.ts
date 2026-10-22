@@ -78,6 +78,7 @@ export class SpcDataEntryComponent {
   }
 
   protected submit(): void {
+    if (this.saving()) return;
     const vals = this.values().filter((v): v is number => v != null);
     if (vals.length !== this.characteristic().sampleSize) return;
 

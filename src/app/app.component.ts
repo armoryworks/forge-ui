@@ -43,6 +43,7 @@ import { LanguageService } from './shared/services/language.service';
 import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { DraftRecoveryService } from './shared/services/draft-recovery.service';
+import { WorkflowResumeService } from './shared/services/workflow-resume.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { AnnouncementService } from './shared/services/announcement.service';
 import { CapabilityService } from './shared/services/capability.service';
@@ -63,6 +64,7 @@ import { INVENTORY_TOUR } from './shared/tours/inventory-tour';
 import { EXPENSES_TOUR } from './shared/tours/expenses-tour';
 import { TIME_TRACKING_TOUR } from './shared/tours/time-tracking-tour';
 import { REPORTS_TOUR } from './shared/tours/reports-tour';
+import { SANKEY_REPORTS_TOUR } from './shared/tours/sankey-reports-tour';
 import { ADMIN_TOUR } from './shared/tours/admin-tour';
 import { PLANNING_TOUR } from './shared/tours/planning-tour';
 
@@ -96,6 +98,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly scanner = inject(ScannerService);
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly draftRecovery = inject(DraftRecoveryService);
+  private readonly workflowResume = inject(WorkflowResumeService);
   private readonly draftBroadcast = inject(DraftBroadcastService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly capabilityService = inject(CapabilityService);
@@ -145,6 +148,7 @@ export class AppComponent implements OnInit, OnDestroy {
           this.manualNumberSettings.load();
           this.scanner.start();
           this.draftRecovery.onLogin();
+          void this.workflowResume.checkAfterLogin();
         }
         this.userPreferences.load();
         this.terminology.load();
@@ -173,6 +177,7 @@ export class AppComponent implements OnInit, OnDestroy {
           setTimeout(() => this.authService.redirectToLogin());
         }
         this.wasAuthenticated = false;
+        this.workflowResume.reset();
       }
     });
 
@@ -388,7 +393,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private registerTours(): void {
     [KANBAN_TOUR, DASHBOARD_TOUR, PARTS_TOUR, INVENTORY_TOUR,
-     EXPENSES_TOUR, TIME_TRACKING_TOUR, REPORTS_TOUR, ADMIN_TOUR, PLANNING_TOUR]
+     EXPENSES_TOUR, TIME_TRACKING_TOUR, REPORTS_TOUR, SANKEY_REPORTS_TOUR, ADMIN_TOUR, PLANNING_TOUR]
       .forEach(t => this.helpTours.register(t));
   }
 }

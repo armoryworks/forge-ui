@@ -42,6 +42,7 @@ import {
   OnboardingSubmitRequest,
   SaveOnboardingDraftRequest,
 } from './onboarding.service';
+import { requiredTrimmed } from '../../shared/validators/required-trimmed.validator';
 
 const REVIEW_STATE_KEY = 'forge-onboarding-review-state';
 const MAX_DEPENDENTS = 20;
@@ -364,9 +365,9 @@ export class OnboardingWizardComponent {
 
   // ── Step 1: Personal Information ─────────────────────────────────────────
   protected readonly personalForm = new FormGroup({
-    firstName: new FormControl('', [Validators.required]),
+    firstName: new FormControl('', [requiredTrimmed]),
     middleName: new FormControl(''),
-    lastName: new FormControl('', [Validators.required]),
+    lastName: new FormControl('', [requiredTrimmed]),
     otherLastNames: new FormControl(''),
     dateOfBirth: new FormControl<Date | null>(null, [Validators.required]),
     ssn: new FormControl('', [Validators.required, Validators.pattern(/^\d{3}-?\d{2}-?\d{4}$/)]),
@@ -385,9 +386,9 @@ export class OnboardingWizardComponent {
 
   // ── Step 2: Address ───────────────────────────────────────────────────────
   protected readonly addressForm = new FormGroup({
-    street1: new FormControl('', [Validators.required]),
+    street1: new FormControl('', [requiredTrimmed]),
     street2: new FormControl(''),
-    city: new FormControl('', [Validators.required]),
+    city: new FormControl('', [requiredTrimmed]),
     state: new FormControl<string | null>(null, [Validators.required]),
     zipCode: new FormControl('', [Validators.required, Validators.pattern(/^\d{5}(-\d{4})?$/)]),
   });

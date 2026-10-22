@@ -53,3 +53,9 @@
   font-size: $font-size-sm;
   color: var(--error);
 }
+
+.time-entry__split {
+  display: block;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+}

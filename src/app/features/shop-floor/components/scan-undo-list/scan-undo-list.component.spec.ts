@@ -92,7 +92,16 @@ describe('ScanUndoListComponent', () => {
 
       expect(list.loading()).toBe(false);
       expect(list.recentEntries().map(e => e.id)).toEqual([9]);
-      expect(list.todayCount()).toBe(1);
+      expect(list.loadFailed()).toBe(false);
+    });
+
+    it('says the list could not load instead of showing it as empty', () => {
+      const { list } = setup(vi.fn(), vi.fn(() => throwError(() => new Error('401'))));
+
+      list.ngOnInit();
+
+      expect(list.loading()).toBe(false);
+      expect(list.loadFailed()).toBe(true);
     });
 
     it('also asks for the earlier day when the look-back window starts before it', () => {

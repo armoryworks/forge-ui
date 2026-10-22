@@ -1,4 +1,4 @@
-<app-dialog [title]="forecast().name + ' — ' + forecast().partNumber" width="760px" (closed)="close()">
+<app-dialog [title]="forecast().name + ' — ' + forecast().partNumber" width="760px" [dirty]="hasUnsavedOverrides()" (closed)="close()">
   <div class="forecast-detail" [appLoadingBlock]="loading() || saving()">
     <div class="forecast-detail__meta">
       <span>{{ 'mrp.cols.status' | translate }}: <strong>{{ forecast().status }}</strong></span>

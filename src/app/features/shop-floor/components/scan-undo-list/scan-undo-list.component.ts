@@ -32,16 +32,12 @@ export class ScanUndoListComponent implements OnInit {
 
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);
+  readonly loadFailed = signal(false);
   readonly reversing = signal<number | null>(null);
 
   readonly recentEntries = computed(() => {
     const cutoff = Date.now() - DEFAULT_LOOKBACK_HOURS * 3_600_000;
     return this.entries().filter(e => new Date(e.createdAt).getTime() >= cutoff);
-  });
-
-  readonly todayCount = computed(() => {
-    const today = new Date().toDateString();
-    return this.entries().filter(e => new Date(e.createdAt).toDateString() === today).length;
   });
 
   ngOnInit(): void {
@@ -50,11 +46,10 @@ export class ScanUndoListComponent implements OnInit {
 
   loadEntries(): void {
     this.loading.set(true);
+    this.loadFailed.set(false);
     const now = new Date();
     const lookbackStart = new Date(now.getTime() - DEFAULT_LOOKBACK_HOURS * 3_600_000);
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const earliest = lookbackStart < startOfToday ? lookbackStart : startOfToday;
-    const days = [...new Set([earliest, now].map(d => d.toISOString().slice(0, 10)))];
+    const days = [...new Set([lookbackStart, now].map(d => d.toISOString().slice(0, 10)))];
     forkJoin(days.map(day => this.scanActionService.getScanLog(undefined, day))).subscribe({
       next: (pages) => {
         const byId = new Map(pages.flat().map(e => [e.id, e]));
@@ -63,6 +58,7 @@ export class ScanUndoListComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.loadFailed.set(true);
       },
     });
   }

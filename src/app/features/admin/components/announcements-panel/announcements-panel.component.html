@@ -5,13 +5,13 @@
         class="tab" [appTab]="activeView() === 'announcements'"
         (click)="switchView('announcements')"
       >
-        Announcements
+        {{ 'admin.announcementsPanel.announcements' | translate }}
       </button>
       <button
         class="tab" [appTab]="activeView() === 'templates'"
         (click)="switchView('templates')"
       >
-        Templates
+        {{ 'admin.announcementsPanel.templates' | translate }}
       </button>
     </div>
     <span class="announcements-panel__spacer"></span>
@@ -22,7 +22,7 @@
         (click)="openCreateAnnouncement()"
       >
         <span class="material-icons-outlined">campaign</span>
-        New Announcement
+        {{ 'admin.announcementsPanel.newAnnouncement' | translate }}
       </button>
     } @else {
       <button
@@ -31,7 +31,7 @@
         (click)="openCreateTemplate()"
       >
         <span class="material-icons-outlined">add</span>
-        New Template
+        {{ 'admin.announcementsPanel.newTemplate' | translate }}
       </button>
     }
   </div>
@@ -43,7 +43,7 @@
         [columns]="announcementColumns"
         [data]="announcements()"
         emptyIcon="campaign"
-        emptyMessage="No announcements sent yet"
+        [emptyMessage]="'admin.announcementsPanel.noAnnouncementsSentYet' | translate"
         [clickableRows]="true"
         (rowClick)="viewAcknowledgments($any($event))"
       >
@@ -56,7 +56,7 @@
         <ng-template appColumnCell="actions" let-row>
           <button
             class="icon-btn"
-            aria-label="View acknowledgments"
+            [attr.aria-label]="'admin.announcementsPanel.viewAcknowledgments' | translate"
             (click)="viewAcknowledgments(row); $event.stopPropagation()"
           >
             <span class="material-icons-outlined">visibility</span>
@@ -70,14 +70,14 @@
       [columns]="templateColumns"
       [data]="templates()"
       emptyIcon="description"
-      emptyMessage="No templates created yet"
+      [emptyMessage]="'admin.announcementsPanel.noTemplatesCreatedYet' | translate"
     >
       <ng-template appColumnCell="defaultSeverity" let-row>
         <span [class]="severityChipClass(row.defaultSeverity)">{{ row.defaultSeverity }}</span>
       </ng-template>
       <ng-template appColumnCell="defaultRequiresAcknowledgment" let-row>
         @if (row.defaultRequiresAcknowledgment) {
-          <span class="chip chip--warning">Yes</span>
+          <span class="chip chip--warning">{{ 'common.yes' | translate }}</span>
         } @else {
           <span class="text-muted">No</span>
         }
@@ -85,7 +85,7 @@
       <ng-template appColumnCell="actions" let-row>
         <button
           class="icon-btn icon-btn--danger"
-          aria-label="Delete template"
+          [attr.aria-label]="'admin.announcementsPanel.deleteTemplate' | translate"
           (click)="deleteTemplate(row); $event.stopPropagation()"
         >
           <span class="material-icons-outlined">delete</span>
@@ -105,11 +105,11 @@
     <div class="ack-summary">
       <span class="ack-summary__count">{{ acknowledgments().length }} acknowledged</span>
       @if (selectedAnnouncement()?.requiresAcknowledgment) {
-        <span class="ack-summary__required">Acknowledgment required</span>
+        <span class="ack-summary__required">{{ 'admin.announcementsPanel.acknowledgmentRequired' | translate }}</span>
       }
     </div>
     @if (acknowledgments().length === 0) {
-      <div class="ack-empty">No acknowledgments yet</div>
+      <div class="ack-empty">{{ 'admin.announcementsPanel.noAcknowledgmentsYet' | translate }}</div>
     } @else {
       <div class="ack-list">
         @for (ack of acknowledgments(); track ack.userId) {
@@ -121,24 +121,24 @@
       </div>
     }
     <div dialog-footer>
-      <button class="action-btn" (click)="closeAckDialog()">Close</button>
+      <button class="action-btn" (click)="closeAckDialog()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Create Template Dialog -->
 @if (showTemplateDialog()) {
-  <app-dialog title="New Template" width="520px" (closed)="closeTemplateDialog()">
+  <app-dialog [title]="'admin.announcementsPanel.newTemplate' | translate" width="520px" (closed)="closeTemplateDialog()">
     <div [formGroup]="templateForm">
       <app-input
-        label="Name"
+        [label]="'common.name' | translate"
         formControlName="name"
         [required]="true"
         [maxlength]="200"
         data-testid="template-name"
       />
       <app-textarea
-        label="Content"
+        [label]="'admin.announcementsPanel.content' | translate"
         formControlName="content"
         [required]="true"
         [rows]="4"
@@ -147,25 +147,25 @@
       />
       <div class="dialog-row">
         <app-select
-          label="Default Severity"
+          [label]="'admin.announcementsPanel.defaultSeverity' | translate"
           formControlName="defaultSeverity"
           [options]="severityOptions"
           [required]="true"
         />
         <app-select
-          label="Default Scope"
+          [label]="'admin.announcementsPanel.defaultScope' | translate"
           formControlName="defaultScope"
           [options]="scopeOptions"
           [required]="true"
         />
       </div>
       <app-toggle
-        label="Require Acknowledgment by Default"
+        [label]="'admin.announcementsPanel.requireAcknowledgmentByDefault' | translate"
         formControlName="defaultRequiresAcknowledgment"
       />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="closeTemplateDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeTemplateDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="templateViolations" [loading]="savingTemplate()">
         <button
           class="action-btn action-btn--primary"
@@ -174,7 +174,7 @@
           (click)="saveTemplate()"
         >
           <span class="material-icons-outlined">save</span>
-          Create Template
+          {{ 'admin.announcementsPanel.createTemplate' | translate }}
         </button>
       </app-validation-button>
     </div>

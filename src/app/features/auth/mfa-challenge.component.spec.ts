@@ -26,9 +26,9 @@ describe('MfaChallengeComponent', () => {
     TestBed.configureTestingModule({
       imports: [MfaChallengeComponent],
       providers: [
+        provideTranslateService(),
         { provide: MfaService, useValue: mfa },
         { provide: SnackbarService, useValue: snackbar },
-        provideTranslateService(),
       ],
     });
   });

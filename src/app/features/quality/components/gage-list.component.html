@@ -1,14 +1,14 @@
 <!-- Filter Bar -->
 <div class="filters-bar">
-  <app-input label="Search" [formControl]="searchControl" placeholder="Search gages..." />
-  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
+  <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'quality.gageList.searchGages' | translate" />
+  <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions"
     (selectionChange)="applyFilters()" />
 </div>
 
 <!-- Gage Table -->
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="gage-list" [columns]="columns" [data]="gages()"
-    emptyIcon="straighten" emptyMessage="No gages found" [clickableRows]="true"
+    emptyIcon="straighten" [emptyMessage]="'quality.gageList.noGagesFound' | translate" [clickableRows]="true"
     (rowClick)="openDetail($any($event))">
     <ng-template appColumnCell="gageNumber" let-row>
       <span class="gage-list__number">{{ row.gageNumber }}</span>
@@ -26,20 +26,20 @@
 @if (showCreateDialog()) {
   <app-dialog [title]="(editingGageId() === null ? 'qcInspections.newGage' : 'gages.editTitle') | translate" width="520px" (closed)="closeCreate()">
     <div [formGroup]="createForm">
-      <app-input label="Description" formControlName="description" [required]="true" />
+      <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
 
       <div class="dialog-row">
-        <app-input label="Gage Type" formControlName="gageType" />
-        <app-input label="Manufacturer" formControlName="manufacturer" />
+        <app-input [label]="'quality.gageList.gageType' | translate" formControlName="gageType" />
+        <app-input [label]="'quality.gageList.manufacturer' | translate" formControlName="manufacturer" />
       </div>
 
       <div class="dialog-row">
-        <app-input label="Model" formControlName="model" />
-        <app-input label="Serial Number" formControlName="serialNumber" />
+        <app-input [label]="'quality.gageList.model' | translate" formControlName="model" />
+        <app-input [label]="'quality.gageList.serialNumber' | translate" formControlName="serialNumber" />
       </div>
 
       <div class="dialog-row">
-        <app-input label="Calibration Interval (Days)" type="number" formControlName="calibrationIntervalDays" [required]="true"
+        <app-input [label]="'quality.gageList.calibrationIntervalDays' | translate" type="number" formControlName="calibrationIntervalDays" [required]="true"
           [min]="1" [max]="maxIntervalDays" />
         @if (editingGageId() === null) {
           <app-datepicker [label]="'gages.lastCalibratedAt' | translate" formControlName="lastCalibratedAt" [max]="today"
@@ -54,16 +54,16 @@
       }
 
       <div class="dialog-row">
-        <app-input label="Accuracy Spec" formControlName="accuracySpec" />
-        <app-input label="Range Spec" formControlName="rangeSpec" />
+        <app-input [label]="'quality.gageList.accuracySpec' | translate" formControlName="accuracySpec" />
+        <app-input [label]="'quality.gageList.rangeSpec' | translate" formControlName="rangeSpec" />
       </div>
 
-      <app-input label="Resolution" formControlName="resolution" />
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-input [label]="'quality.gageList.resolution' | translate" formControlName="resolution" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeCreate()">Cancel</button>
+      <button class="action-btn" (click)="closeCreate()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="createForm.invalid || saving()"
@@ -87,71 +87,71 @@
       <div class="gage-detail__grid">
         @if (gage.gageType) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Type</span>
+            <span class="gage-detail__label">{{ 'common.type' | translate }}</span>
             <span class="gage-detail__value">{{ gage.gageType }}</span>
           </div>
         }
         @if (gage.manufacturer) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Manufacturer</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.manufacturer' | translate }}</span>
             <span class="gage-detail__value">{{ gage.manufacturer }}</span>
           </div>
         }
         @if (gage.model) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Model</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.model' | translate }}</span>
             <span class="gage-detail__value">{{ gage.model }}</span>
           </div>
         }
         @if (gage.serialNumber) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Serial Number</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.serialNumber' | translate }}</span>
             <span class="gage-detail__value">{{ gage.serialNumber }}</span>
           </div>
         }
         <div class="gage-detail__field">
-          <span class="gage-detail__label">Cal Interval</span>
+          <span class="gage-detail__label">{{ 'quality.gageList.calInterval' | translate }}</span>
           <span class="gage-detail__value">{{ gage.calibrationIntervalDays }} days</span>
         </div>
         @if (gage.lastCalibratedAt) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Last Calibrated</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.lastCalibrated' | translate }}</span>
             <span class="gage-detail__value">{{ gage.lastCalibratedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         }
         @if (gage.nextCalibrationDue) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Next Cal Due</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.nextCalDue' | translate }}</span>
             <span class="gage-detail__value">{{ gage.nextCalibrationDue | date:'MM/dd/yyyy' }}</span>
           </div>
         }
         @if (gage.accuracySpec) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Accuracy</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.accuracy' | translate }}</span>
             <span class="gage-detail__value">{{ gage.accuracySpec }}</span>
           </div>
         }
         @if (gage.rangeSpec) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Range</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.range' | translate }}</span>
             <span class="gage-detail__value">{{ gage.rangeSpec }}</span>
           </div>
         }
         @if (gage.resolution) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Resolution</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.resolution' | translate }}</span>
             <span class="gage-detail__value">{{ gage.resolution }}</span>
           </div>
         }
         @if (gage.locationName) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Location</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.location' | translate }}</span>
             <span class="gage-detail__value">{{ gage.locationName }}</span>
           </div>
         }
         @if (gage.assetName) {
           <div class="gage-detail__field">
-            <span class="gage-detail__label">Asset</span>
+            <span class="gage-detail__label">{{ 'quality.gageList.asset' | translate }}</span>
             <span class="gage-detail__value">{{ gage.assetName }}</span>
           </div>
         }
@@ -159,7 +159,7 @@
 
       @if (gage.notes) {
         <div class="gage-detail__notes">
-          <span class="gage-detail__label">Notes</span>
+          <span class="gage-detail__label">{{ 'common.notes' | translate }}</span>
           <p>{{ gage.notes }}</p>
         </div>
       }
@@ -167,10 +167,10 @@
       <!-- Calibration History -->
       <div class="gage-detail__section">
         <div class="gage-detail__section-header">
-          <h4 class="gage-detail__section-title">Calibration History</h4>
+          <h4 class="gage-detail__section-title">{{ 'quality.gageList.calibrationHistory' | translate }}</h4>
           @if (canManage()) {
             <button class="action-btn action-btn--sm action-btn--primary" (click)="openCalDialog()">
-              <span class="material-icons-outlined">add</span> Record Calibration
+              <span class="material-icons-outlined">add</span> {{ 'quality.gageList.recordCalibration' | translate }}
             </button>
           }
         </div>
@@ -181,7 +181,7 @@
             [columns]="calibrationColumns"
             [data]="calibrations()"
             emptyIcon="info"
-            emptyMessage="No calibration records yet">
+            [emptyMessage]="'quality.gageList.noCalibrationRecordsYet' | translate">
             <ng-template appColumnCell="result" let-row>
               <span [class]="getCalResultClass(row.result)">{{ row.result }}</span>
             </ng-template>
@@ -196,38 +196,38 @@
           <span class="material-icons-outlined">edit</span> {{ 'common.edit' | translate }}
         </button>
       }
-      <button class="action-btn action-btn--primary" (click)="closeDetail()">Close</button>
+      <button class="action-btn action-btn--primary" (click)="closeDetail()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Record Calibration Dialog -->
 @if (showCalDialog()) {
-  <app-dialog title="Record Calibration" width="520px" (closed)="closeCalDialog()">
+  <app-dialog [title]="'quality.gageList.recordCalibration' | translate" width="520px" (closed)="closeCalDialog()">
     <div [formGroup]="calForm">
       <div class="dialog-row">
-        <app-datepicker label="Calibrated Date" formControlName="calibratedAt" [required]="true" [max]="today" />
-        <app-select label="Result" formControlName="result" [options]="calResultOptions" [required]="true" />
+        <app-datepicker [label]="'quality.gageList.calibratedDate' | translate" formControlName="calibratedAt" [required]="true" [max]="today" />
+        <app-select [label]="'quality.gageList.result' | translate" formControlName="result" [options]="calResultOptions" [required]="true" />
       </div>
 
-      <app-input label="Lab Name" formControlName="labName" />
-      <app-input label="Standards Used" formControlName="standardsUsed" />
+      <app-input [label]="'quality.gageList.labName' | translate" formControlName="labName" />
+      <app-input [label]="'quality.gageList.standardsUsed' | translate" formControlName="standardsUsed" />
 
       <div class="dialog-row">
-        <app-input label="As Found Condition" formControlName="asFoundCondition" />
-        <app-input label="As Left Condition" formControlName="asLeftCondition" />
+        <app-input [label]="'quality.gageList.asFoundCondition' | translate" formControlName="asFoundCondition" />
+        <app-input [label]="'quality.gageList.asLeftCondition' | translate" formControlName="asLeftCondition" />
       </div>
 
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeCalDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeCalDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="calViolations" [loading]="calSaving()">
       <button class="action-btn action-btn--primary"
         [disabled]="calForm.invalid || calSaving()"
         (click)="saveCalibration()">
-        <span class="material-icons-outlined">save</span> Save
+        <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
       </button>
       </app-validation-button>
     </div>

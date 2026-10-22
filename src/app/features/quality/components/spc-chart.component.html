@@ -9,31 +9,31 @@
           <app-kpi-chip label="Ppk" [value]="(data.activeLimits.ppk | number:'1.2-2') ?? ''" icon="analytics" />
           <app-kpi-chip label="σ" [value]="(data.activeLimits.processSigma | number:'1.4-4') ?? ''" />
         }
-        <app-kpi-chip label="Points" [value]="'' + data.points.length" />
+        <app-kpi-chip [label]="'quality.spcChart.points' | translate" [value]="'' + data.points.length" />
       </div>
       @if (canRecalculate) {
         <button class="action-btn action-btn--sm" (click)="recalculateLimits()">
-          <span class="material-icons-outlined">refresh</span> Recalculate
+          <span class="material-icons-outlined">refresh</span> {{ 'quality.spcChart.recalculate' | translate }}
         </button>
       }
     </div>
 
     <div class="spc-chart__spec-info">
-      <span>LSL: {{ data.lsl }}</span>
-      <span>Nominal: {{ data.nominal }}</span>
-      <span>USL: {{ data.usl }}</span>
+      <span>{{ 'quality.spcChart.lslLsl' | translate:{ lsl: data.lsl } }}</span>
+      <span>{{ 'quality.spcChart.nominalNominal' | translate:{ nominal: data.nominal } }}</span>
+      <span>{{ 'quality.spcChart.uslUsl' | translate:{ usl: data.usl } }}</span>
     </div>
 
     @if (data.points.length > 0) {
       <div class="spc-chart__canvas-wrapper">
-        <h4 class="spc-chart__chart-label">X-bar Chart</h4>
+        <h4 class="spc-chart__chart-label">{{ 'quality.spcChart.xBarChart' | translate }}</h4>
         <div class="spc-chart__canvas">
           <canvas baseChart type="line" [data]="xBarChartData()" [options]="chartOptions"></canvas>
         </div>
       </div>
 
       <div class="spc-chart__canvas-wrapper">
-        <h4 class="spc-chart__chart-label">R Chart</h4>
+        <h4 class="spc-chart__chart-label">{{ 'quality.spcChart.rChart' | translate }}</h4>
         <div class="spc-chart__canvas">
           <canvas baseChart type="line" [data]="rangeChartData()" [options]="chartOptions"></canvas>
         </div>
@@ -41,13 +41,13 @@
     } @else {
       <div class="spc-chart__empty">
         <span class="material-icons-outlined">show_chart</span>
-        <p>No measurement data yet. Record subgroups to generate charts.</p>
+        <p>{{ 'quality.spcChart.noMeasurementDataYetRecordSubgroups' | translate }}</p>
       </div>
     }
   } @else if (!loading()) {
     <div class="spc-chart__empty">
       <span class="material-icons-outlined">show_chart</span>
-      <p>Select a characteristic to view control charts.</p>
+      <p>{{ 'quality.spcChart.selectACharacteristicToViewControl' | translate }}</p>
     </div>
   }
 </div>

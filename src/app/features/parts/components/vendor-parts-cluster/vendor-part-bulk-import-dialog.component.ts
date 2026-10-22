@@ -78,13 +78,13 @@ export class VendorPartBulkImportDialogComponent {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'lineNumber', header: '#', width: '50px', align: 'right' },
-    { field: 'partNumber', header: 'Part #', width: '120px' },
-    { field: 'partName', header: 'Description' },
-    { field: 'vendorPartNumber', header: 'Vendor PN', width: '120px' },
-    { field: 'leadTimeDays', header: 'Lead', width: '70px', align: 'right' },
-    { field: 'minOrderQty', header: 'MOQ', width: '70px', align: 'right' },
-    { field: 'action', header: 'Action', width: '100px' },
-    { field: 'errorMessage', header: 'Error' },
+    { field: 'partNumber', header: 'columns.partNumber', width: '120px' },
+    { field: 'partName', header: 'common.description' },
+    { field: 'vendorPartNumber', header: 'columns.vendorPartNumber', width: '120px' },
+    { field: 'leadTimeDays', header: 'columns.leadTime', width: '70px', align: 'right' },
+    { field: 'minOrderQty', header: 'columns.moq', width: '70px', align: 'right' },
+    { field: 'action', header: 'columns.action', width: '100px' },
+    { field: 'errorMessage', header: 'common.error' },
   ];
 
   protected readonly rows = computed<VendorPartImportRowPreview[]>(

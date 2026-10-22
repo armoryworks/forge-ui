@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { CurrencyService } from '../../services/currency.service';
+import { LanguageService } from '../../services/language.service';
 
 /**
  * Renders a monetary amount using the user's locale for numeric formatting,
@@ -28,6 +29,7 @@ import { CurrencyService } from '../../services/currency.service';
 })
 export class CurrencyDisplayComponent {
   private readonly currencyService = inject(CurrencyService);
+  private readonly language = inject(LanguageService);
 
   readonly value = input.required<number>();
   readonly currency = input<string | null>(null);
@@ -38,6 +40,7 @@ export class CurrencyDisplayComponent {
     const v = this.value();
     const recordCurrency = this.currency();
     const base = this.currencyService.baseCurrency();
+    const locale = this.language.intlLocale();
     const effective = recordCurrency ?? base;
 
     // Intl.NumberFormat throws on a malformed currency code (anything not 3
@@ -46,14 +49,14 @@ export class CurrencyDisplayComponent {
     // sensible instead of erroring out the whole row.
     let numStr: string;
     try {
-      numStr = new Intl.NumberFormat(undefined, {
+      numStr = new Intl.NumberFormat(locale, {
         style: 'currency',
         currency: effective,
         currencyDisplay: 'symbol',
         ...this.fractionOptions(),
       }).format(v);
     } catch {
-      numStr = new Intl.NumberFormat(undefined, {
+      numStr = new Intl.NumberFormat(locale, {
         style: 'currency',
         currency: base,
         currencyDisplay: 'symbol',

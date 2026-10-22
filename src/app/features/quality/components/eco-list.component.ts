@@ -26,6 +26,8 @@ import { EntityPickerComponent } from '../../../shared/components/entity-picker/
 import { AuthService } from '../../../shared/services/auth.service';
 import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from '../quality-roles';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
+import { wholeNumber } from '../../../shared/validators/whole-number.validator';
 
 const PART_ENTITY_TYPES = ['Part', 'BOM'];
 
@@ -107,28 +109,28 @@ export class EcoListComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'ecoNumber', header: 'ECO #', sortable: true, width: '160px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'changeType', header: 'Type', sortable: true, filterable: true, type: 'enum', filterOptions: this.changeTypeOptions, width: '130px' },
-    { field: 'priority', header: 'Priority', sortable: true, filterable: true, type: 'enum', filterOptions: this.priorityOptions, width: '90px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '130px' },
-    { field: 'requestedByName', header: 'Requested By', sortable: true, width: '140px' },
-    { field: 'affectedItemCount', header: 'Items', sortable: true, type: 'number', width: '60px', align: 'center' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'ecoNumber', header: 'columns.ecoNumber', sortable: true, width: '160px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'changeType', header: 'common.type', sortable: true, filterable: true, type: 'enum', filterOptions: this.changeTypeOptions, width: '130px' },
+    { field: 'priority', header: 'common.priority', sortable: true, filterable: true, type: 'enum', filterOptions: this.priorityOptions, width: '90px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '130px' },
+    { field: 'requestedByName', header: 'columns.requestedBy', sortable: true, width: '140px' },
+    { field: 'affectedItemCount', header: 'columns.items', sortable: true, type: 'number', width: '60px', align: 'center' },
+    { field: 'createdAt', header: 'common.created', sortable: true, type: 'date', width: '100px' },
     { field: 'actions', header: '', width: '50px' },
   ];
 
   protected readonly affectedItemColumns: ColumnDef[] = [
-    { field: 'entityType', header: 'Type', sortable: true, width: '100px' },
-    { field: 'entityLabel', header: 'Item', sortable: true, width: '160px', sortValue: row => (row as EcoAffectedItem).entityLabel ?? (row as EcoAffectedItem).entityId },
-    { field: 'changeDescription', header: 'Change Description', sortable: true },
-    { field: 'isImplemented', header: 'Implemented', width: '100px', align: 'center' },
+    { field: 'entityType', header: 'common.type', sortable: true, width: '100px' },
+    { field: 'entityLabel', header: 'columns.item', sortable: true, width: '160px', sortValue: row => (row as EcoAffectedItem).entityLabel ?? (row as EcoAffectedItem).entityId },
+    { field: 'changeDescription', header: 'columns.changeDescription', sortable: true },
+    { field: 'isImplemented', header: 'columns.implemented', width: '100px', align: 'center' },
     { field: 'actions', header: '', width: '50px' },
   ];
 
   protected readonly createForm = new FormGroup({
-    title: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
-    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    title: new FormControl('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(200)] }),
+    description: new FormControl('', { nonNullable: true, validators: [requiredTrimmed] }),
     changeType: new FormControl<EcoChangeType>('Revision', { nonNullable: true }),
     priority: new FormControl<EcoPriority>('Normal', { nonNullable: true }),
     reasonForChange: new FormControl(''),
@@ -138,8 +140,8 @@ export class EcoListComponent implements OnInit {
 
   protected readonly addItemForm = new FormGroup({
     entityType: new FormControl('Part', { nonNullable: true }),
-    entityId: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
-    changeDescription: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
+    entityId: new FormControl<number | null>(null, [Validators.required, Validators.min(1), wholeNumber]),
+    changeDescription: new FormControl('', { nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(500)] }),
     oldValue: new FormControl('', [jsonText]),
     newValue: new FormControl('', [jsonText]),
   });
@@ -189,7 +191,7 @@ export class EcoListComponent implements OnInit {
   }
 
   saveEco(): void {
-    if (this.createForm.invalid) return;
+    if (this.createForm.invalid || this.saving()) return;
     this.saving.set(true);
     const form = this.createForm.getRawValue();
     this.ecoService.createEco({
@@ -203,7 +205,7 @@ export class EcoListComponent implements OnInit {
       effectiveDate: toDateOnly(form.effectiveDate) ?? undefined,
     }).subscribe({
       next: () => {
-        this.snackbar.success('ECO created');
+        this.snackbar.success(this.translate.instant('quality.messages.ecoCreated'));
         this.showCreateDialog.set(false);
         this.saving.set(false);
         this.loadEcos();
@@ -247,9 +249,9 @@ export class EcoListComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Approve ECO?',
-        message: `Approve ${eco.ecoNumber}? This will allow implementation to begin.`,
-        confirmLabel: 'Approve',
+        title: this.translate.instant('quality.messages.approveEcoTitle'),
+        message: this.translate.instant('quality.messages.approveEcoMessage', { number: eco.ecoNumber }),
+        confirmLabel: this.translate.instant('quality.approve'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -257,7 +259,7 @@ export class EcoListComponent implements OnInit {
       this.saving.set(true);
       this.ecoService.approveEco(eco.id).subscribe({
         next: () => {
-          this.snackbar.success('ECO approved');
+          this.snackbar.success(this.translate.instant('quality.messages.ecoApproved'));
           this.saving.set(false);
           this.refreshDetail(eco.id);
           this.loadEcos();
@@ -273,9 +275,9 @@ export class EcoListComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Implement ECO?',
-        message: `Mark ${eco.ecoNumber} as implemented? All affected items will be marked as implemented.`,
-        confirmLabel: 'Implement',
+        title: this.translate.instant('quality.messages.implementEcoTitle'),
+        message: this.translate.instant('quality.messages.implementEcoMessage', { number: eco.ecoNumber }),
+        confirmLabel: this.translate.instant('quality.implement'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -283,7 +285,7 @@ export class EcoListComponent implements OnInit {
       this.saving.set(true);
       this.ecoService.implementEco(eco.id).subscribe({
         next: () => {
-          this.snackbar.success('ECO implemented');
+          this.snackbar.success(this.translate.instant('quality.messages.ecoImplemented'));
           this.saving.set(false);
           this.refreshDetail(eco.id);
           this.loadEcos();
@@ -312,7 +314,7 @@ export class EcoListComponent implements OnInit {
     };
     this.ecoService.addAffectedItem(eco.id, data).subscribe({
       next: () => {
-        this.snackbar.success('Affected item added');
+        this.snackbar.success(this.translate.instant('quality.messages.affectedItemAdded'));
         this.showAddItemDialog.set(false);
         this.saving.set(false);
         this.refreshDetail(eco.id);
@@ -328,16 +330,17 @@ export class EcoListComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Affected Item?',
-        message: 'Remove this affected item from the ECO?',
-        confirmLabel: 'Remove',
+        title: this.translate.instant('quality.messages.removeAffectedItemTitle'),
+        message: this.translate.instant('quality.messages.removeAffectedItemMessage'),
+        details: [`${item.entityType} ${item.entityId}: ${item.changeDescription}`],
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.ecoService.deleteAffectedItem(eco.id, item.id).subscribe({
         next: () => {
-          this.snackbar.success('Affected item removed');
+          this.snackbar.success(this.translate.instant('quality.messages.affectedItemRemoved'));
           this.refreshDetail(eco.id);
           this.loadEcos();
         },

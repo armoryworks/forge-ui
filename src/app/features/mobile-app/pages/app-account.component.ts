@@ -24,6 +24,8 @@ import { PlatformService } from '../../../shared/services/platform.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MOBILE_APP_SCREENS } from '../../../shared/utils/mobile-app-screens';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
+import { wasHttpErrorShown } from '../../../shared/utils/shown-http-errors';
+import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
 
 const PROBLEM_MAX_LENGTH = 2000;
 
@@ -74,7 +76,7 @@ export class AppAccountComponent {
 
   protected readonly problemMaxLength = PROBLEM_MAX_LENGTH;
   protected readonly problemControl = new FormControl('', {
-    nonNullable: true, validators: [Validators.required, Validators.maxLength(PROBLEM_MAX_LENGTH)],
+    nonNullable: true, validators: [requiredTrimmed, Validators.maxLength(PROBLEM_MAX_LENGTH)],
   });
   private readonly problemText = toSignal(this.problemControl.valueChanges, { initialValue: '' });
   protected readonly problemCount = computed(() =>
@@ -189,8 +191,10 @@ export class AppAccountComponent {
       this.problemControl.reset();
       this.sent.set(true);
       this.snackbar.success(this.translate.instant('mobileApp.account.problemSent'));
-    } catch {
-      this.snackbar.error(this.translate.instant('mobileApp.account.problemFailed'));
+    } catch (err) {
+      if (wasHttpErrorShown(err)) return;
+      const offline = !(err instanceof HttpErrorResponse) || err.status === 0;
+      this.snackbar.error(this.translate.instant(offline ? 'mobileApp.account.problemFailed' : 'mobileApp.account.problemRejected'));
     } finally {
       this.busy.set(false);
     }

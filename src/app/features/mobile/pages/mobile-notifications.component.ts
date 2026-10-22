@@ -4,9 +4,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { RichTextPipe } from '../../../shared/pipes/rich-text.pipe';
-import { LanguageService } from '../../../shared/services/language.service';
 import { AppNotification } from '../../../shared/models/app-notification.model';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { formatDate } from '../../../shared/utils/date.utils';
 import { MobileEntityLinkService } from '../services/mobile-entity-link.service';
 
 @Component({
@@ -20,7 +20,6 @@ import { MobileEntityLinkService } from '../services/mobile-entity-link.service'
 export class MobileNotificationsComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly translate = inject(TranslateService);
-  private readonly languageService = inject(LanguageService);
   private readonly entityLinks = inject(MobileEntityLinkService);
 
   protected readonly notifications = this.notificationService.filteredNotifications;
@@ -61,7 +60,7 @@ export class MobileNotificationsComponent implements OnInit {
     if (hours < 24) return this.translate.instant('mobileLegacyPages.notifications.hoursAgo', { count: hours });
     const days = Math.floor(hours / 24);
     if (days < 7) return this.translate.instant('mobileLegacyPages.notifications.daysAgo', { count: days });
-    return d.toLocaleDateString(this.languageService.currentLanguage());
+    return formatDate(d);
   }
 
   protected getSeverityIcon(severity: string): string {

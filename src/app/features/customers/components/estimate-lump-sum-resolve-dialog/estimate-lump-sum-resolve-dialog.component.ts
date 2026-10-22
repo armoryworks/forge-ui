@@ -15,6 +15,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 
 import { QuoteService } from '../../../quotes/services/quote.service';
 import { EstimateLine, EstimateLineResolution, EstimateLineResolutionAction } from '../../models/estimate.model';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 export interface EstimateLumpSumResolveDialogData {
   /** Owning customer — used to resolve price-list prices for replacement parts. */
@@ -80,7 +82,10 @@ export class EstimateLumpSumResolveDialogComponent {
       {
         action: new FormControl<EstimateLineResolutionAction | null>(null, [Validators.required]),
         partId: new FormControl<number | null>(null),
-        unitPrice: new FormControl<number | null>(line.unitPrice, [Validators.min(0)]),
+        unitPrice: new FormControl<number | null>(line.unitPrice, [
+          Validators.min(0),
+          maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('customers.estimates.resolveLumpSum.unitPriceLabel'), this.translate),
+        ]),
       },
       { validators: [EstimateLumpSumResolveDialogComponent.replaceRequiresPart] },
     )),

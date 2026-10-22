@@ -20,16 +20,20 @@
       }
     </div>
     <div class="routing__header-actions">
+      <div class="routing__gating">
+        <app-select data-testid="routing-step-gating" [label]="'parts.stepGating' | translate"
+                    [formControl]="gatingControl" [options]="gatingOptions" />
+      </div>
       <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
         <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'list'"
-                (click)="routingViewMode.set('list')"
+                (click)="showView('list')" data-testid="routing-view-list"
                 [matTooltip]="'parts.viewRoutingList' | translate" matTooltipPosition="above"
                 [attr.aria-label]="'parts.viewRoutingList' | translate"
                 [attr.aria-pressed]="routingViewMode() === 'list'">
           <span class="material-icons-outlined">view_list</span>
         </button>
         <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'flow'"
-                (click)="routingViewMode.set('flow')"
+                (click)="showView('flow')" data-testid="routing-view-flow"
                 [matTooltip]="'parts.viewRoutingFlow' | translate" matTooltipPosition="above"
                 [attr.aria-label]="'parts.viewRoutingFlow' | translate"
                 [attr.aria-pressed]="routingViewMode() === 'flow'">
@@ -43,7 +47,11 @@
   </div>
 
   @if (routingViewMode() === 'flow') {
-    <app-routing-flow-view [operations]="operations()" />
+    @if (canEditFlow) {
+      <app-routing-graph-editor [partId]="partId()" (saved)="onFlowSaved($event)" (dirtyChange)="flowDirty.set($event)" />
+    } @else {
+      <app-routing-flow-view [operations]="operations()" />
+    }
   } @else {
     @if (operations().length === 0) {
       <app-empty-state icon="route" data-testid="routing-empty-state"
@@ -81,6 +89,24 @@
                   <span class="operation-card__tag">
                     <span class="material-icons-outlined">schedule</span>
                     {{ operation.estimatedMs | durationMs }}
+                  </span>
+                }
+                @if (followsByOperation().get(operation.id); as follows) {
+                  <span class="operation-card__tag" data-testid="op-follows-meta">
+                    <span class="material-icons-outlined">call_merge</span>
+                    {{ 'parts.followsTag' | translate: { steps: follows } }}
+                  </span>
+                }
+                @if (operation.cycleCountdown) {
+                  <span class="operation-card__tag" data-testid="op-cycle-countdown-meta">
+                    <span class="material-icons-outlined">autorenew</span>
+                    {{ 'parts.cycleCountdown' | translate }}
+                  </span>
+                }
+                @if (operation.scrapFactor > 0) {
+                  <span class="operation-card__tag" data-testid="op-scrap-factor-meta">
+                    <span class="material-icons-outlined">delete_sweep</span>
+                    {{ 'parts.scrapFactorTag' | translate: { percent: (operation.scrapFactor | percent: '1.0-2') } }}
                   </span>
                 }
                 <!-- Phase 3 H5 / WU-13 — surface subcontract metadata. -->

@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { ElementRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -6,6 +6,7 @@ import { Navigation, Router } from '@angular/router';
 
 import { DraftService } from '../../services/draft.service';
 import { DialogComponent } from './dialog.component';
+import { provideTranslateService } from '@ngx-translate/core';
 
 describe('DialogComponent draft lifecycle', () => {
   let draftService: { register: ReturnType<typeof vi.fn>; unregister: ReturnType<typeof vi.fn>; loadDraft: ReturnType<typeof vi.fn>; clearDraft: ReturnType<typeof vi.fn> };
@@ -21,9 +22,11 @@ describe('DialogComponent draft lifecycle', () => {
     currentNavigation = signal<Navigation | null>(null);
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: { openDialogs: [], open: vi.fn() } },
         { provide: DraftService, useValue: draftService },
         { provide: Router, useValue: { currentNavigation } },
+        { provide: ElementRef, useValue: new ElementRef(document.createElement('app-dialog')) },
       ],
     });
   });

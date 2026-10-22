@@ -172,7 +172,7 @@ export class VendorPartPriceTiersDialogComponent {
       width: '400px',
       data: {
         title: this.translate.instant('common.confirm'),
-        message: 'Remove this price tier?',
+        message: this.translate.instant('vendorPart.priceTiers.removeConfirm'),
         confirmLabel: this.translate.instant('common.remove'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
@@ -180,7 +180,7 @@ export class VendorPartPriceTiersDialogComponent {
       if (!confirmed) return;
       this.vendorPartsService.deletePriceTier(this.data.vendorPart.id, tier.id).subscribe({
         next: () => {
-          this.snackbar.success('Price tier removed');
+          this.snackbar.success(this.translate.instant('vendorPart.priceTiers.removed'));
           this.refreshTiers();
         },
       });

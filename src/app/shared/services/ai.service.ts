@@ -1,9 +1,10 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Observable, catchError, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { isCapabilityDisabledError } from '../errors/capability-disabled.error';
+import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { RagSearchResponse } from '../models/rag-search-response.model';
 import { CapabilityService } from './capability.service';
 
@@ -203,6 +204,8 @@ export class AiService {
   }
 
   assistantChat(assistantId: number, question: string, history?: AiHelpMessage[]): Observable<AiHelpResponse> {
-    return this.http.post<AiHelpResponse>(`${this.base}/assistants/${assistantId}/chat`, { question, history });
+    return this.http.post<AiHelpResponse>(`${this.base}/assistants/${assistantId}/chat`, { question, history }, {
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 }

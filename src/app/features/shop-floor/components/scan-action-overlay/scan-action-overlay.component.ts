@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, output, signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ScannerService } from '../../../../shared/services/scanner.service';
@@ -30,6 +31,7 @@ interface JobActionContext {
   currentStage: string;
   assigneeName: string | null;
   hasActiveTimer: boolean;
+  focusOperationId: number | null;
 }
 
 const ACTION_ICONS: Record<string, string> = {
@@ -168,31 +170,57 @@ export class ScanActionOverlayComponent {
     this.lookupPart(value);
   }
 
+  /** Open a job's step view directly, as a job scan would (e.g., from the worker card's My jobs). */
+  openJobById(jobId: number, job: { jobNumber: string; title: string; stageName: string }, focusOperationId: number | null = null): void {
+    this.error.set(null);
+    this.context.set(null);
+    this.jobContext.set({
+      jobId,
+      jobNumber: job.jobNumber,
+      jobTitle: job.title,
+      currentStage: job.stageName,
+      assigneeName: null,
+      hasActiveTimer: false,
+      focusOperationId,
+    });
+    this.phase.set('job');
+  }
+
   private lookupPart(identifier: string): void {
     this.phase.set('loading');
     this.error.set(null);
     this.jobContext.set(null);
 
+    this.shopFloor.identifyScan(identifier).subscribe({
+      next: (result) => {
+        if (result.scanType === 'job' && result.isClosed) {
+          this.showMessage(this.translate.instant('shopFloor.closedJobScanned', { number: result.entityNumber ?? '' }));
+        } else if ((result.scanType === 'job' || result.scanType === 'job-operation') && result.entityId != null) {
+          this.openJob(result);
+        } else {
+          this.loadPartContext(identifier);
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        if (err?.status === 401) {
+          this.showSignInNeeded();
+          return;
+        }
+        this.loadPartContext(identifier);
+      },
+    });
+  }
+
+  private loadPartContext(identifier: string): void {
     this.scanAction.getContext(identifier).subscribe({
       next: (ctx) => {
         this.context.set(ctx);
         this.phase.set('actions');
         this.contextLoaded.emit(ctx);
       },
-      error: () => this.lookupJob(identifier),
-    });
-  }
-
-  private lookupJob(identifier: string): void {
-    this.shopFloor.identifyScan(identifier).subscribe({
-      next: (result) => {
-        if (result.scanType === 'job' && result.entityId != null) {
-          this.openJob(result);
-        } else {
-          this.showNotFound(identifier);
-        }
-      },
-      error: () => this.showNotFound(identifier),
+      error: (err: HttpErrorResponse) => err?.status === 401
+        ? this.showSignInNeeded()
+        : this.showNotFound(identifier),
     });
   }
 
@@ -205,12 +233,21 @@ export class ScanActionOverlayComponent {
       currentStage: result.stageName ?? '',
       assigneeName: null,
       hasActiveTimer: false,
+      focusOperationId: result.scanType === 'job-operation' ? result.operationId ?? null : null,
     });
     this.phase.set('job');
   }
 
   private showNotFound(identifier: string): void {
-    this.error.set(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
+    this.showMessage(this.translate.instant('kioskFlows.overlay.partNotFound', { identifier }));
+  }
+
+  private showSignInNeeded(): void {
+    this.showMessage(this.translate.instant('kioskFlows.overlay.signInNeeded'));
+  }
+
+  private showMessage(message: string): void {
+    this.error.set(message);
     this.phase.set('actions');
     setTimeout(() => this.close(), 3000);
   }
@@ -296,6 +333,11 @@ export class ScanActionOverlayComponent {
 
   protected toggleMultiScan(): void {
     this.multiScanMode.update(v => !v);
+  }
+
+  /** Close the overlay from outside (e.g., when the kiosk signs the worker out). */
+  dismiss(): void {
+    if (this.phase() !== 'idle') this.close();
   }
 
   protected close(): void {

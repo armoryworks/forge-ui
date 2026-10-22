@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
+import { PercentPipe } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-
-import { forkJoin } from 'rxjs';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,6 +13,7 @@ import { Operation } from '../../models/operation.model';
 import { BOMLine } from '../../models/bom-line.model';
 import { OperationDialogComponent, OperationDialogData } from '../operation-dialog/operation-dialog.component';
 import { RoutingFlowViewComponent } from '../routing-flow-view/routing-flow-view.component';
+import { RoutingGraphEditorComponent } from '../routing-graph-editor/routing-graph-editor.component';
 import { RoutingCopyDialogComponent, RoutingCopyDialogData } from '../routing-copy-dialog/routing-copy-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -19,13 +21,18 @@ import { DraftResumeService } from '../../../../shared/services/draft-resume.ser
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { STEP_GATING_MODES, StepGatingMode } from '../../../../shared/models/step-gating-mode.type';
+import { describeConflicts, predecessorConflictsOf } from '../../utils/predecessor-conflicts.utils';
+import { effectivePredecessors } from '../../utils/routing-predecessors.utils';
 
 type RoutingViewMode = 'list' | 'flow';
 
 @Component({
   selector: 'app-routing',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, DragDropModule, DurationMsPipe],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, RoutingFlowViewComponent, RoutingGraphEditorComponent, DragDropModule, DurationMsPipe, PercentPipe, ReactiveFormsModule, SelectComponent],
   templateUrl: './routing.component.html',
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,9 +43,11 @@ export class RoutingComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly auth = inject(AuthService);
 
   readonly partId = input.required<number>();
   readonly bomLines = input<BOMLine[]>([]);
+  readonly stepGating = input<StepGatingMode | null>(null);
 
   protected readonly operations = signal<Operation[]>([]);
   protected readonly loading = signal(false);
@@ -50,6 +59,48 @@ export class RoutingComponent implements OnInit {
     this.operations().reduce((sum, op) => sum + (op.setupMinutes ?? 0), 0) * 60_000);
   protected readonly totalLotMs = computed(() =>
     this.operations().reduce((sum, op) => sum + (op.runMinutesLot ?? 0), 0) * 60_000);
+  protected readonly followsByOperation = computed(() => {
+    const labels = new Map<number, string>();
+    for (const [id, links] of effectivePredecessors(this.operations())) {
+      if (links.length === 0 || links.every(link => link.implicit)) continue;
+      labels.set(id, links.map(link => link.gate === 'Complete'
+        ? this.translate.instant('parts.followsDone', { step: link.stepNumber })
+        : `Op ${link.stepNumber}`).join(', '));
+    }
+    return labels;
+  });
+
+  protected readonly canEditGating = this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer']);
+  protected readonly canEditFlow = this.canEditGating;
+  protected readonly flowDirty = signal(false);
+  protected readonly gatingControl = new FormControl<StepGatingMode | null>({ value: null, disabled: !this.canEditGating });
+  protected readonly gatingOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('parts.stepGatingDefault') },
+    ...STEP_GATING_MODES.map(mode => ({ value: mode, label: this.translate.instant(`parts.stepGatingModes.${mode}`) })),
+  ];
+  private savedGating: StepGatingMode | null = null;
+
+  private readonly syncGating = effect(() => {
+    const value = this.stepGating();
+    this.savedGating = value;
+    this.gatingControl.setValue(value, { emitEvent: false });
+  });
+
+  private readonly saveGating = this.gatingControl.valueChanges
+    .pipe(takeUntilDestroyed())
+    .subscribe(value => {
+      if (value === this.savedGating) return;
+      this.partsService.updateStepGating(this.partId(), value).subscribe({
+        next: () => {
+          this.savedGating = value;
+          this.snackbar.success(this.translate.instant('parts.stepGatingSaved'));
+        },
+        error: (err: unknown) => {
+          this.gatingControl.setValue(this.savedGating, { emitEvent: false });
+          this.snackbar.errorFrom(err, 'parts.stepGatingSaveFailed');
+        },
+      });
+    });
 
   constructor() {
     effect(() => {
@@ -79,6 +130,31 @@ export class RoutingComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected showView(mode: RoutingViewMode): void {
+    if (mode === this.routingViewMode()) return;
+    if (!this.flowDirty()) {
+      this.routingViewMode.set(mode);
+      return;
+    }
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('routingGraph.leaveTitle'),
+        message: this.translate.instant('routingGraph.leaveMessage'),
+        confirmLabel: this.translate.instant('routingGraph.leaveConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.flowDirty.set(false);
+      this.routingViewMode.set(mode);
+    });
+  }
+
+  protected onFlowSaved(operations: Operation[]): void {
+    this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
   }
 
   protected toggleInstructions(operationId: number): void {
@@ -128,40 +204,47 @@ export class RoutingComponent implements OnInit {
       } satisfies OperationDialogData,
     }).afterClosed().subscribe((result: Operation | undefined) => {
       if (result) {
-        this.operations.update(list =>
-          list.map(s => s.id === result.id ? result : s).sort((a, b) => a.stepNumber - b.stepNumber),
-        );
         this.snackbar.success(this.translate.instant('parts.operationUpdated'));
+        this.loadOperations();
       }
     });
   }
 
-  // Drag-reorder of routing steps. There is no bulk reorder endpoint, so we
-  // renumber optimistically and PATCH each operation whose stepNumber changed —
-  // the same per-item persistence the kanban board uses for card positions.
   protected onReorderOperation(event: CdkDragDrop<Operation[]>): void {
     if (event.previousIndex === event.currentIndex) return;
 
-    const previousStepById = new Map(this.operations().map(op => [op.id, op.stepNumber]));
-
+    const numbers = this.operations().map(op => op.stepNumber).sort((a, b) => a - b);
     const reordered = [...this.operations()];
     moveItemInArray(reordered, event.previousIndex, event.currentIndex);
-    const renumbered = reordered.map((op, index) => ({ ...op, stepNumber: index + 1 }));
+    this.operations.set(reordered.map((op, index) => ({ ...op, stepNumber: numbers[index] })));
+    this.saveOrder(reordered.map(op => op.id), false);
+  }
 
-    // Apply the new order immediately for a responsive feel.
-    this.operations.set(renumbered);
-
-    const changed = renumbered.filter(op => previousStepById.get(op.id) !== op.stepNumber);
-    if (changed.length === 0) return;
-
-    forkJoin(
-      changed.map(op => this.partsService.updateOperation(this.partId(), op.id, { stepNumber: op.stepNumber })),
-    ).subscribe({
-      next: () => this.snackbar.success(this.translate.instant('parts.operationReordered')),
+  private saveOrder(operationIds: number[], removeConflictingPredecessors: boolean): void {
+    this.partsService.reorderOperations(this.partId(), { operationIds, removeConflictingPredecessors }).subscribe({
+      next: (operations) => {
+        this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
+        this.snackbar.success(this.translate.instant('parts.operationReordered'));
+      },
       error: (err: unknown) => {
-        // Re-sync from the server so the UI can't drift from persisted order.
-        this.snackbar.errorFrom(err, 'parts.operationReorderFailed');
-        this.loadOperations();
+        const conflicts = predecessorConflictsOf(err);
+        if (!conflicts) {
+          this.snackbar.errorFrom(err, 'parts.operationReorderFailed');
+          this.loadOperations();
+          return;
+        }
+        this.dialog.open(ConfirmDialogComponent, {
+          width: '440px',
+          data: {
+            title: this.translate.instant('parts.predecessorConflictTitle'),
+            message: this.translate.instant('parts.predecessorConflictMessage', { links: describeConflicts(conflicts) }),
+            confirmLabel: this.translate.instant('parts.predecessorConflictConfirm'),
+            severity: 'warn',
+          } satisfies ConfirmDialogData,
+        }).afterClosed().subscribe(confirmed => {
+          if (confirmed) this.saveOrder(operationIds, true);
+          else this.loadOperations();
+        });
       },
     });
   }
@@ -178,8 +261,8 @@ export class RoutingComponent implements OnInit {
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.partsService.deleteOperation(this.partId(), operation.id).subscribe(() => {
-        this.operations.update(list => list.filter(s => s.id !== operation.id));
         this.snackbar.success(this.translate.instant('parts.operationDeleted'));
+        this.loadOperations();
       });
     });
   }

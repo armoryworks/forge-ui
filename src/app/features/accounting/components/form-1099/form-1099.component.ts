@@ -11,6 +11,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
@@ -44,6 +45,7 @@ interface Form1099TableRow {
     SelectComponent,
     StatusBadgeComponent,
     ColumnCellDirective,
+    ToggleComponent,
   ],
   templateUrl: './form-1099.component.html',
   styleUrl: './form-1099.component.scss',
@@ -72,6 +74,13 @@ export class Form1099Component {
   );
 
   protected readonly yearControl = new FormControl<number>(this.currentYear, { nonNullable: true });
+
+  /** Whether 1099 vendors paid nothing in the year are listed, mirrored to `?zero=1`. */
+  private readonly includeZeroParam = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('zero') === '1')),
+    { initialValue: false },
+  );
+  protected readonly includeZeroControl = new FormControl<boolean>(false, { nonNullable: true });
 
   protected readonly yearOptions: SelectOption[] = Array.from({ length: 6 }, (_, i) => {
     const year = this.currentYear - i;
@@ -109,6 +118,19 @@ export class Form1099Component {
       }
     });
 
+    effect(() => {
+      const on = this.includeZeroParam();
+      if (this.includeZeroControl.value !== on) this.includeZeroControl.setValue(on, { emitEvent: false });
+    });
+
+    this.includeZeroControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((on) => {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { zero: on ? '1' : null },
+        queryParamsHandling: 'merge',
+      });
+    });
+
     // Picker → URL.
     this.yearControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((year) => {
       this.router.navigate([], {
@@ -121,6 +143,7 @@ export class Form1099Component {
     // URL year drives the (re)load.
     effect(() => {
       this.yearParam();
+      this.includeZeroParam();
       this.load();
     });
   }
@@ -129,7 +152,7 @@ export class Form1099Component {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .get1099Report(this.yearParam())
+      .get1099Report(this.yearParam(), this.includeZeroParam())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {

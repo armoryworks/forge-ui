@@ -133,10 +133,10 @@ export class I18nLabelsComponent {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'key', header: 'Key', sortable: true, width: '280px' },
-    { field: 'baseValue', header: 'Base Value', sortable: true },
-    { field: 'overrideValue', header: 'Override', sortable: true },
-    { field: 'status', header: 'Status', width: '120px', align: 'center' },
+    { field: 'key', header: 'admin.i18nLabels.key', sortable: true, width: '280px' },
+    { field: 'baseValue', header: 'columns.baseValue', sortable: true },
+    { field: 'overrideValue', header: 'columns.override', sortable: true },
+    { field: 'status', header: 'common.status', width: '120px', align: 'center' },
     { field: 'actions', header: '', width: '90px', align: 'right' },
   ];
 

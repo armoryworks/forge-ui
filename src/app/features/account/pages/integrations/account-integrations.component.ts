@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { formatDateTime } from '../../../../shared/utils/date.utils';
 import { UserIntegrationService } from '../../services/user-integration.service';
 import { IntegrationProviderInfo, UserIntegrationSummary } from '../../models/user-integration.model';
 import { ConnectIntegrationDialogComponent, ConnectIntegrationDialogData } from './connect-integration-dialog.component';
@@ -29,6 +30,7 @@ interface CategoryGroup {
 })
 export class AccountIntegrationsComponent implements OnInit {
   private readonly integrationService = inject(UserIntegrationService);
+  private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
@@ -78,11 +80,11 @@ export class AccountIntegrationsComponent implements OnInit {
       next: (result) => {
         this.testing.set(null);
         if (result.success && !result.contacted) {
-          this.snackbar.info('Credentials saved, but Forge cannot contact this provider to check them yet');
+          this.snackbar.info(this.translate.instant('integrations.messages.savedUnverified'));
         } else if (result.success) {
-          this.snackbar.success('Connection test passed');
+          this.snackbar.success(this.translate.instant('integrations.messages.testPassed'));
         } else {
-          this.snackbar.error('Connection test failed');
+          this.snackbar.error(this.translate.instant('integrations.connectionTestFailed'));
         }
       },
       error: (err: unknown) => {
@@ -99,15 +101,15 @@ export class AccountIntegrationsComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Disconnect Integration?',
-        message: `This will disconnect ${providerLabel}${integration.displayName ? ` (${integration.displayName})` : ''}. You can reconnect later.`,
-        confirmLabel: 'Disconnect',
+        title: this.translate.instant('integrations.messages.disconnectTitle'),
+        message: this.translate.instant('integrations.messages.disconnectMessage', { provider: integration.displayName ? `${providerLabel} (${integration.displayName})` : providerLabel }),
+        confirmLabel: this.translate.instant('integrations.disconnect'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (confirmed) {
         this.integrationService.disconnect(integration.id).subscribe({
-          next: () => this.snackbar.success(`${providerLabel} disconnected`),
+          next: () => this.snackbar.success(this.translate.instant('integrations.messages.disconnected', { provider: providerLabel })),
         });
       }
     });
@@ -122,10 +124,6 @@ export class AccountIntegrationsComponent implements OnInit {
   }
 
   protected formatDate(dateStr: string | null): string {
-    if (!dateStr) return 'Never';
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: '2-digit', day: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    return dateStr ? formatDateTime(dateStr) : this.translate.instant('integrations.never');
   }
 }

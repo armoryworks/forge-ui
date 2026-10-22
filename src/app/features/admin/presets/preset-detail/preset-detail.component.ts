@@ -25,6 +25,7 @@ import { PresetService } from '../../../../shared/services/preset.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { PresetCapabilityRow } from '../../../../shared/models/preset.model';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface CapabilityAreaGroup {
   area: string;
@@ -43,13 +44,14 @@ interface CapabilityAreaGroup {
 @Component({
   selector: 'app-preset-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, DetailLoadErrorComponent],
+  imports: [CommonModule, RouterModule, PageLayoutComponent, LoadingBlockDirective, DetailLoadErrorComponent, TranslatePipe],
   templateUrl: './preset-detail.component.html',
   styleUrl: './preset-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PresetDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly presetService = inject(PresetService);
@@ -136,9 +138,9 @@ export class PresetDetailComponent implements OnInit {
       next: (result) => {
         this.applying.set(false);
         if (result.noOp) {
-          this.snackbar.info(`${presetName}: no changes — already matches.`);
+          this.snackbar.info(this.translate.instant('admin.presetMessages.noChanges', { name: presetName }));
         } else {
-          this.snackbar.success(`Applied ${presetName} (${result.deltaCount} capabilities changed).`);
+          this.snackbar.success(this.translate.instant('admin.presetMessages.applied', { name: presetName, count: result.deltaCount }));
         }
         // Refresh capability descriptor + install state, dismiss banner.
         this.capabilityService.load().subscribe();

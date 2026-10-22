@@ -152,9 +152,7 @@ export class IntegrationConfigDialogComponent {
           // notice it. Mode flip without restart = "saved successfully but
           // does absolutely nothing" which is the most confusing possible
           // UX. Better to over-communicate.
-          this.snackbar.warn(
-            `${this.data.integration.name} mode change requires an API restart to take effect. ` +
-            `Run: docker compose restart forge-api`);
+          this.snackbar.warn(this.translate.instant('integrationConfigDialog.restartRequired', { name: this.data.integration.name }));
         }
         this.saving.set(false);
         this.matDialogRef.close(true);

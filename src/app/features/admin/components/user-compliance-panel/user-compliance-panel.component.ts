@@ -23,6 +23,7 @@ import { UserComplianceDetail, ComplianceFormSubmission, IdentityDocument } from
 import { CompleteI9DialogComponent, CompleteI9DialogData } from '../complete-i9-dialog/complete-i9-dialog.component';
 import { PayrollService } from '../../../account/services/payroll.service';
 import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
+import { formatDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-user-compliance-panel',
@@ -74,12 +75,12 @@ export class UserCompliancePanelComponent {
   ];
 
   protected readonly payStubColumns: ColumnDef[] = [
-    { field: 'payDate', header: 'Pay Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'period', header: 'Period', sortable: false, width: '160px' },
-    { field: 'grossPay', header: 'Gross', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'netPay', header: 'Net', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'source', header: 'Source', sortable: true, width: '90px' },
-    { field: 'actions', header: 'Actions', sortable: false, width: '80px' },
+    { field: 'payDate', header: 'userCompliance.payDate', sortable: true, type: 'date', width: '100px' },
+    { field: 'period', header: 'userCompliance.period', sortable: false, width: '160px' },
+    { field: 'grossPay', header: 'userCompliance.gross', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'netPay', header: 'userCompliance.net', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'source', header: 'userCompliance.source', sortable: true, width: '90px' },
+    { field: 'actions', header: 'common.actions', sortable: false, width: '80px' },
   ];
 
   constructor() {
@@ -275,9 +276,9 @@ export class UserCompliancePanelComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Pay Stub?',
-        message: `This will remove the manually uploaded pay stub for ${stub.payDate.toLocaleDateString()}.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('userCompliance.messages.deletePayStubTitle'),
+        message: this.translate.instant('userCompliance.messages.deletePayStubMessage', { date: formatDate(stub.payDate) }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -297,9 +298,9 @@ export class UserCompliancePanelComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Tax Document?',
-        message: `This will remove the manually uploaded ${doc.documentType} for ${doc.taxYear}.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('userCompliance.messages.deleteTaxDocTitle'),
+        message: this.translate.instant('userCompliance.messages.deleteTaxDocMessage', { type: doc.documentType, year: doc.taxYear }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {

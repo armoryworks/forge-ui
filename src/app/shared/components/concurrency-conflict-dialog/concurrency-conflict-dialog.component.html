@@ -1,7 +1,7 @@
 <div class="concurrency-dialog">
   <div class="concurrency-dialog__header">
     <span class="concurrency-dialog__title">{{ 'concurrencyConflict.title' | translate }}</span>
-    <button class="icon-btn" aria-label="Close" matTooltip="Close" matTooltipPosition="above" (click)="cancel()">
+    <button class="icon-btn" [attr.aria-label]="'common.close' | translate" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="cancel()">
       <span class="material-icons-outlined">close</span>
     </button>
   </div>

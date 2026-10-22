@@ -1,4 +1,9 @@
-@if (summary(); as s) {
+@if (loadError()) {
+  <app-empty-state data-testid="margin-load-error" icon="error_outline"
+                   [message]="'dashboardWidgets.margin.loadFailed' | translate"
+                   [actionLabel]="'dashboardWidgets.margin.retry' | translate"
+                   (action)="load()" />
+} @else if (summary(); as s) {
   <div class="margin-summary">
     <div class="margin-stat">
       @if (costMissing()) {
@@ -12,6 +17,11 @@
         </span>
       }
       <span class="margin-stat__label">{{ 'dashboard.avgMargin' | translate }}</span>
+      @if (partialCoverage()) {
+        <span class="margin-stat__note" data-testid="margin-coverage">
+          {{ 'dashboardWidgets.margin.coverage' | translate: { costed: s.costedJobCount, total: s.jobCount } }}
+        </span>
+      }
     </div>
     <div class="margin-breakdown">
       <div class="margin-breakdown__row">
