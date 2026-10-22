@@ -91,7 +91,8 @@ export class UpgradeLockService {
     try {
       const response = await fetch(MARKER_URL, { cache: 'no-store' });
       // 404 is the resting state: no marker means no upgrade in flight.
-      this.apply(response.ok ? ((await response.json()) as UpgradeStatus) : null);
+      const hasMarker = response.ok && response.status !== 204;
+      this.apply(hasMarker ? ((await response.json()) as UpgradeStatus) : null);
     } catch {
       // Unreachable marker during the swap tells us nothing new — hold whatever
       // state we already have rather than releasing the lock on a network blip.

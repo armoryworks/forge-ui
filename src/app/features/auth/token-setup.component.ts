@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AbstractControl, ReactiveFormsModule, FormGroup, FormControl, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -37,6 +38,7 @@ export class TokenSetupComponent implements OnInit {
 
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);
+  protected readonly submitError = signal<string | null>(null);
   protected readonly submitting = signal(false);
   protected readonly tokenInfo = signal<SetupTokenInfo | null>(null);
 
@@ -66,32 +68,43 @@ export class TokenSetupComponent implements OnInit {
     });
   }
 
+  private readonly passwordsMatch = (control: AbstractControl): ValidationErrors | null => {
+    const confirm = control.value as string | null;
+    const password = control.parent?.get('password')?.value as string | null | undefined;
+    if (!confirm || !password || confirm === password) return null;
+    return { passwordsMismatch: { message: this.translate.instant('account.passwordsDoNotMatch') } };
+  };
+
   protected readonly form = new FormGroup({
     password: new FormControl('', [Validators.required, passwordStrengthValidator]),
-    confirmPassword: new FormControl('', [Validators.required]),
+    confirmPassword: new FormControl('', [Validators.required, this.passwordsMatch]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    password: 'Password',
-    confirmPassword: 'Confirm Password',
+    password: this.translate.instant('auth.password'),
+    confirmPassword: this.translate.instant('auth.confirmPassword'),
   });
+
+  constructor() {
+    this.form.controls.password.valueChanges.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(() => {
+      this.form.controls.confirmPassword.updateValueAndValidity({ emitEvent: false });
+      this.form.updateValueAndValidity();
+    });
+  }
 
   protected readonly loading = this.loadingService.isLoading;
 
   protected onSubmit(): void {
     if (this.form.invalid || this.submitting()) return;
 
-    const { password, confirmPassword } = this.form.getRawValue();
-    if (password !== confirmPassword) {
-      this.snackbar.error(this.translate.instant('account.passwordsDoNotMatch'));
-      return;
-    }
+    const { password } = this.form.getRawValue();
 
     if (!this.token) {
       this.error.set(this.translate.instant('auth.invalidSetupLink'));
       return;
     }
 
+    this.submitError.set(null);
     this.submitting.set(true);
     this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.completeSetup({
       token: this.token,
@@ -103,9 +116,12 @@ export class TokenSetupComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
-        const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';
-        if (err.status >= 500) {
-          this.toast.show({ severity: 'error', title: 'Setup failed', message: detail });
+        const detail: string = err.error?.detail ?? err.error?.title ?? this.translate.instant('errorFallbacksA.setupFailed');
+        if (err.status >= 500 || err.status === 0) {
+          this.toast.show({ severity: 'error', title: this.translate.instant('auth.setupFailedTitle'), message: detail });
+        } else if (err.status === 400) {
+          const applied = FormValidationService.applyServerError(this.form, err);
+          if (!applied || applied.unmatched.length > 0) this.submitError.set(detail);
         } else {
           this.error.set(detail);
         }

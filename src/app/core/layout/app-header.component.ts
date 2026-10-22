@@ -137,6 +137,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected readonly searchControl = new FormControl('');
   protected readonly searchResults = signal<SearchResult[]>([]);
+  protected readonly searchFailed = signal(false);
   private readonly searchTerm = signal('');
 
   /**
@@ -180,11 +181,13 @@ export class AppHeaderComponent implements OnInit {
       debounceTime(300),
       distinctUntilChanged(),
       filter(v => (v?.length ?? 0) >= 2),
-      switchMap(term => this.searchService.search(term!)),
+      switchMap(term => this.searchService.search(term!).pipe(
+        catchError(() => of(null)),
+      )),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(results => {
-      this.searchResults.set(results);
-      this.showResults.set(results.length > 0 || this.navMatches().length > 0 || this.aiService.available() || this.aiSuggestions().length > 0);
+      if ((this.searchControl.value?.length ?? 0) < 2) return;
+      this.applySearchResults(results);
     });
 
     this.searchControl.valueChanges.pipe(
@@ -215,10 +218,13 @@ export class AppHeaderComponent implements OnInit {
       filter(v => !v || v.length < 2),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => {
+      this.searchResults.set([]);
+      this.searchFailed.set(false);
       this.aiSuggestions.set([]);
       this.ragResults.set([]);
       this.ragAnswer.set(null);
       this.aiLoading.set(false);
+      this.showResults.set(this.navMatches().length > 0);
     });
   }
 
@@ -259,12 +265,33 @@ export class AppHeaderComponent implements OnInit {
     const term = this.searchControl.value;
     if ((term?.length ?? 0) >= 2) {
       this.searchService.search(term!).pipe(
-        catchError(() => of([] as SearchResult[])),
+        catchError(() => of(null)),
         takeUntilDestroyed(this.destroyRef),
       ).subscribe(res => {
-        this.searchResults.set(res);
+        this.applySearchResults(res);
         this.showResults.set(true);
       });
+    }
+  }
+
+  private applySearchResults(results: SearchResult[] | null): void {
+    this.searchFailed.set(results === null);
+    this.searchResults.set(results ?? []);
+    this.showResults.set(
+      results === null || results.length > 0 || this.navMatches().length > 0
+      || this.aiService.available() || this.aiSuggestions().length > 0);
+  }
+
+  /** Escape closes the results first; a second Escape clears the search term. */
+  protected onSearchEscape(event: Event): void {
+    if (this.showResults()) {
+      this.showResults.set(false);
+      event.preventDefault();
+      return;
+    }
+    if (this.searchControl.value) {
+      this.searchControl.setValue('');
+      event.preventDefault();
     }
   }
 
@@ -446,6 +473,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected openAbout(): void {
     this.userMenuOpen.set(false);
+    this.versionService.loadServer();
     this.showAboutDialog.set(true);
   }
 

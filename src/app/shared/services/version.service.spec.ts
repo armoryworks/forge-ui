@@ -64,4 +64,19 @@ describe('VersionService', () => {
 
     expect(service.local()).toBeNull();
   });
+
+  it('loadServer() reads the running API build once', () => {
+    service.loadServer();
+    httpMock.expectOne(req => req.url.endsWith('/version')).flush({ version: '0.9.1', gitCommit: 'abcdef0123', shortCommit: 'abcdef0', buildLabel: '0.9.1 (abcdef0)' });
+    expect(service.server()?.buildLabel).toBe('0.9.1 (abcdef0)');
+
+    service.loadServer();
+    httpMock.expectNone(req => req.url.endsWith('/version'));
+  });
+
+  it('loadServer() leaves the server version empty when the API cannot be reached', () => {
+    service.loadServer();
+    httpMock.expectOne(req => req.url.endsWith('/version')).flush('down', { status: 503, statusText: 'Unavailable' });
+    expect(service.server()).toBeNull();
+  });
 });

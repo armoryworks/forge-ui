@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -8,6 +9,9 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { MfaService } from '../account/services/mfa.service';
 import { MfaChallengeResponse, MfaValidateResponse } from '../account/models/mfa.model';
+
+const MAX_FAILED_ATTEMPTS = 5;
+const CHALLENGE_LIFETIME_MS = 5 * 60 * 1000;
 
 @Component({
   selector: 'app-mfa-challenge',
@@ -32,6 +36,8 @@ export class MfaChallengeComponent implements OnInit {
   protected readonly challenge = signal<MfaChallengeResponse | null>(null);
   protected readonly showRecovery = signal(false);
   protected readonly error = signal<string | null>(null);
+  private failedAttempts = 0;
+  private challengeIssuedAt = 0;
 
   protected readonly codeForm = new FormGroup({
     code: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^\d{6}$/)] }),
@@ -46,10 +52,15 @@ export class MfaChallengeComponent implements OnInit {
     code: this.translate.instant('account.mfa.verificationCode'),
   });
 
+  protected readonly recoveryViolations = FormValidationService.getViolations(this.recoveryForm, {
+    recoveryCode: this.translate.instant('auth.mfa.recoveryCode'),
+  });
+
   ngOnInit(): void {
     this.mfaService.createChallenge(this.pendingToken()).subscribe({
       next: (challenge) => {
         this.challenge.set(challenge);
+        this.challengeIssuedAt = Date.now();
         this.loading.set(false);
       },
       error: (err: unknown) => {
@@ -76,10 +87,9 @@ export class MfaChallengeComponent implements OnInit {
         this.verifying.set(false);
         this.validated.emit(result);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.verifying.set(false);
-        this.error.set(this.translate.instant('auth.mfa.invalidCode'));
-        this.codeForm.controls.code.reset();
+        this.onVerifyFailed(err, 'auth.mfa.invalidCode', () => this.codeForm.controls.code.reset());
       },
     });
   }
@@ -100,15 +110,38 @@ export class MfaChallengeComponent implements OnInit {
         this.verifying.set(false);
         this.validated.emit(result);
       },
-      error: () => {
+      error: (err: unknown) => {
         this.verifying.set(false);
-        this.error.set(this.translate.instant('auth.mfa.invalidRecoveryCode'));
-        this.recoveryForm.controls.recoveryCode.reset();
+        this.onVerifyFailed(err, 'auth.mfa.invalidRecoveryCode', () => this.recoveryForm.controls.recoveryCode.reset());
       },
     });
   }
 
   protected cancel(): void {
     this.cancelled.emit();
+  }
+
+  private onVerifyFailed(err: unknown, invalidKey: string, resetField: () => void): void {
+    const status = err instanceof HttpErrorResponse ? err.status : 0;
+    const expired = status === 404 || status === 410
+      || (status === 401 && Date.now() - this.challengeIssuedAt > CHALLENGE_LIFETIME_MS);
+
+    if (expired) {
+      this.snackbar.error(this.translate.instant('auth.mfa.challengeExpired'));
+      this.cancelled.emit();
+      return;
+    }
+    if (status === 429) {
+      this.error.set(this.translate.instant('auth.mfa.tooManyAttempts'));
+      return;
+    }
+    if (status === 400 || status === 401) {
+      this.failedAttempts++;
+      this.error.set(this.translate.instant(
+        this.failedAttempts >= MAX_FAILED_ATTEMPTS ? 'auth.mfa.tooManyAttempts' : invalidKey));
+      resetField();
+      return;
+    }
+    this.snackbar.errorFrom(err, 'auth.mfa.verifyFailed');
   }
 }

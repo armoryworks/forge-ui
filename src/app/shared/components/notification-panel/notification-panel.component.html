@@ -47,8 +47,8 @@
             <div class="notification-item__time">{{ n.createdAt | dateTime }}</div>
           </div>
           <div class="notification-item__actions">
-            <button class="icon-btn" [attr.aria-label]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" [matTooltip]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" matTooltipPosition="above" (click)="togglePin(n, $event)">
-              <span class="material-icons-outlined">{{ n.isPinned ? 'push_pin' : 'push_pin' }}</span>
+            <button class="icon-btn" [class.notification-item__pin--active]="n.isPinned" [attr.aria-pressed]="n.isPinned" [attr.aria-label]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" [matTooltip]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" matTooltipPosition="above" (click)="togglePin(n, $event)">
+              <span class="material-icons-outlined">push_pin</span>
             </button>
             <button class="icon-btn" [attr.aria-label]="'notifications.dismiss' | translate" [matTooltip]="'notifications.dismiss' | translate" matTooltipPosition="above" (click)="dismiss(n, $event)">
               <span class="material-icons-outlined">close</span>
@@ -59,7 +59,9 @@
     }
   </div>
 
-  <div class="notification-panel__footer">
-    <button class="notification-panel__dismiss-all" (click)="dismissAll()">{{ 'notifications.dismissAll' | translate }}</button>
-  </div>
+  @if (!isEmpty()) {
+    <div class="notification-panel__footer">
+      <button class="notification-panel__dismiss-all" (click)="dismissAll()">{{ 'notifications.dismissAll' | translate }}</button>
+    </div>
+  }
 </div>

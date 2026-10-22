@@ -78,6 +78,44 @@ describe('TokenSetupComponent', () => {
     return setup;
   }
 
+  it('flags mismatched passwords on the confirm field and blocks submit', () => {
+    const setup = TestBed.runInInjectionContext(() => new TokenSetupComponent()) as unknown as TokenSetupHarness;
+    setup.form.setValue({ password: 'Forge-Setup-2026!', confirmPassword: 'Forge-Setup-2027!' });
+
+    expect(setup.form.controls.confirmPassword.hasError('passwordsMismatch')).toBe(true);
+    setup.onSubmit();
+    expect(completeSetup).not.toHaveBeenCalled();
+
+    setup.form.controls.password.setValue('Forge-Setup-2027!');
+    expect(setup.form.controls.confirmPassword.hasError('passwordsMismatch')).toBe(false);
+    expect(setup.form.valid).toBe(true);
+  });
+
+  it('keeps the form and marks the password when the server rejects it', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 400,
+      error: { status: 400, title: 'Validation failed', detail: 'Passwords must have at least one digit.', errors: [{ field: 'password', message: 'Passwords must have at least one digit.' }] },
+    })));
+    const setup = filledForm() as TokenSetupHarness & { error(): string | null };
+
+    setup.onSubmit();
+
+    expect(setup.error()).toBeNull();
+    expect(setup.form.controls.password.hasError('serverError')).toBe(true);
+  });
+
+  it('shows the error card when the setup link itself is no longer valid', () => {
+    completeSetup.mockReturnValue(throwError(() => new HttpErrorResponse({
+      status: 409,
+      error: { status: 409, title: 'Action not allowed', detail: 'Invalid or expired setup token' },
+    })));
+    const setup = filledForm() as TokenSetupHarness & { error(): string | null };
+
+    setup.onSubmit();
+
+    expect(setup.error()).toBe('Invalid or expired setup token');
+  });
+
   it('posts the setup once when Enter submits twice before the server answers', () => {
     completeSetup.mockReturnValue(new Subject());
     const setup = filledForm();

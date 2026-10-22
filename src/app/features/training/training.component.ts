@@ -17,6 +17,7 @@ import { TrainingEnrollment } from './models/training-progress.model';
 import { TrainingPath } from './models/training-path.model';
 import { TrainingContentType } from './models/training-content-type.enum';
 import { TrainingTab } from './models/training-tab.model';
+import { trainingContentIcon } from '../../shared/utils/training-content-icon';
 
 @Component({
   selector: 'app-training',
@@ -155,14 +156,7 @@ export class TrainingComponent implements OnInit {
   }
 
   protected contentTypeIcon(type: TrainingContentType): string {
-    const icons: Record<TrainingContentType, string> = {
-      Article: 'article',
-      Walkthrough: 'route',
-      QuickRef: 'quick_reference_all',
-      Quiz: 'quiz',
-      Reference: 'menu_book',
-    };
-    return icons[type] ?? 'school';
+    return trainingContentIcon(type);
   }
 
   protected contentTypeLabel(type: TrainingContentType): string {

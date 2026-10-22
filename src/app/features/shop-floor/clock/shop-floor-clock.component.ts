@@ -173,7 +173,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
     this.updateClock();
 
     // Connect to RFID relay (silent, no error if not running)
-    this.rfid.reconnect();
+    this.rfid.reconnect({ probeRelay: true });
 
     interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))

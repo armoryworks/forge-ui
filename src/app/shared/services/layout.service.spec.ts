@@ -178,6 +178,20 @@ describe('LayoutService', () => {
     });
   });
 
+  describe('auth routes', () => {
+    const isAuth = (url: string) =>
+      (service as unknown as { checkAuthRoute(u: string): boolean }).checkAuthRoute(url);
+
+    it('treats a customer acceptance link as outside the employee shell', () => {
+      expect(isAuth('/accept/abc123')).toBe(true);
+    });
+
+    it('does not treat app routes that merely start with accept as auth routes', () => {
+      expect(isAuth('/acceptance-tests')).toBe(false);
+      expect(isAuth('/dashboard')).toBe(false);
+    });
+  });
+
   describe('getDefaultRoute', () => {
     it('should return /dashboard on desktop', () => {
       // Test environment is desktop-like

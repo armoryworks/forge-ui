@@ -47,7 +47,7 @@
   <div class="app-header__search hide-tablet" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" data-testid="header-search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
-           [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keydown.enter)="onSearchEnter()" />
+           [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keydown.enter)="onSearchEnter()" (keydown.escape)="onSearchEscape($event)" />
     <kbd>{{ 'header.ctrlK' | translate }}</kbd>
 
     @if (showResults()) {
@@ -81,7 +81,9 @@
               <span class="search-result__type">{{ entityTypeLabel(result.entityType) }}</span>
             </button>
           }
-          @if (searchResults().length === 0 && navMatches().length === 0) {
+          @if (searchFailed()) {
+            <div class="search-results__empty search-results__empty--error" role="alert" data-testid="search-error">{{ 'header.searchFailed' | translate }}</div>
+          } @else if (searchResults().length === 0 && navMatches().length === 0) {
             <div class="search-results__empty">{{ 'header.noMatches' | translate }}</div>
           }
         </div>
@@ -252,13 +254,20 @@
             }
           </span>
         </div>
+        @if (versionService.server(); as server) {
+          <div class="about-dialog__row">
+            <span class="about-dialog__label">{{ 'header.about.server' | translate }}</span>
+            <span class="about-dialog__value about-dialog__value--stack">
+              <span class="about-dialog__version">{{ server.version }}</span>
+              @if (server.shortCommit) {
+                <span class="about-dialog__sha mono">{{ server.shortCommit }}</span>
+              }
+            </span>
+          </div>
+        }
         <div class="about-dialog__row">
           <span class="about-dialog__label">{{ 'header.about.license' | translate }}</span>
           <span class="about-dialog__value">Apache License 2.0</span>
-        </div>
-        <div class="about-dialog__row">
-          <span class="about-dialog__label">{{ 'header.about.stack' | translate }}</span>
-          <span class="about-dialog__value">Angular 21 · .NET 9 · PostgreSQL</span>
         </div>
       </div>
 

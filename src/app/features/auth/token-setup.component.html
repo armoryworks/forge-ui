@@ -23,6 +23,10 @@
         <p class="setup-password-hint">{{ 'auth.passwordRequirements' | translate }}</p>
         <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword" autocomplete="new-password" data-testid="setup-confirm-password" />
 
+        @if (submitError(); as submitErr) {
+          <p class="setup-submit-error" role="alert" data-testid="setup-submit-error">{{ submitErr }}</p>
+        }
+
         <app-validation-button [violations]="violations" [loading]="loading() || submitting()">
           <button class="action-btn action-btn--primary" type="submit"
             [disabled]="form.invalid || loading() || submitting()"

@@ -63,6 +63,7 @@
           </div>
         }
 
+        <app-validation-button [violations]="recoveryViolations" [loading]="verifying()">
         <button class="action-btn action-btn--primary mfa-challenge__submit" type="submit"
           [disabled]="recoveryForm.invalid || verifying()"
           data-testid="mfa-recovery-submit">
@@ -73,6 +74,7 @@
             {{ 'auth.mfa.verifyRecoveryCode' | translate }}
           }
         </button>
+        </app-validation-button>
       </form>
 
       <button class="mfa-challenge__alt-link" (click)="showRecovery.set(false)" type="button">

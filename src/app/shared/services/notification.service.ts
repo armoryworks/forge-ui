@@ -2,14 +2,27 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of, tap } from 'rxjs';
 
+import { MatDialog } from '@angular/material/dialog';
+import { TranslateService } from '@ngx-translate/core';
+
 import { environment } from '../../../environments/environment';
 import { AppNotification } from '../models/app-notification.model';
 import { NotificationFilter } from '../models/notification-filter.model';
 import { NotificationTab } from '../models/notification-tab.type';
+import { notificationOrigin } from '../utils/notification-origin';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from './snackbar.service';
+import { UserPreferencesService } from './user-preferences.service';
+import { ChatNotificationService } from './chat-notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private readonly http = inject(HttpClient);
+  private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly prefs = inject(UserPreferencesService);
+  private readonly chime = inject(ChatNotificationService);
 
   private readonly _notifications = signal<AppNotification[]>([]);
   private readonly _panelOpen = signal(false);
@@ -26,28 +39,30 @@ export class NotificationService {
     this._notifications().filter(n => !n.isRead && !n.isDismissed).length
   );
 
+  /**
+   * Every notification that has not been dismissed, pinned first and newest first,
+   * without the bell panel's tab and filter state.
+   */
+  readonly activeNotifications = computed(() =>
+    this._notifications()
+      .filter(n => !n.isDismissed)
+      .sort((a, b) => {
+        if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      })
+  );
+
   readonly filteredNotifications = computed(() => {
-    const all = this._notifications();
     const f = this._filter();
 
-    return all.filter(n => {
-      if (n.isDismissed) return false;
-
-      // Tab filter
-      if (f.tab === 'messages' && n.source !== 'user') return false;
-      if (f.tab === 'alerts' && n.source !== 'system') return false;
-
-      // Additional filters
+    return this.activeNotifications().filter(n => {
+      if (f.tab === 'messages' && notificationOrigin(n) !== 'user') return false;
+      if (f.tab === 'alerts' && notificationOrigin(n) !== 'system') return false;
       if (f.source && n.source !== f.source) return false;
       if (f.severity && n.severity !== f.severity) return false;
       if (f.type && n.type !== f.type) return false;
       if (f.unreadOnly && n.isRead) return false;
-
       return true;
-    }).sort((a, b) => {
-      // Pinned first, then by date
-      if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-      return b.createdAt.getTime() - a.createdAt.getTime();
     });
   });
 
@@ -62,10 +77,23 @@ export class NotificationService {
   }
 
   /**
-   * Add a notification from SignalR push.
+   * Add a notification from SignalR push. Hub payloads skip the HTTP date
+   * interceptor, so `createdAt` is normalised to a Date here. A payload that is
+   * only a nudge (no notification id) reloads the list from the API instead.
    */
   push(notification: AppNotification): void {
-    this._notifications.update(list => [notification, ...list]);
+    if (typeof notification?.id !== 'number') {
+      this.load();
+    } else {
+      const createdAt = notification.createdAt instanceof Date
+        ? notification.createdAt
+        : new Date(notification.createdAt as unknown as string);
+      this._notifications.update(list => [
+        { ...notification, createdAt },
+        ...list.filter(n => n.id !== notification.id),
+      ]);
+    }
+    if (this.prefs.get<boolean>('notif:sound') ?? true) this.chime.playChime();
   }
 
   togglePanel(): void {
@@ -88,39 +116,55 @@ export class NotificationService {
   }
 
   markAsRead(id: number): void {
-    this._notifications.update(list =>
-      list.map(n => n.id === id ? { ...n, isRead: true } : n)
+    this.applyOptimistic(
+      list => list.map(n => n.id === id ? { ...n, isRead: true } : n),
+      () => this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isRead: true }),
+      'notifications.updateFailed',
     );
-    this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isRead: true })
-      .pipe(catchError(() => of(null)))
-      .subscribe();
   }
 
   markAllRead(): void {
-    this._notifications.update(list =>
-      list.map(n => ({ ...n, isRead: true }))
+    this.applyOptimistic(
+      list => list.map(n => ({ ...n, isRead: true })),
+      () => this.http.post(`${environment.apiUrl}/notifications/mark-all-read`, {}),
+      'notifications.updateFailed',
     );
-    this.http.post(`${environment.apiUrl}/notifications/mark-all-read`, {})
-      .pipe(catchError(() => of(null)))
-      .subscribe();
   }
 
   dismiss(id: number): void {
-    this._notifications.update(list =>
-      list.map(n => n.id === id ? { ...n, isDismissed: true } : n)
+    this.applyOptimistic(
+      list => list.map(n => n.id === id ? { ...n, isDismissed: true } : n),
+      () => this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isDismissed: true }),
+      'notifications.dismissFailed',
     );
-    this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isDismissed: true })
-      .pipe(catchError(() => of(null)))
-      .subscribe();
   }
 
   dismissAll(): void {
-    this._notifications.update(list =>
-      list.map(n => ({ ...n, isDismissed: true }))
+    this.applyOptimistic(
+      list => list.map(n => ({ ...n, isDismissed: true })),
+      () => this.http.post(`${environment.apiUrl}/notifications/dismiss-all`, {}),
+      'notifications.dismissFailed',
     );
-    this.http.post(`${environment.apiUrl}/notifications/dismiss-all`, {})
-      .pipe(catchError(() => of(null)))
-      .subscribe();
+  }
+
+  /**
+   * Asks before dismissing every notification, since dismissed notifications
+   * cannot be brought back.
+   */
+  confirmDismissAll(): void {
+    const count = this.activeNotifications().length;
+    if (count === 0) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('notifications.dismissAllConfirmTitle'),
+        message: this.translate.instant('notifications.dismissAllConfirmMessage', { count }),
+        confirmLabel: this.translate.instant('notifications.dismissAll'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.dismissAll();
+    });
   }
 
   togglePin(id: number): void {
@@ -128,11 +172,25 @@ export class NotificationService {
     if (!notification) return;
 
     const isPinned = !notification.isPinned;
-    this._notifications.update(list =>
-      list.map(n => n.id === id ? { ...n, isPinned } : n)
+    this.applyOptimistic(
+      list => list.map(n => n.id === id ? { ...n, isPinned } : n),
+      () => this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isPinned }),
+      'notifications.updateFailed',
     );
-    this.http.patch(`${environment.apiUrl}/notifications/${id}`, { isPinned })
-      .pipe(catchError(() => of(null)))
-      .subscribe();
+  }
+
+  private applyOptimistic(
+    change: (list: AppNotification[]) => AppNotification[],
+    request: () => ReturnType<HttpClient['post']>,
+    fallbackKey: string,
+  ): void {
+    const before = new Map(this._notifications().map(n => [n.id, n]));
+    this._notifications.update(change);
+    request().subscribe({
+      error: (err: unknown) => {
+        this._notifications.update(list => list.map(n => before.get(n.id) ?? n));
+        this.snackbar.errorFrom(err, fallbackKey);
+      },
+    });
   }
 }

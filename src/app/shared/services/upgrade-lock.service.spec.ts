@@ -46,6 +46,14 @@ describe('UpgradeLockService', () => {
     vi.restoreAllMocks();
   });
 
+  it('reads a 204 marker response as no upgrade without parsing the empty body', async () => {
+    const json = vi.fn().mockRejectedValue(new SyntaxError('Unexpected end of JSON input'));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204, json }));
+    await (service as unknown as { readMarker(): Promise<void> }).readMarker();
+    expect(json).not.toHaveBeenCalled();
+    expect(service.locked()).toBe(false);
+  });
+
   it('locks on the broadcast', () => {
     expect(service.locked()).toBe(false);
     handlers['upgradeStateChanged'](running());

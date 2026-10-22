@@ -11,6 +11,7 @@ type TransportMode = 'none' | 'websocket' | 'webhid';
 const RELAY_URL = 'ws://localhost:9876';
 const WS_RECONNECT_DELAY = 3000;
 const RELAY_NOT_INSTALLED_MSG = 'rfid.relayNotInstalled';
+const RELAY_SEEN_KEY = 'rfid:relay-seen';
 
 @Injectable({ providedIn: 'root' })
 export class WebHidRfidService implements OnDestroy {
@@ -109,12 +110,15 @@ export class WebHidRfidService implements OnDestroy {
 
   /**
    * Try to auto-connect (called on page load).
-   * Silently tries WebSocket relay, then WebHID reconnect.
+   * Silently tries the WebSocket relay, then WebHID reconnect. The relay is only
+   * tried when it has connected on this device before, unless `probeRelay` is set,
+   * so devices without the relay never open a failing WebSocket.
    */
-  async reconnect(): Promise<boolean> {
-    // Try WebSocket relay first (silent, no error if not running)
-    const wsSuccess = await this.connectWebSocket();
-    if (wsSuccess) return true;
+  async reconnect(options: { probeRelay?: boolean } = {}): Promise<boolean> {
+    if (options.probeRelay || this.relaySeen()) {
+      const wsSuccess = await this.connectWebSocket();
+      if (wsSuccess) return true;
+    }
 
     // Try WebHID reconnect (Chromium only, previously paired devices)
     if (this.webHidSupported()) {
@@ -150,6 +154,22 @@ export class WebHidRfidService implements OnDestroy {
     this.disconnect();
   }
 
+  private relaySeen(): boolean {
+    try {
+      return localStorage.getItem(RELAY_SEEN_KEY) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private markRelaySeen(): void {
+    try {
+      localStorage.setItem(RELAY_SEEN_KEY, '1');
+    } catch {
+      return;
+    }
+  }
+
   // Prefer contactless/NFC reader names over contact/EMV readers
   private pickBestDeviceName(): string | null {
     if (this.connectedDevices.size === 0) return null;
@@ -178,6 +198,7 @@ export class WebHidRfidService implements OnDestroy {
 
         ws.onopen = () => {
           clearTimeout(timeout);
+          this.markRelaySeen();
           this.ws = ws;
           this.mode = 'websocket';
           this.wsIntentionalClose = false;

@@ -350,10 +350,11 @@
       "logoAlt": "Forge — Manufacturing Operations Platform",
       "build": "Your build",
       "license": "License",
-      "stack": "Stack",
-      "description": "Open-source ERP and production management for small manufacturers. Integrates with QuickBooks Online for accounting sync."
+      "description": "Open-source ERP and production management for small manufacturers. Integrates with QuickBooks Online for accounting sync.",
+      "server": "Server"
     },
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "searchFailed": "Search is unavailable right now. Try again in a moment."
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -4612,7 +4613,7 @@
       "multipleJobsInstructions": "Multiple Jobs (Step 2):",
       "multipleJobsDesc": "Check this if you (or your spouse) hold more than one job simultaneously. This prevents under-withholding.",
       "dependentsInstructions": "Dependents (Step 3):",
-      "dependentsDesc": "Enter the number of qualifying children under 17 (line 3a, worth $2,000 each) and other dependents (line 3b, worth $500 each). Most employees leave both at 0.",
+      "dependentsDesc": "Enter the number of qualifying children under 17 (line 3a, worth $2,200 each) and other dependents (line 3b, worth $500 each). Most employees leave both at 0.",
       "otherAdjustmentsInstructions": "Other Adjustments (Step 4 — Optional):",
       "otherAdjustmentsDesc": "Use these fields to fine-tune withholding for investment income, itemized deductions, or extra withholding per paycheck.",
       "exemptInstructions": "Exempt:",
@@ -6006,22 +6007,34 @@
     "severityCritical": "Critical",
     "allFilter": "-- All --",
     "sourceSystem": "System",
-    "sourceBoard": "Board",
-    "sourceTimer": "Timer",
     "emailNotifications": "Email Notifications",
     "inAppNotifications": "In-App Notifications",
-    "criticalAlerts": "Critical Alerts",
-    "criticalAlertsDesc": "Receive email for critical system alerts",
-    "toggleCriticalAlerts": "Toggle critical alerts email",
-    "jobAssignments": "Job Assignments",
-    "jobAssignmentsDesc": "Receive email when assigned to a job",
-    "toggleJobAssignments": "Toggle job assignments email",
-    "mentions": "Mentions",
-    "mentionsDesc": "Receive email when mentioned in a comment",
-    "toggleMentions": "Toggle mentions email",
     "sound": "Sound",
     "soundDesc": "Play a sound when a notification arrives",
-    "toggleSound": "Toggle notification sound"
+    "toggleSound": "Toggle notification sound",
+    "sourceUser": "People",
+    "updateFailed": "Could not update the notification. Your change was undone.",
+    "dismissFailed": "Could not dismiss. The notifications are back in your list.",
+    "dismissAllConfirmTitle": "Dismiss all notifications?",
+    "dismissAllConfirmMessage": "Dismiss all {{count}} notifications? Dismissed notifications cannot be brought back.",
+    "dailyDigest": "Daily digest",
+    "dailyDigestDesc": "A morning email with your overdue jobs, jobs due in the next three days and yesterday's completions",
+    "toggleDailyDigest": "Toggle the daily digest email",
+    "sources": {
+      "compliance": "Compliance",
+      "events": "Events",
+      "inventory": "Inventory",
+      "invoices": "Invoices",
+      "jobs": "Jobs",
+      "kanban": "Board",
+      "maintenance_overdue": "Overdue maintenance",
+      "payroll": "Payroll",
+      "purchasing": "Purchasing",
+      "sales_orders": "Sales orders",
+      "scanner": "Scanner",
+      "shipments": "Shipments",
+      "time_tracking": "Time tracking"
+    }
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -6105,8 +6118,13 @@
       "useAuthenticator": "Use authenticator code instead",
       "backToLogin": "Back to login",
       "invalidCode": "Invalid verification code",
-      "invalidRecoveryCode": "Invalid recovery code"
-    }
+      "invalidRecoveryCode": "Invalid recovery code",
+      "challengeExpired": "This verification has expired. Please sign in again.",
+      "tooManyAttempts": "Too many incorrect codes. Wait a few minutes, then sign in again.",
+      "verifyFailed": "Could not check the code. Please try again."
+    },
+    "setupFailedTitle": "Setup failed",
+    "ssoNoResponse": "Single sign-on did not finish. Please try signing in again."
   },
   "validation": {
     "required": "{field} is required",

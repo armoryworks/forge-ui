@@ -350,10 +350,11 @@
       "logoAlt": "Forge — Plataforma de operaciones de manufactura",
       "build": "Su versión",
       "license": "Licencia",
-      "stack": "Tecnologías",
-      "description": "ERP de código abierto y gestión de producción para pequeños fabricantes. Se integra con QuickBooks Online para sincronizar la contabilidad."
+      "description": "ERP de código abierto y gestión de producción para pequeños fabricantes. Se integra con QuickBooks Online para sincronizar la contabilidad.",
+      "server": "Servidor"
     },
-    "breadcrumb": "Ruta de navegación"
+    "breadcrumb": "Ruta de navegación",
+    "searchFailed": "La búsqueda no está disponible en este momento. Inténtelo de nuevo en un momento."
   },
   "app": {
     "updateAvailable": "Hay una nueva versión disponible.",
@@ -4612,7 +4613,7 @@
       "multipleJobsInstructions": "Múltiples empleos (Paso 2):",
       "multipleJobsDesc": "Marque esto si usted (o su cónyuge) tiene más de un empleo simultáneamente. Esto evita la retención insuficiente.",
       "dependentsInstructions": "Dependientes (Paso 3):",
-      "dependentsDesc": "Ingrese el número de hijos calificados menores de 17 años (línea 3a, $2,000 cada uno) y otros dependientes (línea 3b, $500 cada uno). La mayoría de los empleados deja ambos en 0.",
+      "dependentsDesc": "Ingrese el número de hijos calificados menores de 17 años (línea 3a, $2,200 cada uno) y otros dependientes (línea 3b, $500 cada uno). La mayoría de los empleados deja ambos en 0.",
       "otherAdjustmentsInstructions": "Otros ajustes (Paso 4 — Opcional):",
       "otherAdjustmentsDesc": "Use estos campos para afinar la retención por ingresos de inversión, deducciones detalladas o retención adicional por cheque.",
       "exemptInstructions": "Exento:",
@@ -5999,22 +6000,34 @@
     "severityCritical": "Crítico",
     "allFilter": "-- Todos --",
     "sourceSystem": "Sistema",
-    "sourceBoard": "Tablero",
-    "sourceTimer": "Temporizador",
     "emailNotifications": "Notificaciones por Email",
     "inAppNotifications": "Notificaciones en la Aplicación",
-    "criticalAlerts": "Alertas Críticas",
-    "criticalAlertsDesc": "Recibir email para alertas críticas del sistema",
-    "toggleCriticalAlerts": "Alternar alertas críticas por email",
-    "jobAssignments": "Asignaciones de Trabajo",
-    "jobAssignmentsDesc": "Recibir email al ser asignado a un trabajo",
-    "toggleJobAssignments": "Alternar asignaciones de trabajo por email",
-    "mentions": "Menciones",
-    "mentionsDesc": "Recibir email al ser mencionado en un comentario",
-    "toggleMentions": "Alternar menciones por email",
     "sound": "Sonido",
     "soundDesc": "Reproducir un sonido cuando llega una notificación",
-    "toggleSound": "Alternar sonido de notificación"
+    "toggleSound": "Alternar sonido de notificación",
+    "sourceUser": "Personas",
+    "updateFailed": "No se pudo actualizar la notificación. Se deshizo el cambio.",
+    "dismissFailed": "No se pudo descartar. Las notificaciones volvieron a su lista.",
+    "dismissAllConfirmTitle": "¿Descartar todas las notificaciones?",
+    "dismissAllConfirmMessage": "¿Descartar las {{count}} notificaciones? Las notificaciones descartadas no se pueden recuperar.",
+    "dailyDigest": "Resumen diario",
+    "dailyDigestDesc": "Un correo cada mañana con sus trabajos vencidos, los que vencen en los próximos tres días y los completados ayer",
+    "toggleDailyDigest": "Activar o desactivar el correo de resumen diario",
+    "sources": {
+      "compliance": "Cumplimiento",
+      "events": "Eventos",
+      "inventory": "Inventario",
+      "invoices": "Facturas",
+      "jobs": "Trabajos",
+      "kanban": "Tablero",
+      "maintenance_overdue": "Mantenimiento vencido",
+      "payroll": "Nómina",
+      "purchasing": "Compras",
+      "sales_orders": "Órdenes de venta",
+      "scanner": "Escáner",
+      "shipments": "Envíos",
+      "time_tracking": "Control de tiempo"
+    }
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -6098,8 +6111,13 @@
       "useAuthenticator": "Usar el código del autenticador",
       "backToLogin": "Volver al inicio de sesión",
       "invalidCode": "Código de verificación no válido",
-      "invalidRecoveryCode": "Código de recuperación no válido"
-    }
+      "invalidRecoveryCode": "Código de recuperación no válido",
+      "challengeExpired": "Esta verificación expiró. Inicie sesión de nuevo.",
+      "tooManyAttempts": "Demasiados códigos incorrectos. Espere unos minutos y vuelva a iniciar sesión.",
+      "verifyFailed": "No se pudo comprobar el código. Inténtelo de nuevo."
+    },
+    "setupFailedTitle": "Error en la configuración",
+    "ssoNoResponse": "El inicio de sesión único no terminó. Intente iniciar sesión de nuevo."
   },
   "validation": {
     "required": "{field} es requerido",

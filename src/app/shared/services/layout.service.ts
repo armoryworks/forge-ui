@@ -154,7 +154,8 @@ export class LayoutService {
       // Treating /portal/* as an "auth route" means showShell() returns
       // false there, so the green QB·ENG header + sidebar don't render
       // even when an employee is also logged into this same browser.
-      || url.startsWith('/portal');
+      || url.startsWith('/portal')
+      || url.startsWith('/accept/');
   }
 
   private checkOnboardingRoute(url: string): boolean {

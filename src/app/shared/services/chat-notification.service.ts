@@ -79,7 +79,8 @@ export class ChatNotificationService {
     this.latestIncomingMessage.set(null);
   }
 
-  private playChime(): void {
+  /** Plays the selected chime once; does nothing where audio is unavailable. */
+  playChime(): void {
     try {
       if (!this.audioContext) {
         this.audioContext = new AudioContext();

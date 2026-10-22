@@ -8,6 +8,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TrainingService } from '../../../training/services/training.service';
 import { UserTrainingDetail } from '../../../training/models/user-training-detail.model';
+import { trainingContentIcon } from '../../../../shared/utils/training-content-icon';
 
 @Component({
   selector: 'app-training-detail-panel',
@@ -61,11 +62,7 @@ export class TrainingDetailPanelComponent {
   }
 
   protected contentTypeIcon(type: string): string {
-    const icons: Record<string, string> = {
-      Article: 'article', Video: 'play_circle',
-      Walkthrough: 'route', QuickRef: 'quick_reference_all', Quiz: 'quiz', Reference: 'menu_book',
-    };
-    return icons[type] ?? 'school';
+    return trainingContentIcon(type);
   }
 
   protected formatTime(seconds: number): string {

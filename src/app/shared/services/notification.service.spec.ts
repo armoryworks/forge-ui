@@ -2,13 +2,24 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 
+import { MatDialog } from '@angular/material/dialog';
+import { TranslateService } from '@ngx-translate/core';
+import { of } from 'rxjs';
+
 import { NotificationService } from './notification.service';
+import { SnackbarService } from './snackbar.service';
+import { UserPreferencesService } from './user-preferences.service';
+import { ChatNotificationService } from './chat-notification.service';
 import { AppNotification } from '../models/app-notification.model';
 import { environment } from '../../../environments/environment';
 
 describe('NotificationService', () => {
   let service: NotificationService;
   let httpMock: HttpTestingController;
+  let snackbar: { errorFrom: ReturnType<typeof vi.fn> };
+  let dialogOpen: ReturnType<typeof vi.fn>;
+  let playChime: ReturnType<typeof vi.fn>;
+  let soundPref: boolean | null;
 
   const makeNotification = (overrides: Partial<AppNotification> = {}): AppNotification => ({
     id: 1,
@@ -25,10 +36,19 @@ describe('NotificationService', () => {
   });
 
   beforeEach(() => {
+    snackbar = { errorFrom: vi.fn() };
+    dialogOpen = vi.fn(() => ({ afterClosed: () => of(true) }));
+    playChime = vi.fn();
+    soundPref = null;
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: SnackbarService, useValue: snackbar },
+        { provide: MatDialog, useValue: { open: dialogOpen } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        { provide: UserPreferencesService, useValue: { get: () => soundPref } },
+        { provide: ChatNotificationService, useValue: { playChime } },
       ],
     });
 
@@ -274,6 +294,114 @@ describe('NotificationService', () => {
 
       expect(service.filteredNotifications().length).toBe(1);
       expect(service.filteredNotifications()[0].id).toBe(1);
+    });
+  });
+
+  describe('tabs by origin', () => {
+    it('puts module-tagged system rows under Alerts and mentions under Messages', () => {
+      service.push(makeNotification({ id: 1, source: 'inventory', type: 'system' }));
+      service.push(makeNotification({ id: 2, source: 'sales_orders', type: 'system' }));
+      service.push(makeNotification({ id: 3, source: 'jobs', type: 'mention', senderInitials: 'AB' }));
+
+      service.setTab('alerts');
+      expect(service.filteredNotifications().map(n => n.id).sort()).toEqual([1, 2]);
+
+      service.setTab('messages');
+      expect(service.filteredNotifications().map(n => n.id)).toEqual([3]);
+    });
+
+    it('keeps the full list free of the panel tab and unread filter', () => {
+      service.push(makeNotification({ id: 1, source: 'inventory', isRead: true }));
+      service.push(makeNotification({ id: 2, source: 'jobs', type: 'mention' }));
+
+      service.setTab('messages');
+      service.setFilter({ unreadOnly: true });
+
+      expect(service.activeNotifications().length).toBe(2);
+    });
+  });
+
+  describe('live pushes', () => {
+    it('turns a hub-delivered ISO date into a Date so sorting keeps working', () => {
+      service.push(makeNotification({ id: 1 }));
+      service.push(makeNotification({ id: 2, createdAt: '2026-03-11T12:00:00Z' as unknown as Date }));
+
+      const list = service.filteredNotifications();
+      expect(list[0].id).toBe(2);
+      expect(list[0].createdAt).toBeInstanceOf(Date);
+    });
+
+    it('chimes on arrival unless sound is turned off', () => {
+      service.push(makeNotification({ id: 1 }));
+      expect(playChime).toHaveBeenCalledTimes(1);
+
+      soundPref = false;
+      service.push(makeNotification({ id: 2 }));
+      expect(playChime).toHaveBeenCalledTimes(1);
+    });
+
+    it('reloads instead of adding a blank row when the push is only a nudge', () => {
+      service.push({ type: 'invoice_overdue', invoiceId: 7 } as unknown as AppNotification);
+
+      expect(service.activeNotifications().length).toBe(0);
+      const req = httpMock.expectOne(`${environment.apiUrl}/notifications`);
+      req.flush({ data: [makeNotification({ id: 9, title: 'Invoice overdue' })] });
+      expect(service.activeNotifications().map(n => n.id)).toEqual([9]);
+      expect(playChime).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces rather than duplicates a notification pushed twice', () => {
+      service.push(makeNotification({ id: 3, title: 'Old' }));
+      service.push(makeNotification({ id: 3, title: 'New' }));
+
+      expect(service.activeNotifications().map(n => n.title)).toEqual(['New']);
+    });
+  });
+
+  describe('failed writes', () => {
+    it('restores dismissed rows and says so when Dismiss All fails', () => {
+      service.push(makeNotification({ id: 1 }));
+      service.push(makeNotification({ id: 2 }));
+
+      service.dismissAll();
+      expect(service.activeNotifications().length).toBe(0);
+
+      httpMock.expectOne(`${environment.apiUrl}/notifications/dismiss-all`)
+        .flush('nope', { status: 500, statusText: 'Server Error' });
+
+      expect(service.activeNotifications().length).toBe(2);
+      expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.anything(), 'notifications.dismissFailed');
+    });
+
+    it('rolls back only the row it changed and keeps a push that arrived meanwhile', () => {
+      service.push(makeNotification({ id: 1, isRead: false }));
+      service.markAsRead(1);
+      service.push(makeNotification({ id: 9 }));
+
+      httpMock.expectOne(`${environment.apiUrl}/notifications/1`)
+        .flush('nope', { status: 409, statusText: 'Conflict' });
+
+      expect(service.notifications().find(n => n.id === 1)?.isRead).toBe(false);
+      expect(service.notifications().some(n => n.id === 9)).toBe(true);
+    });
+  });
+
+  describe('confirmDismissAll', () => {
+    it('asks first and dismisses only after confirming', () => {
+      service.push(makeNotification({ id: 1 }));
+      service.confirmDismissAll();
+
+      expect(dialogOpen).toHaveBeenCalled();
+      httpMock.expectOne(`${environment.apiUrl}/notifications/dismiss-all`).flush(null);
+    });
+
+    it('sends nothing when the confirmation is cancelled', () => {
+      dialogOpen.mockReturnValue({ afterClosed: () => of(false) });
+      service.push(makeNotification({ id: 1 }));
+      service.confirmDismissAll();
+
+      httpMock.expectNone(`${environment.apiUrl}/notifications/dismiss-all`);
+      expect(service.activeNotifications().length).toBe(1);
     });
   });
 
