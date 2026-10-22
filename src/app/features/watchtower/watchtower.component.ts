@@ -159,6 +159,12 @@ export class WatchtowerComponent {
     });
   }
 
+  protected statusLabel(status: string): string {
+    const key = `watchtower.status.${status.toLowerCase()}`;
+    const text = this.translate.instant(key);
+    return text === key ? status : text;
+  }
+
   protected statusChipClass(status: string): string {
     switch (status) {
       case 'Applied': return 'chip chip--success';

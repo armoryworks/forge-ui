@@ -160,7 +160,7 @@ describe('CurrencyInputComponent', () => {
     expect(input.value).toBe('1250.5');
   });
 
-  it('reads the comma as the decimal separator in Spanish', () => {
+  it('keeps the US decimal point in Spanish (es-US) and rejects a comma decimal', () => {
     TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
@@ -173,11 +173,14 @@ describe('CurrencyInputComponent', () => {
     fixture.detectChanges();
     const host = fixture.componentInstance;
     const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
-    input.value = '1,5';
+    input.value = '1.5';
     input.dispatchEvent(new Event('input'));
     expect(host.control.value).toBe(1.5);
+    input.value = '1,5';
+    input.dispatchEvent(new Event('input'));
+    expect(host.control.value).toBeNull();
     host.control.setValue(42.25);
     fixture.detectChanges();
-    expect(input.value).toBe('42,25');
+    expect(input.value).toBe('42.25');
   });
 });

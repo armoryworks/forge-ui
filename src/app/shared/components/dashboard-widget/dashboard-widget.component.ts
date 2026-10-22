@@ -16,5 +16,5 @@ export class DashboardWidgetComponent {
   readonly widgetKey = input<string>('');
   readonly accent = input<boolean>(false);
   readonly viewAllLink = input<string | null>(null);
-  readonly viewAllLabel = input<string>('View all');
+  readonly viewAllLabel = input.required<string>();
 }

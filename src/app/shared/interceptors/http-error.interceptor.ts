@@ -9,7 +9,8 @@ import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { LayoutService } from '../services/layout.service';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
-import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
+import { localizeServerError } from '../utils/server-error-localizer';
+import { ServerValidationError, parseServerValidationEnvelope } from '../utils/server-validation.utils';
 import { markHttpErrorShown } from '../utils/shown-http-errors';
 import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
@@ -54,7 +55,8 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           if (fieldErrors !== null && req.context.get(SUPPRESS_VALIDATION_SNACKBAR)) {
             break;
           }
-          const message = problemDetail(error) ?? fieldErrors?.[0].message ?? extractMessage(error);
+          const message = localizedFieldErrors(fieldErrors, translate)
+            ?? problemDetail(error) ?? fieldErrors?.[0].message ?? extractMessage(error);
           if (message) {
             snackbar.error(message);
             markHttpErrorShown(error);
@@ -147,6 +149,18 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
+/**
+ * The field errors worded in the UI language, joined like the server's own detail,
+ * when the language is not English and at least one error carries a code the catalog
+ * words. Null otherwise, so the server's text is shown.
+ */
+function localizedFieldErrors(errors: ServerValidationError[] | null, translate: TranslateService): string | null {
+  if (!errors || (translate.getCurrentLang?.() ?? 'en') === 'en') return null;
+  const messages = errors.map(e => localizeServerError(e, (key, params) => translate.instant(key, params)));
+  if (messages.every((m, i) => m === errors[i].message)) return null;
+  return [...new Set(messages)].join(' ');
+}
 
 function problemDetail(error: HttpErrorResponse): string | null {
   const body = error.error;

@@ -8,6 +8,7 @@ import {
   PresetApplyViolation,
   PresetCapabilityDelta,
 } from '../../models/preset.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 /**
  * Phase 4 Phase-G — Reusable apply-confirmation modal data.
@@ -38,7 +39,7 @@ export interface PresetApplyDialogResult {
 @Component({
   selector: 'app-preset-apply-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TextareaComponent],
+  imports: [CommonModule, ReactiveFormsModule, TextareaComponent, TranslatePipe],
   templateUrl: './preset-apply-dialog.component.html',
   styleUrl: './preset-apply-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

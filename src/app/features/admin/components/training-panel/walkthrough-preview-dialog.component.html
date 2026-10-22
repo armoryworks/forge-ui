@@ -2,33 +2,33 @@
   <div class="walkthrough-preview">
     <div class="walkthrough-preview__toolbar">
       <span class="walkthrough-preview__count">{{ steps().length }} step{{ steps().length === 1 ? '' : 's' }}</span>
-      <button class="action-btn action-btn--sm" (click)="addStep()" aria-label="Add step">
+      <button class="action-btn action-btn--sm" (click)="addStep()" [attr.aria-label]="'admin.walkthroughPreviewDialog.addStep' | translate">
         <span class="material-icons-outlined">add</span>
-        Add Step
+        {{ 'admin.walkthroughPreviewDialog.addStep2' | translate }}
       </button>
     </div>
 
     @if (steps().length === 0) {
       <div class="walkthrough-preview__empty">
         <span class="material-icons-outlined">route</span>
-        <p>No steps defined. Click "Add Step" to create the first step.</p>
+        <p>{{ 'admin.walkthroughPreviewDialog.noStepsDefinedClickAddStep' | translate }}</p>
       </div>
     }
 
     @for (step of steps(); track $index; let i = $index) {
       <div class="walkthrough-preview__step">
         <div class="walkthrough-preview__step-header">
-          <span class="walkthrough-preview__step-num">Step {{ i + 1 }}</span>
+          <span class="walkthrough-preview__step-num">{{ 'admin.walkthroughPreviewDialog.stepI' | translate:{ i: i + 1 } }}</span>
           <div class="walkthrough-preview__step-actions">
-            <button class="icon-btn" [disabled]="i === 0" title="Move up" aria-label="Move step up"
+            <button class="icon-btn" [disabled]="i === 0" [title]="'admin.walkthroughPreviewDialog.moveUp' | translate" [attr.aria-label]="'admin.walkthroughPreviewDialog.moveStepUp' | translate"
               (click)="moveUp(i)">
               <span class="material-icons-outlined">arrow_upward</span>
             </button>
-            <button class="icon-btn" [disabled]="i === steps().length - 1" title="Move down" aria-label="Move step down"
+            <button class="icon-btn" [disabled]="i === steps().length - 1" [title]="'admin.walkthroughPreviewDialog.moveDown' | translate" [attr.aria-label]="'admin.walkthroughPreviewDialog.moveStepDown' | translate"
               (click)="moveDown(i)">
               <span class="material-icons-outlined">arrow_downward</span>
             </button>
-            <button class="icon-btn icon-btn--danger" title="Delete step" aria-label="Delete step"
+            <button class="icon-btn icon-btn--danger" [title]="'admin.walkthroughPreviewDialog.deleteStep' | translate" [attr.aria-label]="'admin.walkthroughPreviewDialog.deleteStep' | translate"
               (click)="deleteStep(i)">
               <span class="material-icons-outlined">delete</span>
             </button>
@@ -37,26 +37,26 @@
 
         <div class="walkthrough-preview__step-body">
           <div class="walkthrough-preview__field walkthrough-preview__field--full">
-            <label class="walkthrough-preview__label" [attr.for]="'step-element-' + i">CSS Selector <span class="walkthrough-preview__label-hint">(null = center overlay)</span></label>
+            <label class="walkthrough-preview__label" [attr.for]="'step-element-' + i">{{ 'admin.walkthroughPreviewDialog.cssSelector' | translate }} <span class="walkthrough-preview__label-hint">{{ 'admin.walkthroughPreviewDialog.nullCenterOverlay' | translate }}</span></label>
             <input class="walkthrough-preview__input" type="text"
               [attr.id]="'step-element-' + i"
               [value]="step.element ?? ''"
               (change)="updateElement(i, $any($event.target).value)"
-              placeholder="e.g. app-page-header, .action-btn--primary" />
+              [placeholder]="'admin.walkthroughPreviewDialog.eGAppPageHeaderAction' | translate" />
           </div>
 
           <div class="walkthrough-preview__row">
             <div class="walkthrough-preview__field walkthrough-preview__field--grow">
-              <label class="walkthrough-preview__label" [attr.for]="'step-title-' + i">Title</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-title-' + i">{{ 'common.title' | translate }}</label>
               <input class="walkthrough-preview__input" type="text"
                 [attr.id]="'step-title-' + i"
                 [value]="step.popover.title"
                 (input)="updatePopover(i, { title: $any($event.target).value })"
-                placeholder="Step title" />
+                [placeholder]="'admin.walkthroughPreviewDialog.stepTitle' | translate" />
             </div>
 
             <div class="walkthrough-preview__field">
-              <label class="walkthrough-preview__label" [attr.for]="'step-side-' + i">Side</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-side-' + i">{{ 'admin.walkthroughPreviewDialog.side' | translate }}</label>
               <select class="walkthrough-preview__select"
                 [attr.id]="'step-side-' + i"
                 [value]="step.popover.side"
@@ -68,7 +68,7 @@
             </div>
 
             <div class="walkthrough-preview__field">
-              <label class="walkthrough-preview__label" [attr.for]="'step-align-' + i">Align</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-align-' + i">{{ 'admin.walkthroughPreviewDialog.align' | translate }}</label>
               <select class="walkthrough-preview__select"
                 [attr.id]="'step-align-' + i"
                 [value]="step.popover.align"
@@ -81,12 +81,12 @@
           </div>
 
           <div class="walkthrough-preview__field walkthrough-preview__field--full">
-            <label class="walkthrough-preview__label" [attr.for]="'step-desc-' + i">Description</label>
+            <label class="walkthrough-preview__label" [attr.for]="'step-desc-' + i">{{ 'common.description' | translate }}</label>
             <textarea class="walkthrough-preview__textarea" rows="3"
               [attr.id]="'step-desc-' + i"
               [value]="step.popover.description"
               (input)="updatePopover(i, { description: $any($event.target).value })"
-              placeholder="Explain what this step covers..."></textarea>
+              [placeholder]="'admin.walkthroughPreviewDialog.explainWhatThisStepCovers' | translate"></textarea>
           </div>
         </div>
       </div>
@@ -94,14 +94,14 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()" [disabled]="saving()">Cancel</button>
+    <button class="action-btn" (click)="close()" [disabled]="saving()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary" (click)="save()" [disabled]="saving() || steps().length === 0">
       @if (saving()) {
         <span class="material-icons-outlined spin">sync</span>
       } @else {
         <span class="material-icons-outlined">save</span>
       }
-      Save Steps
+      {{ 'admin.walkthroughPreviewDialog.saveSteps' | translate }}
     </button>
   </div>
 </app-dialog>

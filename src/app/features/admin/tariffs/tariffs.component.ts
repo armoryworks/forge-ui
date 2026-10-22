@@ -61,12 +61,12 @@ export class TariffsComponent {
   protected readonly editingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'htsCode', header: 'HTS Code', sortable: true, width: '160px' },
-    { field: 'countryOfOrigin', header: 'Origin', sortable: true, width: '90px' },
-    { field: 'ratePct', header: 'Rate %', sortable: true, type: 'number', align: 'right', width: '100px' },
-    { field: 'effectiveFrom', header: 'Effective From', sortable: true, type: 'date', width: '130px' },
-    { field: 'effectiveTo', header: 'Effective To', sortable: true, type: 'date', width: '130px' },
-    { field: 'source', header: 'Source', sortable: true },
+    { field: 'htsCode', header: 'admin.tariffs.htsCode', sortable: true, width: '160px' },
+    { field: 'countryOfOrigin', header: 'columns.origin', sortable: true, width: '90px' },
+    { field: 'ratePct', header: 'admin.tariffs.ratePct', sortable: true, type: 'number', align: 'right', width: '100px' },
+    { field: 'effectiveFrom', header: 'admin.tariffs.effectiveFrom', sortable: true, type: 'date', width: '130px' },
+    { field: 'effectiveTo', header: 'admin.tariffs.effectiveTo', sortable: true, type: 'date', width: '130px' },
+    { field: 'source', header: 'admin.tariffs.source', sortable: true },
     { field: 'actions', header: '', width: '110px', align: 'right' },
   ];
 

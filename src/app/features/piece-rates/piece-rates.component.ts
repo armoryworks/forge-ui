@@ -82,31 +82,31 @@ export class PieceRatesComponent {
   protected readonly totalMakeup = computed(() => this.compliance()?.totalMakeupOwed ?? 0);
 
   protected readonly rateColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '140px' },
-    { field: 'partDescription', header: 'Description', sortable: true },
-    { field: 'current', header: 'Current rate', width: '130px', align: 'right' },
-    { field: 'since', header: 'Since', width: '110px' },
+    { field: 'partNumber', header: 'columns.partNumber', sortable: true, width: '140px' },
+    { field: 'partDescription', header: 'common.description', sortable: true },
+    { field: 'current', header: 'columns.currentRate', width: '130px', align: 'right' },
+    { field: 'since', header: 'columns.since', width: '110px' },
   ];
 
   protected readonly workColumns: ColumnDef[] = [
-    { field: 'workDate', header: 'Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'userName', header: 'Worker', sortable: true },
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '130px' },
-    { field: 'quantity', header: 'Pieces', width: '90px', align: 'right' },
-    { field: 'rateSnapshot', header: 'Rate', width: '100px', align: 'right' },
-    { field: 'earnings', header: 'Earned', width: '110px', align: 'right' },
+    { field: 'workDate', header: 'common.date', sortable: true, type: 'date', width: '110px' },
+    { field: 'userName', header: 'pieceRates.worker', sortable: true },
+    { field: 'partNumber', header: 'columns.partNumber', sortable: true, width: '130px' },
+    { field: 'quantity', header: 'pieceRates.quantity', width: '90px', align: 'right' },
+    { field: 'rateSnapshot', header: 'common.rate', width: '100px', align: 'right' },
+    { field: 'earnings', header: 'columns.earned', width: '110px', align: 'right' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
   protected readonly complianceColumns: ColumnDef[] = [
-    { field: 'userName', header: 'Worker', sortable: true },
-    { field: 'stateCode', header: 'State', width: '70px' },
-    { field: 'minimumWage', header: 'Min wage', width: '100px', align: 'right' },
-    { field: 'hoursWorked', header: 'Hours', width: '90px', align: 'right' },
-    { field: 'pieceEarnings', header: 'Piece pay', width: '110px', align: 'right' },
-    { field: 'requiredFloor', header: 'Floor', width: '110px', align: 'right' },
-    { field: 'makeupOwed', header: 'Make-up owed', width: '130px', align: 'right' },
-    { field: 'effectiveHourly', header: 'Effective /hr', width: '110px', align: 'right' },
+    { field: 'userName', header: 'pieceRates.worker', sortable: true },
+    { field: 'stateCode', header: 'common.state', width: '70px' },
+    { field: 'minimumWage', header: 'columns.minimumWage', width: '100px', align: 'right' },
+    { field: 'hoursWorked', header: 'common.hours', width: '90px', align: 'right' },
+    { field: 'pieceEarnings', header: 'columns.piecePay', width: '110px', align: 'right' },
+    { field: 'requiredFloor', header: 'columns.floor', width: '110px', align: 'right' },
+    { field: 'makeupOwed', header: 'pieceRates.totalMakeup', width: '130px', align: 'right' },
+    { field: 'effectiveHourly', header: 'columns.effectivePerHour', width: '110px', align: 'right' },
   ];
 
   constructor() {

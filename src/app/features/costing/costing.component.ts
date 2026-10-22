@@ -116,27 +116,27 @@ export class CostingComponent {
   ];
 
   protected readonly templateColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'description', header: 'Description' },
-    { field: 'lines', header: 'Lines', width: '70px', align: 'center' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'description', header: 'common.description' },
+    { field: 'lines', header: 'costing.templates.lines', width: '70px', align: 'center' },
     { field: 'isSystem', header: '', width: '90px' },
     { field: 'actions', header: '', width: '160px' },
   ];
 
   protected readonly periodColumns: ColumnDef[] = [
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '120px' },
-    { field: 'endDate', phoneHidden: true, header: 'End', sortable: true, type: 'date', width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum' },
-    { field: 'frozenAt', phoneHidden: true, header: 'Frozen', sortable: true, type: 'date', width: '120px' },
+    { field: 'startDate', header: 'costing.periods.start', sortable: true, type: 'date', width: '120px' },
+    { field: 'endDate', phoneHidden: true, header: 'costing.periods.end', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum' },
+    { field: 'frozenAt', phoneHidden: true, header: 'costing.periods.frozen', sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', align: 'right' },
   ];
   protected readonly rateColumns: ColumnDef[] = [
-    { field: 'workCenterId', header: 'Work Center', sortable: true },
-    { field: 'laborRate', header: 'Labor', type: 'number', align: 'right' },
-    { field: 'laborOhRate', header: 'Labor OH', type: 'number', align: 'right' },
-    { field: 'machineRate', header: 'Machine', type: 'number', align: 'right' },
-    { field: 'machineOhVarRate', header: 'Mch OH Var', type: 'number', align: 'right' },
-    { field: 'machineOhFixedRate', header: 'Mch OH Fixed', type: 'number', align: 'right' },
+    { field: 'workCenterId', header: 'costing.rates.workCenter', sortable: true },
+    { field: 'laborRate', header: 'costing.rates.labor', type: 'number', align: 'right' },
+    { field: 'laborOhRate', header: 'costing.rates.laborOh', type: 'number', align: 'right' },
+    { field: 'machineRate', header: 'costing.rates.machine', type: 'number', align: 'right' },
+    { field: 'machineOhVarRate', header: 'costing.rates.mchVar', type: 'number', align: 'right' },
+    { field: 'machineOhFixedRate', header: 'costing.rates.mchFixed', type: 'number', align: 'right' },
   ];
   protected readonly costCenterColumns: ColumnDef[] = [
     { field: 'code', header: this.translate.instant('costing.costCenters.code'), sortable: true },
@@ -294,14 +294,14 @@ export class CostingComponent {
     const end = toIsoDate(v.end);
     if (!start || !end) return;
     this.service.createPeriod(start, end).subscribe({
-      next: () => { this.snackbar.success('Period created'); this.periodForm.reset(); this.loadPeriods(); },
+      next: () => { this.snackbar.success(this.translate.instant('costing.messages.periodCreated')); this.periodForm.reset(); this.loadPeriods(); },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodCreateFailed'),
     });
   }
 
   protected freeze(period: CostingPeriod): void {
     this.service.freezePeriod(period.id).subscribe({
-      next: r => { this.snackbar.success(`Frozen: ${r.budgetsRated} budget(s), ${r.workCentersRated} rate(s)`); this.loadPeriods(); this.viewRates(period.id); },
+      next: r => { this.snackbar.success(this.translate.instant('costing.messages.frozen', { budgets: r.budgetsRated, rates: r.workCentersRated })); this.loadPeriods(); this.viewRates(period.id); },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costingPeriodFreezeFailed'),
     });
   }
@@ -321,7 +321,7 @@ export class CostingComponent {
       code: v.code!, name: v.name!, type: v.type as CostingCostCenter['type'],
       parentId: null, sqft: v.sqft, headcount: v.headcount, isInventoriable: v.isInventoriable!,
     }).subscribe({
-      next: () => { this.snackbar.success('Cost center created'); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
+      next: () => { this.snackbar.success(this.translate.instant('costing.messages.costCenterCreated')); this.costCenterForm.reset({ type: 'Production', isInventoriable: true }); this.loadCostCenters(); },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.costCenterCreateFailed'),
     });
   }
@@ -334,7 +334,7 @@ export class CostingComponent {
       code: v.code!, name: v.name!, behavior: v.behavior as OverheadPool['behavior'],
       fixedPortion: v.fixedPortion, driver: v.driver as OverheadPool['driver'],
     }).subscribe({
-      next: () => { this.snackbar.success('Pool created'); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
+      next: () => { this.snackbar.success(this.translate.instant('costing.messages.poolCreated')); this.poolForm.reset({ behavior: 'Fixed', driver: 'MachineHour' }); this.loadPools(); },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadPoolCreateFailed'),
     });
   }
@@ -343,7 +343,7 @@ export class CostingComponent {
     if (this.budgetForm.invalid) return;
     const v = this.budgetForm.getRawValue();
     this.service.upsertBudget(v.overheadCostPoolId!, v.costingPeriodId!, v.budgetAmount!, v.budgetDriverQty!).subscribe({
-      next: r => { this.snackbar.success(`Budget set — rate ${r.derivedRate.toFixed(4)}`); this.budgetForm.reset(); },
+      next: r => { this.snackbar.success(this.translate.instant('costing.messages.budgetSet', { rate: r.derivedRate.toFixed(4) })); this.budgetForm.reset(); },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.overheadBudgetSetFailed'),
     });
   }

@@ -189,8 +189,8 @@ export class PartsComponent {
     { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('common.name'), sortable: true, exportValue: row => (row as { name?: string }).name },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
-    { field: 'procurementSource', header: 'Procurement', sortable: true, width: '110px' },
-    { field: 'inventoryClass', header: 'Class', sortable: true, width: '110px' },
+    { field: 'procurementSource', header: 'columns.procurement', sortable: true, width: '110px' },
+    { field: 'inventoryClass', header: 'columns.class', sortable: true, width: '110px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},

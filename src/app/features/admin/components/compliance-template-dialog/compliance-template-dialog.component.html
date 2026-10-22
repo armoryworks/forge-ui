@@ -82,7 +82,7 @@
         (input)="acroMapJson.set($any($event.target).value)"
         [placeholder]="'complianceTemplateDialog.acroFieldMapPlaceholder' | translate"
         rows="8"
-        aria-label="AcroField JSON map"></textarea>
+        [attr.aria-label]="'complianceTemplateDialog.acrofieldJsonMap' | translate"></textarea>
       <div class="acro-map-section__actions">
         <button class="action-btn action-btn--primary action-btn--sm"
           [disabled]="savingAcroMap()"

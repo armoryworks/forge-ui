@@ -6,9 +6,9 @@
     <button
       type="button"
       class="validation-button__trigger"
-      [attr.aria-label]="count() + ' validation issue' + (count() === 1 ? '' : 's') + '. Click to view.'"
+      [attr.aria-label]="(count() === 1 ? 'validationButton.triggerAriaOne' : 'validationButton.triggerAriaOther') | translate: { count: count() }"
       [attr.aria-expanded]="open()"
-      matTooltip="Show validation errors"
+      [matTooltip]="'validationButton.show' | translate"
       matTooltipPosition="above"
       (click)="toggle()">
       <span class="material-icons-outlined validation-button__icon">warning</span>
@@ -31,7 +31,7 @@
   <div
     class="validation-popover"
     role="alertdialog"
-    aria-label="Validation errors"
+    [attr.aria-label]="'validationButton.popoverLabel' | translate"
     (keydown.escape)="close()">
     @if (count() > 0) {
       <ul class="validation-popover__list">
@@ -54,7 +54,7 @@
     } @else {
       <div class="validation-popover__cleared">
         <span class="material-icons-outlined">check_circle</span>
-        All issues resolved
+        {{ 'validationButton.allResolved' | translate }}
       </div>
     }
   </div>

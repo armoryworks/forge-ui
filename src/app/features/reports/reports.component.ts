@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from '../../shared/charts/base-chart.directive';
@@ -58,6 +59,7 @@ export class ReportsComponent {
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly langChange = toSignal(this.translate.onLangChange);
   private readonly auth = inject(AuthService);
 
   protected readonly canViewShopReports = this.auth.hasAnyRole(SHOP_REPORT_ROLES);
@@ -142,6 +144,7 @@ export class ReportsComponent {
 
   // Chart configurations
   protected readonly jobsByStageChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.jobsByStageData();
     return {
       labels: data.map(d => d.stageName),
@@ -154,6 +157,7 @@ export class ReportsComponent {
   });
 
   protected readonly timeByUserChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.timeByUserData();
     return {
       labels: data.map(d => d.userName),
@@ -166,6 +170,7 @@ export class ReportsComponent {
   });
 
   protected readonly expenseSummaryChart = computed<ChartData<'pie'>>(() => {
+    this.langChange();
     const data = this.expenseSummaryData();
     const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#f97316', '#ec4899'];
     return {
@@ -178,6 +183,7 @@ export class ReportsComponent {
   });
 
   protected readonly leadPipelineChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.leadPipelineData();
     const statusColors: Record<string, string> = {
       New: '#3b82f6', Qualified: '#8b5cf6', Proposal: '#f59e0b', Won: '#22c55e', Lost: '#ef4444',
@@ -193,6 +199,7 @@ export class ReportsComponent {
   });
 
   protected readonly completionTrendChart = computed<ChartData<'line'>>(() => {
+    this.langChange();
     const data = this.completionTrendData();
     return {
       labels: data.map(d => d.month),
@@ -204,6 +211,7 @@ export class ReportsComponent {
   });
 
   protected readonly onTimeDeliveryChart = computed<ChartData<'pie'>>(() => {
+    this.langChange();
     const data = this.onTimeDeliveryData();
     if (!data) return { labels: [], datasets: [{ data: [] }] };
     return {
@@ -216,6 +224,7 @@ export class ReportsComponent {
   });
 
   protected readonly averageLeadTimeChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.averageLeadTimeData();
     return {
       labels: data.map(d => d.stageName),
@@ -228,6 +237,7 @@ export class ReportsComponent {
   });
 
   protected readonly teamWorkloadChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.teamWorkloadData();
     return {
       labels: data.map(d => d.userName),
@@ -239,6 +249,7 @@ export class ReportsComponent {
   });
 
   protected readonly customerActivityChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.customerActivityData().slice(0, 10);
     return {
       labels: data.map(d => d.customerName),
@@ -250,6 +261,7 @@ export class ReportsComponent {
   });
 
   protected readonly quoteToCloseChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.quoteToCloseData();
     const statusColors: Record<string, string> = {
       Draft: '#94a3b8', Sent: '#3b82f6', Accepted: '#22c55e', Rejected: '#ef4444', Expired: '#f59e0b',
@@ -265,6 +277,7 @@ export class ReportsComponent {
   });
 
   protected readonly timeInStageChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.timeInStageData();
     return {
       labels: data.map(d => d.stageName),
@@ -277,6 +290,7 @@ export class ReportsComponent {
   });
 
   protected readonly revenueChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.revenueData();
     return {
       labels: data.map(d => d.customerName ?? d.period),
@@ -296,6 +310,7 @@ export class ReportsComponent {
   });
 
   protected readonly employeeProductivityChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.employeeProductivityData();
     return {
       labels: data.map(d => d.userName),
@@ -308,6 +323,7 @@ export class ReportsComponent {
   });
 
   protected readonly inventoryLevelsChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.inventoryLevelsData();
     return {
       labels: data.map(d => d.partNumber),
@@ -320,6 +336,7 @@ export class ReportsComponent {
   });
 
   protected readonly maintenanceChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.maintenanceData();
     return {
       labels: data.map(d => d.assetName),
@@ -332,6 +349,7 @@ export class ReportsComponent {
   });
 
   protected readonly qualityScrapChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.qualityScrapData();
     return {
       labels: data.map(d => d.partNumber),
@@ -344,6 +362,7 @@ export class ReportsComponent {
   });
 
   protected readonly cycleReviewChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.cycleReviewData();
     return {
       labels: data.map(d => d.cycleName),
@@ -356,6 +375,7 @@ export class ReportsComponent {
   });
 
   protected readonly jobMarginChart = computed<ChartData<'bar'>>(() => {
+    this.langChange();
     const data = this.jobMarginData();
     return {
       labels: data.map(d => d.jobNumber),
@@ -777,6 +797,7 @@ export class ReportsComponent {
   }
 
   protected readonly arAgingBuckets = computed(() => {
+    this.langChange();
     const data = this.arAgingData();
     const buckets: { key: string; label: string }[] = [
       { key: 'Current', label: this.translate.instant('reports.bucketCurrent') },

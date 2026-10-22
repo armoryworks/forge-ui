@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal 
 import { FormControl } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AnnouncementService } from '../../../../shared/services/announcement.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -51,6 +51,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 })
 export class AnnouncementsPanelComponent implements OnInit {
   private readonly announcementService = inject(AnnouncementService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
@@ -75,25 +76,25 @@ export class AnnouncementsPanelComponent implements OnInit {
   ];
 
   protected readonly announcementColumns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'severity', header: 'Severity', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'severity', header: 'columns.severity', sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
         { value: 'Critical', label: 'Critical' },
         { value: 'Warning', label: 'Warning' },
         { value: 'Info', label: 'Info' },
       ] },
-    { field: 'scope', header: 'Scope', sortable: true, width: '140px' },
-    { field: 'createdByName', header: 'Sent By', sortable: true, width: '140px' },
-    { field: 'createdAt', header: 'Sent', sortable: true, type: 'date', width: '140px' },
-    { field: 'acknowledgmentCount', header: 'Acks', sortable: true, type: 'number', width: '80px' },
+    { field: 'scope', header: 'columns.scope', sortable: true, width: '140px' },
+    { field: 'createdByName', header: 'columns.sentBy', sortable: true, width: '140px' },
+    { field: 'createdAt', header: 'columns.sent', sortable: true, type: 'date', width: '140px' },
+    { field: 'acknowledgmentCount', header: 'columns.acknowledgements', sortable: true, type: 'number', width: '80px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
   protected readonly templateColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'defaultSeverity', header: 'Severity', sortable: true, width: '100px' },
-    { field: 'defaultScope', header: 'Scope', sortable: true, width: '140px' },
-    { field: 'defaultRequiresAcknowledgment', header: 'Ack Required', width: '110px' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'defaultSeverity', header: 'columns.severity', sortable: true, width: '100px' },
+    { field: 'defaultScope', header: 'columns.scope', sortable: true, width: '140px' },
+    { field: 'defaultRequiresAcknowledgment', header: 'columns.acknowledgementRequired', width: '110px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
@@ -207,7 +208,7 @@ export class AnnouncementsPanelComponent implements OnInit {
         this.savingTemplate.set(false);
         this.closeTemplateDialog();
         this.loadTemplates();
-        this.snackbar.success('Template created');
+        this.snackbar.success(this.translate.instant('announcements.templateMessages.created'));
       },
       error: () => this.savingTemplate.set(false),
     });
@@ -217,9 +218,9 @@ export class AnnouncementsPanelComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Template?',
-        message: `Delete template "${template.name}"? This cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('announcements.templateMessages.deleteTitle'),
+        message: this.translate.instant('announcements.templateMessages.deleteMessage', { name: template.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -227,7 +228,7 @@ export class AnnouncementsPanelComponent implements OnInit {
       this.announcementService.deleteTemplate(template.id).subscribe({
         next: () => {
           this.loadTemplates();
-          this.snackbar.success('Template deleted');
+          this.snackbar.success(this.translate.instant('announcements.templateMessages.deleted'));
         },
       });
     });

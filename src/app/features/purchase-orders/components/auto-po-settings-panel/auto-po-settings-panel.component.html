@@ -33,7 +33,7 @@
           [disabled]="form.invalid || form.pristine || saving()"
           (click)="save()"
           data-testid="auto-po-settings-save-btn"
-          aria-label="Save auto-PO settings">
+          [attr.aria-label]="'autoPo.saveAutoPoSettings' | translate">
           <span class="material-icons-outlined">save</span>
           {{ 'common.save' | translate }}
         </button>

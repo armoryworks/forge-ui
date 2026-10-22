@@ -73,10 +73,10 @@ export class GageListComponent {
   protected readonly statusFilter = new FormControl<GageStatus | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'gageNumber', header: 'Gage #', sortable: true, width: '110px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'gageType', header: 'Type', sortable: true, width: '110px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '130px',
+    { field: 'gageNumber', header: 'columns.gageNumber', sortable: true, width: '110px' },
+    { field: 'description', header: 'common.description', sortable: true },
+    { field: 'gageType', header: 'common.type', sortable: true, width: '110px' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', width: '130px',
       filterOptions: [
         { value: 'InService', label: 'In Service' },
         { value: 'DueForCalibration', label: 'Due for Cal' },
@@ -84,18 +84,18 @@ export class GageListComponent {
         { value: 'OutOfService', label: 'Out of Service' },
         { value: 'Retired', label: 'Retired' },
       ] },
-    { field: 'nextCalibrationDue', header: 'Next Cal Due', sortable: true, type: 'date', width: '110px' },
-    { field: 'calibrationCount', header: 'Cal Records', sortable: true, type: 'number', width: '90px', align: 'center' },
+    { field: 'nextCalibrationDue', header: 'columns.nextCalibrationDue', sortable: true, type: 'date', width: '110px' },
+    { field: 'calibrationCount', header: 'columns.calibrationRecords', sortable: true, type: 'number', width: '90px', align: 'center' },
   ];
 
   protected readonly calibrationColumns: ColumnDef[] = [
-    { field: 'calibratedAt', header: 'Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'result', header: 'Result', sortable: true, width: '120px' },
-    { field: 'labName', header: 'Lab', sortable: true },
-    { field: 'standardsUsed', header: 'Standards', sortable: true },
-    { field: 'asFoundCondition', header: 'As Found', sortable: true },
-    { field: 'asLeftCondition', header: 'As Left', sortable: true },
-    { field: 'nextCalibrationDue', header: 'Next Due', sortable: true, type: 'date', width: '110px' },
+    { field: 'calibratedAt', header: 'common.date', sortable: true, type: 'date', width: '110px' },
+    { field: 'result', header: 'columns.result', sortable: true, width: '120px' },
+    { field: 'labName', header: 'columns.lab', sortable: true },
+    { field: 'standardsUsed', header: 'columns.standards', sortable: true },
+    { field: 'asFoundCondition', header: 'columns.asFound', sortable: true },
+    { field: 'asLeftCondition', header: 'columns.asLeft', sortable: true },
+    { field: 'nextCalibrationDue', header: 'columns.nextDue', sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly statusOptions: SelectOption[] = [
@@ -246,7 +246,7 @@ export class GageListComponent {
         this.saving.set(false);
         this.closeCreate();
         this.loadGages();
-        this.snackbar.success('Gage created');
+        this.snackbar.success(this.translate.instant('quality.messages.gageCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -302,7 +302,7 @@ export class GageListComponent {
         this.loadCalibrations(gage.id);
         this.refreshSelectedGage(gage.id);
         this.loadGages();
-        this.snackbar.success('Calibration recorded');
+        this.snackbar.success(this.translate.instant('quality.messages.calibrationRecorded'));
       },
       error: () => this.calSaving.set(false),
     });

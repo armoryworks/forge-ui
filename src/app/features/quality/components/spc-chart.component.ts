@@ -12,17 +12,19 @@ import { KpiChipComponent } from '../../../shared/components/kpi-chip/kpi-chip.c
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { AuthService } from '../../../shared/services/auth.service';
 import { QUALITY_MANAGER_ROLES } from '../quality-roles';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-spc-chart',
   standalone: true,
-  imports: [DecimalPipe, BaseChartDirective, LoadingBlockDirective, KpiChipComponent],
+  imports: [DecimalPipe, BaseChartDirective, LoadingBlockDirective, KpiChipComponent, TranslatePipe],
   templateUrl: './spc-chart.component.html',
   styleUrl: './spc-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SpcChartComponent {
   private readonly spcService = inject(SpcService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly auth = inject(AuthService);
   private readonly themeService = inject(ThemeService);
@@ -133,7 +135,7 @@ export class SpcChartComponent {
     this.spcService.recalculateLimits(this.characteristic().id).subscribe({
       next: () => {
         this.loadChartData(this.characteristic().id);
-        this.snackbar.success('Control limits recalculated');
+        this.snackbar.success(this.translate.instant('quality.messages.limitsRecalculated'));
       },
       error: () => this.loading.set(false),
     });

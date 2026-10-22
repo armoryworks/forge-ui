@@ -14,6 +14,10 @@ export interface ServerValidationError {
   field: string;
   message: string;
   rejectedValue?: string | null;
+  /** Stable error code (a FluentValidation validator name or an explicit API code) the UI can word itself. */
+  code?: string | null;
+  /** The rule's limits behind the code (`maxLength`, `comparisonValue`, `from`, `to`, ...). */
+  params?: Record<string, unknown> | null;
 }
 
 /**
@@ -48,10 +52,14 @@ export function parseServerValidationEnvelope(
     const message = (e as { message?: unknown }).message;
     if (typeof field !== 'string' || typeof message !== 'string') return null;
     const rv = (e as { rejectedValue?: unknown }).rejectedValue;
+    const code = (e as { code?: unknown }).code;
+    const params = (e as { params?: unknown }).params;
     parsed.push({
       field,
       message,
       rejectedValue: typeof rv === 'string' ? rv : (rv == null ? null : String(rv)),
+      code: typeof code === 'string' ? code : null,
+      params: params && typeof params === 'object' ? params as Record<string, unknown> : null,
     });
   }
   return parsed;

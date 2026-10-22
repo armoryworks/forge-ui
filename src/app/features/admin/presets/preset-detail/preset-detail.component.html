@@ -2,7 +2,7 @@
   <ng-container toolbar>
     <button class="action-btn action-btn--sm" type="button"
       (click)="back()" data-testid="preset-detail-back-btn">
-      <span class="material-icons-outlined">chevron_left</span> Presets
+      <span class="material-icons-outlined">chevron_left</span> {{ 'admin.presetDetail.presets' | translate }}
     </button>
   </ng-container>
 
@@ -20,13 +20,13 @@
               <h2>{{ p.name }}</h2>
               <span class="preset-detail__id">{{ p.id }}</span>
               @if (p.isActive) {
-                <span class="chip chip--primary">Active</span>
+                <span class="chip chip--primary">{{ 'common.active' | translate }}</span>
               }
             </div>
             <p class="preset-detail__description">{{ p.shortDescription }}</p>
             <p class="preset-detail__profile">
               <span class="material-icons-outlined">groups</span>
-              <strong>Target profile:</strong> {{ p.targetProfile }}
+              <strong>{{ 'admin.presetDetail.targetProfile' | translate }}</strong> {{ p.targetProfile }}
             </p>
             <div class="preset-detail__tags">
               @for (tag of p.recommendedFor; track tag) {
@@ -49,15 +49,15 @@
         <section class="preset-detail__stats">
           <div class="preset-detail__stat" data-testid="preset-detail-stat-count">
             <span class="preset-detail__stat-value">{{ p.capabilityCount }}</span>
-            <span class="preset-detail__stat-label">Capabilities enabled</span>
+            <span class="preset-detail__stat-label">{{ 'admin.presetDetail.capabilitiesEnabled' | translate }}</span>
           </div>
           <div class="preset-detail__stat" data-testid="preset-detail-stat-vs-catalog">
             <span class="preset-detail__stat-value">{{ deltaVsCatalogCount() }}</span>
-            <span class="preset-detail__stat-label">Differ from catalog defaults</span>
+            <span class="preset-detail__stat-label">{{ 'admin.presetDetail.differFromCatalogDefaults' | translate }}</span>
           </div>
           <div class="preset-detail__stat" data-testid="preset-detail-stat-vs-install">
             <span class="preset-detail__stat-value">{{ deltaVsInstallCount() }}</span>
-            <span class="preset-detail__stat-label">Will change if applied</span>
+            <span class="preset-detail__stat-label">{{ 'admin.presetDetail.willChangeIfApplied' | translate }}</span>
           </div>
         </section>
 
@@ -65,10 +65,10 @@
           <section class="preset-detail__section" data-testid="preset-detail-vs-install">
             <h3 class="preset-detail__section-title">
               <span class="material-icons-outlined">compare_arrows</span>
-              Differences vs current install
+              {{ 'admin.presetDetail.differencesVsCurrentInstall' | translate }}
             </h3>
             <p class="preset-detail__section-help">
-              These capabilities will change if you apply this preset right now.
+              {{ 'admin.presetDetail.theseCapabilitiesWillChangeIfYou' | translate }}
             </p>
             <div class="preset-detail__delta-grid">
               @for (delta of p.deltaVsCurrentInstall; track delta.code) {
@@ -90,7 +90,7 @@
         <section class="preset-detail__section" data-testid="preset-detail-capabilities">
           <h3 class="preset-detail__section-title">
             <span class="material-icons-outlined">view_list</span>
-            All capabilities ({{ enabledInPreset() }} in / {{ p.capabilities.length - enabledInPreset() }} out)
+            {{ 'admin.presetDetail.allCapabilitiesEnabledinpresetInEnabledinpreset2Out' | translate:{ enabledInPreset: enabledInPreset(), enabledInPreset2: p.capabilities.length - enabledInPreset() } }}
           </h3>
           @for (group of capabilityGroups(); track group.area) {
             <div class="preset-detail__area">

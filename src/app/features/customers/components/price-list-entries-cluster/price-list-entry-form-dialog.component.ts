@@ -122,7 +122,7 @@ export class PriceListEntryFormDialogComponent {
       }).subscribe({
         next: result => {
           this.saving.set(false);
-          this.snackbar.success('Price entry updated');
+          this.snackbar.success(this.translate.instant('priceListEntry.messages.updated'));
           this.dialogRef.close(result);
         },
         error: () => this.saving.set(false),
@@ -137,7 +137,7 @@ export class PriceListEntryFormDialogComponent {
       }).subscribe({
         next: result => {
           this.saving.set(false);
-          this.snackbar.success('Price entry added');
+          this.snackbar.success(this.translate.instant('priceListEntry.messages.added'));
           this.dialogRef.close(result);
         },
         error: () => this.saving.set(false),

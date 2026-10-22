@@ -1,5 +1,5 @@
 <app-page-header [title]="'reports.sankey.title' | translate" [subtitle]="'reports.sankey.subtitle' | translate" helpTourId="sankey-reports">
-  <button class="action-btn action-btn--sm" (click)="goBack()" aria-label="Back to reports">
+  <button class="action-btn action-btn--sm" (click)="goBack()" [attr.aria-label]="'reports.sankey.backToReports2' | translate">
     <span class="material-icons-outlined">arrow_back</span>
     {{ 'reports.sankey.backToReports' | translate }}
   </button>

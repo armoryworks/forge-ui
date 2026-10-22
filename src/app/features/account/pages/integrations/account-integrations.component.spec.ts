@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -19,6 +20,7 @@ describe('AccountIntegrationsComponent', () => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
+        provideTranslateService(),
         {
           provide: UserIntegrationService,
           useValue: {
@@ -53,7 +55,7 @@ describe('AccountIntegrationsComponent', () => {
 
     (component as unknown as { testConnection(i: UserIntegrationSummary): void }).testConnection(summary);
 
-    expect(snackbar.success).toHaveBeenCalledWith('Connection test passed');
+    expect(snackbar.success).toHaveBeenCalledWith('integrations.messages.testPassed');
   });
 
   it('hides categories that have nothing connected and nothing to offer', () => {

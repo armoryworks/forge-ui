@@ -3,6 +3,7 @@ import {
   ApplicationConfig,
   isDevMode,
   inject,
+  LOCALE_ID,
   provideBrowserGlobalErrorListeners,
   ErrorHandler,
 } from '@angular/core';
@@ -16,6 +17,7 @@ import { provideMarkdown } from 'ngx-markdown';
 import { TranslateService, provideTranslateLoader, provideTranslateService } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG } from '@ngx-translate/http-loader';
 import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig } from '@angular/material/dialog';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { firstValueFrom } from 'rxjs';
 
 import { routes } from './app.routes';
@@ -34,9 +36,13 @@ import { portalAuthInterceptor } from './features/portal/services/portal-auth.in
 import { trainingLangInterceptor } from './shared/interceptors/training-lang.interceptor';
 import { TerminologyTranslateLoader } from './shared/terminology/terminology-translate-loader';
 import { ForgeTitleStrategy } from './shared/services/forge-title-strategy';
+import { TranslatedPaginatorIntl } from './shared/services/translated-paginator-intl';
+import { FormValidationService } from './shared/services/form-validation.service';
+import { localeIdForStoredLanguage } from './shared/services/language.service';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
+  FormValidationService.setTranslator((key, params) => translate.instant(key, params), () => translate.getCurrentLang());
   return async () => {
     const saved = localStorage.getItem('language') || 'en';
     await firstValueFrom(translate.use(saved));
@@ -73,6 +79,8 @@ export const appConfig: ApplicationConfig = {
     provideTranslateService({
       loader: provideTranslateLoader(TerminologyTranslateLoader),
     }),
+    { provide: LOCALE_ID, useFactory: localeIdForStoredLanguage },
+    { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
       useValue: { prefix: '/assets/i18n/', suffix: '.json' },

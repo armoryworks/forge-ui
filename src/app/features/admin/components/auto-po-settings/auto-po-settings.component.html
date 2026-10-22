@@ -3,7 +3,7 @@
   <button class="action-btn action-btn--primary action-btn--sm"
     [disabled]="saving()"
     (click)="saveSettings()"
-    aria-label="Save auto-PO settings">
+    [attr.aria-label]="'autoPo.saveAutoPoSettings' | translate">
     <span class="material-icons-outlined">save</span>
     {{ 'common.save' | translate }}
   </button>

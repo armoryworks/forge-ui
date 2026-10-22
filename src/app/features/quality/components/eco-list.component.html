@@ -1,10 +1,10 @@
 <div class="filters-bar">
-  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadEcos()" />
+  <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadEcos()" />
 </div>
 
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="eco-list" [columns]="columns" [data]="ecos()"
-    emptyIcon="engineering" emptyMessage="No engineering change orders found"
+    emptyIcon="engineering" [emptyMessage]="'quality.noEngineeringChangeOrdersFound' | translate"
     [clickableRows]="true" (rowClick)="openDetail($any($event))">
     <ng-template appColumnCell="changeType" let-row>
       <span class="chip chip--muted">{{ getStatusLabel(row.changeType) }}</span>
@@ -19,7 +19,7 @@
       {{ row.createdAt | date:'MM/dd/yyyy' }}
     </ng-template>
     <ng-template appColumnCell="actions" let-row>
-      <button class="icon-btn" aria-label="View ECO details" matTooltip="View details" (click)="openDetail(row); $event.stopPropagation()">
+      <button class="icon-btn" [attr.aria-label]="'quality.viewEcoDetails' | translate" [matTooltip]="'quality.viewDetails' | translate" (click)="openDetail(row); $event.stopPropagation()">
         <span class="material-icons-outlined">visibility</span>
       </button>
     </ng-template>
@@ -28,24 +28,24 @@
 
 <!-- Create ECO Dialog -->
 @if (showCreateDialog()) {
-  <app-dialog title="Create Engineering Change Order" width="520px" (closed)="showCreateDialog.set(false)">
+  <app-dialog [title]="'quality.createEngineeringChangeOrder' | translate" width="520px" (closed)="showCreateDialog.set(false)">
     <div [formGroup]="createForm">
-      <app-input label="Title" formControlName="title" [required]="true" data-testid="eco-title" />
+      <app-input [label]="'common.title' | translate" formControlName="title" [required]="true" data-testid="eco-title" />
       <div class="dialog-row">
-        <app-select label="Change Type" formControlName="changeType" [options]="changeTypeOptions" [required]="true" data-testid="eco-change-type" />
-        <app-select label="Priority" formControlName="priority" [options]="priorityOptions" [required]="true" data-testid="eco-priority" />
+        <app-select [label]="'quality.changeType' | translate" formControlName="changeType" [options]="changeTypeOptions" [required]="true" data-testid="eco-change-type" />
+        <app-select [label]="'common.priority' | translate" formControlName="priority" [options]="priorityOptions" [required]="true" data-testid="eco-priority" />
       </div>
-      <app-textarea label="Description" formControlName="description" [required]="true" data-testid="eco-description" />
-      <app-textarea label="Reason for Change" formControlName="reasonForChange" data-testid="eco-reason" />
-      <app-textarea label="Impact Analysis" formControlName="impactAnalysis" data-testid="eco-impact" />
-      <app-datepicker label="Effective Date" formControlName="effectiveDate" data-testid="eco-effective-date" />
+      <app-textarea [label]="'common.description' | translate" formControlName="description" [required]="true" data-testid="eco-description" />
+      <app-textarea [label]="'quality.reasonForChange' | translate" formControlName="reasonForChange" data-testid="eco-reason" />
+      <app-textarea [label]="'quality.impactAnalysis' | translate" formControlName="impactAnalysis" data-testid="eco-impact" />
+      <app-datepicker [label]="'quality.effectiveDate' | translate" formControlName="effectiveDate" data-testid="eco-effective-date" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="createForm.invalid || saving()"
-        (click)="saveEco()" data-testid="eco-save-btn">Create</button>
+        (click)="saveEco()" data-testid="eco-save-btn">{{ 'common.create' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>
@@ -65,28 +65,28 @@
         </div>
         <div class="eco-detail__info">
           <div class="eco-detail__field">
-            <span class="eco-detail__label">Requested By</span>
+            <span class="eco-detail__label">{{ 'quality.requestedBy' | translate }}</span>
             <span class="eco-detail__value">{{ eco.requestedByName }}</span>
           </div>
           <div class="eco-detail__field">
-            <span class="eco-detail__label">Created</span>
+            <span class="eco-detail__label">{{ 'common.createdAt' | translate }}</span>
             <span class="eco-detail__value">{{ eco.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           @if (eco.effectiveDate) {
             <div class="eco-detail__field">
-              <span class="eco-detail__label">Effective Date</span>
+              <span class="eco-detail__label">{{ 'quality.effectiveDate' | translate }}</span>
               <span class="eco-detail__value">{{ eco.effectiveDate | dateOnly }}</span>
             </div>
           }
           @if (eco.approvedByName) {
             <div class="eco-detail__field">
-              <span class="eco-detail__label">Approved By</span>
+              <span class="eco-detail__label">{{ 'quality.approvedBy' | translate }}</span>
               <span class="eco-detail__value">{{ eco.approvedByName }} &middot; {{ eco.approvedAt | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (eco.implementedAt) {
             <div class="eco-detail__field">
-              <span class="eco-detail__label">Implemented</span>
+              <span class="eco-detail__label">{{ 'quality.implemented' | translate }}</span>
               <span class="eco-detail__value">{{ eco.implementedAt | date:'MM/dd/yyyy' }}</span>
             </div>
           }
@@ -95,20 +95,20 @@
 
       <!-- Description -->
       <div class="eco-detail__section">
-        <h4 class="eco-detail__section-title">Description</h4>
+        <h4 class="eco-detail__section-title">{{ 'common.description' | translate }}</h4>
         <p class="eco-detail__text">{{ eco.description }}</p>
       </div>
 
       @if (eco.reasonForChange) {
         <div class="eco-detail__section">
-          <h4 class="eco-detail__section-title">Reason for Change</h4>
+          <h4 class="eco-detail__section-title">{{ 'quality.reasonForChange' | translate }}</h4>
           <p class="eco-detail__text">{{ eco.reasonForChange }}</p>
         </div>
       }
 
       @if (eco.impactAnalysis) {
         <div class="eco-detail__section">
-          <h4 class="eco-detail__section-title">Impact Analysis</h4>
+          <h4 class="eco-detail__section-title">{{ 'quality.impactAnalysis' | translate }}</h4>
           <p class="eco-detail__text">{{ eco.impactAnalysis }}</p>
         </div>
       }
@@ -116,16 +116,16 @@
       <!-- Affected Items -->
       <div class="eco-detail__section">
         <div class="eco-detail__section-header">
-          <h4 class="eco-detail__section-title">Affected Items ({{ eco.affectedItems.length }})</h4>
+          <h4 class="eco-detail__section-title">{{ 'quality.affectedItemsCount' | translate:{ count: eco.affectedItems.length } }}</h4>
           @if (canAuthor && canEdit(eco)) {
             <button class="action-btn action-btn--sm" (click)="openAddItem()">
-              <span class="material-icons-outlined">add</span> Add Item
+              <span class="material-icons-outlined">add</span> {{ 'quality.addItem' | translate }}
             </button>
           }
         </div>
         @if (eco.affectedItems.length > 0) {
           <app-data-table tableId="eco-affected-items" [columns]="affectedItemColumns" [data]="eco.affectedItems"
-            emptyIcon="list" emptyMessage="No affected items">
+            emptyIcon="list" [emptyMessage]="'quality.noAffectedItems' | translate">
             <ng-template appColumnCell="entityType" let-row>
               <span class="chip chip--muted">{{ row.entityType }}</span>
             </ng-template>
@@ -134,14 +134,14 @@
             </ng-template>
             <ng-template appColumnCell="isImplemented" let-row>
               @if (row.isImplemented) {
-                <span class="material-icons-outlined eco-detail__check" aria-label="Implemented">check_circle</span>
+                <span class="material-icons-outlined eco-detail__check" [attr.aria-label]="'quality.implemented' | translate">check_circle</span>
               } @else {
-                <span class="material-icons-outlined eco-detail__pending" aria-label="Pending">radio_button_unchecked</span>
+                <span class="material-icons-outlined eco-detail__pending" [attr.aria-label]="'common.pending' | translate">radio_button_unchecked</span>
               }
             </ng-template>
             <ng-template appColumnCell="actions" let-row>
               @if (canAuthor && canEdit(eco)) {
-                <button class="icon-btn icon-btn--danger" aria-label="Remove affected item"
+                <button class="icon-btn icon-btn--danger" [attr.aria-label]="'quality.removeAffectedItem' | translate"
                   (click)="deleteAffectedItem(row); $event.stopPropagation()">
                   <span class="material-icons-outlined">delete</span>
                 </button>
@@ -149,7 +149,7 @@
             </ng-template>
           </app-data-table>
         } @else {
-          <p class="eco-detail__empty">No affected items added yet.</p>
+          <p class="eco-detail__empty">{{ 'quality.noAffectedItemsAddedYet' | translate }}</p>
         }
       </div>
     </div>
@@ -162,43 +162,43 @@
       }
       @if (canApproveRole && canApprove(eco)) {
         <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="approveEco()">
-          <span class="material-icons-outlined">check</span> Approve
+          <span class="material-icons-outlined">check</span> {{ 'quality.approve' | translate }}
         </button>
       }
       @if (canAuthor && canImplement(eco)) {
         <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="implementEco()">
-          <span class="material-icons-outlined">build</span> Implement
+          <span class="material-icons-outlined">build</span> {{ 'quality.implement' | translate }}
         </button>
       }
-      <button class="action-btn" (click)="closeDetail()">Close</button>
+      <button class="action-btn" (click)="closeDetail()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Add Affected Item Dialog -->
 @if (showAddItemDialog()) {
-  <app-dialog title="Add Affected Item" width="520px" (closed)="showAddItemDialog.set(false)">
+  <app-dialog [title]="'quality.addAffectedItem' | translate" width="520px" (closed)="showAddItemDialog.set(false)">
     <div [formGroup]="addItemForm">
       <div class="dialog-row">
-        <app-select label="Entity Type" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
+        <app-select [label]="'quality.entityType' | translate" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
         @if (pickPart()) {
           <app-entity-picker [label]="'qcInspections.part' | translate" entityType="parts" displayField="partNumber"
             secondaryDisplayField="name" formControlName="entityId" data-testid="eco-item-part" />
         } @else {
-          <app-input label="Entity ID" type="number" formControlName="entityId" [required]="true" />
+          <app-input [label]="'quality.entityId' | translate" type="number" formControlName="entityId" [required]="true" />
         }
       </div>
-      <app-textarea label="Change Description" formControlName="changeDescription" [required]="true" />
+      <app-textarea [label]="'quality.changeDescription' | translate" formControlName="changeDescription" [required]="true" />
       <app-textarea [label]="'ecos.oldValue' | translate" formControlName="oldValue" data-testid="eco-item-old-value" />
       <app-textarea [label]="'ecos.newValue' | translate" formControlName="newValue" data-testid="eco-item-new-value" />
       <p class="text-muted">{{ 'ecos.jsonHint' | translate }}</p>
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="showAddItemDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showAddItemDialog.set(false)">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="addItemViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="addItemForm.invalid || saving()"
-        (click)="saveAffectedItem()">Add</button>
+        (click)="saveAffectedItem()">{{ 'common.add' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

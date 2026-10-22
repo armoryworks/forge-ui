@@ -5,7 +5,6 @@ import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 
 import { AppNotification } from '../../../shared/models/app-notification.model';
 import { DesktopPreferenceService } from '../../../shared/services/desktop-preference.service';
-import { LanguageService } from '../../../shared/services/language.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MobileNotificationsComponent } from './mobile-notifications.component';
@@ -47,7 +46,6 @@ describe('MobileNotificationsComponent', () => {
       },
     });
     translate.use('es');
-    TestBed.inject(LanguageService).currentLanguage.set('es');
     component = TestBed.runInInjectionContext(() => new MobileNotificationsComponent()) as unknown as NotificationsInternals;
   });
 
@@ -63,9 +61,9 @@ describe('MobileNotificationsComponent', () => {
     expect(component.formatTime(ago(2 * 86_400_000))).toBe('hace 2 d');
   });
 
-  it('formats older dates with the app language rather than the browser locale', () => {
+  it('formats older dates as MM/dd/yyyy in every language rather than the browser locale', () => {
     const old = new Date(2026, 0, 31);
-    expect(component.formatTime(old)).toBe(old.toLocaleDateString('es'));
+    expect(component.formatTime(old)).toBe('01/31/2026');
   });
 
   const notification = (entityType?: string, entityId?: number): AppNotification => ({

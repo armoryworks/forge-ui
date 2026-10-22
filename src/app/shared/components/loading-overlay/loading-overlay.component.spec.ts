@@ -2,13 +2,14 @@ import { TestBed } from '@angular/core/testing';
 
 import { LoadingService } from '../../services/loading.service';
 import { LoadingOverlayComponent } from './loading-overlay.component';
+import { provideTranslateService } from '@ngx-translate/core';
 
 describe('LoadingOverlayComponent', () => {
   let loading: LoadingService;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    TestBed.configureTestingModule({ imports: [LoadingOverlayComponent] });
+    TestBed.configureTestingModule({ imports: [LoadingOverlayComponent], providers: [provideTranslateService()] });
     loading = TestBed.inject(LoadingService);
   });
 

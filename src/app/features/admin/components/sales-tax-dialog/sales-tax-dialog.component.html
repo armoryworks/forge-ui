@@ -7,18 +7,18 @@
 
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-input label="Name" formControlName="name" [required]="true"
+      <app-input [label]="'common.name' | translate" formControlName="name" [required]="true"
         [attr.aria-label]="'salesTax.fieldName' | translate" />
-      <app-input label="Code" formControlName="code" [required]="true"
-        placeholder="e.g. CA-SALES"
+      <app-input [label]="'salesTax.fieldCode' | translate" formControlName="code" [required]="true"
+        [placeholder]="'salesTax.eGCaSales' | translate"
         [attr.aria-label]="'salesTax.fieldCode' | translate" />
     </div>
 
     <div class="dialog-row">
-      <app-select label="State" formControlName="stateCode" [options]="stateOptions"
-        aria-label="State code" />
+      <app-select [label]="'common.state' | translate" formControlName="stateCode" [options]="stateOptions"
+        [attr.aria-label]="'salesTax.stateCode' | translate" />
       <app-input
-        label="Rate (%)"
+        [label]="'salesTax.fieldRate' | translate"
         type="number"
         formControlName="ratePercent"
         [required]="true"
@@ -26,16 +26,16 @@
         [attr.aria-label]="'salesTax.fieldRate' | translate" />
     </div>
 
-    <app-datepicker label="Effective From" formControlName="effectiveFrom" aria-label="Effective from date" />
+    <app-datepicker [label]="'salesTax.effectiveFrom' | translate" formControlName="effectiveFrom" [attr.aria-label]="'salesTax.effectiveFromDate' | translate" />
 
     <app-textarea
-      label="Description (optional)"
+      [label]="'salesTax.descriptionOptional' | translate"
       formControlName="description"
       [rows]="2"
       [attr.aria-label]="'salesTax.fieldDescription' | translate" />
 
     <app-toggle
-      label="Set as default rate"
+      [label]="'salesTax.setAsDefaultRate' | translate"
       formControlName="isDefault"
       [attr.aria-label]="'salesTax.fieldDefault' | translate" />
 
@@ -43,14 +43,14 @@
          exemption marker (local concern); glPostingAccount is optional and
          populated by the external accounting sync when configured. -->
     <app-toggle
-      label="Exempt rate"
+      [label]="'salesTax.exemptRate' | translate"
       formControlName="exemptFlag"
       data-testid="sales-tax-exempt-flag" />
 
     <app-input
-      label="GL Posting Account (optional)"
+      [label]="'salesTax.glPostingAccountOptional' | translate"
       formControlName="glPostingAccount"
-      placeholder="e.g. 2200-Sales-Tax"
+      [placeholder]="'salesTax.eG2200SalesTax' | translate"
       data-testid="sales-tax-gl-posting-account" />
   </div>
 

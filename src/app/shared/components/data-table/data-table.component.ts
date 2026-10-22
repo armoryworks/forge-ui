@@ -87,7 +87,7 @@ export class DataTableComponent implements OnInit {
   readonly selectable = input(false);
   readonly trackByField = input('id');
   readonly emptyIcon = input('search_off');
-  readonly emptyMessage = input('No data found');
+  readonly emptyMessage = input('common.noResults');
   readonly emptyHelpText = input<string>();
   readonly expandable = input(false);
   readonly loading = input(false);
@@ -635,7 +635,7 @@ export class DataTableComponent implements OnInit {
   }
 
   private exportHeader(col: ColumnDef): string {
-    return col.header?.trim() ? col.header : col.field;
+    return col.header?.trim() ? this.translate.instant(col.header) : col.field;
   }
 
   private exportText(row: unknown, col: ColumnDef): string {

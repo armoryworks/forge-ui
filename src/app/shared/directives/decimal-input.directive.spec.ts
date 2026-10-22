@@ -54,13 +54,13 @@ describe('DecimalInputDirective', () => {
     expect(field().value).toBe('0');
   });
 
-  it('reads es "1,5" as 1.5 and shows a stored value with the es decimal comma', async () => {
+  it('reads es "1.5" as 1.5 and shows a stored value with the es-US decimal point', async () => {
     await render('es');
-    type('1,5');
+    type('1.5');
     expect(host.qty.value).toBe(1.5);
     host.qty.setValue(2.25);
     fixture.detectChanges();
-    expect(field().value).toBe('2,25');
+    expect(field().value).toBe('2.25');
   });
 
   it('flags en "1,5" instead of reading it as 15 and keeps the typed text', async () => {

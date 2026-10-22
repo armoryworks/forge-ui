@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslateService } from '@ngx-translate/core';
 
 import { firstValueFrom } from 'rxjs';
 
@@ -28,6 +29,7 @@ import { WorkflowActiveListDialogComponent } from '../components/workflow-active
 @Injectable({ providedIn: 'root' })
 export class WorkflowResumeService {
   private readonly workflowService = inject(WorkflowService);
+  private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
@@ -62,7 +64,7 @@ export class WorkflowResumeService {
     if (recent.length === 0) return;
 
     this.snackbar.info(
-      `You have ${recent.length} workflow draft${recent.length === 1 ? '' : 's'} in progress. Tap to resume.`,
+      this.translate.instant(recent.length === 1 ? 'workflowResume.draftsOne' : 'workflowResume.draftsOther', { count: recent.length }),
     );
     // The snackbar is informational — open the active list immediately
     // (one click cost) so the user can resume without hunting for a

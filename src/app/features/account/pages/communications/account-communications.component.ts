@@ -17,6 +17,7 @@ import {
   ConnectCommunicationDialogData,
 } from './connect-communication-dialog.component';
 import { ConnectImapDialogComponent } from './connect-imap-dialog.component';
+import { formatDateTime } from '../../../../shared/utils/date.utils';
 
 interface KindGroup {
   kind: 'Email' | 'Voice';
@@ -192,9 +193,6 @@ export class AccountCommunicationsComponent implements OnInit {
 
   protected formatDate(dateStr: string | null): string {
     if (!dateStr) return this.translate.instant('account.communications.never');
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: '2-digit', day: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    return formatDateTime(dateStr);
   }
 }

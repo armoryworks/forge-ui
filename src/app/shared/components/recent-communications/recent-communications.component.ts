@@ -1,10 +1,11 @@
 import {
   ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal,
 } from '@angular/core';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ActivityItem } from '../../models/activity.model';
 import { EntityActivityService } from '../../services/entity-activity.service';
+import { formatDate as formatDisplayDate } from '../../utils/date.utils';
 import { AvatarComponent } from '../avatar/avatar.component';
 
 /**
@@ -38,6 +39,7 @@ const COMM_VERB_PREFIXES = ['communication-', 'interaction-auto-', 'interaction-
 })
 export class RecentCommunicationsComponent {
   private readonly activityService = inject(EntityActivityService);
+  private readonly translate = inject(TranslateService);
 
   readonly entityType = input.required<string>();
   readonly entityId = input.required<number>();
@@ -97,10 +99,10 @@ export class RecentCommunicationsComponent {
     const minutes = Math.floor(diff / 60_000);
     const hours = Math.floor(diff / 3_600_000);
     const days = Math.floor(diff / 86_400_000);
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString();
+    if (minutes < 1) return this.translate.instant('mobileLegacyPages.notifications.justNow');
+    if (minutes < 60) return this.translate.instant('mobileLegacyPages.notifications.minutesAgo', { count: minutes });
+    if (hours < 24) return this.translate.instant('mobileLegacyPages.notifications.hoursAgo', { count: hours });
+    if (days < 7) return this.translate.instant('mobileLegacyPages.notifications.daysAgo', { count: days });
+    return formatDisplayDate(date);
   }
 }

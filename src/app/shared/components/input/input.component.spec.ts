@@ -216,13 +216,13 @@ describe('InputComponent · numbers', () => {
     expect(field().value).toBe('1500');
   });
 
-  it('reads es "1,5" as 1.5, es "1.500" as 1500 and rejects es "1.5"', async () => {
+  it('reads es "1.5" as 1.5, es "1,500" as 1500 and rejects es "1,5" (es-US conventions)', async () => {
     await render('es');
-    type('1,5');
-    expect(host.quantity.value).toBe(1.5);
-    type('1.500');
-    expect(host.quantity.value).toBe(1500);
     type('1.5');
+    expect(host.quantity.value).toBe(1.5);
+    type('1,500');
+    expect(host.quantity.value).toBe(1500);
+    type('1,5');
     expect(host.quantity.value).toBeNull();
     expect(host.quantity.hasError('numberFormat')).toBe(true);
   });
@@ -231,7 +231,7 @@ describe('InputComponent · numbers', () => {
     await render('es');
     host.quantity.setValue(1234.5);
     fixture.detectChanges();
-    expect(field().value).toBe('1234,5');
+    expect(field().value).toBe('1234.5');
   });
 
   it('keeps a typed minus sign and emits -1 rather than 1', async () => {
@@ -278,13 +278,13 @@ describe('InputComponent · numbers', () => {
 
   it('parses the currency mask with the language separators and groups it on blur', async () => {
     await render('es');
-    type('1,50', 1);
+    type('1.50', 1);
     expect(host.price.value).toBe(1.5);
-    type('12345,67', 1);
+    type('12345.67', 1);
     expect(host.price.value).toBe(12345.67);
     blur(1);
-    expect(field(1).value).toBe('12.345,67');
-    type('1,555', 1);
+    expect(field(1).value).toBe('12,345.67');
+    type('1.555', 1);
     expect(host.price.hasError('decimalPlaces')).toBe(true);
   });
 });

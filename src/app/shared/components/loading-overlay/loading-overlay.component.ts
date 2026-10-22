@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked } from '@angular/core';
 
 import { LoadingService, LoadingCause } from '../../services/loading.service';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface DisplayCause extends LoadingCause {
   state: 'entering' | 'visible' | 'exiting';
@@ -10,7 +11,7 @@ interface DisplayCause extends LoadingCause {
 @Component({
   selector: 'app-loading-overlay',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './loading-overlay.component.html',
   styleUrl: './loading-overlay.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

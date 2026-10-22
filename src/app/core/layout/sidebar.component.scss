@@ -1,6 +1,8 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+$rail-label-max-height: 20em;
+
 :host {
   display: flex;
   flex-shrink: 0;
@@ -120,7 +122,13 @@
 
 .nav-item__label {
   @include uppercase-label(var(--font-size-sm), 0.5px, 600);
-  @include truncate;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+  min-width: 0;
 
   &--header {
     text-transform: none;
@@ -297,7 +305,7 @@
     padding: $sp-md 0;
     gap: $sp-sm;
 
-    .rail-item__vlabel { max-height: 150px; opacity: 1; }
+    .rail-item__vlabel { max-height: $rail-label-max-height; opacity: 1; }
   }
 
   // Active parent: the "beta bar" green fills the item, label + icon go light.
@@ -309,7 +317,7 @@
     padding: $sp-md 0;
     gap: $sp-sm;
 
-    .rail-item__vlabel { max-height: 150px; opacity: 1; color: var(--attention-text); }
+    .rail-item__vlabel { max-height: $rail-label-max-height; opacity: 1; color: var(--attention-text); }
   }
 }
 

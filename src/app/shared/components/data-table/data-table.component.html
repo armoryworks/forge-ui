@@ -46,7 +46,7 @@
                 (contextmenu)="onHeaderContextMenu(col, $event)">
                 <div class="data-table__th-inner">
                   <span class="data-table__th-content">
-                    {{ col.header }}
+                    {{ col.header | translate }}
                     @if (getSortState(col.field); as sort) {
                       <span class="material-icons-outlined data-table__sort-icon" aria-hidden="true">
                         {{ sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
@@ -69,8 +69,8 @@
                     [class.data-table__col-menu-btn--has-filter]="hasFilter(col.field)"
                     [matMenuTriggerFor]="headerContextMenu"
                     (click)="contextMenuCol.set(col); $event.stopPropagation()"
-                    [attr.aria-label]="(col.header ? ('shared.columnMenu' | translate:{ column: col.header }) : ('shared.columnMenuUnnamed' | translate))"
-                    [matTooltip]="(col.header ? ('shared.columnMenu' | translate:{ column: col.header }) : ('shared.columnMenuUnnamed' | translate))" matTooltipPosition="above"
+                    [attr.aria-label]="(col.header ? ('shared.columnMenu' | translate:{ column: (col.header | translate) }) : ('shared.columnMenuUnnamed' | translate))"
+                    [matTooltip]="(col.header ? ('shared.columnMenu' | translate:{ column: (col.header | translate) }) : ('shared.columnMenuUnnamed' | translate))" matTooltipPosition="above"
                     cdkOverlayOrigin
                     #filterOrigin="cdkOverlayOrigin">
                     <span class="material-icons-outlined">more_vert</span>
@@ -198,7 +198,7 @@
           } @empty {
             <tr>
               <td [attr.colspan]="totalColSpan()">
-                <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" [helpText]="emptyHelpText()" />
+                <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage() | translate" [helpText]="emptyHelpText()" />
               </td>
             </tr>
           }
@@ -233,7 +233,7 @@
         (closed)="closeColumnManager()" />
     </ng-template>
   } @else {
-    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" [helpText]="emptyHelpText()" />
+    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage() | translate" [helpText]="emptyHelpText()" />
   }
 </div>
 

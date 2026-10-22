@@ -19,6 +19,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 /**
  * Phase 3 / WU-06 / C1 — Tenant-side CRUD over role templates (rollups).
@@ -41,6 +42,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
     SelectComponent,
     ValidationButtonComponent,
     MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './role-templates-panel.component.html',
   styleUrl: './role-templates-panel.component.scss',
@@ -48,6 +50,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 })
 export class RoleTemplatesPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly translate = inject(TranslateService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -71,11 +74,11 @@ export class RoleTemplatesPanelComponent implements OnInit {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'description', header: 'Description', sortable: false },
-    { field: 'includedRoleNames', header: 'Included Roles', sortable: false },
-    { field: 'isSystemDefault', header: 'Source', sortable: true, width: '110px' },
-    { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
+    { field: 'name', header: 'common.name', sortable: true },
+    { field: 'description', header: 'common.description', sortable: false },
+    { field: 'includedRoleNames', header: 'columns.includedRoles', sortable: false },
+    { field: 'isSystemDefault', header: 'columns.source', sortable: true, width: '110px' },
+    { field: 'actions', header: 'common.actions', width: '140px', align: 'right' },
   ];
 
   ngOnInit(): void {
@@ -102,7 +105,7 @@ export class RoleTemplatesPanelComponent implements OnInit {
 
   protected openEdit(template: RoleTemplate): void {
     if (template.isSystemDefault) {
-      this.snackbar.error('System-default templates cannot be edited. Create a new template to customize.');
+      this.snackbar.error(this.translate.instant('admin.roleTemplatesPanel.messages.systemNoEdit'));
       return;
     }
     this.editingTemplate.set(template);
@@ -150,22 +153,21 @@ export class RoleTemplatesPanelComponent implements OnInit {
 
   protected delete(template: RoleTemplate): void {
     if (template.isSystemDefault) {
-      this.snackbar.error('System-default templates cannot be deleted.');
+      this.snackbar.error(this.translate.instant('admin.roleTemplatesPanel.messages.systemNoDelete'));
       return;
     }
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Delete Role Bundle?',
-        message: `This will deactivate "${template.name}". Any System API keys scoped to this ` +
-                 `bundle will need to be re-scoped. The underlying roles are unaffected.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('admin.roleTemplatesPanel.messages.deleteTitle'),
+        message: this.translate.instant('admin.roleTemplatesPanel.messages.deleteMessage', { name: template.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.adminService.deleteRoleTemplate(template.id).subscribe({
-        next: () => { this.load(); this.snackbar.success('Template deleted.'); },
+        next: () => { this.load(); this.snackbar.success(this.translate.instant('admin.roleTemplatesPanel.messages.deleted')); },
         error: (err: unknown) => this.snackbar.errorFrom(err, 'errorFallbacksA.roleTemplateDeleteFailed'),
       });
     });

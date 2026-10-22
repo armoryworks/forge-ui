@@ -65,25 +65,25 @@ export class SpcOocListComponent {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'detectedAt', header: 'Detected', sortable: true, type: 'date', width: '130px' },
-    { field: 'partNumber', header: 'Part', sortable: true, width: '100px' },
-    { field: 'characteristicName', header: 'Characteristic', sortable: true },
-    { field: 'ruleName', header: 'Rule', sortable: true, width: '200px' },
-    { field: 'severity', header: 'Severity', sortable: true, width: '110px', filterable: true, type: 'enum',
+    { field: 'detectedAt', header: 'columns.detected', sortable: true, type: 'date', width: '130px' },
+    { field: 'partNumber', header: 'common.part', sortable: true, width: '100px' },
+    { field: 'characteristicName', header: 'columns.characteristic', sortable: true },
+    { field: 'ruleName', header: 'columns.rule', sortable: true, width: '200px' },
+    { field: 'severity', header: 'columns.severity', sortable: true, width: '110px', filterable: true, type: 'enum',
       filterOptions: [
         { value: 'Warning', label: 'Warning' },
         { value: 'OutOfControl', label: 'Out of Control' },
         { value: 'OutOfSpec', label: 'Out of Spec' },
       ]},
-    { field: 'status', header: 'Status', sortable: true, width: '120px', filterable: true, type: 'enum',
+    { field: 'status', header: 'common.status', sortable: true, width: '120px', filterable: true, type: 'enum',
       filterOptions: [
         { value: 'Open', label: 'Open' },
         { value: 'Acknowledged', label: 'Acknowledged' },
         { value: 'CapaCreated', label: 'CAPA Created' },
         { value: 'Resolved', label: 'Resolved' },
       ]},
-    { field: 'acknowledgedByName', header: 'Acknowledged By', sortable: true, width: '140px' },
-    { field: 'capaNumber', header: 'CAPA', sortable: true, width: '130px' },
+    { field: 'acknowledgedByName', header: 'columns.acknowledgedBy', sortable: true, width: '140px' },
+    { field: 'capaNumber', header: 'columns.capa', sortable: true, width: '130px' },
     { field: 'actions', header: '', width: '80px', align: 'center' },
   ];
 
@@ -125,7 +125,7 @@ export class SpcOocListComponent {
         this.saving.set(false);
         this.closeAckDialog();
         this.loadEvents();
-        this.snackbar.success('OOC event acknowledged');
+        this.snackbar.success(this.translate.instant('quality.messages.oocAcknowledged'));
       },
       error: () => this.saving.set(false),
     });

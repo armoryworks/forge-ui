@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, LOCALE_ID } from '@angular/core';
 import { BaseChartDirective } from '../../../../shared/charts/base-chart.directive';
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -29,6 +29,7 @@ const MACHINE_OH_FIXED_COLOR = '#b45309';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CostingRatesVisualComponent {
+  private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
 
   readonly rates = input.required<WorkCenterCostRate[]>();
@@ -93,7 +94,7 @@ export class CostingRatesVisualComponent {
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(undefined, { style: 'currency', currency: 'USD' })}`,
+                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`,
             },
           },
         },

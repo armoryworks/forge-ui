@@ -20,7 +20,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../../shared/services/auth.service';
 import { QUALITY_MANAGER_ROLES } from '../quality-roles';
 import { CapaDetailDialogComponent } from './capa-detail-dialog/capa-detail-dialog.component';
@@ -43,6 +43,7 @@ import { EnumLabelPipe } from '../../../shared/pipes/enum-label.pipe';
 })
 export class CapaListComponent implements OnInit {
   private readonly ncrCapaService = inject(NcrCapaService);
+  private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly auth = inject(AuthService);
 
@@ -95,14 +96,14 @@ export class CapaListComponent implements OnInit {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'capaNumber', header: 'CAPA #', sortable: true, width: '180px' },
-    { field: 'type', header: 'Type', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'ownerName', header: 'Owner', sortable: true, width: '150px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '80px', align: 'center' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '150px' },
-    { field: 'dueDate', header: 'Due', sortable: true, type: 'date', width: '100px' },
-    { field: 'tasks', header: 'Tasks', width: '80px', align: 'center' },
+    { field: 'capaNumber', header: 'columns.capaNumber', sortable: true, width: '180px' },
+    { field: 'type', header: 'common.type', sortable: true, width: '100px' },
+    { field: 'title', header: 'common.title', sortable: true },
+    { field: 'ownerName', header: 'columns.owner', sortable: true, width: '150px' },
+    { field: 'priority', header: 'common.priority', sortable: true, width: '80px', align: 'center' },
+    { field: 'status', header: 'common.status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '150px' },
+    { field: 'dueDate', header: 'columns.due', sortable: true, type: 'date', width: '100px' },
+    { field: 'tasks', header: 'columns.tasks', width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
@@ -158,7 +159,7 @@ export class CapaListComponent implements OnInit {
     this.saving.set(true);
     this.ncrCapaService.createCapa(this.createForm.getRawValue() as Partial<CorrectiveAction>).subscribe({
       next: () => {
-        this.snackbar.success('CAPA created');
+        this.snackbar.success(this.translate.instant('quality.messages.capaCreated'));
         this.showCreateDialog.set(false);
         this.saving.set(false);
         this.loadCapas();
@@ -170,7 +171,7 @@ export class CapaListComponent implements OnInit {
   advancePhase(capa: CorrectiveAction): void {
     this.ncrCapaService.advanceCapaPhase(capa.id).subscribe({
       next: updated => {
-        this.snackbar.success(`CAPA advanced to ${this.labels.enumLabel(updated.status)}`);
+        this.snackbar.success(this.translate.instant('quality.messages.capaAdvanced', { status: this.labels.enumLabel(updated.status) }));
         this.loadCapas();
       },
     });
