@@ -18,7 +18,7 @@ export interface ColumnDef {
   header: string;
   sortable?: boolean;
   filterable?: boolean;
-  type?: 'text' | 'number' | 'date' | 'enum';
+  type?: 'text' | 'number' | 'currency' | 'date' | 'enum';
   filterOptions?: SelectOption[];
   width?: string;
   visible?: boolean;

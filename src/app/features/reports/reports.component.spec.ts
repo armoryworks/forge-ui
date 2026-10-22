@@ -20,7 +20,8 @@ interface ReportsInternals {
   arAgingData(): ArAgingItem[];
   jobsByStageData(): JobsByStageItem[];
   jobMarginData: { set(rows: JobMarginItem[]): void };
-  jobMarginTotals(): { avgMarginPct: number | null; measuredCount: number; jobCount: number; totalRevenue: number };
+  jobMarginTotals(): { avgMarginPct: number | null; measuredCount: number; jobCount: number; totalRevenue: number; totalMargin: number };
+  jobMarginChart(): { labels?: unknown[] };
   reportPicker: FormControl<string>;
   selectReport(id: ReportType): void;
 }
@@ -29,7 +30,9 @@ function marginRow(revenue: number, totalCost: number): JobMarginItem {
   return {
     jobNumber: `J-${revenue}-${totalCost}`, title: 'Job', customerName: null,
     revenue, laborCost: totalCost, materialCost: 0, expenseCost: 0, totalCost,
-    margin: revenue - totalCost, marginPercentage: revenue > 0 ? (revenue - totalCost) / revenue * 100 : 0,
+    margin: totalCost > 0 ? revenue - totalCost : null,
+    marginPercentage: revenue > 0 && totalCost > 0 ? (revenue - totalCost) / revenue * 100 : null,
+    costRecorded: totalCost > 0,
   };
 }
 
@@ -98,6 +101,15 @@ describe('ReportsComponent', () => {
     expect(totals.avgMarginPct).toBe(19);
     expect(totals.measuredCount).toBe(2);
     expect(totals.jobCount).toBe(4);
+  });
+
+  it('leaves uncosted and uninvoiced jobs out of the total margin and the margin chart', () => {
+    const component = create();
+
+    component.jobMarginData.set([marginRow(1000, 600), marginRow(5000, 0), marginRow(0, 200)]);
+
+    expect(component.jobMarginTotals().totalMargin).toBe(400);
+    expect(component.jobMarginChart().labels).toEqual(['J-1000-600', 'J-0-200']);
   });
 
   it('withholds the average margin when no row has both cost and revenue', () => {

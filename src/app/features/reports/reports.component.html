@@ -431,6 +431,7 @@
           <div class="kpi-card" [class.kpi-card--success]="jobMarginTotals().totalMargin >= 0" [class.kpi-card--error]="jobMarginTotals().totalMargin < 0">
             <span class="kpi-card__value">{{ jobMarginTotals().totalMargin | currency }}</span>
             <span class="kpi-card__label">{{ 'reports.totalMargin' | translate }}</span>
+            <span class="kpi-card__note">{{ 'reports.marginCoverage' | translate: { measured: jobMarginTotals().measuredCount, total: jobMarginTotals().jobCount } }}</span>
           </div>
           <div class="kpi-card" data-testid="job-margin-avg">
             <span class="kpi-card__value">
@@ -452,14 +453,15 @@
         </div>
         <app-data-table tableId="report-job-margin" [columns]="jobMarginColumns" [data]="jobMarginData()"
                         emptyIcon="trending_up" [emptyMessage]="'reports.emptyNoJobMarginData' | translate">
-          <ng-template appColumnCell="revenue" let-row>{{ row.revenue | currency }}</ng-template>
-          <ng-template appColumnCell="laborCost" let-row>{{ row.laborCost | currency }}</ng-template>
-          <ng-template appColumnCell="materialCost" let-row>{{ row.materialCost | currency }}</ng-template>
-          <ng-template appColumnCell="expenseCost" let-row>{{ row.expenseCost | currency }}</ng-template>
-          <ng-template appColumnCell="totalCost" let-row>{{ row.totalCost | currency }}</ng-template>
-          <ng-template appColumnCell="margin" let-row>{{ row.margin | currency }}</ng-template>
+          <ng-template appColumnCell="margin" let-row>
+            @if (row.margin === null) {
+              <span class="text-muted" [title]="'reports.costNotRecorded' | translate" data-testid="margin-uncosted">&mdash;</span>
+            } @else {
+              {{ row.margin | currency }}
+            }
+          </ng-template>
           <ng-template appColumnCell="marginPercentage" let-row>
-            @if (row.totalCost === 0) {
+            @if (!row.costRecorded) {
               <span class="text-muted" [title]="'reports.costNotRecorded' | translate" data-testid="margin-pct-uncosted">&mdash;</span>
             } @else if (row.revenue === 0) {
               <span class="text-muted" [title]="'reports.notInvoiced' | translate">&mdash;</span>

@@ -7318,6 +7318,7 @@
     "askPlaceholder": "Pregunte a {{name}}...",
     "messagePlaceholder": "Mensaje para {{name}}",
     "errorMessage": "Lo siento, encontré un error. Intente de nuevo.",
+    "unavailableMessage": "El servicio de IA no está disponible en este momento. Inténtelo de nuevo en unos minutos.",
     "assistantNotFound": "Asistente no encontrado",
     "assistantNotFoundHelp": "Es posible que se haya eliminado o que el enlace apunte al asistente equivocado.",
     "openGeneralAssistant": "Abrir el asistente general"

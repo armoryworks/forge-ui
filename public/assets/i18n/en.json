@@ -7325,6 +7325,7 @@
     "askPlaceholder": "Ask {{name}} a question...",
     "messagePlaceholder": "Message {{name}}",
     "errorMessage": "Sorry, I encountered an error. Please try again.",
+    "unavailableMessage": "The AI service is unavailable right now. Try again in a few minutes.",
     "assistantNotFound": "Assistant not found",
     "assistantNotFoundHelp": "It may have been removed, or the link points to the wrong assistant.",
     "openGeneralAssistant": "Open the general assistant"

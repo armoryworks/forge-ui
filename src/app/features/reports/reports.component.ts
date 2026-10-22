@@ -367,12 +367,12 @@ export class ReportsComponent {
   });
 
   protected readonly jobMarginChart = computed<ChartData<'bar'>>(() => {
-    const data = this.jobMarginData();
+    const data = this.jobMarginData().filter(d => d.margin !== null);
     return {
       labels: data.map(d => d.jobNumber),
       datasets: [{
-        data: data.map(d => d.margin),
-        backgroundColor: data.map(d => d.margin >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+        data: data.map(d => d.margin ?? 0),
+        backgroundColor: data.map(d => (d.margin ?? 0) >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
         label: this.translate.instant('reports.legend.margin'),
       }],
     };
@@ -382,14 +382,13 @@ export class ReportsComponent {
     const data = this.jobMarginData();
     const totalRevenue = data.reduce((sum, d) => sum + d.revenue, 0);
     const totalCost = data.reduce((sum, d) => sum + d.totalCost, 0);
-    const totalMargin = totalRevenue - totalCost;
     const measured = data.filter(d => d.revenue > 0 && d.totalCost > 0);
     const measuredRevenue = measured.reduce((sum, d) => sum + d.revenue, 0);
-    const measuredMargin = measured.reduce((sum, d) => sum + d.margin, 0);
+    const measuredMargin = measured.reduce((sum, d) => sum + (d.revenue - d.totalCost), 0);
     const avgMarginPct = measuredRevenue > 0
       ? Math.round(measuredMargin / measuredRevenue * 1000) / 10
       : null;
-    return { totalRevenue, totalCost, totalMargin, avgMarginPct, measuredCount: measured.length, jobCount: data.length };
+    return { totalRevenue, totalCost, totalMargin: measuredMargin, avgMarginPct, measuredCount: measured.length, jobCount: data.length };
   });
 
   protected readonly barOptions: ChartOptions<'bar'> = {
@@ -631,12 +630,12 @@ export class ReportsComponent {
     { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
     { field: 'title', header: this.translate.instant('reports.colTitle'), sortable: true },
     { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true, width: '140px' },
-    { field: 'revenue', header: this.translate.instant('reports.colRevenue'), sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'laborCost', header: this.translate.instant('reports.colLabor'), sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'materialCost', header: this.translate.instant('reports.colMaterial'), sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'expenseCost', header: this.translate.instant('reports.colExpenses'), sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalCost', header: this.translate.instant('reports.colTotalCost'), sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'margin', header: this.translate.instant('reports.colMargin'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'revenue', header: this.translate.instant('reports.colRevenue'), sortable: true, type: 'currency', width: '110px', align: 'right' },
+    { field: 'laborCost', header: this.translate.instant('reports.colLabor'), sortable: true, type: 'currency', width: '100px', align: 'right' },
+    { field: 'materialCost', header: this.translate.instant('reports.colMaterial'), sortable: true, type: 'currency', width: '100px', align: 'right' },
+    { field: 'expenseCost', header: this.translate.instant('reports.colExpenses'), sortable: true, type: 'currency', width: '100px', align: 'right' },
+    { field: 'totalCost', header: this.translate.instant('reports.colTotalCost'), sortable: true, type: 'currency', width: '110px', align: 'right' },
+    { field: 'margin', header: this.translate.instant('reports.colMargin'), sortable: true, type: 'currency', width: '100px', align: 'right' },
     { field: 'marginPercentage', header: this.translate.instant('reports.colMarginPercent'), sortable: true, type: 'number', width: '90px', align: 'right' },
   ];
 

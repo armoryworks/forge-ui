@@ -177,7 +177,7 @@ export class ReportBuilderComponent {
   // Computed: numeric field options (for chart value)
   protected readonly numericFieldOptions = computed<SelectOption[]>(() => {
     return this.availableFields()
-      .filter(f => f.type === 'number')
+      .filter(f => f.type === 'number' || f.type === 'currency')
       .map(f => ({ value: f.field, label: f.label }));
   });
 
@@ -199,15 +199,16 @@ export class ReportBuilderComponent {
     const entity = this.selectedEntity();
     return results.columns.map(col => {
       const fieldDef = entity?.fields.find(f => f.field === col);
-      const colType = fieldDef?.type === 'number' ? 'number'
+      const colType: ColumnDef['type'] = fieldDef?.type === 'number' ? 'number'
+        : fieldDef?.type === 'currency' ? 'currency'
         : fieldDef?.type === 'date' ? 'date'
         : 'text';
       return {
         field: col,
         header: fieldDef?.label ?? col,
         sortable: true,
-        type: colType as 'text' | 'number' | 'date',
-        align: colType === 'number' ? 'right' as const : 'left' as const,
+        type: colType,
+        align: colType === 'number' || colType === 'currency' ? 'right' as const : 'left' as const,
       };
     });
   });
