@@ -10,11 +10,9 @@ export class ScannerService implements OnDestroy {
 
   private readonly SCAN_THRESHOLD_MS = 50;
   private readonly SCAN_COMPLETE_DELAY_MS = 80;
-  private readonly STALL_TOLERANCE_MS = 40;
   private readonly MIN_SCAN_LENGTH = 4;
 
   private buffer = '';
-  private firstKeyTime = 0;
   private lastKeyTime = 0;
   private completeTimer: ReturnType<typeof setTimeout> | null = null;
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -131,10 +129,10 @@ export class ScannerService implements OnDestroy {
       return;
     }
 
-    const now = this.eventTime(event);
+    const now = Date.now();
 
     if (event.key === 'Enter') {
-      if (this.isScanBurst()) {
+      if (this.buffer.length >= this.MIN_SCAN_LENGTH) {
         this.emitScan(this.buffer);
         event.preventDefault();
         event.stopPropagation();
@@ -146,43 +144,23 @@ export class ScannerService implements OnDestroy {
     // Only accumulate printable characters
     if (event.key.length !== 1) return;
 
-    if (this.buffer && (now - this.lastKeyTime < this.SCAN_THRESHOLD_MS || this.completeTimer)) {
+    const elapsed = now - this.lastKeyTime;
+    this.lastKeyTime = now;
+
+    if (this.buffer && (elapsed < this.SCAN_THRESHOLD_MS || this.completeTimer)) {
       this.buffer += event.key;
     } else {
       this.buffer = event.key;
-      this.firstKeyTime = now;
     }
-    this.lastKeyTime = now;
 
     // Auto-complete scan after brief pause (scanner sends Enter, but as a fallback)
-    this.scheduleComplete();
-  }
-
-  private scheduleComplete(afterStall = false): void {
     if (this.completeTimer) clearTimeout(this.completeTimer);
-    const scheduledAt = performance.now();
     this.completeTimer = setTimeout(() => {
-      this.completeTimer = null;
-      const late = performance.now() - scheduledAt > this.SCAN_COMPLETE_DELAY_MS + this.STALL_TOLERANCE_MS;
-      if (late && !afterStall) {
-        this.scheduleComplete(true);
-        return;
-      }
-      if (this.isScanBurst()) {
+      if (this.buffer.length >= this.MIN_SCAN_LENGTH) {
         this.emitScan(this.buffer);
       }
       this.clearBuffer();
     }, this.SCAN_COMPLETE_DELAY_MS);
-  }
-
-  private isScanBurst(): boolean {
-    if (this.buffer.length < this.MIN_SCAN_LENGTH) return false;
-    const meanGap = (this.lastKeyTime - this.firstKeyTime) / (this.buffer.length - 1);
-    return meanGap < this.SCAN_THRESHOLD_MS;
-  }
-
-  private eventTime(event: KeyboardEvent): number {
-    return event.timeStamp > 0 ? event.timeStamp : performance.now();
   }
 
   private emitScan(value: string): void {
@@ -199,7 +177,6 @@ export class ScannerService implements OnDestroy {
 
   private clearBuffer(): void {
     this.buffer = '';
-    this.firstKeyTime = 0;
     this.lastKeyTime = 0;
     if (this.completeTimer) {
       clearTimeout(this.completeTimer);

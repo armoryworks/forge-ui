@@ -231,6 +231,7 @@ export class ScanJobFlowComponent implements OnInit {
           scrapQuantity: row.scrapQuantity,
           reasons: this.reasons(),
           touch: true,
+          decimalPlaces: this.jobOperations()?.quantityDecimalPlaces ?? null,
         },
       }).afterClosed().subscribe(result => {
       if (result) this.submitQuantity(row, result);

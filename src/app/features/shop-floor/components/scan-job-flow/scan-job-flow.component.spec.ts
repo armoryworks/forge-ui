@@ -370,9 +370,21 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(config.data).toEqual({
       title: 'shopFloor.operations.quantityTitle:{"step":2,"title":"Step 2"}',
       jobQuantity: 40, completedQuantity: 12, scrapQuantity: 1,
-      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true,
+      reasons: [{ code: 'tooling', label: 'Tooling' }], touch: true, decimalPlaces: null,
     });
     expect(shopFloor.updateOperationProgress).not.toHaveBeenCalled();
+  });
+
+  it('Record pieces passes the stock unit decimals to the dialog', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true, reasons: [] }));
+    shopFloor.getOperations.mockReturnValueOnce(of({ ...operations([opRow(1), opRow(2)]), quantityDecimalPlaces: 0 }));
+    dialogResult = undefined;
+    const c = create();
+
+    c.openQuantity(opRow(2));
+
+    const config = (dialog.open.mock.calls[0] as unknown[])[1] as { data: Record<string, unknown> };
+    expect(config.data['decimalPlaces']).toBe(0);
   });
 
   it('scrap, rework and a reason travel with the recorded pieces', () => {

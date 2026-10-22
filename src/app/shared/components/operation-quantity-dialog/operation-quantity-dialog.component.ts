@@ -66,6 +66,13 @@ export class OperationQuantityDialogComponent {
     if (isNegative(raw.quantity) || isNegative(raw.scrap) || isNegative(raw.rework)) {
       issues.push(this.translate.instant('jobOperations.dialog.negative'));
     }
+    const places = this.data.decimalPlaces;
+    if (places !== null && places !== undefined
+      && [raw.quantity, raw.scrap, raw.rework].some(v => !fitsDecimals(v, places))) {
+      issues.push(places === 0
+        ? this.translate.instant('jobOperations.dialog.wholeNumbers')
+        : this.translate.instant('jobOperations.dialog.decimals', { places }));
+    }
     if (this.newCompleted() + this.newScrap() > this.data.jobQuantity) {
       issues.push(this.translate.instant('jobOperations.dialog.overQuantity', {
         total: this.newCompleted() + this.newScrap(),
@@ -168,4 +175,10 @@ function toCount(value: number | null | undefined): number {
 
 function isNegative(value: number | null | undefined): boolean {
   return value !== null && value !== undefined && Number(value) < 0;
+}
+
+function fitsDecimals(value: number | null | undefined, places: number): boolean {
+  if (value === null || value === undefined) return true;
+  const n = Number(value);
+  return !Number.isFinite(n) || Number(n.toFixed(places)) === n;
 }

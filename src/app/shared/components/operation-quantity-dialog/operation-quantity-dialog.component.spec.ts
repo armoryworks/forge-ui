@@ -77,6 +77,41 @@ describe('OperationQuantityDialogComponent', () => {
     expect(close).not.toHaveBeenCalled();
   });
 
+  it('takes whole pieces only when the stock unit has no decimals', () => {
+    const { component, close } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 0, scrapQuantity: 0, reasons: [], decimalPlaces: 0 });
+
+    component.form.patchValue({ quantity: 2.5 });
+    expect(component.violations()).toEqual(['jobOperations.dialog.wholeNumbers']);
+    component.record();
+    component.complete();
+    expect(close).not.toHaveBeenCalled();
+
+    component.form.patchValue({ quantity: 3 });
+    expect(component.violations()).toEqual([]);
+    component.record();
+    expect(close).toHaveBeenCalledWith({ completedQuantity: 3, scrapQuantity: 0, reworkQuantity: 0, reasonCode: null, complete: false });
+  });
+
+  it('takes fractions within the stock unit decimals and refuses more', () => {
+    const { component, close } = setup({ title: 'Cut', jobQuantity: 40, completedQuantity: 0, scrapQuantity: 0, reasons: [], decimalPlaces: 2 });
+
+    component.form.patchValue({ quantity: 2.5, scrap: 0.125 });
+    expect(component.violations()).toEqual(['jobOperations.dialog.decimals']);
+    component.record();
+    expect(close).not.toHaveBeenCalled();
+
+    component.form.patchValue({ scrap: 0.25 });
+    component.record();
+    expect(close).toHaveBeenCalledWith({ completedQuantity: 2.5, scrapQuantity: 0.25, reworkQuantity: 0, reasonCode: null, complete: false });
+  });
+
+  it('accepts any fraction when the stock unit is unknown', () => {
+    const { component } = setup({ title: 'Cut', jobQuantity: 40, completedQuantity: 0, scrapQuantity: 0, reasons: [] });
+
+    component.form.patchValue({ quantity: 2.125 });
+    expect(component.violations()).toEqual([]);
+  });
+
   it('asks for a reason once scrap or rework is entered and returns both', () => {
     const { component, close } = setup({
       title: 'Mill', jobQuantity: 40, completedQuantity: 12, scrapQuantity: 0,

@@ -7871,10 +7871,7 @@
       "alreadyRunning": "Tu temporizador en el paso {{step}} · {{title}} ya está en curso",
       "stopped": "Paso {{step}} · {{title}} detenido",
       "timerStopped": "Se detuvo tu temporizador en {{jobNumber}}",
-      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas",
-      "wholeNumbersOnly": "Ingrese solo piezas enteras (0 o más).",
-      "quantityNotNegative": "Introduzca 0 o más.",
-      "quantityDecimals": "Introduzca 0 o más, con un máximo de {{places}} decimales."
+      "recorded": "Paso {{step}}: {{count}} de {{total}} registradas"
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -12361,6 +12358,8 @@
       "doneAll": "Terminar — las {{count}}",
       "done": "Terminar — {{count}}",
       "negative": "Las cantidades no pueden ser negativas",
+      "wholeNumbers": "Ingrese solo piezas enteras (0 o más).",
+      "decimals": "Introduzca 0 o más, con un máximo de {{places}} decimales.",
       "overQuantity": "Terminadas más desechadas ({{total}}) supera la cantidad del trabajo ({{quantity}})",
       "rework": "Piezas devueltas a retrabajo ahora",
       "addRework": "Registrar retrabajo",

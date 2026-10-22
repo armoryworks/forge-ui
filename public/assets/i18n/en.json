@@ -7889,10 +7889,7 @@
       "alreadyRunning": "Your timer on step {{step}} · {{title}} is already running",
       "stopped": "Stopped step {{step}} · {{title}}",
       "timerStopped": "Stopped your timer on {{jobNumber}}",
-      "recorded": "Step {{step}}: {{count}} of {{total}} recorded",
-      "wholeNumbersOnly": "Enter whole pieces only (0 or more).",
-      "quantityNotNegative": "Enter 0 or more.",
-      "quantityDecimals": "Enter 0 or more, with at most {{places}} decimal places."
+      "recorded": "Step {{step}}: {{count}} of {{total}} recorded"
     },
     "returnFlow": {
       "title": "Return Items",
@@ -12361,6 +12358,8 @@
       "doneAll": "Done — all {{count}}",
       "done": "Done — {{count}}",
       "negative": "Quantities cannot be negative",
+      "wholeNumbers": "Enter whole pieces only (0 or more).",
+      "decimals": "Enter 0 or more, with at most {{places}} decimal places.",
       "overQuantity": "Finished plus scrapped ({{total}}) is more than the job quantity ({{quantity}})",
       "rework": "Pieces sent back for rework now",
       "addRework": "Record rework",
