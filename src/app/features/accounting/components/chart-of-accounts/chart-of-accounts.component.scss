@@ -2,12 +2,18 @@
 
 .coa-chip {
   margin-left: $sp-sm;
-  padding: $sp-xxs $sp-sm;
-  font-size: $font-size-xxs;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  background: color-mix(in srgb, var(--info) 15%, transparent);
-  color: var(--info);
+}
+
+.coa-actions {
+  display: inline-flex;
+  align-items: center;
+  min-height: $input-height;
+}
+
+.coa-contra-note {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
 }
 
 .coa-lock-note {

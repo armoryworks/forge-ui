@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../../../shared/components/page-header/p
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { BudgetLine, BudgetVsActual, GlAccount } from '../../models/accounting.models';
@@ -20,6 +21,16 @@ import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.dir
 const DEFAULT_BOOK_ID = 1;
 
 type BudgetMode = 'entry' | 'vs-actual';
+
+interface BudgetTotal {
+  key: 'income' | 'expense' | 'net';
+  labelKey: string;
+  budget: number;
+  actual: number;
+  variance: number;
+  variancePercent: number | null;
+  favorable: boolean;
+}
 
 interface BudgetRow {
   account: GlAccount;
@@ -40,6 +51,7 @@ interface BudgetRow {
     TabDirective,
     ScrollCueDirective,
     DecimalPipe,
+    DateOnlyPipe,
     ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,
@@ -64,6 +76,25 @@ export class BudgetsComponent {
 
   protected readonly rows = signal<BudgetRow[]>([]);
   protected readonly comparison = signal<BudgetVsActual | null>(null);
+  /** Income, expense and net-income totals; income and expense are never added together. */
+  protected readonly totals = computed<BudgetTotal[]>(() => {
+    const c = this.comparison();
+    if (!c) return [];
+    const total = (key: BudgetTotal['key'], labelKey: string, budget: number, actual: number): BudgetTotal => ({
+      key,
+      labelKey,
+      budget,
+      actual,
+      variance: actual - budget,
+      variancePercent: budget === 0 ? null : ((actual - budget) / Math.abs(budget)) * 100,
+      favorable: key === 'expense' ? actual <= budget : actual >= budget,
+    });
+    return [
+      total('income', 'accounting.budget.totalIncome', c.totalBudgetIncome, c.totalActualIncome),
+      total('expense', 'accounting.budget.totalExpense', c.totalBudgetExpense, c.totalActualExpense),
+      total('net', 'accounting.budget.netIncome', c.netBudget, c.netActual),
+    ];
+  });
   protected readonly form = signal<FormGroup>(new FormGroup({}));
 
   /** Existing budget id per account (full-year row), so save knows update vs create vs delete. */

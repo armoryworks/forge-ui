@@ -12,6 +12,16 @@
 
 .acct-view-bar {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-md;
   margin-bottom: $sp-md;
+
+  app-view-mode-toggle {
+    margin-left: auto;
+  }
+}
+
+.stmt-period-note {
+  margin: 0 0 $sp-sm;
 }

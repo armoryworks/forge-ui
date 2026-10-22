@@ -99,6 +99,7 @@ describe('PeriodCloseComponent', () => {
     http.expectOne(`${base}/periods/112/close-checklist`).flush(checklist('2026-12-31', true));
 
     expect(c.checklistLabel({ key: 'AR_TIES', label: 'x', passed: true, detail: '' })).toBe('accounting.periodClose.checklist.arTies');
+    expect(c.checklistLabel({ key: 'PENDING_JE', label: 'x', passed: true, detail: '' })).toBe('accounting.periodClose.checklist.noPendingEntries');
     expect(c.checklistLabel({ key: 'NEW_ITEM', label: 'Server label', passed: true, detail: '' })).toBe('Server label');
   });
 });

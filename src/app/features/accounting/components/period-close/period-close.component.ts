@@ -29,6 +29,7 @@ const CHECKLIST_LABEL_KEYS: Readonly<Record<string, string>> = {
   GRNI_RECONCILED: 'accounting.periodClose.checklist.grniReconciled',
   AR_TIES: 'accounting.periodClose.checklist.arTies',
   AP_TIES: 'accounting.periodClose.checklist.apTies',
+  PENDING_JE: 'accounting.periodClose.checklist.noPendingEntries',
 };
 
 interface ShownChecklist {

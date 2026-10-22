@@ -1,9 +1,9 @@
 <app-page-layout [pageTitle]="'accounting.journalEditor.title' | translate">
   <ng-container content>
     @if (original(); as o) {
-      <section class="je-original" [attr.aria-label]="'accounting.journalEditor.correcting' | translate: { number: o.entryNumber }">
+      <section class="je-original" [attr.aria-label]="(resubmitting() ? 'accounting.journalEditor.resubmitting' : 'accounting.journalEditor.correcting') | translate: { number: o.entryNumber }">
         <div class="je-original__head">
-          <span class="je-original__title">{{ 'accounting.journalEditor.correcting' | translate: { number: o.entryNumber } }}</span>
+          <span class="je-original__title">{{ (resubmitting() ? 'accounting.journalEditor.resubmitting' : 'accounting.journalEditor.correcting') | translate: { number: o.entryNumber } }}</span>
           <span class="chip" [class.chip--warning]="o.status === 'Reversed'" [class.chip--success]="o.status === 'Posted'">{{ o.status }}</span>
           <span class="je-original__memo">{{ o.memo }}</span>
         </div>

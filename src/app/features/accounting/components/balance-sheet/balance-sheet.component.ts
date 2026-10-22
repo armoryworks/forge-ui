@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { ViewModeToggleComponent } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import {
@@ -22,14 +23,15 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { BalanceSheet } from '../../models/accounting.models';
 import { BalanceSheetVisualComponent } from './balance-sheet-visual.component';
-
-const DEFAULT_BOOK_ID = 1;
+import { StatementPeriodComponent } from '../statement-period/statement-period.component';
+import { StatementPeriod, bookIdFromParams, periodFromParams, samePeriod } from '../../utils/statement-period';
 
 @Component({
   selector: 'app-balance-sheet',
   standalone: true,
   imports: [
     DecimalPipe,
+    DateOnlyPipe,
     ReactiveFormsModule,
     TranslatePipe,
     PageHeaderComponent,
@@ -37,6 +39,7 @@ const DEFAULT_BOOK_ID = 1;
     ToggleComponent,
     ViewModeToggleComponent,
     BalanceSheetVisualComponent,
+    StatementPeriodComponent,
   ],
   templateUrl: './balance-sheet.component.html',
   styleUrl: './balance-sheet.component.scss',
@@ -71,6 +74,19 @@ export class BalanceSheetComponent {
   );
   protected readonly compareControl = new FormControl<boolean>(false, { nonNullable: true });
 
+  private readonly params = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  /** As-of date, mirrored to `?to=`; empty is today. */
+  protected readonly period = computed(() => periodFromParams(this.params()), { equal: samePeriod });
+  private readonly bookId = computed(() => bookIdFromParams(this.params()));
+
+  protected setPeriod(period: StatementPeriod): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { from: null, to: period.to },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   protected setViewMode(mode: AccountingViewMode): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -101,6 +117,8 @@ export class BalanceSheetComponent {
     // URL compare state drives the (re)load. Runs on init and whenever it flips.
     effect(() => {
       this.compare();
+      this.period();
+      this.bookId();
       this.load();
     });
   }
@@ -109,7 +127,7 @@ export class BalanceSheetComponent {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .getBalanceSheet(DEFAULT_BOOK_ID, null, this.compare())
+      .getBalanceSheet(this.bookId(), this.period().to, this.compare())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {
