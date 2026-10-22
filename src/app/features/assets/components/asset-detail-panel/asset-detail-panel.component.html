@@ -61,6 +61,38 @@
         </div>
       </div>
 
+      @if (hasAcquisitionDetails(asset)) {
+        <div class="info-section" data-testid="asset-acquisition-section">
+          <h4 class="info-section__title">{{ 'assets.acquisitionSection' | translate }}</h4>
+          <div class="info-grid">
+            @if (asset.acquisitionCost !== null && asset.acquisitionCost !== undefined) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.acquisitionCost' | translate }}</span>
+                <span class="info-value"><app-currency-display [value]="asset.acquisitionCost" /></span>
+              </div>
+            }
+            @if (asset.depreciationMethod) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.depreciationMethod' | translate }}</span>
+                <span class="info-value">{{ ('assets.depreciation.' + asset.depreciationMethod) | translate }}</span>
+              </div>
+            }
+            @if (asset.workCenterCode || asset.workCenterId) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.workCenter' | translate }}</span>
+                <span class="info-value">{{ asset.workCenterCode || ('#' + asset.workCenterId) }}</span>
+              </div>
+            }
+            @if (asset.glAccount) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.glAccountLabel' | translate }}</span>
+                <span class="info-value mono" [matTooltip]="'assets.glAccountSyncHint' | translate" matTooltipPosition="above">{{ asset.glAccount }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       @if (asset.assetType === 'Tooling') {
         <div class="info-section">
           <h4 class="info-section__title">{{ 'assets.toolingDetails' | translate }}</h4>

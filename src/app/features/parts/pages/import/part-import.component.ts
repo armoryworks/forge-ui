@@ -24,7 +24,9 @@ interface CsvParseRow {
  * Part bulk import — upload a CSV (or paste comma-/tab-separated rows), the page parses + sends
  * to the preview endpoint (classifies each row new / duplicate-in-batch / duplicate-existing /
  * invalid without persisting), renders a per-row status table, then commits the new rows. Part
- * numbers are server-issued on commit and surfaced back per row. Column aliases:
+ * numbers are server-issued: preview shows the number each new row would get, commit the one it
+ * got, and the page stays put so the result can be read. Rows with data but no name are kept so
+ * the server reports them as invalid; fully blank rows are dropped. Column aliases:
  *   name/part/partname/description(→name only if no name col) → name;
  *   description/desc/notes → description; procurement/source/make-buy → procurementSource;
  *   class/inventoryclass/category → inventoryClass; partnumber/mpn/sku/externalid → externalId.
@@ -51,9 +53,11 @@ export class PartImportPageComponent {
   protected readonly preview = signal<BulkPartIntakeResponse | null>(null);
   protected readonly working = signal(false);
   protected readonly committing = signal(false);
+  protected readonly committed = signal(false);
 
   protected readonly canPreview = computed(() => this.parsedRows().length > 0 && !this.working());
-  protected readonly canCommit = computed(() => (this.preview()?.createdCount ?? 0) > 0 && !this.committing());
+  protected readonly canCommit = computed(() =>
+    (this.preview()?.createdCount ?? 0) > 0 && !this.committing() && !this.committed());
 
   private readonly resultByKey = computed(() => {
     const map = new Map<string, BulkPartIntakeRowResult>();
@@ -69,7 +73,7 @@ export class PartImportPageComponent {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => this.parseCsv(String(reader.result ?? ''));
-    reader.onerror = () => this.parseErrors.set(['Failed to read file.']);
+    reader.onerror = () => this.parseErrors.set([this.translate.instant('parts.importPage.readFailed')]);
     reader.readAsText(file);
     input.value = '';
   }
@@ -80,9 +84,10 @@ export class PartImportPageComponent {
 
   private parseCsv(text: string): void {
     this.preview.set(null);
+    this.committed.set(false);
     if (!text.trim()) {
       this.parsedRows.set([]);
-      this.parseErrors.set(['No content to parse.']);
+      this.parseErrors.set([this.translate.instant('parts.importPage.noContent')]);
       return;
     }
     const result: ParseResult<CsvParseRow> = parse<CsvParseRow>(text, {
@@ -96,14 +101,16 @@ export class PartImportPageComponent {
       for (const err of result.errors.slice(0, 5)) errors.push(`Row ${err.row}: ${err.message}`);
     }
 
-    const rows: BulkPartIntakeRow[] = (result.data ?? []).map((raw, idx) => ({
+    const dataRows = (result.data ?? []).filter(raw => Object.values(raw).some(v => String(v ?? '').trim() !== ''));
+    const rows: BulkPartIntakeRow[] = dataRows.map((raw, idx) => ({
       externalRowKey: `r${idx + 1}`,
       name: pick(raw, 'name', 'part', 'partname', 'part name', 'part_name', 'title') ?? '',
       description: pick(raw, 'description', 'desc', 'notes', 'note'),
       procurementSource: pick(raw, 'procurementsource', 'procurement', 'source', 'make/buy', 'makebuy', 'make buy'),
       inventoryClass: pick(raw, 'inventoryclass', 'inventory class', 'class', 'category', 'type'),
       externalId: pick(raw, 'externalid', 'external id', 'partnumber', 'part number', 'part#', 'part #', 'mpn', 'sku', 'number'),
-    })).filter(r => r.name);
+    }));
+    if (rows.length === 0) errors.push(this.translate.instant('parts.importPage.noDataRows'));
 
     this.parsedRows.set(rows);
     this.parseErrors.set(errors);
@@ -122,13 +129,11 @@ export class PartImportPageComponent {
     this.service.bulkIntakeCommit({ rows: this.parsedRows() }).subscribe({
       next: (resp) => {
         this.committing.set(false);
+        this.committed.set(true);
         this.preview.set(resp);
         this.snackbar.success(this.translate.instant('parts.importPage.committed', {
           created: resp.createdCount, total: resp.totalRows,
         }));
-        if (resp.createdCount > 0) {
-          setTimeout(() => this.router.navigate(['/parts']), 1200);
-        }
       },
       error: () => this.committing.set(false),
     });
@@ -145,7 +150,12 @@ export class PartImportPageComponent {
   }
 
   protected statusLabel(status: BulkPartIntakeRowStatus): string {
+    if (status === 'Created' && this.committed()) return this.translate.instant('parts.importPage.importedStatus');
     return this.translate.instant(`parts.importPage.status.${status}`);
+  }
+
+  protected viewParts(): void {
+    this.router.navigate(['/parts']);
   }
 
   protected resultFor(rowKey: string): BulkPartIntakeRowResult | undefined {
@@ -156,6 +166,7 @@ export class PartImportPageComponent {
     this.parsedRows.set([]);
     this.parseErrors.set([]);
     this.preview.set(null);
+    this.committed.set(false);
     this.pasteControl.setValue('');
   }
 }

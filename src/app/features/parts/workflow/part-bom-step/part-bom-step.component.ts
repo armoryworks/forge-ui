@@ -17,6 +17,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { BOMLine } from '../../models/bom-line.model';
@@ -100,7 +101,7 @@ export class PartBomStepComponent {
 
   protected readonly form = new FormGroup({
     childPartId: new FormControl<number | null>(null, { validators: [Validators.required] }),
-    quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.01)] }),
+    quantity: new FormControl(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001), maxDecimalsValidator(4, this.translate.instant('parts.bomQty'), this.translate)] }),
     sourceType: new FormControl<BOMSourceType>('Buy', { nonNullable: true }),
     referenceDesignator: new FormControl(''),
     leadTimeDays: new FormControl<number | null>(null),

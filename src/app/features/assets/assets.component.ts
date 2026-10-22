@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subject, debounceTime, filter, map, merge } from 'rxjs';
 import { AssetsService } from './services/assets.service';
 import { AssetItem } from './models/asset-item.model';
 import { AssetType } from './models/asset-type.type';
@@ -25,6 +25,7 @@ import { ToggleComponent } from '../../shared/components/toggle/toggle.component
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult } from './components/asset-detail-dialog/asset-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { maxDecimalsValidator } from '../../shared/validators/max-decimals.validator';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
@@ -59,9 +60,8 @@ export class AssetsComponent implements OnInit {
   protected readonly typeFilterControl = new FormControl<AssetType | null>(null);
   protected readonly statusFilterControl = new FormControl<AssetStatus | null>(null);
 
-  private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
-  private readonly typeFilter = toSignal(this.typeFilterControl.valueChanges.pipe(startWith(null as AssetType | null)), { initialValue: null as AssetType | null });
-  private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith(null as AssetStatus | null)), { initialValue: null as AssetStatus | null });
+  protected readonly appliedSearch = signal('');
+  private readonly searchRequests = new Subject<string | null>();
 
   // Dialog
   protected readonly showDialog = signal(false);
@@ -81,10 +81,13 @@ export class AssetsComponent implements OnInit {
     toolLifeExpectancy: new FormControl<number | null>(null),
     currentShotCount: new FormControl<number | null>(null, [Validators.min(0)]),
     // Phase 3 F4 — full-record fields. All optional on create.
-    acquisitionCost: new FormControl<number | null>(null, [Validators.min(0), Validators.max(1_000_000_000)]),
+    acquisitionCost: new FormControl<number | null>(null, [
+      Validators.min(0), Validators.max(1_000_000_000),
+      maxDecimalsValidator(2, this.translate.instant('assets.acquisitionCost'), this.translate),
+    ]),
     depreciationMethod: new FormControl<'StraightLine' | 'DecliningBalance' | 'UnitsOfProduction' | null>(null),
     workCenterId: new FormControl<number | null>(null),
-    glAccount: new FormControl<string | null>(null),
+    glAccount: new FormControl<string | null>(null, [Validators.maxLength(100)]),
   });
 
   // Depreciation-method options match the server enum exactly.
@@ -152,6 +155,24 @@ export class AssetsComponent implements OnInit {
   ];
 
   constructor() {
+    merge(
+      this.searchControl.valueChanges.pipe(
+        debounceTime(300),
+        map(term => (term ?? '').trim()),
+        filter(term => term !== this.appliedSearch()),
+      ),
+      this.searchRequests.pipe(map(term => (term ?? '').trim())),
+    )
+      .pipe(takeUntilDestroyed())
+      .subscribe(term => {
+        this.appliedSearch.set(term);
+        this.loadAssets();
+      });
+
+    merge(this.typeFilterControl.valueChanges, this.statusFilterControl.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.loadAssets());
+
     this.loadAssets();
     // A32 — populate the work-center picker; silently empty if not permitted.
     this.schedulingService.getWorkCenters().subscribe({
@@ -169,9 +190,9 @@ export class AssetsComponent implements OnInit {
 
   protected loadAssets(): void {
     this.loading.set(true);
-    const type = this.typeFilter() ?? undefined;
-    const status = this.statusFilter() ?? undefined;
-    const search = (this.searchTerm() ?? '').trim() || undefined;
+    const type = this.typeFilterControl.value ?? undefined;
+    const status = this.statusFilterControl.value ?? undefined;
+    const search = this.appliedSearch() || undefined;
     this.assetsService.getAssets(type, status, search).subscribe({
       next: (assets) => {
         this.assets.set(assets);
@@ -193,8 +214,8 @@ export class AssetsComponent implements OnInit {
     }
   }
 
-  protected applyFilters(): void { this.loadAssets(); }
-  protected clearSearch(): void { this.searchControl.setValue(''); this.loadAssets(); }
+  protected applyFilters(): void { this.searchRequests.next(this.searchControl.value); }
+  protected clearSearch(): void { this.searchControl.setValue(''); this.applyFilters(); }
 
   protected openAssetDetail(asset: AssetItem): void {
     const ref = this.detailDialog.open<AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult | undefined>(
@@ -238,6 +259,10 @@ export class AssetsComponent implements OnInit {
       cavityCount: asset.cavityCount,
       toolLifeExpectancy: asset.toolLifeExpectancy,
       currentShotCount: asset.currentShotCount,
+      acquisitionCost: asset.acquisitionCost ?? null,
+      depreciationMethod: asset.depreciationMethod ?? null,
+      workCenterId: asset.workCenterId ?? null,
+      glAccount: asset.glAccount ?? null,
     });
     this.showDialog.set(true);
   }
@@ -267,6 +292,10 @@ export class AssetsComponent implements OnInit {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
         currentShotCount: form.currentShotCount ?? undefined,
+        acquisitionCost: form.acquisitionCost ?? undefined,
+        depreciationMethod: form.depreciationMethod ?? undefined,
+        workCenterId: form.workCenterId ?? undefined,
+        glAccount: form.glAccount?.trim() ?? '',
       }).subscribe({
         next: () => {
           this.saving.set(false);

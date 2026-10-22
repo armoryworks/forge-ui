@@ -6,10 +6,10 @@
     <button
       type="button"
       class="validation-button__trigger"
-      [attr.aria-label]="(count() === 1 ? 'validationButton.triggerAriaOne' : 'validationButton.triggerAriaOther') | translate: { count: count() }"
+      [attr.aria-label]="triggerAriaLabel()"
       [attr.aria-expanded]="open()"
-      [matTooltip]="'validationButton.show' | translate"
-      matTooltipPosition="above"
+      [matTooltip]="triggerTooltip()"
+      [matTooltipPosition]="tooltipPosition()"
       (click)="toggle()">
       <span class="material-icons-outlined validation-button__icon">warning</span>
       <span class="validation-button__count">{{ count() }}</span>

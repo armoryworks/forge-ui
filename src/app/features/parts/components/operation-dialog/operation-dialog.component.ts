@@ -18,6 +18,7 @@ import { ActivityTimelineComponent } from '../../../../shared/components/activit
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AuthSrcDirective } from '../../../../shared/directives/auth-src.directive';
@@ -62,6 +63,11 @@ export interface OperationDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OperationDialogComponent implements OnInit {
+  /** Largest setup / lot time the server's numeric(10,2) minute columns hold. */
+  static readonly MAX_MINUTES = 99_999_999.99;
+  /** Largest turn time the server's numeric(5,1) column holds. */
+  static readonly MAX_TURN_TIME_DAYS = 9_999.9;
+
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   @ViewChild('subcontractVendorPicker') protected subcontractVendorPicker?: EntityPickerComponent;
 
@@ -110,8 +116,14 @@ export class OperationDialogComponent implements OnInit {
     estHours: new FormControl<number | null>(this.estParts.hours, [Validators.min(0)]),
     estMinutes: new FormControl<number | null>(this.estParts.minutes, [Validators.min(0)]),
     estSeconds: new FormControl<number | null>(this.estParts.seconds, [Validators.min(0), Validators.max(59.999)]),
-    setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [Validators.min(0)]),
-    runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [Validators.min(0)]),
+    setupMinutes: new FormControl<number | null>(this.data.operation?.setupMinutes ?? null, [
+      Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
+      maxDecimalsValidator(2, this.translate.instant('parts.setupTime'), this.translate),
+    ]),
+    runMinutesLot: new FormControl<number | null>(this.data.operation?.runMinutesLot ?? null, [
+      Validators.min(0), Validators.max(OperationDialogComponent.MAX_MINUTES),
+      maxDecimalsValidator(2, this.translate.instant('parts.lotTime'), this.translate),
+    ]),
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
@@ -120,7 +132,10 @@ export class OperationDialogComponent implements OnInit {
     // shows / hides the two dependent fields based on the toggle.
     isSubcontract: new FormControl(this.data.operation?.isSubcontract ?? false),
     subcontractVendorId: new FormControl<number | null>(this.data.operation?.subcontractVendorId ?? null),
-    subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [Validators.min(0.1)]),
+    subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [
+      Validators.min(0.1), Validators.max(OperationDialogComponent.MAX_TURN_TIME_DAYS),
+      maxDecimalsValidator(1, this.translate.instant('parts.subcontractTurnTimeDays'), this.translate),
+    ]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {

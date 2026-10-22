@@ -3,9 +3,12 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { CurrencyService } from '../../../../shared/services/currency.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { PartDetail } from '../../models/part-detail.model';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { PartDetail, PartStandardCost } from '../../models/part-detail.model';
 import { PartLandedCostComponent } from './part-landed-cost.component';
 import { PartStandardCostRollComponent } from './part-standard-cost-roll.component';
 import { UNIT_DECIMALS } from '../../../../shared/utils/money';
@@ -14,17 +17,17 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
 /**
  * Pillar 4 — Cost cluster.
  *
- * Renders the part's manual cost override and a read-only badge for the
- * current cost-calculation snapshot id and the (Pillar 2) valuation class
- * label. Hidden by the layout resolver for Phantom combos (P1, P3) which
+ * Renders the part's manual cost override, the effective standard cost the
+ * books post (override or current calculation, with its breakdown) and the
+ * (Pillar 2) valuation class label. Hidden by the layout resolver for Phantom combos (P1, P3) which
  * derive cost from their exploded children.
  */
 @Component({
   selector: 'app-part-cost-cluster',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe,
-    CurrencyInputComponent, ValidationButtonComponent,
+    ReactiveFormsModule, TranslatePipe, CurrencyPipe, DatePipe,
+    CurrencyInputComponent, CurrencyDisplayComponent, ValidationButtonComponent,
     PartLandedCostComponent, PartStandardCostRollComponent,
   ],
   templateUrl: './part-cost-cluster.component.html',
@@ -33,6 +36,7 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
 })
 export class PartCostClusterComponent {
   readonly part = input.required<PartDetail>();
+  protected readonly baseCurrency = inject(CurrencyService).baseCurrency;
   readonly editing = input(false);
   readonly saving = input(false);
 
@@ -71,6 +75,13 @@ export class PartCostClusterComponent {
     (close ? this.saveAndClose : this.save).emit({
       manualCostOverride: v.manualCostOverride ?? null,
     });
+  }
+
+  protected standardSourceKey(std: PartStandardCost): string {
+    if (std.source === 'Calculation') return 'parts.detail.clusters.cost.sourceCalculation';
+    return std.calculatedAmount !== null
+      ? 'parts.detail.clusters.cost.sourceOverrideWithCalc'
+      : 'parts.detail.clusters.cost.sourceOverride';
   }
 
   protected onCancel(): void {

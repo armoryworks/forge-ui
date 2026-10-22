@@ -3,7 +3,8 @@ import { BaseChartDirective } from '../../../../shared/charts/base-chart.directi
 import { ChartConfiguration } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { WorkCenterCostRate } from '../../models/costing.model';
+import { CurrencyService } from '../../../../shared/services/currency.service';
+import { WorkCenterCostRate, workCenterRateLabel } from '../../models/costing.model';
 
 // One hue per rate component: labour blues, machine teal, overhead ambers — so a
 // bar reads as its labour-vs-machine-vs-overhead composition at a glance.
@@ -31,6 +32,7 @@ const MACHINE_OH_FIXED_COLOR = '#b45309';
 export class CostingRatesVisualComponent {
   private readonly locale = inject(LOCALE_ID);
   private readonly translate = inject(TranslateService);
+  private readonly currencyService = inject(CurrencyService);
 
   readonly rates = input.required<WorkCenterCostRate[]>();
 
@@ -38,7 +40,8 @@ export class CostingRatesVisualComponent {
 
   protected readonly chartConfig = computed<ChartConfiguration<'bar'>>(() => {
     const rates = this.rates();
-    const labels = rates.map((r) => `#${r.workCenterId}`);
+    const currency = this.currencyService.baseCurrency();
+    const labels = rates.map(workCenterRateLabel);
 
     return {
       type: 'bar',
@@ -94,7 +97,7 @@ export class CostingRatesVisualComponent {
           tooltip: {
             callbacks: {
               label: (ctx) =>
-                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(this.locale, { style: 'currency', currency: 'USD' })}`,
+                `${ctx.dataset.label}: ${(ctx.raw as number).toLocaleString(this.locale, { style: 'currency', currency })}`,
             },
           },
         },
@@ -106,7 +109,7 @@ export class CostingRatesVisualComponent {
           },
           y: {
             stacked: true,
-            ticks: { callback: (v) => `${v}`, font: { size: 10 } },
+            ticks: { callback: (v) => Number(v).toLocaleString(this.locale, { style: 'currency', currency }), font: { size: 10 } },
           },
         },
       },

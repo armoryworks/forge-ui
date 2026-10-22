@@ -100,23 +100,43 @@ export class PartsComponent {
    */
   protected readonly entitylessDrafts = signal<WorkflowRun[]>([]);
 
+  /** Ghost rows for the entity-less drafts that match the applied search (see {@link buildDraftPartRows}). */
+  private readonly draftRows = computed<PartListRow[]>(() => buildDraftPartRows(
+    this.entitylessDrafts(),
+    this.appliedSearch(),
+    this.translate.instant('parts.drafts.unnamed'),
+  ));
+
+  /**
+   * Entity-less drafts are not Part rows, so they only join the list when the status filter is
+   * All or Draft; under any other status they are counted in {@link hiddenDraftCount} instead.
+   */
+  private readonly showDraftRows = computed(() => {
+    const status = this.statusFilter();
+    return !status || status === 'Draft';
+  });
+
+  /** Drafts kept out of the list by the status filter, offered as a "show drafts" link. */
+  protected readonly hiddenDraftCount = computed(() => this.showDraftRows() ? 0 : this.draftRows().length);
+
   /**
    * Parts list with entity-less workflow drafts prepended as synthetic
-   * "ghost" rows (see {@link buildDraftPartRows}). Each ghost has `_draftRun`
+   * "ghost" rows when the status filter allows them. Each ghost has `_draftRun`
    * set so cell templates can branch on it, takes its label from the part
    * number and name typed into the New Part form (otherwise "Unnamed draft"),
    * and is filtered by the applied search like parts are.
    */
   protected readonly combinedRows = computed<PartListRow[]>(() => [
-    ...(this.pageRequest().pageIndex === 0
-      ? buildDraftPartRows(
-        this.entitylessDrafts(),
-        this.appliedSearch(),
-        this.translate.instant('parts.drafts.unnamed'),
-      )
-      : []),
+    ...(this.pageRequest().pageIndex === 0 && this.showDraftRows() ? this.draftRows() : []),
     ...this.parts(),
   ]);
+
+  /** True when a search or a non-default filter is narrowing the list. */
+  protected readonly hasActiveFilters = computed(() =>
+    !!this.appliedSearch()
+    || this.statusFilter() !== 'Active'
+    || !!this.procurementFilter()
+    || !!this.inventoryClassFilter());
 
   // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
   protected readonly totalCount = signal<number>(0);
@@ -371,6 +391,17 @@ export class PartsComponent {
   protected clearSearch(): void {
     this.searchControl.setValue('');
     this.searchRequests.next('');
+  }
+
+  protected clearFilters(): void {
+    if (this.statusFilterControl.value !== 'Active') this.statusFilterControl.setValue('Active');
+    if (this.procurementFilterControl.value) this.procurementFilterControl.setValue('');
+    if (this.inventoryClassFilterControl.value) this.inventoryClassFilterControl.setValue('');
+    if (this.searchControl.value || this.appliedSearch()) this.clearSearch();
+  }
+
+  protected showDrafts(): void {
+    this.statusFilterControl.setValue('Draft');
   }
 
   // ── Detail Dialog ──

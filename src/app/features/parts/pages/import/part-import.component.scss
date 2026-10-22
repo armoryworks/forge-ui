@@ -75,8 +75,13 @@
 }
 
 .imp-partnum {
-  margin-left: $sp-sm;
   font-family: $font-family-mono;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.imp-message {
+  margin-left: $sp-sm;
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
