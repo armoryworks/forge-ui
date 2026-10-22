@@ -539,18 +539,20 @@ export class LeadsComponent implements OnInit {
 
   protected confirmLost(): void {
     const leadId = this.lostLeadId();
-    if (!leadId) return;
+    if (!leadId || this.saving()) return;
+    this.saving.set(true);
     this.leadsService.updateLead(leadId, {
       status: 'Lost',
       lostReason: this.lostReasonControl.value || undefined,
     }).subscribe({
       next: () => {
+        this.saving.set(false);
         this.showLostDialog.set(false);
         this.lostLeadId.set(null);
         this.lostReasonControl.setValue('');
         this.loadLeads();
       },
-      error: () => undefined,
+      error: () => this.saving.set(false),
     });
   }
 

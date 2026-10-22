@@ -33,6 +33,7 @@
         @if (canManage && !row.capaId && row.status !== 'Closed') {
           <button class="icon-btn" [attr.aria-label]="'ncrDetail.createCapa' | translate"
             [matTooltip]="'ncrDetail.createCapa' | translate" matTooltipPosition="above"
+            [disabled]="creatingCapa().has(row.id)"
             (click)="createCapa(row); $event.stopPropagation()">
             <span class="material-icons-outlined" aria-hidden="true">assignment_turned_in</span>
           </button>

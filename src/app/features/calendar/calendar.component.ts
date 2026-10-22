@@ -70,6 +70,7 @@ export class CalendarComponent implements OnInit {
   protected readonly canReadPoDeliveries = this.auth.hasAnyRole(PO_READ_ROLES);
 
   protected readonly loading = signal(false);
+  protected readonly savingView = signal(false);
   protected readonly allJobs = signal<CalendarJob[]>([]);
   protected readonly currentDate = signal(new Date());
   protected readonly trackTypeOptions = signal<SelectOption[]>([]);
@@ -349,7 +350,8 @@ export class CalendarComponent implements OnInit {
 
   protected saveCurrentView(): void {
     const name = this.newViewNameControl.value.trim();
-    if (!name) return;
+    if (!name || this.savingView()) return;
+    this.savingView.set(true);
     this.service.createSavedView({
       name,
       scope: this.scope(),
@@ -357,10 +359,12 @@ export class CalendarComponent implements OnInit {
       selectedEventTypeIds: [],
     }).subscribe({
       next: (view) => {
+        this.savingView.set(false);
         this.savedViews.update(vs => [...vs, view]);
         this.newViewNameControl.setValue('');
         this.selectedViewControl.setValue(view.id, { emitEvent: false });
       },
+      error: () => this.savingView.set(false),
     });
   }
 

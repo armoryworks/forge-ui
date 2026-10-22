@@ -37,6 +37,7 @@ export class TokenSetupComponent implements OnInit {
 
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);
+  protected readonly submitting = signal(false);
   protected readonly tokenInfo = signal<SetupTokenInfo | null>(null);
 
   /**
@@ -78,7 +79,7 @@ export class TokenSetupComponent implements OnInit {
   protected readonly loading = this.loadingService.isLoading;
 
   protected onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.submitting()) return;
 
     const { password, confirmPassword } = this.form.getRawValue();
     if (password !== confirmPassword) {
@@ -91,6 +92,7 @@ export class TokenSetupComponent implements OnInit {
       return;
     }
 
+    this.submitting.set(true);
     this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.completeSetup({
       token: this.token,
       password: password!,
@@ -100,6 +102,7 @@ export class TokenSetupComponent implements OnInit {
         this.router.navigate([this.layout.getDefaultRoute()]);
       },
       error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
         const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';
         if (err.status >= 500) {
           this.toast.show({ severity: 'error', title: 'Setup failed', message: detail });

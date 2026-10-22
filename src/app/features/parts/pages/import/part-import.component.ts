@@ -125,6 +125,7 @@ export class PartImportPageComponent {
   }
 
   protected commit(): void {
+    if (!this.canCommit()) return;
     this.committing.set(true);
     this.service.bulkIntakeCommit({ rows: this.parsedRows() }).subscribe({
       next: (resp) => {

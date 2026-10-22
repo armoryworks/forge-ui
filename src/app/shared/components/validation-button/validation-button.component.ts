@@ -1,12 +1,16 @@
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   EventEmitter,
   inject,
+  Injector,
   input,
   Output,
   Signal,
@@ -31,6 +35,9 @@ const AUTO_CLOSE_AFTER_CLEAR_MS = 1200;
 })
 export class ValidationButtonComponent {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly violations = input.required<Signal<string[]>>();
   /**
@@ -110,6 +117,7 @@ export class ValidationButtonComponent {
   ];
 
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
+  private clickLatched = false;
 
   constructor() {
     // Auto-close after violations clear, so the user sees the "all-clear" for a moment.
@@ -123,7 +131,25 @@ export class ValidationButtonComponent {
       }
     });
 
-    this.destroyRef.onDestroy(() => this.cancelScheduledClose());
+    const guard = (event: MouseEvent) => this.guardRepeatClick(event);
+    this.host.nativeElement.addEventListener('click', guard, true);
+    this.destroyRef.onDestroy(() => {
+      this.host.nativeElement.removeEventListener('click', guard, true);
+      this.cancelScheduledClose();
+    });
+  }
+
+  private guardRepeatClick(event: MouseEvent): void {
+    const button = (event.target as Element | null)?.closest('button');
+    if (!button || !this.host.nativeElement.contains(button) || button.classList.contains('validation-button__trigger')) return;
+    if (this.clickLatched || this.loading()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    this.clickLatched = true;
+    afterNextRender(() => { this.clickLatched = false; }, { injector: this.injector });
+    this.cdr.markForCheck();
   }
 
   protected toggle(): void {

@@ -69,6 +69,7 @@ export class SetupComponent {
   protected readonly step = signal(0);
   protected readonly path = signal<'quick' | 'full' | null>(null);
   protected readonly loading = this.loadingService.isLoading;
+  protected readonly submitting = signal(false);
 
   // ── Module picker (quick branch) ──
   protected readonly modules = signal<SetupModule[]>([]);
@@ -234,7 +235,7 @@ export class SetupComponent {
 
   // Step 1 (account) -> step 2 (company).
   protected toCompany(): void {
-    if (this.accountForm.invalid) return;
+    if (this.step() !== 1 || this.accountForm.invalid) return;
     this.step.set(2);
   }
 
@@ -262,14 +263,24 @@ export class SetupComponent {
     }
   }
 
+  protected ignoreRepeatClick(event: MouseEvent): void {
+    if (event.detail > 1) event.preventDefault();
+  }
+
+  protected completeFromModules(event: MouseEvent): void {
+    if (event.detail > 1) return;
+    this.onSubmit();
+  }
+
   protected onSubmit(): void {
-    if (this.accountForm.invalid || this.companyForm.invalid) return;
+    if (this.submitting() || this.accountForm.invalid || this.companyForm.invalid) return;
 
     const account = this.accountForm.getRawValue();
     const company = this.companyForm.getRawValue();
     const address = company.address as Record<string, string> | null;
     const isQuick = this.path() === 'quick';
     const selectedModules = isQuick ? Array.from(this.selectedModuleIds()) : undefined;
+    this.submitting.set(true);
 
     this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.setup({
       email: account.email!,
@@ -299,7 +310,10 @@ export class SetupComponent {
         this.router.navigate([target])
           .then((ok) => { if (!ok) this.router.navigate([this.layout.getDefaultRoute()]); });
       },
-      error: (err: HttpErrorResponse) => this.handleError(err),
+      error: (err: HttpErrorResponse) => {
+        this.submitting.set(false);
+        this.handleError(err);
+      },
     });
   }
 

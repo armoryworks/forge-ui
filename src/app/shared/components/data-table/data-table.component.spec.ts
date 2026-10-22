@@ -737,3 +737,40 @@ describe('DataTableComponent · column headers', () => {
     expect(headerTexts(fixture)).toEqual(['Nombre', 'Code']);
   });
 });
+
+describe('DataTableComponent · row click', () => {
+  let table: DataTableComponent;
+  let emitted: unknown[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService(),
+        { provide: ComponentFixtureAutoDetect, useValue: false },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+      ],
+    });
+    table = TestBed.createComponent(DataTableComponent).componentInstance;
+    emitted = [];
+    table.rowClick.subscribe(row => emitted.push(row));
+  });
+
+  it('opens a row on a single click', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 1 }));
+
+    expect(emitted).toEqual([{ id: 1 }]);
+  });
+
+  it('ignores the second click of a double-click that lands on the row', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 2 }));
+
+    expect(emitted).toEqual([]);
+  });
+
+  it('still opens a row from keyboard activation, which reports no click count', () => {
+    table.onRowClick({ id: 1 }, new MouseEvent('click', { detail: 0 }));
+
+    expect(emitted).toEqual([{ id: 1 }]);
+  });
+});

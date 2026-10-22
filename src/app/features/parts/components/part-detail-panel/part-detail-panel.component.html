@@ -481,9 +481,9 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeBomDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="bomViolations">
+      <app-validation-button [violations]="bomViolations" [loading]="savingBomLine()">
         <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
-          [disabled]="bomForm.invalid"
+          [disabled]="bomForm.invalid || savingBomLine()"
           (click)="saveBomLine()">{{ 'parts.addEntry' | translate }}</button>
       </app-validation-button>
     </div>

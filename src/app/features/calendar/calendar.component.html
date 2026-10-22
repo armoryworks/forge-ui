@@ -59,7 +59,7 @@
       <app-select [label]="'calendar.savedViews.label' | translate" [formControl]="selectedViewControl" [options]="savedViewOptions()" />
       <div class="calendar-saved-views__save">
         <app-input [label]="'calendar.savedViews.namePlaceholder' | translate" [formControl]="newViewNameControl" />
-        <button class="action-btn action-btn--sm" (click)="saveCurrentView()" [attr.aria-label]="'calendar.savedViews.save' | translate">
+        <button class="action-btn action-btn--sm" [disabled]="savingView()" (click)="saveCurrentView()" [attr.aria-label]="'calendar.savedViews.save' | translate">
           <span class="material-icons-outlined">save</span>
           {{ 'calendar.savedViews.save' | translate }}
         </button>

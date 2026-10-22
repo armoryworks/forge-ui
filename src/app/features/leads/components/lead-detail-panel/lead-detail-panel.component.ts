@@ -279,16 +279,19 @@ export class LeadDetailPanelComponent {
 
   protected confirmLost(): void {
     const lead = this.lead();
-    if (!lead) return;
+    if (!lead || this.saving()) return;
+    this.saving.set(true);
     this.leadsService.updateLead(lead.id, {
       status: 'Lost',
       lostReason: this.lostReasonControl.value || undefined,
     }).subscribe({
       next: (updated) => {
+        this.saving.set(false);
         this.lead.set(updated);
         this.showLostDialog.set(false);
         this.lostReasonControl.setValue('');
       },
+      error: () => this.saving.set(false),
     });
   }
 

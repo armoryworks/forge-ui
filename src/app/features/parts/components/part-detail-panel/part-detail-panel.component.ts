@@ -151,6 +151,7 @@ export class PartDetailPanelComponent {
   protected readonly detailLoading = signal(false);
   protected readonly loadError = signal<unknown>(null);
   protected readonly saving = signal(false);
+  protected readonly savingBomLine = signal(false);
   /** Whether the global edit toggle is on; clusters render edit forms. */
   protected readonly editing = signal(false);
 
@@ -622,10 +623,11 @@ export class PartDetailPanelComponent {
   }
 
   protected saveBomLine(): void {
-    if (this.bomForm.invalid) return;
+    if (this.savingBomLine() || this.bomForm.invalid) return;
     const p = this.part();
     if (!p) return;
     const form = this.bomForm.getRawValue();
+    this.savingBomLine.set(true);
     this.partsService.createBOMLine(p.id, {
       childPartId: form.childPartId!,
       quantity: form.quantity!,
@@ -636,11 +638,13 @@ export class PartDetailPanelComponent {
       notes: form.notes || undefined,
     }).subscribe({
       next: (detail) => {
+        this.savingBomLine.set(false);
         this.part.set(detail);
         this.closeBomDialog();
         this.bomRefreshToken.update(v => v + 1);
         this.snackbar.success(this.translate.instant('parts.bomLineAdded'));
       },
+      error: () => this.savingBomLine.set(false),
     });
   }
 

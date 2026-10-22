@@ -191,7 +191,7 @@ export class EcoListComponent implements OnInit {
   }
 
   saveEco(): void {
-    if (this.createForm.invalid) return;
+    if (this.createForm.invalid || this.saving()) return;
     this.saving.set(true);
     const form = this.createForm.getRawValue();
     this.ecoService.createEco({

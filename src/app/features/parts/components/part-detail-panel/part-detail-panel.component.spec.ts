@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { FormGroup } from '@angular/forms';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
@@ -22,13 +23,17 @@ class FakeLoader implements TranslateLoader {
 type PanelInternals = {
   part: () => PartDetail | null;
   onRevised(): void;
+  bomForm: FormGroup;
+  saveBomLine(): void;
 };
 
 describe('PartDetailPanelComponent', () => {
   let getPartById: ReturnType<typeof vi.fn>;
+  let createBOMLine: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getPartById = vi.fn().mockReturnValue(of({ id: 7, revision: 'A' } as PartDetail));
+    createBOMLine = vi.fn(() => new Subject());
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -37,6 +42,7 @@ describe('PartDetailPanelComponent', () => {
           provide: PartsService,
           useValue: {
             getPartById,
+            createBOMLine,
             getPartFiles: vi.fn().mockReturnValue(of([])),
             getPartInventorySummary: vi.fn().mockReturnValue(of(null)),
           },
@@ -65,5 +71,33 @@ describe('PartDetailPanelComponent', () => {
     expect(getPartById).toHaveBeenCalledTimes(2);
     expect(getPartById).toHaveBeenLastCalledWith(7);
     expect(c.part()?.revision).toBe('B');
+  });
+
+  function bomReady(): PanelInternals {
+    const component = TestBed.runInInjectionContext(() => new PartDetailPanelComponent());
+    mockSignalInputs(component, { partId: 7 });
+    TestBed.flushEffects();
+    const c = component as unknown as PanelInternals;
+    c.bomForm.patchValue({ childPartId: 12, quantity: 2 });
+    return c;
+  }
+
+  it('adds one BOM line when Add is pressed twice before the server answers', () => {
+    const c = bomReady();
+
+    c.saveBomLine();
+    c.saveBomLine();
+
+    expect(createBOMLine).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets Add BOM line be pressed again after the server rejects the first press', () => {
+    createBOMLine.mockReturnValue(throwError(() => new Error('500')));
+    const c = bomReady();
+
+    c.saveBomLine();
+    c.saveBomLine();
+
+    expect(createBOMLine).toHaveBeenCalledTimes(2);
   });
 });

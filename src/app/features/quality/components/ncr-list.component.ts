@@ -71,6 +71,7 @@ export class NcrListComponent implements OnInit {
   protected readonly canManage = this.auth.hasAnyRole(QUALITY_MANAGER_ROLES);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  protected readonly creatingCapa = signal<ReadonlySet<number>>(new Set());
   protected readonly ncrs = signal<NonConformance[]>([]);
   protected readonly showCreateDialog = signal(false);
   protected readonly showDispositionDialog = signal(false);
@@ -285,12 +286,22 @@ export class NcrListComponent implements OnInit {
   }
 
   createCapa(ncr: NonConformance): void {
+    if (this.creatingCapa().has(ncr.id)) return;
+    this.setCreatingCapa(ncr.id, true);
     this.ncrCapaService.createCapaFromNcr(ncr.id, ncr.detectedById).subscribe({
       next: capa => {
+        this.setCreatingCapa(ncr.id, false);
         this.snackbar.success(this.translate.instant('ncrDetail.capaCreated', { number: capa.capaNumber }));
         this.loadNcrs();
       },
+      error: () => this.setCreatingCapa(ncr.id, false),
     });
+  }
+
+  private setCreatingCapa(ncrId: number, creating: boolean): void {
+    const next = new Set(this.creatingCapa());
+    if (creating) next.add(ncrId); else next.delete(ncrId);
+    this.creatingCapa.set(next);
   }
 
   getStatusClass(status: string): string {
