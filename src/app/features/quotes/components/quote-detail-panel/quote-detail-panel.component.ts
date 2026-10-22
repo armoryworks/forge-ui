@@ -45,6 +45,8 @@ import { PaymentSchedule } from '../../../../shared/models/payment-schedule.mode
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 /** Per-milestone action availability for the panel's schedule section. */
 interface MilestoneActionRow {
@@ -115,8 +117,14 @@ export class QuoteDetailPanelComponent {
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
-    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    quantity: new FormControl<number>(1, { nonNullable: true, validators: [
+      Validators.required, Validators.min(0.0001),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty'), this.translate),
+    ] }),
+    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.unitPrice'), this.translate),
+    ] }),
   });
 
   constructor() {

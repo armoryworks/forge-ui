@@ -118,7 +118,7 @@
                   <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
                   <td class="lines-table__right lines-table__margin">
                     @if (typeof line.effectiveMargin === 'number') {
                       {{ line.effectiveMargin * 100 | number:'1.1-1' }}%
@@ -194,7 +194,7 @@
             }
             <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
             <app-input [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
-            <app-currency-input [label]="'quotes.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+            <app-currency-input [label]="'quotes.unitPrice' | translate" formControlName="unitPrice" [required]="true" step="0.0001" />
             <div class="line-edit-form__actions">
               <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
               <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>

@@ -46,6 +46,8 @@ import { ManualNumberSettingsService } from '../../../../shared/services/manual-
 import { NumberLockInfoComponent } from '../../../../shared/components/number-lock-info/number-lock-info.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -598,8 +600,14 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly addLineForm = new FormGroup({
     partId: new FormControl<number | null>(null),
     description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
-    unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    quantity: new FormControl<number | null>(null, [
+      Validators.required, Validators.min(0.0001),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.quantity'), this.translate),
+    ]),
+    unitPrice: new FormControl<number | null>(null, [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.unitPrice'), this.translate),
+    ]),
   });
 
   protected readonly addLineViolations = FormValidationService.getViolations(this.addLineForm, {

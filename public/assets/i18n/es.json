@@ -6038,7 +6038,8 @@
       "pattern": "El formato de {{label}} no es válido",
       "wholeNumber": "{{label}} debe ser un número entero",
       "invalid": "{{label}} no es válido"
-    }
+    },
+    "maxDecimals": "{{field}} puede tener como máximo {{max}} decimales"
   },
   "invoices": {
     "invoiceNumberLabel": "Número de factura",
@@ -11738,12 +11739,15 @@
       "quantityInvalid": "Línea {{line}}: la cantidad debe ser mayor que 0",
       "qtyToBillNegative": "Línea {{line}}: la cantidad a facturar no puede ser negativa",
       "quantityExceedsBillable": "Línea {{line}}: la cantidad excede lo facturable (máx. {{max}})",
-      "unitPriceInvalid": "Línea {{line}}: el precio unitario debe ser 0 o mayor"
+      "unitPriceInvalid": "Línea {{line}}: el precio unitario debe ser 0 o mayor",
+      "quantityDecimals": "Línea {{line}}: la cantidad admite como máximo 4 decimales",
+      "unitPriceDecimals": "Línea {{line}}: el precio unitario admite como máximo 4 decimales"
     },
     "applicationViolations": {
       "amountExceedsBalance": "Aplicación {{row}}: el monto excede el saldo de la factura (máx. {{max}})",
       "amountInvalid": "Aplicación {{row}}: el monto no puede ser negativo",
-      "fxRateInvalid": "Aplicación {{row}}: el tipo de cambio de liquidación debe ser mayor que 0"
+      "fxRateInvalid": "Aplicación {{row}}: el tipo de cambio de liquidación debe ser mayor que 0",
+      "amountDecimals": "Aplicación {{row}}: el monto admite como máximo 2 decimales"
     },
     "applications": "Aplicaciones a Facturas",
     "noApplications": "Sin aplicaciones a facturas",

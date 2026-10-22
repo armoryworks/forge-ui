@@ -26,6 +26,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 interface LineEntry {
   partId: number;
@@ -127,18 +129,26 @@ export class QuoteDialogComponent {
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
     // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
-    quantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
-    unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    quantity: new FormControl<number>(1, [
+      Validators.required, Validators.min(0.0001),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('quotes.qty'), this.translate),
+    ]),
+    unitPrice: new FormControl<number>(0, [
+      Validators.required, Validators.min(0),
+      maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('common.price'), this.translate),
+    ]),
   });
-
-  protected readonly lineTotal = computed(() =>
-    this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
-  );
 
   protected readonly taxRateValue = signal<number>(this.form.controls.taxRate.value ?? 0);
 
-  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
-  protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
+  protected readonly lineTotal = computed(() =>
+    roundMoney(this.lines().reduce((sum, l) => sum + this.lineAmount(l), 0)));
+  protected readonly taxAmount = computed(() => roundMoney(this.lineTotal() * (this.taxRateValue() ?? 0) / 100));
+  protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
+
+  protected lineAmount(line: LineEntry): number {
+    return roundMoney(line.quantity * line.unitPrice);
+  }
 
   protected readonly draftConfig: DraftConfig = {
     entityType: 'quote',

@@ -6045,7 +6045,8 @@
       "pattern": "{{label}} format is invalid",
       "wholeNumber": "{{label}} must be a whole number",
       "invalid": "{{label}} is invalid"
-    }
+    },
+    "maxDecimals": "{{field}} can have at most {{max}} decimal places"
   },
   "invoices": {
     "invoiceNumberLabel": "Invoice Number",
@@ -11738,12 +11739,15 @@
       "quantityInvalid": "Line {{line}}: quantity must be greater than 0",
       "qtyToBillNegative": "Line {{line}}: quantity to bill cannot be negative",
       "quantityExceedsBillable": "Line {{line}}: quantity exceeds billable (max {{max}})",
-      "unitPriceInvalid": "Line {{line}}: unit price must be 0 or greater"
+      "unitPriceInvalid": "Line {{line}}: unit price must be 0 or greater",
+      "quantityDecimals": "Line {{line}}: quantity can have at most 4 decimal places",
+      "unitPriceDecimals": "Line {{line}}: unit price can have at most 4 decimal places"
     },
     "applicationViolations": {
       "amountExceedsBalance": "Application {{row}}: amount exceeds the bill balance (max {{max}})",
       "amountInvalid": "Application {{row}}: amount cannot be negative",
-      "fxRateInvalid": "Application {{row}}: settlement FX rate must be greater than 0"
+      "fxRateInvalid": "Application {{row}}: settlement FX rate must be greater than 0",
+      "amountDecimals": "Application {{row}}: amount can have at most 2 decimal places"
     },
     "applications": "Bill Applications",
     "noApplications": "No bill applications",
