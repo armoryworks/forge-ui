@@ -299,7 +299,7 @@ $rail-label-max-height: 20em;
   // Hover a non-active parent: grow to reveal its name vertically in the
   // light-blue attention tone (the icon stays put).
   &:not(.rail-item--active):not(.rail-item--back):hover {
-    color: var(--attention);
+    color: var(--attention-tint-text);
     background: color-mix(in srgb, var(--attention-hover) 35%, transparent);
     min-height: 128px;
     padding: $sp-md 0;
@@ -327,7 +327,7 @@ $rail-label-max-height: 20em;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   @include uppercase-label($font-size-xs, 0.1em, 700);
-  color: var(--attention);
+  color: var(--attention-tint-text);
   white-space: nowrap;
   max-height: 0;
   opacity: 0;
