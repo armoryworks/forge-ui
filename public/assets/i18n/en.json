@@ -6564,6 +6564,7 @@
     "allVendors": "All Vendors",
     "statusDraft": "Draft",
     "statusSubmitted": "Submitted",
+    "statusPendingApproval": "Pending approval",
     "statusAcknowledged": "Acknowledged",
     "statusPartiallyReceived": "Partially Received",
     "statusReceived": "Received",

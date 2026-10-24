@@ -6557,6 +6557,7 @@
     "allVendors": "Todos los proveedores",
     "statusDraft": "Borrador",
     "statusSubmitted": "Enviada",
+    "statusPendingApproval": "Pendiente de aprobación",
     "statusAcknowledged": "Confirmada",
     "statusPartiallyReceived": "Parcialmente Recibida",
     "statusReceived": "Recibida",

@@ -11,6 +11,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
 import { PO_ORIGIN_CHIP_CLASSES, PO_ORIGIN_ICONS, poOriginLabel, poOriginTooltip } from './models/po-origin.const';
+import { PO_STATUSES, PO_STATUS_CHIP_CLASSES, PO_STATUS_LABEL_KEYS } from './models/po-status.const';
 import { VendorService } from '../vendors/services/vendor.service';
 import { VendorResponse } from '../vendors/models/vendor-response.model';
 import { PoDialogComponent } from './components/po-dialog/po-dialog.component';
@@ -100,13 +101,7 @@ export class PurchaseOrdersComponent implements OnInit {
 
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('common.allStatuses') },
-    { value: 'Draft', label: this.translate.instant('status.draft') },
-    { value: 'Submitted', label: this.translate.instant('purchaseOrders.statusSubmitted') },
-    { value: 'Acknowledged', label: this.translate.instant('purchaseOrders.statusAcknowledged') },
-    { value: 'PartiallyReceived', label: this.translate.instant('purchaseOrders.statusPartiallyReceived') },
-    { value: 'Received', label: this.translate.instant('purchaseOrders.statusReceived') },
-    { value: 'Closed', label: this.translate.instant('status.closed') },
-    { value: 'Cancelled', label: this.translate.instant('status.cancelled') },
+    ...PO_STATUSES.map(status => ({ value: status, label: this.translate.instant(PO_STATUS_LABEL_KEYS[status]) })),
   ];
 
   // S4b provenance — fixed server enum (PoOriginSource), so static options
@@ -245,16 +240,7 @@ export class PurchaseOrdersComponent implements OnInit {
 
   // --- Helpers ---
   protected getStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      Draft: 'chip--muted',
-      Submitted: 'chip--info',
-      Acknowledged: 'chip--primary',
-      PartiallyReceived: 'chip--warning',
-      Received: 'chip--success',
-      Closed: 'chip--muted',
-      Cancelled: 'chip--error',
-    };
-    return `chip ${map[status] ?? ''}`.trim();
+    return `chip ${PO_STATUS_CHIP_CLASSES[status] ?? ''}`.trim();
   }
 
   protected getStatusLabel(status: string): string {
