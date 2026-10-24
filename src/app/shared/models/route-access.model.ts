@@ -11,7 +11,7 @@ export interface RouteAccess {
  */
 export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'kanban': { roles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'] },
-  'parts': { roles: ['Admin', 'Manager', 'Engineer', 'PM'] },
+  'parts': { roles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager'] },
   'costing': { roles: ['Admin', 'Manager'] },
   'sequences': { roles: ['Admin', 'Manager'], capabilities: ['CAP-CROSS-SEQUENCES'] },
   'compliance': { roles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'], capabilities: ['CAP-EXT-WATCHTOWER'] },

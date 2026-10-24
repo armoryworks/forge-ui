@@ -4,12 +4,14 @@
   [data]="rows()"
   [loading]="loading()"
   [clickableRows]="true"
-  trackByField="bomLineId"
+  trackByField="rowKey"
   emptyIcon="account_tree"
   [emptyMessage]="'partBom.whereUsed.empty' | translate"
   (rowClick)="openPart($event)">
   <ng-template appColumnCell="parentPartNumber" let-row>
     <button type="button" class="action-btn action-btn--link"
+      [style.margin-left.rem]="((row.level ?? 1) - 1) * 1.25"
+      [attr.title]="row.path?.join(' › ')"
       [attr.data-testid]="'where-used-open-' + row.parentPartId"
       (click)="$event.stopPropagation(); openPart(row)">
       {{ row.parentPartNumber }}

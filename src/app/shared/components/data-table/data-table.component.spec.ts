@@ -608,14 +608,17 @@ describe('DataTableComponent · server paging', () => {
     filters: { set(value: Record<string, unknown>): void };
   }
 
+  let savedPrefs: { key: string; value: unknown }[];
+
   function create(serverPaging: ServerPageState | null) {
+    savedPrefs = [];
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         provideNoopAnimations(),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: EmptyLoader } }),
         { provide: ComponentFixtureAutoDetect, useValue: false },
-        { provide: UserPreferencesService, useValue: { get: () => null, set: () => undefined } },
+        { provide: UserPreferencesService, useValue: { get: () => null, set: (key: string, value: unknown) => savedPrefs.push({ key, value }) } },
       ],
     });
     const fixture = TestBed.createComponent(DataTableComponent);
@@ -668,6 +671,20 @@ describe('DataTableComponent · server paging', () => {
     table.onHeaderClick(columns[1], click);
 
     expect(requests).toEqual([{ pageIndex: 0, pageSize: 25, sort: 'customerName', order: 'asc' }]);
+  });
+
+  it('saves a server sort with the table preferences so the page can restore it after a reload', () => {
+    vi.useFakeTimers();
+    const { table } = create({ ...page, sort: null });
+
+    table.onHeaderClick(columns[1], new MouseEvent('click'));
+    vi.advanceTimersByTime(500);
+    vi.useRealTimers();
+
+    expect(savedPrefs.at(-1)).toEqual({
+      key: 'table:test',
+      value: expect.objectContaining({ sortState: [{ field: 'customer', direction: 'asc' }] }),
+    });
   });
 
   it('reads the active sort from the server state', () => {

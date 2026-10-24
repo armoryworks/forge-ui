@@ -19,6 +19,7 @@ import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
@@ -47,6 +48,7 @@ export class LeadDetailPanelComponent {
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly leadId = input.required<number>();
   readonly closed = output<void>();
@@ -319,7 +321,7 @@ export class LeadDetailPanelComponent {
   }
 
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.leadsService.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.leadsService.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {

@@ -96,7 +96,7 @@ export class OpeningJournalComponent implements OnInit {
       asOfDate: new FormControl<Date | null>(null, [Validators.required]),
       lines: new FormArray<FormGroup>([this.buildLine(), this.buildLine()]),
     },
-    { validators: [balancedValidator] },
+    { validators: [balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation'))] },
   );
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });

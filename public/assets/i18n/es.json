@@ -1666,6 +1666,7 @@
         "inspectionSkipAfter": "Omitir Después de N Recepciones",
         "inspectionTemplate": "Plantilla de Inspección de Recepción",
         "hazmatClass": "Clase de Materiales Peligrosos",
+        "htsCode": "Código HTS",
         "shelfLifeDays": "Vida Útil (días)",
         "backflushPolicy": "Política de Backflush"
       },
@@ -11363,6 +11364,7 @@
       "removeLine": "Quitar línea",
       "account": "Cuenta",
       "balanced": "Cuadrado",
+      "outOfBalanceViolation": "Sin cuadrar: el total de débitos debe ser igual al total de créditos.",
       "post": "Registrar asiento",
       "posted": "Asiento n.º {{number}} registrado",
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",

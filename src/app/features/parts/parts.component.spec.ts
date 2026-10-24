@@ -45,9 +45,15 @@ describe('PartsComponent search and Duplicate', () => {
   let dialog: { open: ReturnType<typeof vi.fn> };
   let detailDialog: { getDetailFromUrl: ReturnType<typeof vi.fn>; open: ReturnType<typeof vi.fn> };
   let destroyCallbacks: (() => void)[];
+  let routeParams: Record<string, string>;
+  let tablePrefs: unknown;
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.useFakeTimers();
+    routeParams = {};
+    tablePrefs = null;
+    router = { navigate: vi.fn(() => Promise.resolve(true)) };
     partsService = {
       getPartsPaged: vi.fn(() => of({ items: [], totalCount: 0 })),
       getPartById: vi.fn(() => of({ id: 3, partNumber: 'BRK-100', name: 'Bracket' } as PartDetail)),
@@ -72,9 +78,15 @@ describe('PartsComponent search and Duplicate', () => {
           useValue: { lastScan, setContext: vi.fn(), clearLastScan: () => lastScan.set(null) },
         },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
-        { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
-        { provide: Router, useValue: { navigate: vi.fn(() => Promise.resolve(true)) } },
-        { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParamMap: of(convertToParamMap({})),
+            get snapshot() { return { queryParamMap: convertToParamMap(routeParams) }; },
+          },
+        },
+        { provide: Router, useValue: router },
+        { provide: UserPreferencesService, useValue: { get: (key: string) => key === 'table:parts' ? tablePrefs : null, set: vi.fn() } },
         { provide: DetailDialogService, useValue: detailDialog },
         { provide: WorkflowService, useValue: { listActive: vi.fn(() => of([])) } },
         { provide: EntityCompletenessService, useValue: { prime: vi.fn() } },
@@ -205,6 +217,66 @@ describe('PartsComponent search and Duplicate', () => {
 
     expect(dialog.open).toHaveBeenCalledTimes(2);
     expect(detailDialog.open).not.toHaveBeenCalled();
+  });
+
+  describe('search and sort across a reload', () => {
+    function firstRequest(): { q?: string; sort?: string; order?: string } {
+      TestBed.runInInjectionContext(() => new PartsComponent());
+      return partsService.getPartsPaged.mock.calls[0][0] as { q?: string; sort?: string; order?: string };
+    }
+
+    function listStateNavigations(): unknown[] {
+      return router.navigate.mock.calls
+        .map(([, extras]) => (extras as { queryParams?: Record<string, unknown> }).queryParams)
+        .filter(params => params && 'q' in params);
+    }
+
+    it('restores the search and the server sort from the URL and fetches with them', () => {
+      routeParams = { q: 'FG-4', sort: 'name', order: 'desc' };
+
+      const request = firstRequest();
+
+      expect(request).toEqual(expect.objectContaining({ q: 'FG-4', sort: 'name', order: 'desc' }));
+      expect(listStateNavigations()).toEqual([]);
+    });
+
+    it('restores the search into the box without firing a second request', () => {
+      routeParams = { q: 'FG-4' };
+      const parts = create();
+
+      vi.advanceTimersByTime(300);
+
+      expect(parts.searchControl.value).toBe('FG-4');
+      expect(parts.appliedSearch()).toBe('FG-4');
+      expect(partsService.getPartsPaged).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the sort saved with the table when the URL has none', () => {
+      tablePrefs = { sortState: [{ field: 'inventoryClass', direction: 'desc' }] };
+
+      expect(firstRequest()).toEqual(expect.objectContaining({ sort: 'inventoryClass', order: 'desc' }));
+    });
+
+    it('ignores a sort on a column that cannot be sorted', () => {
+      routeParams = { sort: 'effectivePrice', order: 'desc' };
+
+      expect(firstRequest()).toEqual(expect.objectContaining({ sort: 'partNumber', order: 'asc' }));
+    });
+
+    it('writes the applied search and sort to the URL so a reload keeps them', () => {
+      const parts = create() as unknown as PartsHarness & { onServerPageChange(r: unknown): void };
+
+      parts.searchControl.setValue('brk');
+      parts.applyFilters();
+      parts.onServerPageChange({ pageIndex: 0, pageSize: 25, sort: 'name', order: 'desc' });
+      parts.clearSearch();
+
+      expect(listStateNavigations()).toEqual([
+        { q: 'brk', sort: null, order: null },
+        { q: 'brk', sort: 'name', order: 'desc' },
+        { q: null, sort: 'name', order: 'desc' },
+      ]);
+    });
   });
 
   describe('drafts and filters', () => {

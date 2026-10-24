@@ -29,7 +29,7 @@ import { PartQualityService } from '../../../services/part-quality.service';
  * Pillar 4 Phase 2 — Quality & Compliance cluster.
  *
  * Surfaces receiving-inspection settings (template, frequency, skip-after
- * count), Pillar 2 compliance (HazmatClass, ShelfLifeDays), and the
+ * count), Pillar 2 compliance (HazmatClass, HtsCode, ShelfLifeDays), and the
  * BackflushPolicy override. Receiving-inspection-template uses
  * <c>&lt;app-entity-picker&gt;</c> against
  * <c>/api/v1/receiving-inspection-templates</c> — gated by the
@@ -130,6 +130,7 @@ export class PartQualityClusterComponent {
     inspectionFrequency: new FormControl<ReceivingInspectionFrequency | null>(null),
     inspectionSkipAfterN: new FormControl<number | null>(null, [Validators.min(0)]),
     hazmatClass: new FormControl<string | null>(null),
+    htsCode: new FormControl<string | null>(null, [Validators.maxLength(20)]),
     shelfLifeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     backflushPolicy: new FormControl<BackflushPolicy | null>(null),
   });
@@ -145,6 +146,7 @@ export class PartQualityClusterComponent {
         inspectionFrequency: p.inspectionFrequency ?? null,
         inspectionSkipAfterN: p.inspectionSkipAfterN ?? null,
         hazmatClass: p.hazmatClass,
+        htsCode: p.htsCode ?? null,
         shelfLifeDays: p.shelfLifeDays,
         backflushPolicy: p.backflushPolicy,
       });
@@ -183,6 +185,7 @@ export class PartQualityClusterComponent {
       inspectionFrequency: v.inspectionFrequency ?? null,
       inspectionSkipAfterN: v.inspectionSkipAfterN ?? null,
       hazmatClass: v.hazmatClass ?? null,
+      htsCode: v.htsCode?.trim() ?? '',
       shelfLifeDays: v.shelfLifeDays ?? null,
       backflushPolicy: v.backflushPolicy ?? null,
     });

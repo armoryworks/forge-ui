@@ -17,4 +17,6 @@ export interface BOMLine {
   uomId: number | null;
   uomCode: string | null;
   uomLabel: string | null;
+  /** True when the child part has a BOM of its own, so the tree can expand it. */
+  childHasBom?: boolean;
 }

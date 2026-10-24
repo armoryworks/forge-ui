@@ -197,12 +197,12 @@ export const ADMIN_ROUTES: Routes = [
   },
   // GS1 GTIN barcode identity — optional. Company-prefix settings that let
   // parts be assigned globally-unique GTINs for retail / marketplace channels.
-  // Off by default; gated by CAP-MD-GS1 (route guard) + Admin/Manager on the
-  // server. Routed before the `:tab` catch-all so the literal segment wins.
+  // Off by default; gated by CAP-MD-GS1 (route guard) + Admin/Manager/OfficeManager
+  // (save Admin-only) on the server. Routed before the `:tab` catch-all so the literal segment wins.
   {
     path: 'gs1',
     data: { titleKey: 'admin.tabs.gs1' },
-    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-MD-GS1')],
+    canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-MD-GS1')],
     loadComponent: () =>
       import('./gs1/gs1.component').then((m) => m.Gs1Component),
   },

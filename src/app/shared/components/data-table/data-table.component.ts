@@ -912,6 +912,8 @@ export class DataTableComponent implements OnInit {
   private requestServerSort(col: ColumnDef | null, order: 'asc' | 'desc'): void {
     const server = this.serverPaging();
     if (!server) return;
+    this.sortStates.set(col ? [{ field: col.field, direction: order }] : []);
+    this.debouncedSave();
     this.serverPageChange.emit({
       pageIndex: 0,
       pageSize: server.pageSize,

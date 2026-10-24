@@ -53,3 +53,53 @@ describe('EdiPanelComponent deletePartner', () => {
     expect(deleteTradingPartner).toHaveBeenCalledWith(9);
   });
 });
+
+interface PartnerFormInternals {
+  partnerForm: EdiPanelComponent['partnerForm'];
+  openCreatePartner(): void;
+  openEditPartner(partner: EdiTradingPartner): void;
+  savePartner(): void;
+}
+
+describe('EdiPanelComponent partner customer link', () => {
+  let createTradingPartner: ReturnType<typeof vi.fn>;
+  let updateTradingPartner: ReturnType<typeof vi.fn>;
+  let component: PartnerFormInternals;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    createTradingPartner = vi.fn(() => of({}));
+    updateTradingPartner = vi.fn(() => of({}));
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: EdiService, useValue: { getTradingPartners: () => of([]), createTradingPartner, updateTradingPartner } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+      ],
+    });
+    component = TestBed.runInInjectionContext(() => new EdiPanelComponent()) as unknown as PartnerFormInternals;
+  });
+
+  it('sends the picked customer when creating a partner', () => {
+    component.openCreatePartner();
+    component.partnerForm.patchValue({ name: 'Big Box Retail', qualifierValue: 'BIGBOX', customerId: 42 });
+
+    component.savePartner();
+
+    expect(createTradingPartner).toHaveBeenCalledWith(expect.objectContaining({ name: 'Big Box Retail', customerId: 42 }));
+  });
+
+  it('loads the linked customer when editing and PUTs a changed one', () => {
+    component.openEditPartner({
+      id: 5, name: 'Big Box Retail', customerId: 42, customerName: 'Big Box', qualifierId: 'ZZ', qualifierValue: 'BIGBOX',
+      defaultFormat: 'X12', transportMethod: 'Manual', autoProcess: true, requireAcknowledgment: true, notes: null,
+    } as EdiTradingPartner);
+    expect(component.partnerForm.controls.customerId.value).toBe(42);
+
+    component.partnerForm.controls.customerId.setValue(77);
+    component.savePartner();
+
+    expect(updateTradingPartner).toHaveBeenCalledWith(5, expect.objectContaining({ customerId: 77 }));
+  });
+});

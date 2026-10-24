@@ -36,6 +36,7 @@ export interface EdiSftpTransportInfo {
 /** Save payload for partner create/update — typed transport, password write-only. */
 export interface EdiTradingPartnerSaveRequest {
   name: string;
+  customerId: number | null;
   qualifierId: string;
   qualifierValue: string;
   defaultFormat: EdiFormat;

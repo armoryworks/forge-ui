@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { environment } from '../../../../../environments/environment';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { ChatFileAttachment } from '../../models/chat-message.model';
 
 @Component({
@@ -13,6 +15,8 @@ import { ChatFileAttachment } from '../../models/chat-message.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatMessageAttachmentComponent {
+  private readonly fileDownload = inject(FileDownloadService);
+
   readonly attachment = input.required<ChatFileAttachment>();
 
   protected readonly isImage = computed(() => {
@@ -33,7 +37,8 @@ export class ChatMessageAttachmentComponent {
   });
 
   protected download(): void {
-    window.open(`/api/v1/files/${this.attachment().id}/download`, '_blank');
+    const file = this.attachment();
+    this.fileDownload.openOrDownload(`${environment.apiUrl}/files/${file.id}/download`, file.fileName, file.contentType);
   }
 
   private formatSize(bytes: number): string {

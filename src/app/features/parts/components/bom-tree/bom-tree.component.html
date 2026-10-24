@@ -2,13 +2,15 @@
   <app-empty-state icon="inventory_2" [message]="'parts.noBomLines' | translate" />
 } @else {
   <div class="bom-tree" role="tree" [attr.aria-label]="'parts.bom' | translate">
-    @for (node of flattenedNodes(); track node.entry.id) {
+    @for (node of flattenedNodes(); track node.key) {
       <div
         class="bom-tree__row"
         role="treeitem"
         [attr.aria-selected]="false"
         [attr.aria-expanded]="node.hasChildren ? node.isExpanded : null"
-        [attr.aria-level]="node.level + 1">
+        [attr.aria-level]="node.level + 1"
+        [attr.aria-busy]="node.isLoading || null"
+        [attr.data-testid]="'bom-tree-row-' + node.entry.childPartNumber">
 
         <!-- Indent spacer -->
         @if (node.level > 0) {
@@ -20,12 +22,14 @@
         }
 
         <!-- Expand/collapse toggle -->
-        <span class="bom-tree__toggle" aria-hidden="true">
+        <span class="bom-tree__toggle">
           @if (node.hasChildren) {
             <button
+              type="button"
               class="bom-tree__toggle-btn"
               [attr.aria-label]="node.isExpanded ? ('nav.collapse' | translate) : ('nav.expand' | translate)"
-              (click)="toggleExpand(node.entry.id)">
+              [attr.data-testid]="'bom-tree-toggle-' + node.entry.childPartNumber"
+              (click)="toggleExpand(node)">
               <span class="material-icons-outlined">
                 {{ node.isExpanded ? 'expand_less' : 'expand_more' }}
               </span>
@@ -56,12 +60,14 @@
         </span>
 
         <!-- Delete action -->
-        <button
-          class="icon-btn icon-btn--danger bom-tree__delete"
-          [attr.aria-label]="'common.remove' | translate"
-          (click)="onDelete(node.entry)">
-          <span class="material-icons-outlined">delete</span>
-        </button>
+        @if (node.level === 0) {
+          <button
+            class="icon-btn icon-btn--danger bom-tree__delete"
+            [attr.aria-label]="'common.remove' | translate"
+            (click)="onDelete(node.entry)">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        }
       </div>
     }
   </div>

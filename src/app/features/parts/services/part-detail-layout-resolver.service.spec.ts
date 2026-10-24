@@ -11,9 +11,11 @@ describe('PartDetailLayoutResolverService', () => {
     service = TestBed.inject(PartDetailLayoutResolverService);
   });
 
-  it('Buy + Raw → identity, sourcing, purchaseHistory, inventory, quality, cost, pricing, whereUsed, files', () => {
+  it('Buy + Raw → identity, sourcing, purchaseHistory, material, inventory, quality, cost, pricing, alternates, whereUsed, files', () => {
     const ids = service.resolve('Buy', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'whereUsed', 'files']);
+    expect(ids).toEqual([
+      'identity', 'sourcing', 'purchaseHistory', 'material', 'inventory', 'quality', 'cost', 'pricing', 'alternates', 'whereUsed', 'files',
+    ]);
   });
 
   it('Make + Subassembly → identity, material, purchaseHistory, bom, routing, inventory, mrp, cost, pricing, quality, alternates, whereUsed, files', () => {
@@ -114,9 +116,9 @@ describe('PartDetailLayoutResolverService', () => {
     }
   });
 
-  it('Buy + Consumable (B5) hides Quality and Alternates but still shows Pricing', () => {
+  it('Buy + Consumable (B5) shows Quality (hazmat) and Pricing but not Alternates', () => {
     const ids = service.resolve('Buy', 'Consumable').map(t => t.id);
-    expect(ids).not.toContain('quality');
+    expect(ids).toContain('quality');
     expect(ids).not.toContain('alternates');
     expect(ids).toContain('pricing');
   });

@@ -45,6 +45,7 @@ import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dia
 import { CapDirective } from '../../../../shared/directives/cap.directive';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
@@ -109,6 +110,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly auth = inject(AuthService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly customerService = inject(CustomerService);
+  private readonly fileDownload = inject(FileDownloadService);
 
   /** Whether the shop allows editing the order number (only offered while Draft). */
   protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
@@ -663,7 +665,9 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected downloadAcceptanceFile(a: SalesOrderAcceptance): void {
-    if (a.fileAttachmentId) window.open(this.soService.downloadFileUrl(a.fileAttachmentId), '_blank');
+    if (!a.fileAttachmentId) return;
+    const fileName = a.fileName ?? `acceptance-${a.fileAttachmentId}`;
+    this.fileDownload.openOrDownload(this.soService.downloadFileUrl(a.fileAttachmentId), fileName);
   }
 
   protected acceptanceStatusClass(status: string): string {
@@ -776,7 +780,8 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected downloadCustomerPoPdf(): void {
-    window.open(this.soService.customerPoPdfUrl(this.salesOrderId()), '_blank');
+    const id = this.salesOrderId();
+    this.fileDownload.open(this.soService.customerPoPdfUrl(id), `customer-po-${id}.pdf`);
   }
 
   private loadSchedule(id: number): void {
@@ -1230,7 +1235,7 @@ export class SalesOrderDetailPanelComponent {
 
   // --- Documents ---
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.soService.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.soService.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {

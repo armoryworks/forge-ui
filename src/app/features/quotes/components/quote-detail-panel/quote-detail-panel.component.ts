@@ -39,6 +39,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
 import { PaymentProgressComponent } from '../../../../shared/components/payment-progress/payment-progress.component';
 import { AccountingService } from '../../../../shared/services/accounting.service';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { PaymentMilestone } from '../../../../shared/models/payment-milestone.model';
 import { PaymentSchedule } from '../../../../shared/models/payment-schedule.model';
@@ -83,6 +84,7 @@ export class QuoteDetailPanelComponent {
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly router = inject(Router);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly quoteId = input.required<number>();
   readonly closed = output<void>();
@@ -618,7 +620,7 @@ export class QuoteDetailPanelComponent {
   }
 
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.quoteService.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.quoteService.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {
