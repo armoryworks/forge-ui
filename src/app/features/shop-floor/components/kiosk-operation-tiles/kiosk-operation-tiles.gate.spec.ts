@@ -68,6 +68,20 @@ describe('KioskOperationTilesComponent step gate hints', () => {
     expect(el.querySelector('[data-testid="kiosk-op-gate-20"] .op-tile__gate-icon')?.textContent?.trim()).toBe('lock');
   });
 
+  it('offers a rework timer beside run and setup, and emits the step for it', () => {
+    const fixture = TestBed.createComponent(KioskOperationTilesComponent);
+    fixture.componentRef.setInput('operations', [row(10)]);
+    fixture.componentRef.setInput('jobQuantity', 20);
+    fixture.componentRef.setInput('now', 0);
+    const reworks: JobOperationRow[] = [];
+    fixture.componentInstance.startRework.subscribe(r => reworks.push(r));
+    fixture.detectChanges();
+
+    (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-testid="kiosk-op-start-rework-10"]')!.click();
+
+    expect(reworks.map(r => r.stepNumber)).toEqual([10]);
+  });
+
   it('changes nothing when gating is off', () => {
     const el = render('Off');
 

@@ -113,6 +113,16 @@
                       <span class="material-icons-outlined" aria-hidden="true">build</span>
                       {{ 'mobileApp.operations.startSetup' | translate }}
                     </button>
+                    <button
+                      type="button"
+                      class="ops__btn"
+                      [disabled]="busy()"
+                      [attr.data-testid]="'job-operation-rework-' + view.row.stepNumber"
+                      (click)="start(view, 'Rework')"
+                    >
+                      <span class="material-icons-outlined" aria-hidden="true">replay</span>
+                      {{ 'mobileApp.operations.startRework' | translate }}
+                    </button>
                   }
                 }
                 <button

@@ -763,6 +763,53 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     }
   });
 
+  it('a freshly paired kiosk probes the RFID relay and a badge tap on it signs the worker in', async () => {
+    class FakeRelaySocket {
+      static readonly OPEN = 1;
+      static instances: FakeRelaySocket[] = [];
+      readyState = 0;
+      onopen: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      onmessage: ((e: MessageEvent) => void) | null = null;
+      onclose: (() => void) | null = null;
+      constructor(readonly url: string) {
+        FakeRelaySocket.instances.push(this);
+      }
+      close(): void {
+        this.readyState = 3;
+      }
+    }
+    const originalWebSocket = globalThis.WebSocket;
+    (globalThis as unknown as { WebSocket: unknown }).WebSocket = FakeRelaySocket;
+    localStorage.removeItem('rfid:relay-seen');
+    TestBed.overrideProvider(ScannerService, { useFactory: () => new ScannerService() });
+    localStorage.setItem('forge-kiosk-device-token', 'tok');
+    localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
+    shopFloor.identifyScan.mockReturnValueOnce(of({ scanType: 'employee', entityId: 7 }));
+    try {
+      const c = create();
+      init(c);
+      expect(FakeRelaySocket.instances.length).toBe(1);
+
+      const relay = FakeRelaySocket.instances[0];
+      relay.readyState = FakeRelaySocket.OPEN;
+      relay.onopen?.();
+      await Promise.resolve();
+      relay.onmessage?.(new MessageEvent('message', {
+        data: JSON.stringify({ type: 'scan', uid: 'BADGE0007', timestamp: new Date().toISOString(), raw: [] }),
+      }));
+      TestBed.tick();
+
+      expect(shopFloor.identifyScan).toHaveBeenCalledWith('BADGE0007');
+    } finally {
+      shopFloor.identifyScan.mockReset();
+      shopFloor.identifyScan.mockImplementation(() => of({}));
+      TestBed.inject(WebHidRfidService).disconnect();
+      (globalThis as unknown as { WebSocket: unknown }).WebSocket = originalWebSocket;
+      localStorage.removeItem('rfid:relay-seen');
+    }
+  });
+
   it('skipping the picker while a claim is in flight waits for the claim', () => {
     const claim = new Subject<undefined>();
     shopFloor.claimJob.mockReturnValueOnce(claim);
@@ -1037,6 +1084,38 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.scanFeedback()).toBe('shopFloor.display.shippingLoadFailed');
     vi.advanceTimersByTime(30_000);
     expect(c.phase()).toBe('main');
+  });
+
+  it('the packing slip is fetched with the session and saved as a file, never opened as a bare URL', () => {
+    const blob = new Blob(['%PDF'], { type: 'application/pdf' });
+    const getPackingSlip = vi.fn(() => of(blob));
+    TestBed.overrideProvider(ShipmentService, { useValue: { getPackingSlip } });
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:slip');
+    const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    try {
+      const c = create() as unknown as { selectedShipment: { set(v: unknown): void }; printPackingSlip(): void };
+      c.selectedShipment.set({ id: 12, shipmentNumber: 'SHP-12' });
+      c.printPackingSlip();
+
+      expect(getPackingSlip).toHaveBeenCalledWith(12);
+      expect(createUrl).toHaveBeenCalledWith(blob);
+      expect(open).not.toHaveBeenCalled();
+    } finally {
+      open.mockRestore();
+      createUrl.mockRestore();
+      revoke.mockRestore();
+    }
+  });
+
+  it('a packing slip that cannot be fetched says so', () => {
+    TestBed.overrideProvider(ShipmentService, {
+      useValue: { getPackingSlip: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 500 }))) },
+    });
+    const c = create() as unknown as Internals & { selectedShipment: { set(v: unknown): void }; printPackingSlip(): void };
+    c.selectedShipment.set({ id: 12, shipmentNumber: 'SHP-12' });
+    c.printPackingSlip();
+    expect(c.scanFeedback()).toBe('shopFloor.display.packingSlipFailed');
   });
 
   it('a paired display loads only its own team', () => {

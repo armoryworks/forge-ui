@@ -51,6 +51,11 @@ export class ShipmentService {
     return this.http.post<CustomerAddress>(`${this.base}/${shipmentId}/customer-addresses`, request);
   }
 
+  /** The packing slip for a shipment as a PDF blob. */
+  getPackingSlip(shipmentId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/${shipmentId}/packing-slip`, { responseType: 'blob' });
+  }
+
   /** The combined "wrapped" ship document (carrier label + company/QR/carrier-badge) as a PDF blob. */
   getShipDocument(shipmentId: number): Observable<Blob> {
     return this.http.get(`${this.base}/${shipmentId}/ship-document`, { responseType: 'blob' });

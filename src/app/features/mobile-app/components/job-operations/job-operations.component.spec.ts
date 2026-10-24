@@ -172,6 +172,28 @@ describe('JobOperationsComponent', () => {
     expect(api.startOperationTimer).toHaveBeenCalledWith(42, 20, 'Setup');
   });
 
+  it('starts a rework timer from the full list', async () => {
+    render(operations([row(20)]));
+    api.startOperationTimer.mockReturnValue(of({ entry: {}, alreadyRunning: false, operation: row(20) }));
+
+    click('job-operation-rework-20');
+    await settle();
+
+    expect(api.startOperationTimer).toHaveBeenCalledWith(42, 20, 'Rework');
+  });
+
+  it('undoes a stopped rework timer by starting rework again', async () => {
+    render(operations([row(20, { status: 'InProgress', openTimers: [{ ...mine, entryType: 'Rework' }] })]));
+    api.stopOperationTimer.mockReturnValue(of({ stopped: true, entry: { entryType: 'Rework' } }));
+    api.startOperationTimer.mockReturnValue(of({ entry: {}, alreadyRunning: false, operation: row(20) }));
+
+    click('job-operation-stop-20');
+    await settle();
+
+    await offer.mock.calls[0][1]();
+    expect(api.startOperationTimer).toHaveBeenCalledWith(42, 20, 'Rework', undefined);
+  });
+
   it('says so instead of offering undo when the step was already running', async () => {
     render(operations([row(20)]));
     api.startOperationTimer.mockReturnValue(of({ entry: {}, alreadyRunning: true, operation: row(20) }));

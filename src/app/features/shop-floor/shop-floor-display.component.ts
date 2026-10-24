@@ -41,6 +41,7 @@ import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dialog/scan-label-dialog.component';
 import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
 import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
+import { downloadBlob } from '../../shared/utils/download-blob';
 import { describeStepGate, stepGateViolationOf } from '../../shared/utils/step-gate-error';
 import { focusCancelOnOpen } from '../../shared/utils/focus-dialog-cancel';
 import { describeNonClockScan } from './utils/describe-scan';
@@ -460,7 +461,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     // Use restart() to guarantee the listener is active regardless of auth effect timing
     // (clearAuth() above triggers the auth effect asynchronously, which may call scanner.stop()).
     this.scanner.setContext('shop-floor');
-    this.scanner.restart();
+    this.scanner.restart({ probeRelay: true });
 
     interval(REFRESH_INTERVAL_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -1348,8 +1349,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     const shipment = this.selectedShipment();
     if (!shipment) return;
     this.resetAutoLogoutTimer();
-    const url = `${environment.apiUrl}/shipments/${shipment.id}/packing-slip`;
-    window.open(url, '_blank');
+    this.shipmentService.getPackingSlip(shipment.id).subscribe({
+      next: (blob) => downloadBlob(blob, `packing-slip-${shipment.shipmentNumber || shipment.id}.pdf`),
+      error: (err: unknown) => this.showScanFeedback(
+        httpProblemDetail(err) ?? this.translate.instant('shopFloor.display.packingSlipFailed')),
+    });
   }
 
   protected cancelShipping(): void {

@@ -45,7 +45,7 @@ export class ScannerService implements OnDestroy {
     });
   });
 
-  start(): void {
+  start(options: { probeRelay?: boolean } = {}): void {
     if (this._listening()) return;
 
     this.keydownHandler = (e: KeyboardEvent) => this.onKeydown(e);
@@ -58,7 +58,7 @@ export class ScannerService implements OnDestroy {
 
     // Auto-connect to RFID relay WebSocket (silent, no error if relay isn't running)
     if (!this.rfidConnected) {
-      this.rfid.reconnect().then((connected) => {
+      this.rfid.reconnect(options).then((connected) => {
         this.rfidConnected = connected;
       });
     }
@@ -79,9 +79,10 @@ export class ScannerService implements OnDestroy {
   /**
    * Force-restart the scanner. Removes any existing listener and re-registers.
    * Use on pages that manage their own scanner lifecycle (e.g., shop floor kiosk)
-   * to guarantee the listener is active regardless of prior state.
+   * to guarantee the listener is active regardless of prior state. `probeRelay`
+   * tries the RFID relay even when it has never connected on this device.
    */
-  restart(): void {
+  restart(options: { probeRelay?: boolean } = {}): void {
     // Tear down unconditionally
     if (this.keydownHandler) {
       document.removeEventListener('keydown', this.keydownHandler, { capture: true });
@@ -91,7 +92,7 @@ export class ScannerService implements OnDestroy {
     this._listening.set(false);
 
     // Re-register
-    this.start();
+    this.start(options);
   }
 
   setContext(context: ScanContext): void {

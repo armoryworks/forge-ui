@@ -282,6 +282,11 @@ export class OnboardingService {
   private readonly _status = signal<OnboardingStatus | null>(null);
   readonly status = this._status.asReadonly();
 
+  /** Completion status of each onboarding item for the calling user, as the server records it. */
+  getStatus(): Observable<OnboardingStatus> {
+    return this.http.get<OnboardingStatus>(`${this.base}/status`);
+  }
+
   loadStatus(): void {
     this.http.get<OnboardingStatus>(`${this.base}/status`).subscribe(s => this._status.set(s));
   }
