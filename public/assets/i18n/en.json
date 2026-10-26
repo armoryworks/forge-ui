@@ -6251,7 +6251,8 @@
       "sent": "Invoice emailed to {{email}}."
     },
     "taxExemptNote": "Tax exempt (certificate {{id}}). No sales tax is billed.",
-    "dueDateTermsMismatch": "Due date must be {{date}} for {{terms}} terms. Change the due date or the credit terms."
+    "dueDateTermsMismatch": "Due date must be {{date}} for {{terms}} terms. Change the due date or the credit terms.",
+    "depositLine": "Deposit"
   },
   "payments": {
     "paymentNumberLabel": "Payment Number",
@@ -14401,7 +14402,10 @@
       "returnQuantityExceeds": "That is more than was returned.",
       "returnAlreadyDisposed": "This return already has a disposition.",
       "returnNoPart": "This return has no part to put back into stock. Choose scrap, rework or no return.",
-      "returnCreditAmountRequired": "This return is not linked to an invoice line; enter the credit amount."
+      "returnCreditAmountRequired": "This return is not linked to an invoice line; enter the credit amount.",
+      "creditedDepositLine": "A deposit line can't be credited. Credit the deposit invoice instead.",
+      "depositLineManual": "Deposit lines are added from the sales order's deposit invoices.",
+      "depositInvoiceInUse": "This deposit invoice can't be voided: later invoices for the order have already used its deposit. Void those invoices first."
     },
     "validators": {
       "required": "{{field}} is required.",

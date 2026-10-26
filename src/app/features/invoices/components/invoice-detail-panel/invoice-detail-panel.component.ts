@@ -79,7 +79,11 @@ export class InvoiceDetailPanelComponent {
   protected readonly currencyCode = computed(() => this.invoice()?.currencyCode ?? null);
   protected readonly sortedLines = computed(() => {
     const lines = this.invoice()?.lines ?? [];
-    return [...lines.filter(l => l.lineType !== 'Freight'), ...lines.filter(l => l.lineType === 'Freight')];
+    return [
+      ...lines.filter(l => l.lineType !== 'Freight' && l.lineType !== 'Deposit'),
+      ...lines.filter(l => l.lineType === 'Freight'),
+      ...lines.filter(l => l.lineType === 'Deposit'),
+    ];
   });
   protected readonly freightSubtotal = computed(() => this.invoice()?.freightSubtotal ?? 0);
   protected readonly itemsSubtotal = computed(() => (this.invoice()?.subtotal ?? 0) - this.freightSubtotal());
