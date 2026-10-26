@@ -41,6 +41,10 @@ const CODE_KEYS: Record<string, string> = {
   'fx-rate-same-currency': 'apiErrors.codes.fxRateSameCurrency',
 };
 
+const PROBLEM_CODE_KEYS: Record<string, string> = {
+  OPENING_INVENTORY_USE_STOCK_LOAD: 'apiErrors.codes.openingInventoryUseStockLoad',
+};
+
 const VALIDATOR_KEYS: Record<string, string> = {
   NotEmptyValidator: 'apiErrors.validators.required',
   NotNullValidator: 'apiErrors.validators.required',
@@ -98,4 +102,12 @@ export function localizeServerError(error: ServerValidationError, translate: Ser
   if (!key) return error.message;
   const text = translate(key, { ...(error.params ?? {}), field: serverFieldLabel(error.field, translate) });
   return text && text !== key && !text.includes('{{') ? text : error.message;
+}
+
+/**
+ * The catalog key for the `code` a ProblemDetails response carries (a posting-engine refusal such as
+ * `OPENING_INVENTORY_USE_STOCK_LOAD`), or undefined for codes the UI does not word itself.
+ */
+export function problemCodeKey(code: unknown): string | undefined {
+  return typeof code === 'string' ? PROBLEM_CODE_KEYS[code] : undefined;
 }

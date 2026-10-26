@@ -23,6 +23,8 @@ type Internals = {
   ngOnInit(): void;
   status(): ConversionStatus | null;
   tieOut(): unknown;
+  inventoryTieOut(): unknown;
+  inventoryLines(): boolean[];
   openingDateLabel(): string;
   form: FormGroup;
   lines: FormArray<FormGroup>;
@@ -41,11 +43,20 @@ function status(overrides: Partial<ConversionStatus> = {}): ConversionStatus {
   };
 }
 
-function account(id: number, accountNumber: string, name: string): GlAccount {
+function account(id: number, accountNumber: string, name: string, isInventoryControl = false): GlAccount {
   return {
     id, accountNumber, name, accountType: 'Asset', normalBalance: 'Debit',
-    isPostable: true, isControlAccount: false, requiresJob: false, requiresCostCenter: false,
+    isPostable: true, isControlAccount: isInventoryControl, requiresJob: false, requiresCostCenter: false, isInventoryControl,
   };
+}
+
+const reconciliation = {
+  bookId: 1, storeValue: 0, glInventoryBalance: 0, glWorkInProcessBalance: 0, glStockedBalance: 0, variance: 0,
+  isReconciled: true, roundingTolerance: 0.01, accounts: [], reconcilingItems: [],
+};
+
+function flushInventoryTieOut(http: HttpTestingController): void {
+  http.expectOne((r) => r.url === `${base}/stock-loads/reconciliation` && r.params.get('bookId') === '1').flush(reconciliation);
 }
 
 describe('OpeningJournalComponent', () => {
@@ -74,10 +85,14 @@ describe('OpeningJournalComponent', () => {
     c.ngOnInit();
     http.expectOne(`${base}/status`).flush(initial);
     if (initial.openingJournalPosted) {
+      flushInventoryTieOut(http);
       http.expectOne((r) => r.url === `${base}/tie-out`).flush({ bookId: 1, rows: [], totalDebit: 0, totalCredit: 0, isBalanced: true });
     }
     http.expectOne((r) => r.url === `${base}/accounts` && r.params.get('bookId') === '1')
-      .flush([account(11, '10100', 'Cash'), account(12, '11000', 'Receivables'), account(30, '30000', 'Equity')]);
+      .flush([
+        account(11, '10100', 'Cash'), account(12, '11000', 'Receivables'), account(30, '30000', 'Equity'),
+        account(40, '13100', 'Inventory — Raw Materials', true),
+      ]);
     return c;
   }
 
@@ -127,6 +142,7 @@ describe('OpeningJournalComponent', () => {
     req.flush({ id: 5, bookId: 1, entryNumber: 1, entryDate: '2026-01-01', status: 'Posted', memo: null });
     http.expectOne((r) => r.url === `${base}/status` && r.params.get('bookId') === '1')
       .flush(status({ openingJournalPosted: true, openingEntryId: 5, openingEntryNumber: 1, openingEntryDate: '2026-01-01' }));
+    flushInventoryTieOut(http);
     http.expectOne((r) => r.url === `${base}/tie-out` && r.params.get('asOfDate') === '2026-01-01')
       .flush({ bookId: 1, rows: [], totalDebit: 10000, totalCredit: 10000, isBalanced: true });
 
@@ -163,5 +179,19 @@ describe('OpeningJournalComponent', () => {
     const c = open(status({ openingJournalPosted: true, openingEntryId: 5, openingEntryNumber: 1, openingEntryDate: '2026-01-01' }));
 
     expect(c.tieOut()).not.toBeNull();
+    expect(c.inventoryTieOut()).not.toBeNull();
+  });
+
+  it('flags an inventory account line and keeps the journal from posting', () => {
+    const c = open();
+    c.form.controls['asOfDate'].setValue(new Date(2026, 0, 1));
+    c.lines.at(0).patchValue({ glAccountId: 40, debit: 500 });
+    c.lines.at(1).patchValue({ glAccountId: 30, credit: 500 });
+
+    expect(c.inventoryLines()).toEqual([true, false]);
+    expect(c.form.valid).toBe(false);
+    expect(FormValidationService.collectViolations(c.form, {})).toContain('accounting.openingJournal.inventoryViolation');
+    c.post();
+    http.expectNone(`${base}/opening-journal`);
   });
 });

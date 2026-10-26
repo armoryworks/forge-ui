@@ -137,6 +137,13 @@ export class InventoryHomeComponent {
     partId: 'Part', quantity: 'Quantity',
   });
 
+  private readonly verbReason = toSignal(this.verbForm.controls.reason.valueChanges, { initialValue: '' });
+  protected readonly showOpeningStockHint = computed(() => {
+    if (this.verbDialog()?.mode !== 'count' || !this.auth.hasAnyRole(['Controller'])) return false;
+    const keyword = this.translate.instant('inventory.home.dialog.openingKeyword').toLowerCase();
+    return (this.verbReason() ?? '').toLowerCase().includes(keyword);
+  });
+
   protected readonly verbTitle = computed(() => {
     const mode = this.verbDialog()?.mode;
     return mode ? this.translate.instant(`inventory.home.dialog.${mode}Title`) : '';

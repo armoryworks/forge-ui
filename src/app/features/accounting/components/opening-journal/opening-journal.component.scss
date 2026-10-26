@@ -95,6 +95,28 @@
     margin-top: $sp-sm;
   }
 
+  &__callout {
+    margin: 0;
+    padding: $sp-sm $sp-md;
+    border-left: $border-width-accent solid var(--info);
+    background: color-mix(in srgb, var(--info) 8%, transparent);
+    font-size: $font-size-sm;
+  }
+
+  &__callout-link {
+    margin-left: $sp-sm;
+  }
+
+  &__line-flag {
+    grid-column: 1 / -1;
+    font-size: $font-size-sm;
+    color: var(--error);
+  }
+
+  &__variance--off {
+    color: var(--error);
+  }
+
   &__balance {
     display: flex;
     flex-wrap: wrap;

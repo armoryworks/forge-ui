@@ -73,6 +73,12 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/budgets/budgets.component').then((m) => m.BudgetsComponent),
   },
   {
+    path: 'inventory-valuation',
+    data: { titleKey: 'nav.inventoryValuation' },
+    loadComponent: () =>
+      import('./components/inventory-valuation/inventory-valuation.component').then((m) => m.InventoryValuationComponent),
+  },
+  {
     path: 'cash-flow',
     data: { titleKey: 'nav.cashFlow' },
     loadComponent: () =>

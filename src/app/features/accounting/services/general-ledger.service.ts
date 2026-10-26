@@ -37,6 +37,7 @@ import {
   YearEndCloseResult,
   CloseChecklistResult,
 } from '../models/accounting.models';
+import { InventoryValuationReconciliation, InventoryValuationRow } from '../models/inventory-valuation.model';
 import { JobCostCloseCandidate, JobProductionCostCloseResult } from '../models/job-cost-close.model';
 import { FxRevaluationResult } from '../models/fx-revaluation-result.model';
 import { FxRevaluationRun } from '../models/fx-revaluation-run.model';
@@ -151,6 +152,18 @@ export class GeneralLedgerService {
     let params = new HttpParams().set('bookId', bookId);
     if (asOfDate) params = params.set('asOfDate', asOfDate);
     return this.http.get<GrniReconciliation>(`${this.base}/grni-reconciliation`, { params });
+  }
+
+  /** Per-part on-hand quantity, average cost and value from the valuation store. */
+  getInventoryValuation(bookId: number): Observable<InventoryValuationRow[]> {
+    return this.http.get<InventoryValuationRow[]>(`${this.base}/inventory-valuation`, { params: new HttpParams().set('bookId', bookId) });
+  }
+
+  /** The valuation store against the GL inventory control accounts, with what makes up any difference. */
+  getInventoryValuationReconciliation(bookId: number): Observable<InventoryValuationReconciliation> {
+    return this.http.get<InventoryValuationReconciliation>(`${this.base}/inventory-valuation/reconciliation`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
   }
 
   // ── Period / year close ──

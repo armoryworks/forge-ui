@@ -9,7 +9,7 @@ import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { LayoutService } from '../services/layout.service';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
-import { localizeServerError } from '../utils/server-error-localizer';
+import { localizeServerError, problemCodeKey } from '../utils/server-error-localizer';
 import { ServerValidationError, parseServerValidationEnvelope } from '../utils/server-validation.utils';
 import { markHttpErrorShown } from '../utils/shown-http-errors';
 import { formatDate, parseDateOnly } from '../utils/date.utils';
@@ -57,6 +57,7 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
             break;
           }
           const message = localizedFieldErrors(fieldErrors, translate)
+            ?? localizedProblemCode(error, translate)
             ?? problemDetail(error) ?? fieldErrors?.[0].message ?? extractMessage(error);
           if (message) {
             snackbar.error(message);
@@ -167,6 +168,16 @@ function localizedFieldErrors(errors: ServerValidationError[] | null, translate:
   const messages = errors.map(e => localizeServerError(e, (key, params) => translate.instant(key, params)));
   if (messages.every((m, i) => m === errors[i].message)) return null;
   return [...new Set(messages)].join(' ');
+}
+
+/** A ProblemDetails `code` the catalog words, in the UI language when it is not English; null otherwise. */
+function localizedProblemCode(error: HttpErrorResponse, translate: TranslateService): string | null {
+  if ((translate.getCurrentLang?.() ?? 'en') === 'en') return null;
+  const body = error.error;
+  const key = body && typeof body === 'object' ? problemCodeKey(body.code) : undefined;
+  if (!key) return null;
+  const text = translate.instant(key);
+  return text && text !== key ? text : null;
 }
 
 function problemDetail(error: HttpErrorResponse): string | null {

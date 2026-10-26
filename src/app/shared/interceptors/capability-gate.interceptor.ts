@@ -2,7 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { throwError } from 'rxjs';
 
-import { resolveCapabilityForUrl } from '../capability/capability-endpoint-registry';
+import { resolveCapabilitiesForUrl } from '../capability/capability-endpoint-registry';
 import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { CapabilityService } from '../services/capability.service';
 
@@ -52,15 +52,16 @@ import { CapabilityService } from '../services/capability.service';
 export const capabilityGateInterceptor: HttpInterceptorFn = (req, next) => {
   const capabilityService = inject(CapabilityService);
 
-  const code = resolveCapabilityForUrl(req.url);
-  if (code === null) {
+  const codes = resolveCapabilitiesForUrl(req.url);
+  if (codes === null || codes.length === 0) {
     // Not a gated endpoint — pass through.
     return next(req);
   }
 
   // Only block when we KNOW the capability is disabled. Unknown / not-yet-
   // loaded descriptor falls through to the server; layer 2 catches a 403.
-  if (capabilityService.isKnown(code) && !capabilityService.isEnabled(code)) {
+  const code = codes[0];
+  if (codes.every((c) => capabilityService.isKnown(c) && !capabilityService.isEnabled(c))) {
     // Diagnostic visibility without flagging as an error in devtools.
     console.debug(`[capability-gate] short-circuit ${req.method} ${req.url} (${code} disabled)`);
     return throwError(

@@ -1,12 +1,14 @@
 import { CanActivateFn } from '@angular/router';
 
 import { ROUTE_ACCESS } from '../models/route-access.model';
+import { anyCapabilityGuard } from './any-capability.guard';
 import { capabilityGuard } from './capability.guard';
 import { roleGuard } from './role.guard';
 
 /**
  * The `canActivate` guards for a gated top-level route, built from its {@link ROUTE_ACCESS} entry:
- * a {@link roleGuard} for its roles, then a {@link capabilityGuard} for its capabilities.
+ * a {@link roleGuard} for its roles, then a {@link capabilityGuard} for its capabilities and an
+ * {@link anyCapabilityGuard} for its any-of capabilities.
  */
 export function routeAccessGuards(path: string): CanActivateFn[] {
   const access = ROUTE_ACCESS[path];
@@ -14,5 +16,6 @@ export function routeAccessGuards(path: string): CanActivateFn[] {
   const guards: CanActivateFn[] = [];
   if (access.roles?.length) guards.push(roleGuard(...access.roles));
   if (access.capabilities?.length) guards.push(capabilityGuard(...access.capabilities));
+  if (access.anyCapabilities?.length) guards.push(anyCapabilityGuard(...access.anyCapabilities));
   return guards;
 }

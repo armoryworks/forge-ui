@@ -1,0 +1,69 @@
+<app-page-layout
+  [pageTitle]="'accounting.inventoryValuation.title' | translate"
+  [pageSubtitle]="'accounting.inventoryValuation.subtitle' | translate">
+  <ng-container content>
+    <div class="iv" [appLoadingBlock]="loading()">
+      @if (reconciliation(); as rec) {
+        <section class="iv__section" data-testid="iv-tie-out">
+          <h2 class="iv__section-title">{{ 'accounting.inventoryValuation.tieOutTitle' | translate }}</h2>
+          <div class="totals-strip">
+            <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.storeValue' | translate }} <app-currency-display [value]="rec.storeValue" /></span>
+            <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.glBalance' | translate }} <app-currency-display [value]="rec.glStockedBalance" /></span>
+            <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.wip' | translate }} <app-currency-display [value]="rec.glWorkInProcessBalance" /></span>
+            <span class="totals-strip__metric" [class.iv__variance--off]="!rec.isReconciled" data-testid="iv-variance">
+              {{ 'accounting.inventoryValuation.variance' | translate }} <app-currency-display [value]="rec.variance" />
+            </span>
+            <span class="totals-strip__label">
+              {{ (rec.isReconciled ? 'accounting.inventoryValuation.reconciled' : 'accounting.inventoryValuation.notReconciled') | translate }}
+            </span>
+          </div>
+          <div class="acct-table-block">
+            <app-data-table
+              tableId="acct-inventory-valuation-accounts"
+              [columns]="accountColumns"
+              [data]="rec.accounts"
+              trackByField="accountNumber"
+              emptyIcon="account_tree"
+              [emptyMessage]="'accounting.inventoryValuation.noAccounts' | translate">
+              <ng-template appColumnCell="glBalance" let-row><app-currency-display [value]="row.glBalance" /></ng-template>
+              <ng-template appColumnCell="storeValue" let-row><app-currency-display [value]="row.storeValue" /></ng-template>
+              <ng-template appColumnCell="variance" let-row><app-currency-display [value]="row.variance" /></ng-template>
+            </app-data-table>
+          </div>
+          @if (reconcilingItems().length > 0) {
+            <h2 class="iv__section-title">{{ 'accounting.inventoryValuation.reconcilingItems' | translate }}</h2>
+            <p class="iv__hint">
+              {{ 'accounting.inventoryValuation.reconcilingHint' | translate }}
+              <a routerLink="/accounting/opening-stock" class="iv__link">{{ 'accounting.inventoryValuation.openingStockLink' | translate }}</a>
+            </p>
+            <div class="acct-table-block">
+              <app-data-table
+                tableId="acct-inventory-valuation-items"
+                [columns]="itemColumns"
+                [data]="reconcilingItems()"
+                emptyIcon="check"
+                [emptyMessage]="''">
+                <ng-template appColumnCell="amount" let-row><app-currency-display [value]="row.amount" /></ng-template>
+              </app-data-table>
+            </div>
+          }
+        </section>
+      }
+
+      <section class="iv__section">
+        <h2 class="iv__section-title">{{ 'accounting.inventoryValuation.partsTitle' | translate }}</h2>
+        <div class="acct-table-block">
+          <app-data-table
+            tableId="acct-inventory-valuation-parts"
+            [columns]="partColumns"
+            [data]="parts()"
+            emptyIcon="inventory_2"
+            [emptyMessage]="'accounting.inventoryValuation.noParts' | translate">
+            <ng-template appColumnCell="averageUnitCost" let-row><app-currency-display [value]="row.averageUnitCost" /></ng-template>
+            <ng-template appColumnCell="totalValue" let-row><app-currency-display [value]="row.totalValue" /></ng-template>
+          </app-data-table>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</app-page-layout>

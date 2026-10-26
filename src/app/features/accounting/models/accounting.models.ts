@@ -464,6 +464,8 @@ export interface GlAccount {
   isControlAccount: boolean;
   requiresJob: boolean;
   requiresCostCenter: boolean;
+  /** Set on the conversion accounts read: an inventory control account, refused by the opening journal. */
+  isInventoryControl?: boolean;
 }
 
 export interface ManualJournalLineInput {

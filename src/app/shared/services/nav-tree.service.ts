@@ -184,6 +184,7 @@ export class NavTreeService {
         // install opts into activity-based costing.
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
+        { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
@@ -194,6 +195,7 @@ export class NavTreeService {
             // absent from the nav, so the GL looked read-only.
             { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
             { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION' },
+            { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
             { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
@@ -207,6 +209,7 @@ export class NavTreeService {
             { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
             { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
             { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
+            { icon: 'warehouse', label: 'Inventory Valuation', i18nKey: 'nav.inventoryValuation', route: '/accounting/inventory-valuation' },
             { icon: 'percent', label: 'Sales Tax Liability', i18nKey: 'nav.salesTaxLiability', route: '/accounting/sales-tax-liability' },
             { icon: 'badge', label: '1099 Report', i18nKey: 'nav.form1099', route: '/accounting/1099-report' },
             // Bank + period + export.
