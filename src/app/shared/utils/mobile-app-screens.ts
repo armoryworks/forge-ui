@@ -1,4 +1,5 @@
 import { MobileAppScreen } from '../models/mobile-app-screen.model';
+import { AuthService } from '../services/auth.service';
 
 /** Roles the pick-wave API admits, so the Pick tab shows only to people who can pick. */
 export const PICK_ROLES: readonly string[] = ['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker'];
@@ -12,3 +13,14 @@ export const MOBILE_APP_SCREENS: readonly MobileAppScreen[] = [
   { path: '/app/lookup', labelKey: 'mobileApp.tabs.lookup', icon: 'search', capability: 'CAP-MOBILE-LOOKUP' },
   { path: '/app/picks', labelKey: 'mobileApp.tabs.picks', icon: 'inventory', capability: 'CAP-O2C-PICKPACK', roles: PICK_ROLES },
 ];
+
+/**
+ * Whether a screen is open to whoever holds the device: screens without roles always are; a role-limited one is
+ * open to a matching role, and on a shared device with no one identified yet it stays open so the person can
+ * identify there (the API checks the role once they have).
+ */
+export function screenOpenToViewer(screen: MobileAppScreen, auth: AuthService, sharedDevice: boolean): boolean {
+  if (!screen.roles) return true;
+  if (sharedDevice && !auth.isAuthenticated()) return true;
+  return auth.hasAnyRole([...screen.roles]);
+}

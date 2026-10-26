@@ -14810,7 +14810,8 @@
       "loadFailed": "Could not load your pick lines.",
       "retry": "Try again",
       "lot": "Lot {{lot}}",
-      "none": "Nothing to pick right now."
+      "none": "Nothing to pick right now.",
+      "notAllowed": "Your role cannot pick orders on this device."
     }
   }
 }

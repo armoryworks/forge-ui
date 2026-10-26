@@ -7,6 +7,8 @@
       <span class="material-icons-outlined" aria-hidden="true">badge</span>
       {{ 'mobileApp.scan.actions.identify' | translate }}
     </button>
+  } @else if (notAllowed()) {
+    <p class="pick-lines__hint" role="alert" data-testid="pick-lines-not-allowed">{{ 'pickWaves.mobile.notAllowed' | translate }}</p>
   } @else if (loading() && lines().length === 0) {
     <p class="pick-lines__hint" role="status">{{ 'common.loading' | translate }}</p>
   } @else if (failed()) {
@@ -18,7 +20,7 @@
     <ul class="pick-lines__list" [attr.aria-label]="'pickWaves.mobile.title' | translate">
       @for (line of lines(); track line.id) {
         <li>
-          <button type="button" class="pick-lines__row" [attr.data-testid]="'pick-lines-row-' + line.id" (click)="confirming.set(line)">
+          <button type="button" class="pick-lines__row" [attr.data-testid]="'pick-lines-row-' + line.id" (click)="openLine(line)">
             <span class="pick-lines__bin">{{ line.binPath || line.fromLocationName }}</span>
             <span class="pick-lines__part">{{ line.partNumber }}</span>
             <span class="pick-lines__meta">

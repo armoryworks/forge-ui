@@ -193,7 +193,7 @@
         }
         <app-shipment-pickup-section [shipment]="shipment" (changed)="onPackagesChanged()" />
         <app-shipment-documents-actions [shipmentId]="shipment.id" [shipmentNumber]="shipment.shipmentNumber" />
-        @if (shipment.status !== 'Cancelled') {
+        @if (shipment.status === 'Shipped' || shipment.status === 'InTransit' || shipment.status === 'Delivered') {
           <app-edi-send-action entityType="shipment" [entityId]="shipment.id" [customerId]="shipment.customerId" />
         }
         @if (shipment.trackingNumber) {

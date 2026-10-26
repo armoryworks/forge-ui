@@ -104,7 +104,7 @@ describe('MobileAppShellComponent timer strip', () => {
         { provide: MobileTimerService, useValue: timer },
         { provide: TimerHubService, useValue: hub },
         { provide: OfflineQueueService, useValue: { lastSyncResult } },
-        { provide: AuthService, useValue: { token, hasAnyRole: (allowed: string[]) => allowed.some((r) => roles.includes(r)) } },
+        { provide: AuthService, useValue: { token, isAuthenticated: () => token() !== null, hasAnyRole: (allowed: string[]) => allowed.some((r) => roles.includes(r)) } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
         { provide: PlatformService, useValue: { isNative: false, mobileShell: true } },
         { provide: SharedIdentityService, useValue: identity },
@@ -304,6 +304,13 @@ describe('MobileAppShellComponent timer strip', () => {
 
     roles = ['PM'];
     expect(create().tabs()).toEqual([]);
+  });
+
+  it('keeps the Pick tab on a shared device until someone identifies', () => {
+    enabled = (code) => code === 'CAP-O2C-PICKPACK';
+    shared = true;
+    token.set(null);
+    expect(create().tabs().map((tab) => tab.path)).toEqual(['/app/picks']);
   });
 
   it('folds several running timers into one strip that unfolds on demand', () => {

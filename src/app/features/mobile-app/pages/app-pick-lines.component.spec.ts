@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
+import { AuthService } from '../../../shared/services/auth.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { PickWaveService } from '../../shipping/pick-waves/services/pick-wave.service';
@@ -15,13 +16,17 @@ interface Internals {
   lines: Signal<PickLine[]>;
   failed: Signal<boolean>;
   needsIdentity: Signal<boolean>;
+  notAllowed: Signal<boolean>;
   confirming: WritableSignal<PickLine | null>;
+  openLine(line: PickLine): void;
   onConfirmed(): void;
 }
 
 describe('AppPickLinesComponent', () => {
   let shared: boolean;
+  let roles: string[];
   const identified = signal(false);
+  const touch = vi.fn();
   const getMyLines = vi.fn();
 
   function create(): Internals {
@@ -33,13 +38,16 @@ describe('AppPickLinesComponent', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     shared = false;
+    roles = ['ProductionWorker'];
     identified.set(false);
+    touch.mockReset();
     getMyLines.mockReset().mockReturnValue(of([line(1), line(2)]));
     TestBed.configureTestingModule({
       providers: [
         { provide: PickWaveService, useValue: { getMyLines } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
-        { provide: SharedIdentityService, useValue: { identified } },
+        { provide: SharedIdentityService, useValue: { identified, touch } },
+        { provide: AuthService, useValue: { hasAnyRole: (allowed: string[]) => allowed.some(r => roles.includes(r)) } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -68,6 +76,22 @@ describe('AppPickLinesComponent', () => {
     c.onConfirmed();
     expect(c.confirming()).toBeNull();
     expect(getMyLines).toHaveBeenCalledTimes(2);
+  });
+
+  it('tells a role that cannot pick so instead of loading', () => {
+    roles = ['PM'];
+    const c = create();
+    expect(c.notAllowed()).toBe(true);
+    expect(getMyLines).not.toHaveBeenCalled();
+  });
+
+  it('keeps the person identified on a shared device while they work through lines', () => {
+    shared = true;
+    identified.set(true);
+    const c = create();
+    c.openLine(line(1));
+    c.onConfirmed();
+    expect(touch).toHaveBeenCalledTimes(2);
   });
 
   it('says so when the lines cannot load', () => {

@@ -2,8 +2,7 @@ import { Routes } from '@angular/router';
 
 import { lockGuard } from '../../shared/guards/lock.guard';
 import { mobileScreenGuard } from '../../shared/guards/mobile-screen.guard';
-import { roleGuard } from '../../shared/guards/role.guard';
-import { PICK_ROLES } from '../../shared/utils/mobile-app-screens';
+import { mobileRoleGuard } from '../../shared/guards/mobile-role.guard';
 import { MobileAppShellComponent } from './mobile-app-shell.component';
 
 export const MOBILE_APP_ROUTES: Routes = [
@@ -61,7 +60,7 @@ export const MOBILE_APP_ROUTES: Routes = [
       {
         path: 'picks',
         data: { titleKey: 'mobileApp.tabs.picks' },
-        canActivate: [mobileScreenGuard('CAP-O2C-PICKPACK'), roleGuard(...PICK_ROLES)],
+        canActivate: [mobileScreenGuard('CAP-O2C-PICKPACK'), mobileRoleGuard('/app/picks')],
         loadComponent: () => import('./pages/app-pick-lines.component').then((m) => m.AppPickLinesComponent),
       },
       {

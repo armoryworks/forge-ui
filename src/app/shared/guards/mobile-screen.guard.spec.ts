@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@a
 
 import { AuthService } from '../services/auth.service';
 import { CapabilityService } from '../services/capability.service';
+import { InstanceService } from '../services/instance.service';
 import { mobileScreenGuard } from './mobile-screen.guard';
 
 describe('mobileScreenGuard', () => {
@@ -15,7 +16,8 @@ describe('mobileScreenGuard', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: CapabilityService, useValue: { isEnabled } },
-        { provide: AuthService, useValue: { hasAnyRole } },
+        { provide: AuthService, useValue: { hasAnyRole, isAuthenticated: () => true } },
+        { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared: false }) } },
       ],
     });
   });

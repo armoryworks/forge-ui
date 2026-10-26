@@ -14810,7 +14810,8 @@
       "loadFailed": "No se pudieron cargar sus líneas de surtido.",
       "retry": "Reintentar",
       "lot": "Lote {{lot}}",
-      "none": "No hay nada que surtir por ahora."
+      "none": "No hay nada que surtir por ahora.",
+      "notAllowed": "Su rol no puede surtir pedidos en este dispositivo."
     }
   }
 }
