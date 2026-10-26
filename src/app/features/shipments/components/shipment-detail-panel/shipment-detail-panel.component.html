@@ -128,6 +128,8 @@
         }
       </div>
 
+      <app-shipment-packages-section [shipmentId]="shipment.id" [editable]="canEdit(shipment.status)" (changed)="onPackagesChanged()" />
+
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'common.createdAt' | translate }}</span>
@@ -188,6 +190,11 @@
             <span class="material-icons-outlined">check_circle</span>
             {{ 'shipments.markDelivered' | translate }}
           </button>
+        }
+        <app-shipment-pickup-section [shipment]="shipment" (changed)="onPackagesChanged()" />
+        <app-shipment-documents-actions [shipmentId]="shipment.id" [shipmentNumber]="shipment.shipmentNumber" />
+        @if (shipment.status !== 'Cancelled') {
+          <app-edi-send-action entityType="shipment" [entityId]="shipment.id" [customerId]="shipment.customerId" />
         }
         @if (shipment.trackingNumber) {
           <button class="action-btn" data-testid="shipment-download-doc-btn" (click)="downloadShipDoc()">

@@ -1,0 +1,90 @@
+<div class="wave" [appLoadingBlock]="loading()">
+  @if (wave(); as w) {
+    <div class="wave__info">
+      <div class="wave__item">
+        <span class="wave__label">{{ 'common.status' | translate }}</span>
+        <span [class]="'chip ' + (statusChip[w.status] ?? '')" data-testid="pick-wave-status">{{ ('pickWaves.status.' + w.status) | translate }}</span>
+      </div>
+      <div class="wave__item">
+        <span class="wave__label">{{ 'pickWaves.cols.strategy' | translate }}</span>
+        <span>{{ ('pickWaves.strategy.' + w.strategy) | translate }}</span>
+      </div>
+      <div class="wave__item">
+        <span class="wave__label">{{ 'pickWaves.cols.progress' | translate }}</span>
+        <span>{{ 'pickWaves.progress' | translate: { picked: w.pickedLines, total: w.totalLines } }}</span>
+      </div>
+      <div class="wave__item">
+        <span class="wave__label">{{ 'pickWaves.cols.assignedTo' | translate }}</span>
+        <span>{{ w.assignedToName ?? ('pickWaves.anyone' | translate) }}</span>
+      </div>
+      @if (w.releasedAt) {
+        <div class="wave__item">
+          <span class="wave__label">{{ 'pickWaves.releasedAt' | translate }}</span>
+          <span>{{ w.releasedAt | dateTime }}</span>
+        </div>
+      }
+      @if (w.completedAt) {
+        <div class="wave__item">
+          <span class="wave__label">{{ 'pickWaves.completedAt' | translate }}</span>
+          <span>{{ w.completedAt | dateTime }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="wave__actions">
+      <button class="action-btn" type="button" data-testid="pick-wave-print-btn" (click)="print()">
+        <span class="material-icons-outlined" aria-hidden="true">print</span>
+        {{ 'pickWaves.print' | translate }}
+      </button>
+      @if (canRelease()) {
+        <button class="action-btn action-btn--primary" type="button" [disabled]="busy()" data-testid="pick-wave-release-btn" (click)="release()">
+          <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+          {{ 'pickWaves.release' | translate }}
+        </button>
+      }
+      @if (canPick()) {
+        <button class="action-btn action-btn--primary" type="button" [disabled]="busy()" data-testid="pick-wave-complete-btn" (click)="complete()">
+          <span class="material-icons-outlined" aria-hidden="true">done_all</span>
+          {{ 'pickWaves.complete' | translate }}
+        </button>
+      }
+    </div>
+
+    <app-data-table tableId="pick-wave-lines" [columns]="columns()" [data]="w.lines" trackByField="id"
+      emptyIcon="inventory" [emptyMessage]="'pickWaves.lines.empty' | translate">
+      <ng-template appColumnCell="partNumber" let-row>
+        <div class="wave__mono">{{ row.partNumber }}</div>
+        <div class="wave__muted">{{ row.partDescription }}</div>
+      </ng-template>
+      <ng-template appColumnCell="binPath" let-row>
+        {{ row.binPath || row.fromLocationName }}
+      </ng-template>
+      <ng-template appColumnCell="lotNumber" let-row>
+        <span class="wave__mono">{{ row.lotNumber ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="requestedQuantity" let-row>
+        {{ row.requestedQuantity | number:'1.0-4' }}
+      </ng-template>
+      <ng-template appColumnCell="pickedQuantity" let-row>
+        {{ row.status === 'Pending' ? '—' : (row.pickedQuantity | number:'1.0-4') }}
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="'chip ' + (statusChip[row.status] ?? '')">{{ ('pickWaves.lineStatus.' + row.status) | translate }}</span>
+        @if (row.shortNotes) {
+          <div class="wave__muted">{{ row.shortNotes }}</div>
+        }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        @if (row.status === 'Pending') {
+          <button class="action-btn action-btn--sm" type="button" [attr.data-testid]="'pick-line-confirm-' + row.id" (click)="openConfirm(row)">
+            {{ 'pickWaves.confirm.action' | translate }}
+          </button>
+        }
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+@if (confirming(); as line) {
+  <app-confirm-pick-line-dialog [line]="line" (closed)="confirming.set(null)" (confirmed)="onConfirmed()" />
+}

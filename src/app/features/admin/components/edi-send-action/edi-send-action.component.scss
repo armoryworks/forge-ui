@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+
+:host { display: contents; }
+
+.edi-send {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.edi-send__status {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+  &--acknowledged { color: var(--success); }
+  &--error { color: var(--error); }
+}

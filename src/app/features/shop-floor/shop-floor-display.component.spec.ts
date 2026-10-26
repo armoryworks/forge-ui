@@ -23,6 +23,7 @@ import { PurchaseOrderService } from '../purchase-orders/services/purchase-order
 import { InventoryService } from '../inventory/services/inventory.service';
 import { ShipmentService } from '../shipments/services/shipment.service';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
+import { PrintPdfService } from '../../shared/services/print-pdf.service';
 
 /**
  * SECURITY-CRITICAL. The shop-floor kiosk is a shared terminal that wipes any
@@ -1086,25 +1087,23 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     expect(c.phase()).toBe('main');
   });
 
-  it('the packing slip is fetched with the session and saved as a file, never opened as a bare URL', () => {
+  it('the packing slip is fetched with the session and opened in a print view, never as a bare URL or a download', () => {
     const blob = new Blob(['%PDF'], { type: 'application/pdf' });
     const getPackingSlip = vi.fn(() => of(blob));
+    const print = vi.fn();
     TestBed.overrideProvider(ShipmentService, { useValue: { getPackingSlip } });
+    TestBed.overrideProvider(PrintPdfService, { useValue: { print } });
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
-    const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:slip');
-    const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     try {
       const c = create() as unknown as { selectedShipment: { set(v: unknown): void }; printPackingSlip(): void };
       c.selectedShipment.set({ id: 12, shipmentNumber: 'SHP-12' });
       c.printPackingSlip();
 
       expect(getPackingSlip).toHaveBeenCalledWith(12);
-      expect(createUrl).toHaveBeenCalledWith(blob);
+      expect(print).toHaveBeenCalledWith(blob, 'packing-slip-SHP-12.pdf');
       expect(open).not.toHaveBeenCalled();
     } finally {
       open.mockRestore();
-      createUrl.mockRestore();
-      revoke.mockRestore();
     }
   });
 

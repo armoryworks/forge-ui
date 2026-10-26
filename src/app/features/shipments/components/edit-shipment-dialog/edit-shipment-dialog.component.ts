@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -20,6 +20,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { Address } from '../../../../shared/models/address.model';
+import { ShipToValidationComponent } from '../ship-to-validation/ship-to-validation.component';
+import { ShipmentPackagesSectionComponent } from '../shipment-packages-section/shipment-packages-section.component';
 
 /** Sentinel shipTo value that reveals the inline "add a new address" form. */
 const ADD_NEW = -1;
@@ -37,6 +39,7 @@ const ADD_NEW = -1;
     ReactiveFormsModule, TranslatePipe, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
     CurrencyInputComponent, AddressFormComponent, ValidationButtonComponent, LoadingBlockDirective,
+    ShipToValidationComponent, ShipmentPackagesSectionComponent,
   ],
   templateUrl: './edit-shipment-dialog.component.html',
   styleUrl: './edit-shipment-dialog.component.scss',
@@ -101,6 +104,18 @@ export class EditShipmentDialogComponent implements OnInit {
 
   protected readonly addingNew = signal(false);
 
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+
+  /** The ship-to being edited: the inline new address, or the saved address picked. */
+  protected readonly shipToAddress = computed<Address | null>(() => {
+    const v = this.formValue();
+    if (v.shipTo === ADD_NEW) return v.newAddress ?? null;
+    const saved = this.addresses().find(a => a.id === v.shipTo);
+    return saved
+      ? { line1: saved.line1, line2: saved.line2 ?? null, city: saved.city, state: saved.state, postalCode: saved.postalCode, country: saved.country }
+      : null;
+  });
+
   protected readonly violations = FormValidationService.getViolations(this.form, {
     shipTo: this.translate.instant('shipments.edit.shipTo'),
     newLabel: this.translate.instant('shipments.edit.addressLabel'),
@@ -155,6 +170,23 @@ export class EditShipmentDialogComponent implements OnInit {
         },
         error: () => this.loadingAddresses.set(false),
       });
+  }
+
+  /**
+   * Applies a standardized ship-to. A saved address is not edited from a shipment, so accepting a suggestion
+   * for one starts a new address with the corrected fields under the same label and type.
+   */
+  protected acceptValidatedAddress(address: Address): void {
+    const c = this.form.controls;
+    if (c.shipTo.value !== ADD_NEW) {
+      const saved = this.addresses().find(a => a.id === c.shipTo.value);
+      c.shipTo.setValue(ADD_NEW);
+      if (saved) {
+        c.newLabel.setValue(saved.label);
+        c.newType.setValue(saved.addressType === 'Both' ? 'Both' : 'Shipping');
+      }
+    }
+    c.newAddress.setValue(address);
   }
 
   protected save(): void {

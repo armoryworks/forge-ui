@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 
 import { lockGuard } from '../../shared/guards/lock.guard';
 import { mobileScreenGuard } from '../../shared/guards/mobile-screen.guard';
+import { roleGuard } from '../../shared/guards/role.guard';
+import { PICK_ROLES } from '../../shared/utils/mobile-app-screens';
 import { MobileAppShellComponent } from './mobile-app-shell.component';
 
 export const MOBILE_APP_ROUTES: Routes = [
@@ -55,6 +57,12 @@ export const MOBILE_APP_ROUTES: Routes = [
         data: { titleKey: 'kioskFlows.receive.title' },
         canActivate: [mobileScreenGuard('CAP-MOBILE-SCAN'), mobileScreenGuard('CAP-P2P-PO')],
         loadComponent: () => import('./pages/app-receive.component').then((m) => m.AppReceiveComponent),
+      },
+      {
+        path: 'picks',
+        data: { titleKey: 'mobileApp.tabs.picks' },
+        canActivate: [mobileScreenGuard('CAP-O2C-PICKPACK'), roleGuard(...PICK_ROLES)],
+        loadComponent: () => import('./pages/app-pick-lines.component').then((m) => m.AppPickLinesComponent),
       },
       {
         path: 'jobs',

@@ -1,0 +1,72 @@
+<section class="packages" [appLoadingBlock]="loading()" data-testid="shipment-packages-section">
+  <div class="packages__head">
+    <span class="packages__title">{{ 'shipments.packages.title' | translate }} ({{ packages().length }})</span>
+    @if (editable()) {
+      <button class="action-btn action-btn--sm" type="button" data-testid="shipment-package-add-btn" (click)="openAdd()">
+        <span class="material-icons-outlined" aria-hidden="true">add</span>
+        {{ 'shipments.packages.add' | translate }}
+      </button>
+    }
+  </div>
+
+  <app-data-table tableId="shipment-packages" [columns]="columns()" [data]="packages()"
+    emptyIcon="inventory_2" [emptyMessage]="'shipments.packages.empty' | translate">
+    <ng-template appColumnCell="weight" let-row>
+      {{ row.weight === null ? '—' : (row.weight | number:'1.0-2') + ' ' + ('shipments.lbs' | translate) }}
+    </ng-template>
+    <ng-template appColumnCell="dimensions" let-row>
+      @if (row.length !== null || row.width !== null || row.height !== null) {
+        {{ row.length ?? '—' }} × {{ row.width ?? '—' }} × {{ row.height ?? '—' }} {{ 'shipments.packages.inches' | translate }}
+      } @else {
+        —
+      }
+    </ng-template>
+    <ng-template appColumnCell="trackingNumber" let-row>
+      <span class="packages__mono">{{ row.trackingNumber ?? '—' }}</span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <span class="packages__row-actions">
+        <button class="icon-btn" type="button" [attr.aria-label]="'shipments.packages.edit' | translate"
+          [attr.data-testid]="'shipment-package-edit-' + row.id" (click)="openEdit(row)">
+          <span class="material-icons-outlined" aria-hidden="true">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger" type="button" [attr.aria-label]="'shipments.packages.remove' | translate"
+          [attr.data-testid]="'shipment-package-remove-' + row.id" (click)="remove(row)">
+          <span class="material-icons-outlined" aria-hidden="true">delete</span>
+        </button>
+      </span>
+    </ng-template>
+  </app-data-table>
+
+  @if (packages().length > 0) {
+    <p class="packages__total" data-testid="shipment-packages-total">
+      {{ 'shipments.packages.total' | translate: { count: packages().length, weight: (totalWeight() | number:'1.0-2') } }}
+      <span class="packages__hint">{{ 'shipments.packages.ratesHint' | translate }}</span>
+    </p>
+  }
+</section>
+
+@if (showForm()) {
+  <app-dialog [title]="(editing() ? 'shipments.packages.editTitle' : 'shipments.packages.addTitle') | translate" width="440px" (closed)="closeForm()">
+    <div [formGroup]="form" class="packages__form">
+      <app-input [label]="'shipments.packages.weight' | translate" type="number" formControlName="weight" [required]="true"
+        [suffix]="'shipments.lbs' | translate" min="0" data-testid="shipment-package-weight" />
+      <div class="packages__dims">
+        <app-input [label]="'shipments.packages.length' | translate" type="number" formControlName="length" min="0" data-testid="shipment-package-length" />
+        <app-input [label]="'shipments.packages.width' | translate" type="number" formControlName="width" min="0" data-testid="shipment-package-width" />
+        <app-input [label]="'shipments.packages.height' | translate" type="number" formControlName="height" min="0" data-testid="shipment-package-height" />
+      </div>
+      <app-input [label]="'shipments.packages.tracking' | translate" formControlName="trackingNumber" [maxlength]="200" data-testid="shipment-package-tracking" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" type="button" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()"
+          data-testid="shipment-package-save-btn" (click)="save()">
+          <span class="material-icons-outlined" aria-hidden="true">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

@@ -13,6 +13,10 @@ import { ShippingLabel } from '../models/shipping-label.model';
 import { ShipmentTracking } from '../models/shipment-tracking.model';
 import { CustomerAddress } from '../../../shared/models/customer-address.model';
 import { CreateCustomerAddressRequest } from '../../../shared/models/create-customer-address-request.model';
+import { Address, AddressValidationResult } from '../../../shared/models/address.model';
+import { PickupConfirmation } from '../models/pickup-confirmation.model';
+import { PickupOrigin } from '../models/pickup-origin.model';
+import { SchedulePickupRequest } from '../models/schedule-pickup-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShipmentService {
@@ -56,6 +60,16 @@ export class ShipmentService {
     return this.http.get(`${this.base}/${shipmentId}/packing-slip`, { responseType: 'blob' });
   }
 
+  /** URL of the packing slip PDF, for FileDownloadService (which adds the session). */
+  packingSlipUrl(shipmentId: number): string {
+    return `${this.base}/${shipmentId}/packing-slip`;
+  }
+
+  /** URL of the bill of lading PDF, for FileDownloadService (which adds the session). */
+  billOfLadingUrl(shipmentId: number): string {
+    return `${this.base}/${shipmentId}/bill-of-lading`;
+  }
+
   /** The combined "wrapped" ship document (carrier label + company/QR/carrier-badge) as a PDF blob. */
   getShipDocument(shipmentId: number): Observable<Blob> {
     return this.http.get(`${this.base}/${shipmentId}/ship-document`, { responseType: 'blob' });
@@ -93,6 +107,29 @@ export class ShipmentService {
 
   removePackage(shipmentId: number, packageId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${shipmentId}/packages/${packageId}`);
+  }
+
+  getPickupOrigin(): Observable<PickupOrigin> {
+    return this.http.get<PickupOrigin>(`${this.base}/pickup-origin`);
+  }
+
+  schedulePickup(shipmentId: number, request: SchedulePickupRequest): Observable<PickupConfirmation> {
+    return this.http.post<PickupConfirmation>(`${this.base}/${shipmentId}/pickup`, request);
+  }
+
+  cancelPickup(shipmentId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${shipmentId}/pickup/cancel`, {});
+  }
+
+  /** Checks a ship-to with the carrier address service and returns its standardized form. */
+  validateAddress(address: Address): Observable<AddressValidationResult> {
+    return this.http.post<AddressValidationResult>(`${this.base}/validate-address`, {
+      street: address.line1,
+      city: address.city,
+      state: address.state,
+      zip: address.postalCode,
+      country: address.country || 'US',
+    });
   }
 
   // Shipping Rates

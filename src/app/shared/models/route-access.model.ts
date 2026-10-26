@@ -21,6 +21,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'compliance': { roles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'], capabilities: ['CAP-EXT-WATCHTOWER'] },
   'watchtower': { roles: ['Admin', 'Manager'], capabilities: ['CAP-EXT-WATCHTOWER'] },
   'shipping': { roles: ['Admin', 'Manager', 'OfficeManager'], capabilities: ['CAP-O2C-SHIP'] },
+  'pick-waves': { roles: ['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker'], capabilities: ['CAP-O2C-PICKPACK'] },
   'inventory': { roles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
   'customers': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
   'communications': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },

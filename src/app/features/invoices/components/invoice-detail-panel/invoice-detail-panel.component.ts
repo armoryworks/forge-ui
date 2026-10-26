@@ -34,6 +34,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { CreditMemoService } from '../../../credit-memos/services/credit-memo.service';
 import { CreditMemoDialogComponent } from '../../../credit-memos/components/credit-memo-dialog/credit-memo-dialog.component';
+import { EdiSendActionComponent } from '../../../admin/components/edi-send-action/edi-send-action.component';
 
 const EMAILABLE_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue', 'Paid']);
 const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
@@ -50,6 +51,7 @@ const WRITE_OFF_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue']);
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent, DiscountChipComponent,
     DialogComponent, TextareaComponent, ValidationButtonComponent, CreditMemoDialogComponent,
+    EdiSendActionComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',

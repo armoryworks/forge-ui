@@ -1,0 +1,119 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { flex: 1; display: flex; flex-direction: column; }
+
+.pick-lines {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  padding-bottom: calc(#{$sp-lg} + env(safe-area-inset-bottom));
+  overflow-y: auto;
+
+  &__heading {
+    @include uppercase-label($font-size-xs, 0.08em, 600);
+    margin: $sp-sm 0 0;
+    color: var(--text-muted);
+  }
+
+  &__hint {
+    margin: $sp-lg 0;
+    list-style: none;
+    text-align: center;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__identify,
+  &__retry {
+    min-height: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    padding: 0 $sp-xl;
+    border: none;
+    font-family: $font-family-primary;
+    font-size: $font-size-lg;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  &__identify {
+    background: var(--primary);
+    color: var(--bg);
+  }
+
+  &__retry {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: $sp-xs $sp-md;
+    min-height: 64px;
+    padding: $sp-md;
+    background: var(--surface);
+    border: none;
+    border-left: $border-width-accent solid var(--primary);
+    color: var(--text);
+    text-align: left;
+    font-family: $font-family-primary;
+    cursor: pointer;
+  }
+
+  &__bin {
+    grid-column: 1 / -1;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__part {
+    font-family: $font-family-mono;
+    font-size: $font-size-lg;
+    font-weight: 700;
+  }
+
+  &__qty {
+    grid-row: 2 / span 2;
+    grid-column: 2;
+    align-self: center;
+    font-size: $font-size-xl;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-xs $sp-md;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    background: var(--surface);
+    border-top: $border-width-accent solid var(--primary);
+  }
+}

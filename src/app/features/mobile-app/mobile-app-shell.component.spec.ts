@@ -39,6 +39,7 @@ const deburr: RunningTimer = {
 describe('MobileAppShellComponent timer strip', () => {
   let shared: boolean;
   let enabled: (code: string) => boolean;
+  let roles: string[] = [];
   const token = signal<string | null>('session-token');
   const active = signal<ActiveTimer | null>(null);
   const operationTimers = signal<RunningTimer[]>([]);
@@ -74,6 +75,7 @@ describe('MobileAppShellComponent timer strip', () => {
   beforeEach(() => {
     shared = false;
     enabled = () => true;
+    roles = [];
     token.set('session-token');
     active.set(null);
     operationTimers.set([]);
@@ -102,7 +104,7 @@ describe('MobileAppShellComponent timer strip', () => {
         { provide: MobileTimerService, useValue: timer },
         { provide: TimerHubService, useValue: hub },
         { provide: OfflineQueueService, useValue: { lastSyncResult } },
-        { provide: AuthService, useValue: { token } },
+        { provide: AuthService, useValue: { token, hasAnyRole: (allowed: string[]) => allowed.some((r) => roles.includes(r)) } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared }) } },
         { provide: PlatformService, useValue: { isNative: false, mobileShell: true } },
         { provide: SharedIdentityService, useValue: identity },
@@ -292,6 +294,15 @@ describe('MobileAppShellComponent timer strip', () => {
     expect(create().tabs().map((tab) => tab.path)).toEqual(['/app/jobs']);
 
     enabled = () => false;
+    expect(create().tabs()).toEqual([]);
+  });
+
+  it('shows the Pick tab only to the picking roles', () => {
+    enabled = (code) => code === 'CAP-O2C-PICKPACK';
+    roles = ['ProductionWorker'];
+    expect(create().tabs().map((tab) => tab.path)).toEqual(['/app/picks']);
+
+    roles = ['PM'];
     expect(create().tabs()).toEqual([]);
   });
 

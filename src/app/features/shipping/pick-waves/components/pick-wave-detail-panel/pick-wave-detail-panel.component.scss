@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.wave { display: flex; flex-direction: column; gap: $sp-lg; }
+
+.wave__info { display: grid; grid-template-columns: 1fr 1fr; gap: $sp-md; }
+.wave__item { display: flex; flex-direction: column; gap: $sp-xs; font-size: $font-size-sm; }
+.wave__label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+
+.wave__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: $sp-md; }
+
+.wave__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+.wave__muted { font-size: $font-size-xs; color: var(--text-muted); }

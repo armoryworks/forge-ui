@@ -90,7 +90,8 @@
     "exchangeRates": "Tipos de cambio",
     "openingStock": "Existencias iniciales",
     "inventoryValuation": "Valoración de inventario",
-    "creditMemos": "Notas de crédito"
+    "creditMemos": "Notas de crédito",
+    "pickWaves": "Olas de surtido"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -7294,7 +7295,66 @@
     "cancelShipmentTitle": "¿Cancelar envío?",
     "cancelShipmentMessage": "¿Cancelar el envío {{number}}? Sus cantidades vuelven a la orden de venta para que se puedan enviar de nuevo.",
     "shipmentCancelled": "Envío cancelado",
-    "cancelFailed": "No se pudo cancelar el envío"
+    "cancelFailed": "No se pudo cancelar el envío",
+    "packages": {
+      "title": "Paquetes",
+      "add": "Agregar paquete",
+      "addTitle": "Agregar paquete",
+      "editTitle": "Editar paquete",
+      "edit": "Editar paquete",
+      "remove": "Quitar paquete",
+      "removeTitle": "¿Quitar el paquete?",
+      "removeMessage": "El paquete y su número de rastreo se quitan de este envío.",
+      "weight": "Peso",
+      "length": "Largo (pulg)",
+      "width": "Ancho (pulg)",
+      "height": "Alto (pulg)",
+      "dimensions": "Dimensiones",
+      "inches": "pulg",
+      "tracking": "Número de rastreo",
+      "ratesHint": "Las tarifas de la paquetería se cotizan con estos paquetes.",
+      "empty": "Aún no hay paquetes. Las tarifas usan el peso y las dimensiones del envío.",
+      "loadFailed": "No se pudieron cargar los paquetes.",
+      "saveFailed": "No se pudo guardar el paquete.",
+      "removeFailed": "No se pudo quitar el paquete.",
+      "total": "{{count}} paquetes, {{weight}} lb en total."
+    },
+    "pickup": {
+      "title": "Recolección de la paquetería",
+      "schedule": "Programar recolección",
+      "scheduleTitle": "Programar recolección de la paquetería",
+      "cancel": "Cancelar recolección",
+      "cancelTitle": "¿Cancelar la recolección?",
+      "cancelMessage": "La recolección {{number}} se cancelará con la paquetería.",
+      "cancelled": "Recolección cancelada",
+      "cancelFailed": "No se pudo cancelar la recolección.",
+      "scheduled": "Recolección programada, confirmación {{number}}",
+      "scheduleFailed": "No se pudo programar la recolección.",
+      "confirmation": "Confirmación",
+      "date": "Fecha de recolección",
+      "readyTime": "Lista desde",
+      "closeTime": "Cierra a las",
+      "instructions": "Lugar e instrucciones de recolección",
+      "instructionsPlaceholder": "p. ej., andén 3, tocar en embarques",
+      "windowOrder": "La hora de cierre debe ser posterior a la hora en que está lista.",
+      "origin": "Se recoge en {{location}}. Las horas están en {{zone}}.",
+      "defaultLocation": "la ubicación predeterminada de la empresa",
+      "browserZone": "la zona horaria de este dispositivo"
+    },
+    "documents": {
+      "packingSlip": "Lista de empaque",
+      "billOfLading": "Conocimiento de embarque"
+    },
+    "validateAddress": {
+      "action": "Validar dirección",
+      "validating": "Validando…",
+      "suggested": "Dirección sugerida",
+      "accept": "Usar la sugerida",
+      "keep": "Conservar la mía",
+      "valid": "Dirección verificada",
+      "invalid": "No se pudo verificar la dirección.",
+      "failed": "La validación de direcciones no está disponible."
+    }
   },
   "planning": {
     "title": "Planificación",
@@ -12985,7 +13045,8 @@
       "clock": "Reloj",
       "jobs": "Trabajos",
       "move": "Mover",
-      "lookup": "Buscar"
+      "lookup": "Buscar",
+      "picks": "Surtir"
     },
     "scan": {
       "prompt": "Apunte a una hoja de ruta de trabajo, pieza, ubicación o credencial.",
@@ -14653,6 +14714,103 @@
       "BankTransfer": "Transferencia bancaria",
       "Wire": "Giro",
       "Other": "Otro"
+    }
+  },
+  "edi": {
+    "send": {
+      "action": "Enviar EDI {{set}}",
+      "ariaLabel": "Enviar EDI {{set}} a {{partner}}",
+      "sent": "EDI {{set}} enviado a {{partner}}",
+      "failed": "No se pudo enviar el documento EDI.",
+      "status": {
+        "sent": "Enviado",
+        "acknowledged": "Acusado de recibo",
+        "error": "Error"
+      },
+      "viewLog": "Registro EDI"
+    }
+  },
+  "pickWaves": {
+    "title": "Olas de surtido",
+    "subtitle": "Agrupe las líneas de envío abiertas en olas, libérelas al piso y confirme lo surtido.",
+    "wave": "Ola de surtido",
+    "empty": "Aún no hay olas de surtido.",
+    "allStatuses": "Todos los estados",
+    "anyone": "Cualquiera",
+    "progress": "{{picked}} de {{total}}",
+    "releasedAt": "Liberada",
+    "completedAt": "Completada",
+    "print": "Imprimir lista de surtido",
+    "release": "Liberar",
+    "released": "Ola liberada al piso",
+    "releaseFailed": "No se pudo liberar la ola.",
+    "complete": "Completar ola",
+    "completed": "Ola completada",
+    "completeFailed": "No se pudo completar la ola.",
+    "completeTitle": "¿Completar con líneas sin surtir?",
+    "completeMessage": "{{count}} líneas no se han surtido y se marcarán como omitidas.",
+    "loadFailed": "No se pudieron cargar las olas de surtido.",
+    "cols": {
+      "wave": "Ola",
+      "strategy": "Estrategia",
+      "progress": "Líneas surtidas",
+      "assignedTo": "Asignada a"
+    },
+    "status": {
+      "Draft": "Borrador",
+      "Released": "Liberada",
+      "InProgress": "En curso",
+      "Completed": "Completada",
+      "Cancelled": "Cancelada"
+    },
+    "lineStatus": {
+      "Pending": "Por surtir",
+      "Picked": "Surtida",
+      "Short": "Faltante",
+      "Skipped": "Omitida"
+    },
+    "strategy": {
+      "Zone": "Por zona",
+      "Batch": "Por lote de pedidos",
+      "Discrete": "Pedido por pedido",
+      "WaveByCarrier": "Por paquetería"
+    },
+    "lines": {
+      "title": "Líneas de surtido",
+      "part": "Parte",
+      "from": "Ubicación",
+      "lot": "Lote",
+      "toPick": "Por surtir",
+      "picked": "Surtido",
+      "empty": "Esta ola no tiene líneas."
+    },
+    "confirm": {
+      "title": "Surtir {{part}}",
+      "action": "Confirmar surtido",
+      "shortPick": "Registrar faltante",
+      "shortReason": "Motivo del faltante",
+      "picked": "Surtido confirmado",
+      "shortRecorded": "Faltante registrado",
+      "failed": "No se pudo confirmar el surtido."
+    },
+    "generate": {
+      "open": "Generar ola automáticamente",
+      "title": "Generar una ola de surtido",
+      "hint": "Toma las líneas de envío abiertas que aún no están en una ola, primero la entrega solicitada más próxima.",
+      "strategy": "Estrategia de surtido",
+      "shipBy": "Con envío a más tardar el",
+      "maxLines": "Máximo de líneas en la ola",
+      "action": "Generar",
+      "created": "Ola {{number}} creada con {{lines}} líneas",
+      "failed": "No se pudo generar la ola."
+    },
+    "mobile": {
+      "title": "Mis líneas de surtido",
+      "identifyHint": "Identifíquese para ver las líneas que puede surtir.",
+      "loadFailed": "No se pudieron cargar sus líneas de surtido.",
+      "retry": "Reintentar",
+      "lot": "Lote {{lot}}",
+      "none": "No hay nada que surtir por ahora."
     }
   }
 }

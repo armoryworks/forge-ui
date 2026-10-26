@@ -1,0 +1,10 @@
+@if (visible()) {
+  <button class="action-btn" type="button" data-testid="shipment-packing-slip-btn" (click)="openPackingSlip()">
+    <span class="material-icons-outlined" aria-hidden="true">receipt_long</span>
+    {{ 'shipments.documents.packingSlip' | translate }}
+  </button>
+  <button class="action-btn" type="button" data-testid="shipment-bol-btn" (click)="openBillOfLading()">
+    <span class="material-icons-outlined" aria-hidden="true">description</span>
+    {{ 'shipments.documents.billOfLading' | translate }}
+  </button>
+}

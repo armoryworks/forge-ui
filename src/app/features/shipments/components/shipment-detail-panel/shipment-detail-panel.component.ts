@@ -21,6 +21,10 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { ShipmentPackagesSectionComponent } from '../shipment-packages-section/shipment-packages-section.component';
+import { ShipmentPickupSectionComponent } from '../shipment-pickup-section/shipment-pickup-section.component';
+import { ShipmentDocumentsActionsComponent } from '../shipment-documents-actions/shipment-documents-actions.component';
+import { EdiSendActionComponent } from '../../../admin/components/edi-send-action/edi-send-action.component';
 
 @Component({
   selector: 'app-shipment-detail-panel',
@@ -31,6 +35,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
     TrackingTimelineComponent, ShippingRatesDialogComponent, EditShipmentDialogComponent, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
     DetailLoadErrorComponent,
+    ShipmentPackagesSectionComponent, ShipmentPickupSectionComponent, ShipmentDocumentsActionsComponent, EdiSendActionComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
   styleUrl: './shipment-detail-panel.component.scss',
@@ -286,6 +291,11 @@ export class ShipmentDetailPanelComponent implements OnInit {
     link.download = `ship-document-${this.shipmentId()}.pdf`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  protected onPackagesChanged(): void {
+    this.refreshDetail();
+    this.shipmentChanged.emit();
   }
 
   private refreshDetail(): void {

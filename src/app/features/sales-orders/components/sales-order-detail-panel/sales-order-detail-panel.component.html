@@ -357,6 +357,9 @@
                 {{ 'salesOrders.confirm' | translate }}
               </button>
             }
+            @if (so.status !== 'Draft' && so.status !== 'Cancelled') {
+              <app-edi-send-action entityType="sales-order" [entityId]="so.id" [customerId]="so.customerId" />
+            }
             @if (canCreateAddendum(so)) {
               <button class="action-btn action-btn--create action-btn--sm" data-testid="so-addendum-btn" (click)="createAddendum()">
                 <span class="material-icons-outlined">add</span>
