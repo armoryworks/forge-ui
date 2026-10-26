@@ -27,3 +27,18 @@ export function balancedValidator(message: () => string): ValidatorFn {
     return Math.abs(debit - credit) < 0.005 ? null : { unbalanced: { message: message() } };
   };
 }
+
+/**
+ * §7A: the opening journal may not post to an inventory control account; opening stock loads as a costed stock
+ * load instead. Fails with `{ inventoryAccount: { message } }` when any line's account is one.
+ */
+export function noInventoryAccountsValidator(isInventory: (glAccountId: number) => boolean, message: () => string): ValidatorFn {
+  return (group: AbstractControl): ValidationErrors | null => {
+    const lines = (group.get('lines') as FormArray | null)?.controls ?? [];
+    const flagged = lines.some((line) => {
+      const id = Number(line.get('glAccountId')?.value);
+      return id > 0 && isInventory(id);
+    });
+    return flagged ? { inventoryAccount: { message: message() } } : null;
+  };
+}

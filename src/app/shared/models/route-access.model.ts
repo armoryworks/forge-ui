@@ -1,7 +1,11 @@
-/** Who may open a gated top-level route: any one of `roles`, and every one of `capabilities`. */
+/**
+ * Who may open a gated top-level route: any one of `roles`, every one of `capabilities`, and at least one of
+ * `anyCapabilities` when that is set.
+ */
 export interface RouteAccess {
   roles?: readonly string[];
   capabilities?: readonly string[];
+  anyCapabilities?: readonly string[];
 }
 
 /**
@@ -24,6 +28,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'leads': { roles: ['Admin', 'Manager', 'PM'] },
   'expenses': { roles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
   'accounting/opening-journal': { roles: ['Controller'], capabilities: ['CAP-ACCT-MIGRATION'] },
+  'accounting/opening-stock': { roles: ['Controller'], anyCapabilities: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
   'accounting': { roles: ['Controller'], capabilities: ['CAP-ACCT-GL-VIEW'] },
   'assets': { roles: ['Admin', 'Manager', 'Engineer'] },
   'maintenance': { roles: ['Admin', 'Manager'] },

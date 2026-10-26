@@ -24,10 +24,12 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { AccountingConversionService } from '../../services/accounting-conversion.service';
+import { AccountingStockLoadService } from '../../services/accounting-stock-load.service';
+import { InventoryValuationReconciliation } from '../../models/inventory-valuation.model';
 import { GlAccount, TrialBalance } from '../../models/accounting.models';
 import { ConversionStatus } from '../../models/conversion-status.model';
 import { OpeningJournalInput } from '../../models/opening-journal-input.model';
-import { balancedValidator, lineValidator } from '../../utils/journal-line.validators';
+import { balancedValidator, lineValidator, noInventoryAccountsValidator } from '../../utils/journal-line.validators';
 import { parseOpeningJournalCsv } from '../../utils/opening-journal-csv';
 
 /**
@@ -62,6 +64,7 @@ import { parseOpeningJournalCsv } from '../../utils/opening-journal-csv';
 })
 export class OpeningJournalComponent implements OnInit {
   private readonly conversion = inject(AccountingConversionService);
+  private readonly stockLoads = inject(AccountingStockLoadService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly route = inject(ActivatedRoute);
@@ -73,6 +76,7 @@ export class OpeningJournalComponent implements OnInit {
   protected readonly status = signal<ConversionStatus | null>(null);
   protected readonly accounts = signal<GlAccount[]>([]);
   protected readonly tieOut = signal<TrialBalance | null>(null);
+  protected readonly inventoryTieOut = signal<InventoryValuationReconciliation | null>(null);
   protected readonly openingDateLabel = computed(() => {
     const iso = this.status()?.openingEntryDate;
     if (!iso) return '';
@@ -80,8 +84,14 @@ export class OpeningJournalComponent implements OnInit {
     return `${month}/${day}/${year}`;
   });
   protected readonly accountOptions = computed<SelectOption[]>(() =>
-    this.accounts().map((a) => ({ value: a.id, label: `${a.accountNumber} — ${a.name}` })),
+    this.accounts().map((a) => ({
+      value: a.id,
+      label: a.isInventoryControl
+        ? `${a.accountNumber} — ${a.name} (${this.translate.instant('accounting.openingJournal.inventoryFlag')})`
+        : `${a.accountNumber} — ${a.name}`,
+    })),
   );
+  private readonly inventoryAccountIds = computed(() => new Set(this.accounts().filter((a) => a.isInventoryControl).map((a) => a.id)));
 
   protected readonly tieOutColumns: ColumnDef[] = [
     { field: 'accountNumber', header: this.translate.instant('accounting.trialBalance.accountNumber'), sortable: true, width: '130px' },
@@ -96,11 +106,24 @@ export class OpeningJournalComponent implements OnInit {
       asOfDate: new FormControl<Date | null>(null, [Validators.required]),
       lines: new FormArray<FormGroup>([this.buildLine(), this.buildLine()]),
     },
-    { validators: [balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation'))] },
+    {
+      validators: [
+        balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation')),
+        noInventoryAccountsValidator(
+          (id) => this.inventoryAccountIds().has(id),
+          () => this.translate.instant('accounting.openingJournal.inventoryViolation'),
+        ),
+      ],
+    },
   );
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   protected readonly totalDebit = computed(() => this.sideTotal('debit'));
+  protected readonly inventoryLines = computed(() => {
+    const ids = this.inventoryAccountIds();
+    const lines = (this.formValue()?.lines ?? []) as Array<{ glAccountId?: number | null }>;
+    return lines.map((line) => ids.has(Number(line.glAccountId)));
+  });
   protected readonly totalCredit = computed(() => this.sideTotal('credit'));
   protected readonly balanced = computed(() => {
     const debit = this.totalDebit();
@@ -129,6 +152,7 @@ export class OpeningJournalComponent implements OnInit {
       .subscribe({
         next: (accounts) => {
           this.accounts.set(accounts);
+          this.form.updateValueAndValidity();
           this.loading.set(false);
         },
         error: (err: unknown) => {
@@ -228,7 +252,17 @@ export class OpeningJournalComponent implements OnInit {
       });
   }
 
+  private loadInventoryTieOut(status: ConversionStatus): void {
+    this.stockLoads.getReconciliation(status.bookId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (rec) => this.inventoryTieOut.set(rec),
+        error: () => this.inventoryTieOut.set(null),
+      });
+  }
+
   private loadTieOut(status: ConversionStatus): void {
+    this.loadInventoryTieOut(status);
     this.conversion.getTieOut(status.bookId, status.openingEntryDate)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

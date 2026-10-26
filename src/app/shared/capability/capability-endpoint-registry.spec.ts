@@ -1,5 +1,5 @@
 import overrides from './__fixtures__/capability-action-overrides.json';
-import { resolveCapabilityForUrl } from './capability-endpoint-registry';
+import { resolveCapabilitiesForUrl, resolveCapabilityForUrl } from './capability-endpoint-registry';
 
 describe('resolveCapabilityForUrl', () => {
   describe('static prefix matching', () => {
@@ -153,6 +153,15 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/aircrafts/list')).toBeNull();
       // `customs` should not match `customers`
       expect(resolveCapabilityForUrl('/api/v1/customs/declarations')).toBeNull();
+    });
+  });
+
+  describe('any-of endpoints', () => {
+    it('lists every capability that opens the opening stock loads, and one code elsewhere', () => {
+      expect(resolveCapabilitiesForUrl('/api/v1/accounting/conversion/stock-loads/4/post'))
+        .toEqual(['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL']);
+      expect(resolveCapabilitiesForUrl('/api/v1/accounting/conversion/opening-journal')).toEqual(['CAP-ACCT-MIGRATION']);
+      expect(resolveCapabilitiesForUrl('/api/v1/not-gated')).toBeNull();
     });
   });
 });

@@ -31,6 +31,11 @@ export interface CapabilityEndpointEntry {
   readonly prefix: string;
   /** Capability code (e.g. `CAP-EXT-AI-ASSISTANT`) gating this endpoint. */
   readonly capability: string;
+  /**
+   * Mirrors `[RequiresAnyCapability(...)]`: the endpoint is open while any one of these codes is on.
+   * When set, `capability` is its first code.
+   */
+  readonly anyOf?: readonly string[];
 }
 
 /**
@@ -49,6 +54,7 @@ export interface CapabilityEndpointEntry {
 export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = [
   // ── Specific sub-paths first (must precede their parent prefix) ──
   { prefix: 'accounting/cash-flow', capability: 'CAP-RPT-FINANCIALS' },
+  { prefix: 'accounting/conversion/stock-loads', capability: 'CAP-ACCT-MIGRATION', anyOf: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
   { prefix: 'accounting/conversion', capability: 'CAP-ACCT-MIGRATION' },
   { prefix: 'accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
   { prefix: 'admin/accounting-mode', capability: 'CAP-ACCT-EXTERNAL' },
@@ -212,4 +218,23 @@ export function resolveCapabilityForUrl(url: string): string | null {
   }
 
   return null;
+}
+
+/**
+ * Every capability that can open a URL: the entry's `anyOf` list for an any-of endpoint, else the single
+ * code {@link resolveCapabilityForUrl} returns, or `null` when the URL is not gated. The request is refused in
+ * the browser only when all of them are known to be off.
+ */
+export function resolveCapabilitiesForUrl(url: string): readonly string[] | null {
+  const entry = matchRegistryEntry(url);
+  if (entry) return entry.anyOf ?? [entry.capability];
+  const code = resolveCapabilityForUrl(url);
+  return code === null ? null : [code];
+}
+
+function matchRegistryEntry(url: string): CapabilityEndpointEntry | undefined {
+  const apiIdx = url.indexOf('/api/v1/');
+  if (apiIdx < 0) return undefined;
+  const path = url.slice(apiIdx + '/api/v1/'.length).split('?')[0].split('#')[0];
+  return CAPABILITY_ENDPOINT_REGISTRY.find((entry) => path === entry.prefix || path.startsWith(entry.prefix + '/'));
 }

@@ -149,6 +149,12 @@
         <app-input [label]="'inventory.home.dialog.lot' | translate" formControlName="lotNumber" />
       }
       <app-input [label]="'inventory.home.dialog.reason' | translate" formControlName="reason" />
+      @if (showOpeningStockHint()) {
+        <p class="verb-hint" data-testid="opening-stock-hint">
+          {{ 'inventory.home.dialog.openingStockHint' | translate }}
+          <a routerLink="/accounting/opening-stock" (click)="closeVerb()">{{ 'inventory.home.dialog.openingStockLink' | translate }}</a>
+        </p>
+      }
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 

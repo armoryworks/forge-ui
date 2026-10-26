@@ -7,6 +7,10 @@
         <p class="oj__book" data-testid="oj-book">
           {{ 'accounting.openingJournal.book' | translate: { name: s.bookName } }}
         </p>
+        <p class="oj__callout" data-testid="oj-opening-stock-callout">
+          {{ 'accounting.openingJournal.openingStockCallout' | translate }}
+          <a routerLink="/accounting/opening-stock" class="oj__callout-link">{{ 'accounting.openingJournal.openingStockLink' | translate }}</a>
+        </p>
 
         @if (s.openingJournalPosted) {
           <section class="oj__posted" data-testid="oj-posted">
@@ -50,6 +54,19 @@
                 <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
                 <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="tb.totalDebit" /></span>
                 <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="tb.totalCredit" /></span>
+              </div>
+            </section>
+          }
+
+          @if (inventoryTieOut(); as rec) {
+            <section class="oj__tie-out" data-testid="oj-inventory-tie-out">
+              <h2 class="oj__section-title">{{ 'accounting.openingJournal.inventoryTieOutTitle' | translate }}</h2>
+              <div class="totals-strip">
+                <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.glBalance' | translate }} <app-currency-display [value]="rec.glStockedBalance" /></span>
+                <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.storeValue' | translate }} <app-currency-display [value]="rec.storeValue" /></span>
+                <span class="totals-strip__metric" [class.oj__variance--off]="!rec.isReconciled">
+                  {{ 'accounting.inventoryValuation.variance' | translate }} <app-currency-display [value]="rec.variance" />
+                </span>
               </div>
             </section>
           }
@@ -98,6 +115,9 @@
                   <app-currency-input class="oj__line-amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
                   <app-currency-input class="oj__line-amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
                   <app-input class="oj__line-desc" [label]="'accounting.common.description' | translate" formControlName="description" />
+                  @if (inventoryLines()[i]) {
+                    <span class="oj__line-flag" data-testid="oj-inventory-line">{{ 'accounting.openingJournal.inventoryLineFlag' | translate }}</span>
+                  }
                   <button
                     type="button"
                     class="icon-btn icon-btn--danger oj__line-del"

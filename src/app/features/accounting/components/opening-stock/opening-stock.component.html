@@ -1,0 +1,191 @@
+<app-page-layout
+  [pageTitle]="'accounting.openingStock.title' | translate"
+  [pageSubtitle]="'accounting.openingStock.subtitle' | translate">
+  <ng-container toolbar>
+    <button type="button" class="action-btn action-btn--sm" (click)="downloadTemplate()" data-testid="os-template">
+      <span class="material-icons-outlined" aria-hidden="true">download</span>
+      {{ 'accounting.openingStock.template' | translate }}
+    </button>
+    <button type="button" class="action-btn action-btn--sm action-btn--create" (click)="newLoad()" data-testid="os-new">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'accounting.openingStock.newLoad' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <input #fileInput type="file" accept=".csv,text/csv" class="os__file-input"
+      [attr.aria-label]="'accounting.openingStock.chooseFile' | translate"
+      (change)="onFileSelected($event)" />
+
+    <div class="os" [appLoadingBlock]="loading() || busy()">
+      @if (context(); as ctx) {
+        <p class="os__hint" data-testid="os-book">{{ 'accounting.openingStock.book' | translate: { name: ctx.bookName } }}</p>
+        <p class="os__hint">{{ 'accounting.openingStock.intro' | translate }}</p>
+        @if (ctx.connectedMode) {
+          <p class="os__callout os__callout--warning" data-testid="os-connected">{{ 'accounting.openingStock.connectedMode' | translate }}</p>
+        }
+        @if (hasOpeningInventory()) {
+          <p class="os__callout" data-testid="os-opening-inventory">{{ 'accounting.openingStock.openingInventoryHint' | translate }}</p>
+        }
+
+        @if (loads().length > 0) {
+          <section class="os__section">
+            <h2 class="os__section-title">{{ 'accounting.openingStock.loads' | translate }}</h2>
+            <div class="acct-table-block">
+              <app-data-table
+                tableId="acct-opening-stock-loads"
+                [columns]="loadColumns"
+                [data]="loads()"
+                [clickableRows]="true"
+                (rowClick)="selectLoad($any($event))"
+                emptyIcon="inventory_2"
+                [emptyMessage]="'accounting.openingStock.noLoads' | translate">
+                <ng-template appColumnCell="status" let-row>
+                  <span class="chip" [class.chip--success]="row.status === 'Posted'" [class.chip--muted]="row.status === 'Voided'">
+                    {{ 'accounting.openingStock.statuses.' + row.status | translate }}
+                  </span>
+                </ng-template>
+                <ng-template appColumnCell="glMode" let-row>
+                  {{ 'accounting.openingStock.modes.' + row.glMode | translate }}
+                </ng-template>
+                <ng-template appColumnCell="totalValue" let-row>
+                  <app-currency-display [value]="row.totalValue" />
+                </ng-template>
+              </app-data-table>
+            </div>
+          </section>
+        }
+
+        <section class="os__section" data-testid="os-editor">
+          <h2 class="os__section-title">
+            @if (selected(); as load) {
+              {{ 'accounting.openingStock.loadTitle' | translate: { number: load.loadNumber, status: ('accounting.openingStock.statuses.' + load.status | translate) } }}
+            } @else {
+              {{ 'accounting.openingStock.newLoadTitle' | translate }}
+            }
+          </h2>
+
+          <form [formGroup]="form" class="os__form">
+            <app-datepicker class="os__field" [label]="'accounting.openingStock.asOfDate' | translate" formControlName="asOfDate"
+              [required]="true" data-testid="os-as-of" />
+            <app-select class="os__field" [label]="'accounting.openingStock.mode' | translate" [options]="modeOptions()"
+              formControlName="glMode" data-testid="os-mode" />
+            <app-input class="os__field os__field--wide" [label]="'accounting.openingStock.notes' | translate" formControlName="notes" />
+          </form>
+
+          @if (isDraft()) {
+            <div class="os__file">
+              <button type="button" class="action-btn action-btn--sm" (click)="pickFile()" data-testid="os-choose-file">
+                <span class="material-icons-outlined" aria-hidden="true">upload_file</span>
+                {{ 'accounting.openingStock.chooseFile' | translate }}
+              </button>
+              @if (fileName(); as name) {
+                <span class="os__file-name" data-testid="os-file-name">{{ name }}</span>
+                <button type="button" class="icon-btn" [attr.aria-label]="'accounting.openingStock.clearFile' | translate" (click)="clearFile()">
+                  <span class="material-icons-outlined" aria-hidden="true">close</span>
+                </button>
+              } @else {
+                <span class="os__hint">{{ 'accounting.openingStock.fileHint' | translate }}</span>
+              }
+            </div>
+          }
+
+          @for (issue of loadIssues(); track $index) {
+            <p class="os__callout" [class.os__callout--error]="issue.severity === 'Error'" [class.os__callout--warning]="issue.severity === 'Warning'"
+              data-testid="os-load-issue">{{ issue.text }}</p>
+          }
+          @if (unsavedRowErrors().length > 0 && !selected()) {
+            <ul class="os__row-errors" data-testid="os-row-errors">
+              @for (error of unsavedRowErrors(); track $index) {
+                <li>{{ 'accounting.openingStock.rowLabel' | translate: { row: error.row } }} {{ error.message }}</li>
+              }
+            </ul>
+          }
+
+          @if (selected(); as load) {
+            @if (load.journalEntryNumber) {
+              <p class="os__hint" data-testid="os-journal">
+                {{ 'accounting.openingStock.journal' | translate: { number: load.journalEntryNumber } }}
+                <a routerLink="/accounting/ledger" class="os__link">{{ 'accounting.openingStock.openLedger' | translate }}</a>
+              </p>
+            }
+            <div class="acct-table-block">
+              <app-data-table
+                tableId="acct-opening-stock-lines"
+                [columns]="lineColumns"
+                [data]="gridRows()"
+                emptyIcon="inventory_2"
+                [emptyMessage]="'accounting.openingStock.noLines' | translate">
+                <ng-template appColumnCell="unitCost" let-row>
+                  <app-currency-display [value]="row.unitCost" />
+                </ng-template>
+                <ng-template appColumnCell="extendedValue" let-row>
+                  <app-currency-display [value]="row.extendedValue" />
+                </ng-template>
+                <ng-template appColumnCell="errors" let-row>
+                  <span class="os__cell-error">{{ row.errors }}</span>
+                </ng-template>
+                <ng-template appColumnCell="warnings" let-row>
+                  <span class="os__cell-warning">{{ row.warnings }}</span>
+                </ng-template>
+              </app-data-table>
+            </div>
+          }
+
+          @if (validation(); as result) {
+            <div class="totals-strip" data-testid="os-totals">
+              @for (total of result.accountTotals; track total.glAccountId) {
+                <span class="totals-strip__metric">{{ total.accountNumber }} {{ total.accountName }} <app-currency-display [value]="total.total" /></span>
+              }
+              <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+              <span class="totals-strip__metric" data-testid="os-grand-total"><app-currency-display [value]="result.grandTotal" /></span>
+            </div>
+          }
+        </section>
+
+        @if (reconciliation(); as rec) {
+          <section class="os__section" data-testid="os-tie-out">
+            <h2 class="os__section-title">{{ 'accounting.openingStock.tieOutTitle' | translate }}</h2>
+            <div class="totals-strip">
+              <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.storeValue' | translate }} <app-currency-display [value]="rec.storeValue" /></span>
+              <span class="totals-strip__metric">{{ 'accounting.inventoryValuation.glBalance' | translate }} <app-currency-display [value]="rec.glStockedBalance" /></span>
+              <span class="totals-strip__metric" [class.os__variance--off]="!rec.isReconciled">
+                {{ 'accounting.inventoryValuation.variance' | translate }} <app-currency-display [value]="rec.variance" />
+              </span>
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    @if (selected(); as load) {
+      @if (load.status === 'Draft') {
+        <button type="button" class="action-btn" (click)="deleteLoad()" data-testid="os-delete">{{ 'common.delete' | translate }}</button>
+        <button type="button" class="action-btn" (click)="validate()" [disabled]="busy()" data-testid="os-validate">
+          {{ 'accounting.openingStock.validate' | translate }}
+        </button>
+      }
+      @if (load.status === 'Posted') {
+        <button type="button" class="action-btn action-btn--danger" (click)="voidLoad()" [disabled]="busy()" data-testid="os-void">
+          {{ 'accounting.openingStock.void' | translate }}
+        </button>
+      }
+    }
+    @if (isDraft()) {
+      <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="busy()">
+        <button type="button" class="action-btn" [disabled]="form.invalid || !canSave() || busy()" (click)="save()" data-testid="os-save">
+          <span class="material-icons-outlined" aria-hidden="true">save</span>
+          {{ 'accounting.openingStock.saveDraft' | translate }}
+        </button>
+      </app-validation-button>
+    }
+    @if (selected()?.status === 'Draft') {
+      <button type="button" class="action-btn action-btn--primary" [disabled]="!canPost() || busy()" (click)="post()" data-testid="os-post">
+        <span class="material-icons-outlined" aria-hidden="true">inventory</span>
+        {{ 'accounting.openingStock.post' | translate }}
+      </button>
+    }
+  </ng-container>
+</app-page-layout>

@@ -187,6 +187,7 @@ export class LayoutService {
     const access = routeAccessFor(url);
     if (!access) return true;
     if (access.roles?.length && !this.auth.hasAnyRole([...access.roles])) return false;
+    if (access.anyCapabilities?.length && !access.anyCapabilities.some((code) => this.capabilities.isEnabled(code, true))) return false;
     return (access.capabilities ?? []).every((code) => this.capabilities.isEnabled(code, true));
   }
 

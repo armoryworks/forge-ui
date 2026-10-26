@@ -207,6 +207,12 @@
   }
 }
 
+.verb-hint {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
 @include mobile {
   .inv-home__stats {
     grid-template-columns: 1fr;
