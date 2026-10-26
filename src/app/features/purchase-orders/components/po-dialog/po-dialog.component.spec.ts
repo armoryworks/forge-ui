@@ -124,7 +124,7 @@ function setup(opts: SetupOptions = {}) {
       { provide: PurchaseUnitsService, useValue: { list: () => of([]) } },
       { provide: ReferenceDataService, useValue: { getAsOptions: () => of([]) } },
       { provide: SnackbarService, useValue: snackbar },
-      { provide: AuthService, useValue: { hasRole: () => true } },
+      { provide: AuthService, useValue: { hasRole: () => true, hasAnyRole: () => true } },
       { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
       {
         provide: PoVendorRefsService,

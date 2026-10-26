@@ -193,6 +193,8 @@ export interface SalesTaxLiabilityReport {
   totalTaxableBase: number;
   totalLiability: number;
   totalInvoiceCount: number;
+  /** Tax on marketplace-facilitator invoices, left out of `totalLiability` (the marketplace remits it). */
+  marketplaceCollectedTax: number;
 }
 
 // ── 1099 report ─────────────────────────────────────────────────────────────

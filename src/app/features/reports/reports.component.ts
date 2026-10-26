@@ -317,8 +317,9 @@ export class ReportsComponent {
   protected readonly pnlTotals = computed(() => {
     const data = this.simplePnlData();
     const revenue = data.filter(d => d.type === 'Revenue').reduce((sum, d) => sum + d.amount, 0);
+    const otherIncome = data.filter(d => d.type === 'OtherIncome').reduce((sum, d) => sum + d.amount, 0);
     const expenses = data.filter(d => d.type === 'Expense').reduce((sum, d) => sum + d.amount, 0);
-    return { revenue, expenses, net: revenue - expenses };
+    return { revenue, otherIncome, expenses, net: revenue + otherIncome - expenses };
   });
 
   protected readonly employeeProductivityChart = computed<ChartData<'bar'>>(() => {
@@ -563,6 +564,7 @@ export class ReportsComponent {
     { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true },
     { field: 'type', header: this.translate.instant('reports.colType'), sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
       { value: 'Revenue', label: this.translate.instant('reports.filterRevenue') },
+      { value: 'OtherIncome', label: this.translate.instant('reports.filterOtherIncome') },
       { value: 'Expense', label: this.translate.instant('reports.filterExpense') },
     ]},
     { field: 'amount', header: this.translate.instant('reports.colAmount'), sortable: true, type: 'number', width: '130px', align: 'right' },

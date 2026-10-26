@@ -7671,7 +7671,14 @@
     "deleteReportConfirm": "Delete the saved report \"{{name}}\"? This cannot be undone.",
     "chooseDataSourceFirst": "Choose a data source",
     "pickColumnFirst": "Pick at least one column",
-    "runFailed": "This report could not be run."
+    "runFailed": "This report could not be run.",
+    "filterOtherIncome": "Other income",
+    "totalOtherIncome": "Other Income",
+    "pnlType": {
+      "Revenue": "Revenue",
+      "OtherIncome": "Other income",
+      "Expense": "Expense"
+    }
   },
   "qcInspections": {
     "tabTemplates": "Templates",
@@ -11804,7 +11811,8 @@
       "invoices": "Invoices",
       "unassigned": "Unassigned",
       "range": "Date range",
-      "empty": "No sales-tax liability in this period"
+      "empty": "No sales-tax liability in this period",
+      "marketplaceCollected": "Collected by marketplaces (not owed)"
     },
     "form1099": {
       "title": "1099 Report",
@@ -11997,7 +12005,8 @@
       "closed": "{{job}} closed; production variance {{variance}}",
       "empty": "No job has an open WIP balance",
       "loadFailed": "Could not load the jobs with open WIP",
-      "notComplete": "Complete the job before closing its cost"
+      "notComplete": "Complete the job before closing its cost",
+      "receiptVariance": "Receipt variance"
     },
     "period": {
       "period": "Period",
@@ -14405,7 +14414,8 @@
       "returnCreditAmountRequired": "This return is not linked to an invoice line; enter the credit amount.",
       "creditedDepositLine": "A deposit line can't be credited. Credit the deposit invoice instead.",
       "depositLineManual": "Deposit lines are added from the sales order's deposit invoices.",
-      "depositInvoiceInUse": "This deposit invoice can't be voided: later invoices for the order have already used its deposit. Void those invoices first."
+      "depositInvoiceInUse": "This deposit invoice can't be voided: later invoices for the order have already used its deposit. Void those invoices first.",
+      "creditMemoLineOverInvoiced": "A credit for an invoice line can't be priced above what was invoiced, and all the credits on that line can't add up to more than its amount."
     },
     "validators": {
       "required": "{{field}} is required.",
@@ -14653,6 +14663,10 @@
       "BankTransfer": "Bank transfer",
       "Wire": "Wire",
       "Other": "Other"
-    }
+    },
+    "editTitle": "Edit draft {{number}}",
+    "updated": "Credit memo {{number}} updated",
+    "unappliedDepositHint": "Invoice {{invoice}} was paid by its deposit, so it has no balance left to credit. The credit is issued unapplied: refund it to the customer or apply it to a later invoice.",
+    "unappliedPaidHint": "Invoice {{invoice}} has no balance left to credit. The credit is issued unapplied: refund it to the customer or apply it to a later invoice."
   }
 }

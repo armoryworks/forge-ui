@@ -181,6 +181,12 @@
             {{ 'common.delete' | translate }}
           </button>
         }
+        @if (canIssue()) {
+          <button class="action-btn" type="button" data-testid="credit-memo-edit-btn" [disabled]="busy()" (click)="showEdit.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">edit</span>
+            {{ 'common.edit' | translate }}
+          </button>
+        }
         @if (canVoid()) {
           <button class="action-btn action-btn--danger" type="button" data-testid="credit-memo-void-btn" [disabled]="busy()" (click)="openVoid({ kind: 'memo' })">
             <span class="material-icons-outlined" aria-hidden="true">block</span>
@@ -223,6 +229,10 @@
         [saving]="busy()"
         (closed)="showRefund.set(false)"
         (submitted)="submitRefund($event)" />
+    }
+
+    @if (showEdit()) {
+      <app-credit-memo-dialog [memo]="m" (closed)="showEdit.set(false)" (saved)="onEdited($event)" />
     }
 
     @if (showApply()) {

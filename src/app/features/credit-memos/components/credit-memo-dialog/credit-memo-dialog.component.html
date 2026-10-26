@@ -1,8 +1,14 @@
-<app-dialog [title]="'creditMemos.newCreditMemo' | translate" width="1000px" [splitLayout]="true" (closed)="closed.emit()">
+<app-dialog [title]="isEdit() ? ('creditMemos.editTitle' | translate: { number: memo()?.creditMemoNumber }) : ('creditMemos.newCreditMemo' | translate)" width="1000px" [splitLayout]="true" (closed)="closed.emit()">
   <div class="dlg-body">
     <div class="dlg-main">
       <div class="dlg-section">
         <span class="dlg-section__title">{{ 'creditMemos.lines' | translate }}</span>
+        @if (unappliedHintKey(); as hintKey) {
+          <p class="memo-hint" role="note" data-testid="memo-unapplied-hint">
+            <span class="material-icons-outlined" aria-hidden="true">info</span>
+            {{ hintKey | translate: { invoice: invoice()?.invoiceNumber } }}
+          </p>
+        }
         @if (lines().length > 0) {
           <ul class="memo-lines" [attr.aria-label]="'creditMemos.lines' | translate">
             @for (line of lines(); track $index) {
@@ -60,7 +66,7 @@
         <app-textarea [label]="'creditMemos.reasonLabel' | translate" formControlName="reason" [rows]="2" [required]="true" data-testid="memo-reason" />
         <app-datepicker [label]="'creditMemos.creditDate' | translate" formControlName="creditDate" [required]="true" data-testid="memo-date" />
         <app-input [label]="'creditMemos.taxRate' | translate" type="number" formControlName="taxRate" step="0.0001" min="0" data-testid="memo-tax-rate" />
-        @if (!invoice()) {
+        @if (!invoice() && !isEdit()) {
           <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
             [documentDate]="documentDate()" testIdPrefix="memo" />
         }

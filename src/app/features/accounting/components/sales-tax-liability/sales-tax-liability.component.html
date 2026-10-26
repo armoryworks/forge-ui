@@ -41,6 +41,12 @@
       <span class="totals-strip__metric">
         {{ 'accounting.salesTaxLiability.invoices' | translate }} {{ r.totalInvoiceCount }}
       </span>
+      @if (r.marketplaceCollectedTax) {
+        <span class="totals-strip__metric" data-testid="stl-marketplace-tax">
+          {{ 'accounting.salesTaxLiability.marketplaceCollected' | translate }}
+          <app-currency-display [value]="r.marketplaceCollectedTax" />
+        </span>
+      }
       <span class="totals-strip__metric totals-strip__metric--strong">
         {{ 'accounting.salesTaxLiability.liability' | translate }}
         <app-currency-display [value]="r.totalLiability" />

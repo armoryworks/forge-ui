@@ -16,6 +16,7 @@ class FakeLoader implements TranslateLoader {
 
 type Internals = {
   ngOnInit(): void;
+  columns: { field: string }[];
   candidates(): JobCostCloseCandidate[];
   closingId(): number | null;
   close(row: JobCostCloseCandidate): void;
@@ -46,6 +47,17 @@ describe('JobCostCloseComponent', () => {
   });
 
   afterEach(() => http.verify());
+
+  it('lists a zero-WIP job whose receipts posted a variance, with a receipt variance column', () => {
+    const c = TestBed.runInInjectionContext(() => new JobCostCloseComponent()) as unknown as Internals;
+    c.ngOnInit();
+    http.expectOne(`${base}/production-cost-close-candidates`).flush([
+      { jobId: 14, jobNumber: 'J-0014', title: 'Spacers', completedDate: null, wipBalance: 0, isComplete: false, receiptVariance: 12.5 },
+    ]);
+
+    expect(c.columns.map(col => col.field)).toContain('receiptVariance');
+    expect(c.candidates()[0].receiptVariance).toBe(12.5);
+  });
 
   it('closes a job, reports its variance and reloads the worklist', () => {
     const c = TestBed.runInInjectionContext(() => new JobCostCloseComponent()) as unknown as Internals;

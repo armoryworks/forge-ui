@@ -13,6 +13,7 @@ import { InvoiceSources } from '../../models/invoice-sources.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CustomerDetail } from '../../../customers/models/customer-detail.model';
 import { SEEDED_PAYMENT_TERMS } from '../../../../shared/models/payment-terms.fixture';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { InvoiceDialogComponent } from './invoice-dialog.component';
 
 class FakeLoader implements TranslateLoader {
@@ -89,6 +90,7 @@ function setup() {
       provideHttpClientTesting(),
       provideAnimations(),
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      { provide: AuthService, useValue: { hasRole: () => false, hasAnyRole: (roles: string[]) => roles.includes('OfficeManager') } },
     ],
   });
 

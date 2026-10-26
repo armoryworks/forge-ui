@@ -56,6 +56,7 @@ export class CustomerIdentityClusterComponent {
   /** Gated by the `customers.allow_manual_numbers` system setting. */
   protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
   protected readonly creditTermsOptions = this.paymentTerms.options;
+  protected readonly canSeeTerms = this.paymentTerms.canRead;
   protected readonly freightTermsOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('freight.terms.installDefault') },
     ...FREIGHT_TERMS.map(t => ({ value: t, label: this.translate.instant(`freight.terms.${t}`) })),

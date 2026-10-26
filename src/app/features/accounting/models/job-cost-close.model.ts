@@ -6,6 +6,8 @@ export interface JobCostCloseCandidate {
   completedDate: string | null;
   wipBalance: number;
   isComplete: boolean;
+  /** Production variance the job's receipts already posted; a zero-WIP job is listed while this is not zero. */
+  receiptVariance?: number;
 }
 
 /** Outcome of `POST accounting/jobs/{jobId}/close-production-cost`. */

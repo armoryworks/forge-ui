@@ -9,6 +9,7 @@ import { catchError, of, startWith } from 'rxjs';
 import { CreditMemoService } from '../../services/credit-memo.service';
 import { CreditMemoLineRequest } from '../../models/credit-memo-line-request.model';
 import { CREDIT_MEMO_REASON_TYPES } from '../../models/credit-memo-reason-types.const';
+import { CreditMemoDetail } from '../../models/credit-memo-detail.model';
 import { InvoiceService } from '../../../invoices/services/invoice.service';
 import { InvoiceDetail } from '../../../invoices/models/invoice-detail.model';
 import { InvoiceListItem } from '../../../invoices/models/invoice-list-item.model';
@@ -23,7 +24,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
+import { fromIsoDate, toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 
 interface MemoLineEntry {
   lineType: 'Item' | 'Freight' | 'RestockingFee';
@@ -58,6 +59,7 @@ export class CreditMemoDialogComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly invoiceId = input<number | null>(null);
+  readonly memo = input<CreditMemoDetail | null>(null);
   readonly closed = output<void>();
   readonly saved = output<number>();
 
@@ -120,7 +122,15 @@ export class CreditMemoDialogComponent implements OnInit {
     })),
   ]);
 
-  protected readonly currencyCode = computed(() => this.invoice()?.currencyCode ?? null);
+  protected readonly isEdit = computed(() => this.memo() !== null);
+  protected readonly unappliedHintKey = computed(() => {
+    const inv = this.invoice();
+    if (!inv || inv.balanceDue > 0) return null;
+    return inv.lines.some(l => l.lineType === 'Deposit')
+      ? 'creditMemos.unappliedDepositHint'
+      : 'creditMemos.unappliedPaidHint';
+  });
+  protected readonly currencyCode = computed(() => this.invoice()?.currencyCode ?? this.memo()?.currencyCode ?? null);
   protected readonly lineAmounts = computed(() => this.lines().map(l =>
     (l.lineType === 'RestockingFee' ? -1 : 1) * round2(l.quantity * l.unitPrice)));
   protected readonly subtotal = computed(() => round2(this.lineAmounts().reduce((sum, a) => sum + a, 0)));
@@ -139,12 +149,51 @@ export class CreditMemoDialogComponent implements OnInit {
       });
     });
 
+    const memo = this.memo();
+    if (memo) {
+      this.loadDraft(memo);
+      return;
+    }
+
     const invoiceId = this.invoiceId();
     if (invoiceId) {
       this.invoiceService.getInvoiceById(invoiceId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(inv => {
         this.form.controls.customerId.setValue(inv.customerId);
         this.form.controls.invoiceId.setValue(inv.id);
       });
+    }
+  }
+
+  private loadDraft(memo: CreditMemoDetail): void {
+    this.form.patchValue({
+      customerId: memo.customerId,
+      invoiceId: memo.invoiceId,
+      reasonType: memo.reasonType,
+      reason: memo.reason,
+      creditDate: fromIsoDate(memo.creditDate),
+      taxRate: Math.round(memo.taxRate * 1000000) / 10000,
+      currencyId: memo.currencyId,
+      fxRate: memo.fxRate,
+      notes: memo.notes ?? '',
+    }, { emitEvent: false });
+    this.form.controls.customerId.disable({ emitEvent: false });
+    this.form.controls.invoiceId.disable({ emitEvent: false });
+    this.lines.set(memo.lines.map(l => ({
+      lineType: l.lineType as MemoLineEntry['lineType'],
+      partId: l.partId,
+      partNumber: l.partNumber,
+      invoiceLineId: l.invoiceLineId,
+      description: l.description,
+      quantity: l.quantity,
+      unitPrice: l.unitPrice,
+      taxable: l.taxable,
+    })));
+    if (memo.invoiceId) {
+      this.invoices.set([{ id: memo.invoiceId, invoiceNumber: memo.invoiceNumber ?? '' } as InvoiceListItem]);
+      this.invoiceService.getInvoiceById(memo.invoiceId).pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(inv => this.invoice.set(inv));
     }
   }
 
@@ -212,6 +261,7 @@ export class CreditMemoDialogComponent implements OnInit {
   protected save(): void {
     if (!this.canSave()) return;
     const f = this.form.getRawValue();
+    const editing = this.memo();
     const lines: CreditMemoLineRequest[] = this.lines().map(l => ({
       lineType: l.lineType,
       partId: l.partId,
@@ -222,6 +272,24 @@ export class CreditMemoDialogComponent implements OnInit {
       taxable: l.taxable,
     }));
     this.saving.set(true);
+    if (editing) {
+      this.service.update(editing.id, {
+        reasonType: f.reasonType,
+        reason: f.reason.trim(),
+        creditDate: toIsoDate(f.creditDate),
+        lines,
+        taxRate: f.taxRate != null ? f.taxRate / 100 : null,
+        notes: f.notes.trim() || null,
+      }, editing.rowVersion).subscribe({
+        next: memo => {
+          this.saving.set(false);
+          this.snackbar.success(this.translate.instant('creditMemos.updated', { number: memo.creditMemoNumber }));
+          this.saved.emit(memo.id);
+        },
+        error: () => this.saving.set(false),
+      });
+      return;
+    }
     this.service.create({
       customerId: f.customerId!,
       invoiceId: f.invoiceId,

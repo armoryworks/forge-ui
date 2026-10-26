@@ -44,6 +44,15 @@ describe('CreditMemoService', () => {
     expect(httpMock.expectOne(`${apiUrl}/credit-memos/3/void`).request.body).toEqual({ reason: 'Mistake' });
   });
 
+  it('updates a draft with its row version', () => {
+    service.update(5, { reasonType: 'Other', reason: 'Fix', creditDate: '2026-03-10', lines: [] }, 4).subscribe();
+    const req = httpMock.expectOne(`${apiUrl}/credit-memos/5`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.headers.get('If-Match')).toBe('"4"');
+    expect(req.request.body.reason).toBe('Fix');
+    req.flush({});
+  });
+
   it('sends the row version on delete', () => {
     service.delete(5, 3).subscribe();
     const req = httpMock.expectOne(`${apiUrl}/credit-memos/5`);
