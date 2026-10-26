@@ -326,12 +326,12 @@ export class CustomerDetailComponent {
         changes.creditLimit = patch.creditLimit;
       }
     }
-    if (patch.defaultCreditTerms !== undefined) {
-      const current = this.customer()?.defaultCreditTerms ?? null;
-      if (patch.defaultCreditTerms === null) {
-        if (current != null) changes.clearDefaultCreditTerms = true;
-      } else if (patch.defaultCreditTerms !== current) {
-        changes.defaultCreditTerms = patch.defaultCreditTerms;
+    if (patch.paymentTermsId !== undefined) {
+      const current = this.customer()?.paymentTermsId ?? null;
+      if (patch.paymentTermsId === null) {
+        if (current != null || this.customer()?.defaultCreditTerms != null) changes.clearDefaultCreditTerms = true;
+      } else if (patch.paymentTermsId !== current) {
+        changes.paymentTermsId = patch.paymentTermsId;
       }
     }
     return changes;

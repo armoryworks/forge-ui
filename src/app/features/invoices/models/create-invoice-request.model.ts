@@ -9,6 +9,7 @@ export interface CreateInvoiceRequest {
   invoiceDate: string;
   dueDate: string;
   creditTerms?: string;
+  paymentTermsId?: number;
   taxRate: number;
   notes?: string;
   /**

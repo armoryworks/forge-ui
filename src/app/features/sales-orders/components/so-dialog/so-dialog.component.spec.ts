@@ -102,6 +102,7 @@ function setup(parts: PartListItem[] = [part()], confirmed = true, commercialRol
 
   const component = TestBed.runInInjectionContext(() => new SoDialogComponent());
   const httpMock = TestBed.inject(HttpTestingController);
+  httpMock.match(r => r.url.endsWith('/payment-terms')).forEach(r => r.flush([]));
 
   return { component, internals: component as unknown as DialogInternals, httpMock, dialogOpen };
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
@@ -8,6 +9,8 @@ import { Observable, of } from 'rxjs';
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { CustomerIdentityClusterComponent } from './customer-identity-cluster.component';
 import { CustomerSummary } from '../../models/customer-summary.model';
+import { environment } from '../../../../../environments/environment';
+import { SEEDED_PAYMENT_TERMS } from '../../../../shared/models/payment-terms.fixture';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -41,6 +44,7 @@ describe('CustomerIdentityClusterComponent', () => {
       imports: [CustomerIdentityClusterComponent],
       providers: [
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideAnimations(),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
@@ -117,7 +121,7 @@ describe('CustomerIdentityClusterComponent', () => {
     type Internals = {
       form: {
         patchValue(v: Record<string, unknown>): void;
-        getRawValue(): { defaultCreditTerms: string | null };
+        getRawValue(): { paymentTermsId: number | null };
         invalid: boolean;
         controls: { taxExemptionId: { hasError(code: string): boolean } };
       };
@@ -177,17 +181,20 @@ describe('CustomerIdentityClusterComponent', () => {
       expect(patch).not.toHaveProperty('creditLimit');
       expect(patch).not.toHaveProperty('isTaxExempt');
       expect(patch).not.toHaveProperty('taxExemptionId');
-      expect(patch).not.toHaveProperty('defaultCreditTerms');
+      expect(patch).not.toHaveProperty('paymentTermsId');
     });
 
-    it('loads the customer\'s default credit terms and saves a new pick', () => {
+    it('maps legacy default credit terms to their payment terms and saves a new pick', () => {
       const { c, cb } = build(true, true, { defaultCreditTerms: 'Net30' });
-      expect(c.form.getRawValue().defaultCreditTerms).toBe('Net30');
-      c.form.patchValue({ defaultCreditTerms: 'Net60' });
+      TestBed.inject(HttpTestingController)
+        .match(r => r.url === `${environment.apiUrl}/payment-terms`).forEach(r => r.flush(SEEDED_PAYMENT_TERMS));
+      TestBed.flushEffects();
+      expect(c.form.getRawValue().paymentTermsId).toBe(4);
+      c.form.patchValue({ paymentTermsId: 9 });
 
       c.onSave();
 
-      expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ defaultCreditTerms: 'Net60' }));
+      expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ paymentTermsId: 9 }));
     });
   });
 });

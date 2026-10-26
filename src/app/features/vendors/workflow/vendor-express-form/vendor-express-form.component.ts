@@ -11,7 +11,7 @@ import { SelectComponent } from '../../../../shared/components/select/select.com
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
@@ -43,6 +43,7 @@ export class VendorExpressFormComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly router = inject(Router);
@@ -55,7 +56,7 @@ export class VendorExpressFormComponent {
 
   protected readonly saving = signal(false);
   protected readonly allowManualVendorNumbers = computed(() => this.manualNumberSettings.isEnabled('vendors'));
-  protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
+  protected readonly paymentTermsOptions = this.paymentTerms.options;
 
   protected readonly form = new FormGroup({
     companyName: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
@@ -63,7 +64,7 @@ export class VendorExpressFormComponent {
     contactName: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(200)] }),
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email, Validators.maxLength(256)] }),
     phone: new FormControl<string>('', { nonNullable: true, validators: [phoneValidator] }),
-    paymentTerms: new FormControl<string>('', { nonNullable: true }),
+    paymentTermsId: new FormControl<number | null>(null),
     notes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(4000)] }),
   });
 
@@ -73,7 +74,7 @@ export class VendorExpressFormComponent {
     contactName: this.translate.instant('vendors.workflow.identity.contactNameLabel'),
     email: this.translate.instant('vendors.workflow.identity.emailLabel'),
     phone: this.translate.instant('vendors.workflow.identity.phoneLabel'),
-    paymentTerms: this.translate.instant('vendors.workflow.terms.paymentTermsLabel'),
+    paymentTermsId: this.translate.instant('vendors.workflow.terms.paymentTermsLabel'),
     notes: this.translate.instant('vendors.workflow.terms.notesLabel'),
   };
   protected readonly violations = FormValidationService.getViolations(this.form, this.violationLabels);
@@ -88,7 +89,7 @@ export class VendorExpressFormComponent {
         contactName: vendor.contactName ?? '',
         email: vendor.email ?? '',
         phone: vendor.phone ?? '',
-        paymentTerms: vendor.paymentTerms ?? '',
+        paymentTermsId: vendor.paymentTermsId ?? null,
         notes: vendor.notes ?? '',
       }, { emitEvent: false });
       this.workflowService.refreshStepForm();
@@ -168,6 +169,11 @@ export class VendorExpressFormComponent {
     );
   }
 
+  private termsFields(paymentTermsId: number | null): Record<string, unknown> {
+    if (!this.form.controls.paymentTermsId.dirty) return {};
+    return paymentTermsId != null ? { paymentTermsId } : { paymentTerms: null };
+  }
+
   private fieldsFromForm(): Record<string, unknown> {
     const value = this.form.getRawValue();
     return {
@@ -176,7 +182,7 @@ export class VendorExpressFormComponent {
       contactName: value.contactName.trim() || null,
       email: value.email.trim() || null,
       phone: value.phone.trim() || null,
-      paymentTerms: value.paymentTerms || null,
+      ...this.termsFields(value.paymentTermsId),
       notes: value.notes.trim() || null,
     };
   }

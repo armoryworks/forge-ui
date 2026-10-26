@@ -1,0 +1,9 @@
+@if (open()) {
+  <span class="chip chip--success discount-chip" data-testid="discount-chip">
+    @if (percent()) {
+      {{ 'paymentTerms.discountUntil' | translate: { percent: percent(), date: (deadline() | dateOnly) } }}
+    } @else {
+      {{ 'paymentTerms.discountOpenUntil' | translate: { date: (deadline() | dateOnly) } }}
+    }
+  </span>
+}

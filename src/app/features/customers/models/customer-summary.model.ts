@@ -1,4 +1,5 @@
 import { FreightTerms } from '../../../shared/models/freight-terms.const';
+import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
 
 export interface CustomerSummary {
   id: number;
@@ -34,6 +35,8 @@ export interface CustomerSummary {
   rowVersion?: number;
   freightTerms?: FreightTerms | null;
   defaultCreditTerms?: string | null;
+  paymentTermsId?: number | null;
+  paymentTerms?: PaymentTermsSummary | null;
   isOnCreditHold?: boolean;
   currencyId?: number | null;
   currencyLocked?: boolean;

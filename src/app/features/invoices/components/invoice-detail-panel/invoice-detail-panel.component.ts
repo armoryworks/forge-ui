@@ -13,6 +13,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DiscountChipComponent } from '../../../../shared/components/discount-chip/discount-chip.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -37,7 +38,7 @@ const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
     DateOnlyPipe, NumberLockInfoComponent, DatePipe, DecimalPipe, TranslatePipe, RouterLink, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
-    DetailLoadErrorComponent,
+    DetailLoadErrorComponent, DiscountChipComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',

@@ -180,6 +180,13 @@ export const ADMIN_ROUTES: Routes = [
   // browse/manage customer- and part-scoped terms. Company mutations are
   // Admin-only (server-enforced + gated in-page). Lives in the terms feature.
   {
+    path: 'payment-terms',
+    data: { titleKey: 'admin.tabs.paymentTerms' },
+    canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+    loadComponent: () =>
+      import('./payment-terms/payment-terms-admin.component').then((m) => m.PaymentTermsAdminComponent),
+  },
+  {
     path: 'terms',
     data: { titleKey: 'admin.tabs.terms' },
     loadComponent: () =>

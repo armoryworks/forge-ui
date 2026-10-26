@@ -23,5 +23,6 @@ export interface CreatePurchaseOrderRequest {
   isBlanket?: boolean;
   blanketExpirationDate?: string;
   currencyId?: number;
+  paymentTermsId?: number;
   fxRate?: number | null;
 }

@@ -29,7 +29,8 @@ import { DocumentCurrencyComponent } from '../../../../shared/components/documen
 import { formatDate, toCalendarDate, toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
 import { roundMoney } from '../../../../shared/utils/money.utils';
 import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
-import { CREDIT_TERMS_OPTIONS, dueDateForCreditTerms } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
+import { discountDateForTerms, dueDateForTerms } from '../../../../shared/utils/payment-terms.utils';
 import { CustomerDetail } from '../../../customers/models/customer-detail.model';
 import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
 import { SalesTaxRate } from '../../../admin/models/sales-tax-rate.model';
@@ -70,6 +71,7 @@ export class InvoiceDialogComponent {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumbers = inject(ManualNumberSettingsService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
 
   /** Whether the tenant allows a manual invoice-number override on create. */
   protected readonly allowManualInvoiceNumbers = computed(() => this.manualNumbers.isEnabled('invoices'));
@@ -102,7 +104,7 @@ export class InvoiceDialogComponent {
     ...this.sources().salesOrders.map(so => ({ value: so.id, label: `${so.orderNumber} — ${so.customerName}` })),
   ]);
 
-  protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
+  protected readonly creditTermsOptions = this.paymentTerms.options;
 
   protected readonly invoiceForm = new FormGroup({
     invoiceNumber: new FormControl('', [Validators.maxLength(20)]),
@@ -111,7 +113,7 @@ export class InvoiceDialogComponent {
     shipmentId: new FormControl<number | null>(null),
     invoiceDate: new FormControl<Date | null>(todayStart(), [Validators.required]),
     dueDate: new FormControl<Date | null>(null, [Validators.required]),
-    creditTerms: new FormControl<string | null>(null),
+    paymentTermsId: new FormControl<number | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
@@ -150,7 +152,7 @@ export class InvoiceDialogComponent {
     shipmentId: this.translate.instant('invoices.shipmentId'),
     invoiceDate: this.translate.instant('invoices.invoiceDate'),
     dueDate: this.translate.instant('invoices.dueDate'),
-    creditTerms: this.translate.instant('invoices.creditTerms'),
+    paymentTermsId: this.translate.instant('invoices.creditTerms'),
     taxRate: this.translate.instant('invoices.taxRate'),
     currencyId: this.translate.instant('accounting.currency.currency'),
     fxRate: this.translate.instant('accounting.currency.fxRate'),
@@ -224,6 +226,20 @@ export class InvoiceDialogComponent {
     return toIsoDate(expiry)! >= toIsoDate(invoiceDate)!;
   });
 
+  private readonly paymentTermsIdValue = toSignal(
+    this.invoiceForm.controls.paymentTermsId.valueChanges.pipe(startWith(this.invoiceForm.controls.paymentTermsId.value)),
+    { initialValue: this.invoiceForm.controls.paymentTermsId.value },
+  );
+
+  /** The early-payment discount the picked terms offer on this invoice, or null when they carry none. */
+  protected readonly discountOffer = computed(() => {
+    const terms = this.paymentTerms.find(this.paymentTermsIdValue());
+    const invoiceDate = this.invoiceDateValue();
+    const until = invoiceDate ? discountDateForTerms(toCalendarDate(invoiceDate), terms) : null;
+    if (!terms || !until) return null;
+    return { percent: terms.discountPercent, date: formatDate(until), amount: roundMoney(this.grandTotal() * terms.discountPercent / 100) };
+  });
+
   protected readonly effectiveTaxRate = computed(() => (this.customerTaxExempt() ? 0 : (this.taxRateValue() ?? 0)));
   protected readonly taxAmount = computed(() => roundMoney(this.effectiveTaxRate() / 100 * this.taxableTotal()));
   protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
@@ -283,7 +299,7 @@ export class InvoiceDialogComponent {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(customer => {
       this.customerDetail.set(customer);
-      if (controls.salesOrderId.value == null) this.applyDefaultCreditTerms(customer.defaultCreditTerms ?? null);
+      if (controls.salesOrderId.value == null) this.applyDefaultTerms(this.customerTermsId(customer));
     });
 
     effect(() => {
@@ -327,12 +343,14 @@ export class InvoiceDialogComponent {
       const order = this.sources().salesOrders.find(so => so.id === salesOrderId);
       if (order) {
         this.applyDefaultTaxRate(order.taxRate);
-        this.applyDefaultCreditTerms(order.creditTerms ?? this.customerDetail()?.defaultCreditTerms ?? null);
+        this.applyDefaultTerms(
+          order.paymentTermsId ?? this.paymentTerms.forLegacy(order.creditTerms)?.id ?? this.customerTermsId(this.customerDetail()),
+        );
       }
     });
 
     controls.dueDate.addValidators(control => this.dueDateTermsError(control.value as Date | null));
-    controls.creditTerms.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyTermsDueDate());
+    controls.paymentTermsId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyTermsDueDate());
     controls.invoiceDate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.applyTermsDueDate());
 
     controls.shipmentId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((shipmentId) => {
@@ -373,15 +391,20 @@ export class InvoiceDialogComponent {
     this.closed.emit();
   }
 
-  private applyDefaultCreditTerms(creditTerms: string | null): void {
-    const control = this.invoiceForm.controls.creditTerms;
-    if (control.dirty || creditTerms == null) return;
-    control.setValue(creditTerms);
+  private customerTermsId(customer: CustomerDetail | null): number | null {
+    if (!customer) return null;
+    return customer.paymentTermsId ?? this.paymentTerms.forLegacy(customer.defaultCreditTerms)?.id ?? null;
+  }
+
+  private applyDefaultTerms(paymentTermsId: number | null): void {
+    const control = this.invoiceForm.controls.paymentTermsId;
+    if (control.dirty || paymentTermsId == null) return;
+    control.setValue(paymentTermsId);
   }
 
   private termsDueDate(): Date | null {
-    const { invoiceDate, creditTerms } = this.invoiceForm.controls;
-    return invoiceDate.value ? dueDateForCreditTerms(toCalendarDate(invoiceDate.value), creditTerms.value) : null;
+    const { invoiceDate, paymentTermsId } = this.invoiceForm.controls;
+    return invoiceDate.value ? dueDateForTerms(toCalendarDate(invoiceDate.value), this.paymentTerms.find(paymentTermsId.value)) : null;
   }
 
   private applyTermsDueDate(): void {
@@ -393,7 +416,7 @@ export class InvoiceDialogComponent {
   private dueDateTermsError(dueDate: Date | null): ValidationErrors | null {
     const expected = this.termsDueDate();
     if (!dueDate || !expected || toIsoDate(dueDate) === toIsoDate(expected)) return null;
-    const terms = this.creditTermsOptions.find(o => o.value === this.invoiceForm.controls.creditTerms.value)?.label ?? '';
+    const terms = this.paymentTerms.find(this.invoiceForm.controls.paymentTermsId.value)?.name ?? '';
     return {
       termsMismatch: {
         message: this.translate.instant('invoices.dueDateTermsMismatch', { terms, date: formatDate(expected) }),
@@ -510,7 +533,7 @@ export class InvoiceDialogComponent {
       shipmentId: f.shipmentId ?? undefined,
       invoiceDate: toIsoDate(f.invoiceDate!)!,
       dueDate: toIsoDate(f.dueDate!)!,
-      creditTerms: f.creditTerms ?? undefined,
+      paymentTermsId: f.paymentTermsId ?? undefined,
       taxRate: this.effectiveTaxRate() / 100,
       currencyId,
       fxRate,

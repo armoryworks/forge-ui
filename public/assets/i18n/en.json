@@ -3681,7 +3681,8 @@
       "updates": "Updates",
       "tariffs": "Tariff Rates",
       "workingCalendars": "Working Calendars",
-      "database": "Database Transfer"
+      "database": "Database Transfer",
+      "paymentTerms": "Payment Terms"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -6310,7 +6311,9 @@
     "voidReason": "Void Reason",
     "paymentVoided": "Payment voided.",
     "void": "Void",
-    "invoiceOptionLabel": "{{number}} — {{balance}} open"
+    "invoiceOptionLabel": "{{number}} — {{balance}} open",
+    "invoiceOptionLabelDiscount": "{{number}} — {{balance}} open · {{percent}}% off until {{date}}",
+    "discountExceedsBalance": "The amount plus the discount is more than the invoice's balance."
   },
   "vendorContacts": {
     "contactsTab": "Contacts",
@@ -12268,7 +12271,8 @@
       "amountExceedsBalance": "Application {{row}}: amount exceeds the bill balance (max {{max}})",
       "amountInvalid": "Application {{row}}: amount cannot be negative",
       "fxRateInvalid": "Application {{row}}: settlement FX rate must be greater than 0",
-      "amountDecimals": "Application {{row}}: amount can have at most 2 decimal places"
+      "amountDecimals": "Application {{row}}: amount can have at most 2 decimal places",
+      "discountExceedsBalance": "Row {{row}}: the amount plus the discount is more than the bill's balance."
     },
     "applications": "Bill Applications",
     "noApplications": "No bill applications",
@@ -14340,7 +14344,14 @@
       "determinationAccountNotFound": "Choose an account from this book's chart of accounts.",
       "determinationAccountNotPostable": "Choose an active account that accepts postings.",
       "determinationAccountControl": "Control accounts can't be mapped here.",
-      "determinationAccountType": "This posting needs an account of a different type."
+      "determinationAccountType": "This posting needs an account of a different type.",
+      "discountNotAllowed": "That early-payment discount is outside the terms: the window has closed or the amount is more than the terms allow.",
+      "paymentTermsNotFound": "Those payment terms no longer exist. Pick other terms.",
+      "paymentTermsInactive": "Those payment terms are inactive. Pick active terms.",
+      "paymentTermsDueDate": "The due date doesn't match the payment terms.",
+      "paymentTermsDiscountDays": "A discount needs discount days that are more than 0 and fewer than the net days.",
+      "paymentTermsDuplicate": "Payment terms with that code already exist.",
+      "paymentTermsSystem": "System terms can only be renamed."
     },
     "validators": {
       "required": "{{field}} is required.",
@@ -14428,5 +14439,45 @@
     "freightOutAccount": "Freight-Out (delivery)",
     "clearsPoAccrual": "Clears the PO's receipt freight accrual; any excess goes to Freight-In.",
     "freightForPo": "Freight for {{po}}"
+  },
+  "paymentTerms": {
+    "label": "Payment terms",
+    "vendorDefault": "Vendor's terms",
+    "discount": "Discount",
+    "discountShort": "Discount",
+    "discountsTaken": "Early-payment discounts",
+    "discountUntil": "{{percent}}% off until {{date}}",
+    "discountOpenUntil": "Discount open until {{date}}",
+    "discountOpen": "Discount open",
+    "discountDeadline": "Discount deadline",
+    "unmatchedText": "Current terms text: {{text}}",
+    "payAmount": "Pay",
+    "payDate": "Pay date",
+    "dueThrough": "Due through",
+    "noSuggestions": "No bills are due or have a discount open for these dates.",
+    "daysLeft": "{{count}} days left",
+    "selectedCount": "{{count}} selected",
+    "cashTotal": "Cash:",
+    "savingsTotal": "Discounts:",
+    "createPayments": "Create payments",
+    "paymentsCreated": "{{count}} payments created.",
+    "payBillsTab": "Pay bills",
+    "portalOffer": "Pay {{currency}} {{amount}} by {{date}} to take the discount.",
+    "title": "Payment terms",
+    "hint": "Terms customers, vendors, orders, invoices and bills pick from. An early-payment discount (for example 2/10 Net 30) is taken automatically when a payment arrives in time.",
+    "newTerms": "New terms",
+    "editTerms": "Edit terms",
+    "empty": "No payment terms yet.",
+    "fieldName": "Name",
+    "fieldCode": "Code",
+    "fieldNetDays": "Net days",
+    "fieldDiscountPercent": "Discount %",
+    "fieldDiscountDays": "Discount days",
+    "fieldSortOrder": "Sort order",
+    "colSystem": "System",
+    "system": "System",
+    "systemNote": "These are system terms: you can change the name and sort order only.",
+    "saved": "Payment terms saved.",
+    "discountDaysInvalid": "A discount needs discount days that are more than 0 and fewer than the net days."
   }
 }

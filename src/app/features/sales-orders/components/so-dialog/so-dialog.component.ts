@@ -31,7 +31,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
-import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
 import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
@@ -74,6 +74,7 @@ export class SoDialogComponent {
   private readonly auth = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -108,7 +109,7 @@ export class SoDialogComponent {
 
   protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
-  protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
+  protected readonly creditTermsOptions = this.paymentTerms.options;
 
   protected readonly freightTermsOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('freight.terms.customerDefault') },
@@ -128,7 +129,7 @@ export class SoDialogComponent {
     // Optional manual override; blank → server auto-generates. Only surfaced when the setting is on.
     orderNumber: new FormControl('', [Validators.maxLength(20)]),
     customerPO: new FormControl(''),
-    creditTerms: new FormControl<string | null>(null),
+    paymentTermsId: new FormControl<number | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     freightTerms: new FormControl<FreightTerms | null>(null),
@@ -142,7 +143,7 @@ export class SoDialogComponent {
     shippingAddressId: 'Ship to',
     billingAddressId: 'Bill to',
     customerPO: 'Customer PO',
-    creditTerms: 'Credit Terms',
+    paymentTermsId: 'Credit Terms',
     requestedDeliveryDate: 'Delivery Date',
     taxRate: 'Tax Rate',
     notes: 'Notes',
@@ -421,7 +422,7 @@ export class SoDialogComponent {
       shippingAddressId: f.shippingAddressId ?? undefined,
       billingAddressId: f.billingAddressId ?? undefined,
       orderNumber: this.allowManualOrderNumbers() ? (f.orderNumber?.trim() || undefined) : undefined,
-      creditTerms: f.creditTerms || undefined,
+      paymentTermsId: f.paymentTermsId ?? undefined,
       requestedDeliveryDate: toIsoDate(f.requestedDeliveryDate) || undefined,
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,

@@ -37,6 +37,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 
 import { VendorBillDialogComponent } from './components/vendor-bill-dialog/vendor-bill-dialog.component';
 import { VendorPaymentDialogComponent } from './components/vendor-payment-dialog/vendor-payment-dialog.component';
+import { PayBillsPanelComponent } from './components/pay-bills-panel/pay-bills-panel.component';
+import { DiscountChipComponent } from '../../shared/components/discount-chip/discount-chip.component';
 import { VendorBillDetailDialogComponent, VendorBillDetailDialogData } from './components/vendor-bill-detail-dialog/vendor-bill-detail-dialog.component';
 import { PaymentBatchCreateDialogComponent } from './components/payment-batch-create-dialog/payment-batch-create-dialog.component';
 import { VendorBankAccountDialogComponent } from './components/vendor-bank-account-dialog/vendor-bank-account-dialog.component';
@@ -46,9 +48,9 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
-type PayablesTab = 'bills' | 'payments' | 'batches' | 'accounts';
+type PayablesTab = 'bills' | 'pay-bills' | 'payments' | 'batches' | 'accounts';
 
-const VALID_TABS: PayablesTab[] = ['bills', 'payments', 'batches', 'accounts'];
+const VALID_TABS: PayablesTab[] = ['bills', 'pay-bills', 'payments', 'batches', 'accounts'];
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of the Invoices + Payments pages.
 @Component({
@@ -63,7 +65,7 @@ const VALID_TABS: PayablesTab[] = ['bills', 'payments', 'batches', 'accounts'];
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent,
     VendorBillDialogComponent, VendorPaymentDialogComponent,
-    PaymentBatchCreateDialogComponent, VendorBankAccountDialogComponent,
+    PaymentBatchCreateDialogComponent, VendorBankAccountDialogComponent, PayBillsPanelComponent, DiscountChipComponent,
     MatTooltipModule,
   ],
   templateUrl: './payables.component.html',
@@ -89,6 +91,12 @@ export class PayablesComponent {
 
   protected readonly canManage = this.auth.hasAnyRole(PAYABLES_MANAGE_ROLES);
   protected readonly canReadPayments = this.auth.hasAnyRole(VENDOR_PAYMENT_READ_ROLES);
+
+  /** The payment run shows to the roles that pay bills, while vendor payments are on. */
+  protected readonly canPayBills = computed(() => {
+    this.capabilities.capabilities();
+    return this.canManage && this.capabilities.isEnabled('CAP-P2P-PAY', true);
+  });
 
   /** BANK-002 Phase A tabs (batches + bank accounts) show only when NACHA is enabled, and only to the roles that manage payables. */
   protected readonly nachaEnabled = computed(() => {
@@ -233,6 +241,7 @@ export class PayablesComponent {
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'bills') this.loadBills();
+      else if (tab === 'pay-bills') return;
       else if (tab === 'payments') this.loadPayments();
       else if (tab === 'batches') this.loadBatches();
       else this.loadAccounts();
@@ -269,6 +278,7 @@ export class PayablesComponent {
 
   private tabAllowed(tab: PayablesTab): boolean {
     if (tab === 'payments') return this.canReadPayments;
+    if (tab === 'pay-bills') return this.canManage;
     if (tab === 'batches' || tab === 'accounts') return this.canManage;
     return true;
   }
@@ -351,6 +361,11 @@ export class PayablesComponent {
   protected onBillSaved(): void {
     this.closeBillDialog();
     this.loadBills();
+  }
+
+  protected onBillsPaid(): void {
+    this.loadBills();
+    if (this.canReadPayments) this.loadPayments();
   }
 
   protected openPaymentDialog(): void { this.showPaymentDialog.set(true); }

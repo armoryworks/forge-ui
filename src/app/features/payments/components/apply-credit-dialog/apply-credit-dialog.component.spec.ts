@@ -91,7 +91,7 @@ describe('ApplyCreditDialogComponent', () => {
     dialog.save();
 
     expect(paymentService.applyPayment).toHaveBeenCalledWith(4, {
-      applications: [{ invoiceId: 5, amount: 250, settlementFxRate: undefined }],
+      applications: [{ invoiceId: 5, amount: 250, discountAmount: 0, settlementFxRate: undefined }],
     });
     expect(savedCount).toBe(1);
   });

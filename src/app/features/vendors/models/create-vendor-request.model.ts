@@ -12,6 +12,7 @@ export interface CreateVendorRequest {
   zipCode?: string;
   country?: string;
   paymentTerms?: string;
+  paymentTermsId?: number;
   notes?: string;
   is1099?: boolean;
   taxId?: string;

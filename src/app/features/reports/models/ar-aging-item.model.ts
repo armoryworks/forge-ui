@@ -9,4 +9,6 @@ export interface ArAgingItem {
   balanceDue: number;
   daysOverdue: number;
   agingBucket: string;
+  discountDeadline?: string | null;
+  discountAvailable?: number;
 }

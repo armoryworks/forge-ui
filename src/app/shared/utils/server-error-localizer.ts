@@ -48,6 +48,13 @@ const CODE_KEYS: Record<string, string> = {
   'determination-account-not-postable': 'apiErrors.codes.determinationAccountNotPostable',
   'determination-account-control': 'apiErrors.codes.determinationAccountControl',
   'determination-account-type': 'apiErrors.codes.determinationAccountType',
+  'discount-not-allowed': 'apiErrors.codes.discountNotAllowed',
+  'payment-terms-not-found': 'apiErrors.codes.paymentTermsNotFound',
+  'payment-terms-inactive': 'apiErrors.codes.paymentTermsInactive',
+  'payment-terms-due-date': 'apiErrors.codes.paymentTermsDueDate',
+  'payment-terms-discount-days': 'apiErrors.codes.paymentTermsDiscountDays',
+  'payment-terms-duplicate': 'apiErrors.codes.paymentTermsDuplicate',
+  'payment-terms-system': 'apiErrors.codes.paymentTermsSystem',
 };
 
 const PROBLEM_CODE_KEYS: Record<string, string> = {

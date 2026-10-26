@@ -77,7 +77,15 @@
             <span class="info-value">{{ inv.fxRate | number:'1.2-8' }}</span>
           </div>
         }
-        @if (inv.creditTerms) {
+        @if (inv.paymentTerms) {
+          <div class="info-item" data-testid="invoice-detail-terms">
+            <span class="info-label">{{ 'invoices.creditTerms' | translate }}</span>
+            <span class="info-value">
+              {{ inv.paymentTerms.name }}
+              <app-discount-chip [percent]="inv.discountPercent" [deadline]="inv.discountDeadline" [available]="inv.discountAvailable" />
+            </span>
+          </div>
+        } @else if (inv.creditTerms) {
           <div class="info-item">
             <span class="info-label">{{ 'invoices.creditTerms' | translate }}</span>
             <span class="info-value">{{ inv.creditTerms | enumLabel: 'creditTerms' }}</span>
@@ -150,6 +158,12 @@
           <span class="totals-label">{{ 'invoices.amountPaid' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="inv.amountPaid" [currency]="currencyCode()" /></span>
         </div>
+        @if ((inv.discountsTaken ?? 0) > 0) {
+          <div class="totals-row" data-testid="invoice-detail-discounts-taken">
+            <span class="totals-label">{{ 'paymentTerms.discountsTaken' | translate }}</span>
+            <span class="totals-value"><app-currency-display [value]="inv.discountsTaken ?? 0" [currency]="currencyCode()" /></span>
+          </div>
+        }
         <div class="totals-row totals-row--balance">
           <span class="totals-label">{{ 'invoices.balanceDue' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="inv.balanceDue" [currency]="currencyCode()" /></span>

@@ -20,4 +20,13 @@ export interface VendorBillListItem {
   currencyCode?: string | null;
   fxRate?: number;
   totalFunctional?: number | null;
+  paymentTermsId?: number | null;
+  /** Early-payment discount in percent (2 = 2 %); 0 when the bill's terms carry none. */
+  discountPercent?: number;
+  discountDueDate?: string | null;
+  /** The last day a payment still takes the discount (the discount date plus any grace days). */
+  discountDeadline?: string | null;
+  discountsTaken?: number;
+  /** The discount still available, ignoring the date. */
+  discountAvailable?: number;
 }

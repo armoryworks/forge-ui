@@ -98,8 +98,14 @@
           (selected)="onCustomerSelected($event)" />
         <app-select [label]="'invoices.salesOrderId' | translate" formControlName="salesOrderId" [options]="salesOrderOptions()" data-testid="invoice-sales-order" />
         <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" [max]="today" [required]="true" data-testid="invoice-date" />
-        <app-select [label]="'invoices.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="invoice-credit-terms" />
+        <app-select [label]="'invoices.creditTerms' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" data-testid="invoice-credit-terms" />
         <app-datepicker [label]="'invoices.dueDate' | translate" formControlName="dueDate" [required]="true" data-testid="invoice-due-date" />
+        @if (discountOffer(); as offer) {
+          <div class="terms-discount-note" role="note" data-testid="invoice-discount-note">
+            <span class="material-icons-outlined" aria-hidden="true">savings</span>
+            {{ 'paymentTerms.discountUntil' | translate: { percent: offer.percent, date: offer.date } }}
+          </div>
+        }
         <app-input [label]="'invoices.taxRate' | translate" type="number" formControlName="taxRate" suffix="%" data-testid="invoice-tax-rate" />
         @if (customerTaxExempt()) {
           <div class="tax-exempt-note" role="note" data-testid="invoice-tax-exempt-note">

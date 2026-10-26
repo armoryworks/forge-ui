@@ -289,6 +289,7 @@ export class NavTreeService {
             { icon: 'payments', label: 'Currencies & FX', i18nKey: 'admin.tabs.currencies', route: '/admin/currencies', allowedRoles: ['Admin'] },
             { icon: 'request_quote', label: 'Tariff Rates', i18nKey: 'admin.tabs.tariffs', route: '/admin/tariffs', allowedRoles: ['Admin'] },
             { icon: 'calendar_month', label: 'Working Calendars', i18nKey: 'admin.tabs.workingCalendars', route: '/admin/working-calendars', allowedRoles: ['Admin'] },
+            { icon: 'event_note', label: 'Payment Terms', i18nKey: 'admin.tabs.paymentTerms', route: '/admin/payment-terms', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
             { icon: 'gavel', label: 'Terms & Conditions', i18nKey: 'admin.tabs.terms', route: '/admin/terms', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
           ],
         },

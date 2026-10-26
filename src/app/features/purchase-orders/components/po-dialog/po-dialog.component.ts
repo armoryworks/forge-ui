@@ -16,6 +16,7 @@ import { PoVendorRef } from '../../models/po-vendor-ref.model';
 import { PoVendorRefsService } from '../../services/po-vendor-refs.service';
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
 import { PurchaseUnitsService } from '../../../parts/services/purchase-units.service';
 import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
@@ -82,6 +83,7 @@ export class PoDialogComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly vendorRefsService = inject(PoVendorRefsService);
@@ -212,7 +214,13 @@ export class PoDialogComponent {
     blanketExpirationDate: new FormControl<Date | null>(null),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number | null>(null, [Validators.min(0.00000001)]),
+    paymentTermsId: new FormControl<number | null>(null),
   });
+
+  protected readonly paymentTermsOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('paymentTerms.vendorDefault') },
+    ...this.paymentTerms.options().filter(o => o.value != null),
+  ]);
 
   private readonly selectedVendorId = toSignal(this.form.controls.vendorId.valueChanges, { initialValue: null });
   protected readonly vendorCurrencyId = computed(() => {
@@ -332,6 +340,12 @@ export class PoDialogComponent {
           this.form.controls.quoteCurrency.setValue(code);
           this.form.controls.quoteCurrency.markAsDirty();
         }
+      });
+    this.form.controls.vendorId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(vendorId => {
+        const terms = this.form.controls.paymentTermsId;
+        if (!terms.dirty) terms.setValue(this.vendors().find(v => v.id === vendorId)?.paymentTermsId ?? null);
       });
     this.form.controls.vendorId.valueChanges
       .pipe(
@@ -753,6 +767,7 @@ export class PoDialogComponent {
       quoteCurrency: controls.quoteCurrency.dirty ? f.quoteCurrency : undefined,
       currencyId: this.documentCurrencyVisible() ? (f.currencyId ?? undefined) : undefined,
       fxRate: this.documentCurrencyVisible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,
+      paymentTermsId: this.form.controls.paymentTermsId.dirty ? (f.paymentTermsId ?? undefined) : undefined,
       expectedDeliveryDate: toIsoDate(f.expectedDeliveryDate) ?? undefined,
       isBlanket: f.isBlanket || undefined,
       blanketExpirationDate: f.isBlanket ? (toIsoDate(f.blanketExpirationDate) ?? undefined) : undefined,

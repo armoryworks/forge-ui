@@ -29,6 +29,7 @@ function vendorDetail(overrides: Partial<VendorDetail> = {}): VendorDetail {
     zipCode: '62701',
     country: 'US',
     paymentTerms: 'Net 30',
+    paymentTermsId: 4,
     notes: 'Ships Tuesdays',
     isActive: true,
     is1099: false,
@@ -79,7 +80,7 @@ describe('VendorDialogComponent', () => {
     expect(value.email).toBe('pat@example.com');
     expect(value.phone).toBe('555-0100');
     expect(value.fax).toBe('555-0101');
-    expect(value.paymentTerms).toBe('Net 30');
+    expect(value.paymentTermsId).toBe(4);
     expect(value.notes).toBe('Ships Tuesdays');
     expect(value.offTierVariancePct).toBe(7.5);
     expect(value.address?.city).toBe('Springfield');

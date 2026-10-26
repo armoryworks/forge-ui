@@ -1,0 +1,33 @@
+<app-dialog
+  [title]="(isEdit ? 'paymentTerms.editTerms' : 'paymentTerms.newTerms') | translate"
+  width="520px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    @if (isSystem) {
+      <p class="dialog-hint" data-testid="payment-terms-system-note">{{ 'paymentTerms.systemNote' | translate }}</p>
+    }
+    <div class="dialog-row">
+      <app-input [label]="'paymentTerms.fieldName' | translate" formControlName="name" [required]="true" data-testid="payment-terms-name" />
+      <app-input [label]="'paymentTerms.fieldCode' | translate" formControlName="code" [required]="true" data-testid="payment-terms-code" />
+    </div>
+    <div class="dialog-row">
+      <app-input [label]="'paymentTerms.fieldNetDays' | translate" type="number" formControlName="netDays" [required]="true" data-testid="payment-terms-net-days" />
+      <app-input [label]="'paymentTerms.fieldSortOrder' | translate" type="number" formControlName="sortOrder" [required]="true" data-testid="payment-terms-sort" />
+    </div>
+    <div class="dialog-row">
+      <app-input [label]="'paymentTerms.fieldDiscountPercent' | translate" type="number" formControlName="discountPercent" suffix="%" data-testid="payment-terms-discount-percent" />
+      <app-input [label]="'paymentTerms.fieldDiscountDays' | translate" type="number" formControlName="discountDays" data-testid="payment-terms-discount-days" />
+    </div>
+    <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="payment-terms-active" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid" (click)="save()" data-testid="payment-terms-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

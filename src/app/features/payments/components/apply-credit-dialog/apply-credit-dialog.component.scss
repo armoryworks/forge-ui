@@ -35,10 +35,15 @@
   font-family: monospace;
 }
 
-.add-line--3col {
-  grid-template-columns: 1fr 120px auto;
+.credit-lines__discount {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
 }
 
 .add-line--4col {
   grid-template-columns: 1fr 120px 110px auto;
+}
+
+.add-line--5col {
+  grid-template-columns: 1fr 120px 110px 110px auto;
 }

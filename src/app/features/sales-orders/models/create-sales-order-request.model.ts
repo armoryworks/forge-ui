@@ -9,6 +9,7 @@ export interface CreateSalesOrderRequest {
   shippingAddressId?: number;
   billingAddressId?: number;
   creditTerms?: string;
+  paymentTermsId?: number;
   requestedDeliveryDate?: string;
   customerPO?: string;
   notes?: string;

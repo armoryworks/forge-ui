@@ -23,6 +23,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { AccountingService } from '../../shared/services/accounting.service';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
+import { DiscountChipComponent } from '../../shared/components/discount-chip/discount-chip.component';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -42,7 +43,7 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
     DateOnlyPipe, ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    CurrencyDisplayComponent, EntityLinkComponent,
+    CurrencyDisplayComponent, EntityLinkComponent, DiscountChipComponent,
     InvoiceDialogComponent, UninvoicedJobsPanelComponent, MatTooltipModule,
   ],
   templateUrl: './invoices.component.html',

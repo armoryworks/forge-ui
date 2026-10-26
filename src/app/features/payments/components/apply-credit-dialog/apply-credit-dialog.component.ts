@@ -15,11 +15,13 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CurrencyService } from '../../../../shared/services/currency.service';
+import { automaticDiscount, inDiscountWindow } from '../../../../shared/utils/payment-terms.utils';
 
 interface CreditApplication {
   invoiceId: number;
   invoiceNumber: string;
   amount: number;
+  discount: number;
   settlementFxRate: number;
 }
 
@@ -74,6 +76,7 @@ export class ApplyCreditDialogComponent implements OnInit {
   protected readonly appForm = new FormGroup({
     invoiceId: new FormControl<number | null>(null, [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    discount: new FormControl<number | null>(0, [Validators.min(0)]),
     settlementFxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
   });
 
@@ -86,18 +89,41 @@ export class ApplyCreditDialogComponent implements OnInit {
 
     this.appForm.controls.invoiceId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(invoiceId => {
       const invoice = this.openInvoices().find(inv => inv.id === invoiceId);
+      const offered = invoice ? this.discountOffered(invoice) : 0;
+      this.appForm.controls.discount.markAsPristine();
       if (invoice && this.appForm.controls.amount.value == null) {
-        const suggested = round2(Math.min(invoice.balanceDue, this.remainingCredit()));
-        if (suggested > 0) this.appForm.controls.amount.setValue(suggested);
+        const suggested = round2(Math.min(invoice.balanceDue - offered, this.remainingCredit()));
+        if (suggested > 0) this.appForm.controls.amount.setValue(suggested, { emitEvent: false });
       }
+      this.applyAutomaticDiscount();
+    });
+
+    this.appForm.controls.amount.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      if (!this.appForm.controls.discount.dirty) this.applyAutomaticDiscount();
     });
 
     this.appForm.controls.settlementFxRate.setValue(this.payment().fxRate ?? 1);
   }
 
+  /** The discount still open on the invoice for this payment's date (the date the customer paid). */
+  private discountOffered(invoice: InvoiceListItem): number {
+    return inDiscountWindow(invoice.discountDeadline, this.payment().paymentDate) ? invoice.discountAvailable ?? 0 : 0;
+  }
+
+  private applyAutomaticDiscount(): void {
+    const invoice = this.openInvoices().find(inv => inv.id === this.appForm.controls.invoiceId.value);
+    const discount = invoice
+      ? automaticDiscount(this.appForm.controls.amount.value ?? 0, invoice.balanceDue, this.discountOffered(invoice), invoice.discountPercent ?? 0)
+      : 0;
+    this.appForm.controls.discount.setValue(discount, { emitEvent: false });
+  }
+
   protected canAdd(): boolean {
     const amount = this.appForm.controls.amount.value ?? 0;
-    return this.appForm.valid && round2(amount) <= this.remainingCredit();
+    const discount = this.appForm.controls.discount.value ?? 0;
+    const invoice = this.openInvoices().find(inv => inv.id === this.appForm.controls.invoiceId.value);
+    return this.appForm.valid && round2(amount) <= this.remainingCredit()
+      && (!invoice || round2(amount + discount) <= invoice.balanceDue);
   }
 
   protected addApplication(): void {
@@ -109,9 +135,10 @@ export class ApplyCreditDialogComponent implements OnInit {
       invoiceId: invoice.id,
       invoiceNumber: invoice.invoiceNumber,
       amount: round2(f.amount!),
+      discount: round2(f.discount ?? 0),
       settlementFxRate: f.settlementFxRate ?? 1,
     }]);
-    this.appForm.reset({ invoiceId: null, amount: null, settlementFxRate: this.payment().fxRate ?? 1 });
+    this.appForm.reset({ invoiceId: null, amount: null, discount: 0, settlementFxRate: this.payment().fxRate ?? 1 });
   }
 
   protected removeApplication(index: number): void {
@@ -130,6 +157,7 @@ export class ApplyCreditDialogComponent implements OnInit {
       applications: apps.map(a => ({
         invoiceId: a.invoiceId,
         amount: a.amount,
+        discountAmount: a.discount,
         settlementFxRate: this.showSettlementFxRate() ? a.settlementFxRate : undefined,
       })),
     }).subscribe({

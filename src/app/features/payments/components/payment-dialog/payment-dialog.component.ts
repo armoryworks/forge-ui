@@ -23,7 +23,9 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CurrencyService } from '../../../../shared/services/currency.service';
 import { LanguageService } from '../../../../shared/services/language.service';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
-import { toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
+import { formatDate, toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
+import { roundMoney } from '../../../../shared/utils/money.utils';
+import { automaticDiscount, inDiscountWindow } from '../../../../shared/utils/payment-terms.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -31,6 +33,7 @@ interface ApplicationEntry {
   invoiceId: number;
   invoiceNumber: string;
   amount: number;
+  discount: number;
 }
 
 // ⚡ ACCOUNTING BOUNDARY
@@ -84,9 +87,11 @@ export class PaymentDialogComponent {
       .filter(inv => !filterByCurrency || currencyId == null || inv.currencyId == null || inv.currencyId === currencyId)
       .map(inv => ({
         value: inv.id,
-        label: this.translate.instant('payments.invoiceOptionLabel', {
+        label: this.translate.instant(this.discountOffered(inv) > 0 ? 'payments.invoiceOptionLabelDiscount' : 'payments.invoiceOptionLabel', {
           number: inv.invoiceNumber,
           balance: this.formatMoney(inv.balanceDue, inv.currencyCode ?? this.baseCurrency()),
+          percent: inv.discountPercent ?? 0,
+          date: formatDate(inv.discountDeadline ?? null),
         }),
       }));
   });
@@ -140,10 +145,15 @@ export class PaymentDialogComponent {
     invoiceId: new FormControl<number | null>(null, [Validators.required]),
     invoiceNumber: new FormControl('', [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
-  });
+    discount: new FormControl<number | null>(0, [Validators.min(0)]),
+  }, { validators: group => this.overAppliedError(group.value as { amount: number | null; discount: number | null }) });
 
   protected readonly totalApplied = computed(() =>
     this.applications().reduce((sum, a) => sum + a.amount, 0)
+  );
+
+  protected readonly totalDiscount = computed(() =>
+    roundMoney(this.applications().reduce((sum, a) => sum + a.discount, 0))
   );
 
   protected readonly draftConfig: DraftConfig = {
@@ -165,6 +175,7 @@ export class PaymentDialogComponent {
             invoiceId: a.invoiceId!,
             invoiceNumber: a.invoiceNumber ?? '',
             amount: a.amount!,
+            discount: a.discount ?? 0,
           })),
         );
       }
@@ -176,7 +187,7 @@ export class PaymentDialogComponent {
     this.paymentForm.controls.customerId.valueChanges.pipe(
       switchMap(customerId => {
         this.openInvoices.set([]);
-        this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null });
+        this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null, discount: 0 });
         return customerId == null
           ? of<InvoiceListItem[]>([])
           : this.invoiceService.getOpenInvoices(customerId).pipe(
@@ -192,9 +203,28 @@ export class PaymentDialogComponent {
       this.appForm.controls.invoiceNumber.setValue(invoice?.invoiceNumber ?? '');
       const remaining = invoice ? this.remainingBalance(invoice) : null;
       this.capApplicationAmount(remaining);
+      const discount = invoice ? this.discountOffered(invoice) : 0;
+      this.appForm.controls.discount.setValue(discount, { emitEvent: false });
+      this.appForm.controls.discount.markAsPristine();
       if (remaining != null && remaining > 0 && this.appForm.controls.amount.value == null) {
-        this.appForm.controls.amount.setValue(remaining);
+        this.appForm.controls.amount.setValue(roundMoney(remaining - discount), { emitEvent: false });
       }
+      this.appForm.updateValueAndValidity();
+    });
+
+    this.appForm.controls.amount.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(amount => {
+      const invoice = this.openInvoices().find(inv => inv.id === this.appForm.controls.invoiceId.value);
+      if (!invoice || this.appForm.controls.discount.dirty) return;
+      const remaining = this.remainingBalance(invoice);
+      this.appForm.controls.discount.setValue(
+        automaticDiscount(amount ?? 0, remaining, this.discountOffered(invoice), invoice.discountPercent ?? 0), { emitEvent: false });
+    });
+
+    this.paymentForm.controls.paymentDate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.applications.update(prev => prev.map(a => {
+        const invoice = this.openInvoices().find(inv => inv.id === a.invoiceId);
+        return invoice && a.discount > 0 && !this.inWindow(invoice) ? { ...a, discount: 0 } : a;
+      }));
     });
 
     this.paymentForm.controls.currencyId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(currencyId => {
@@ -223,8 +253,27 @@ export class PaymentDialogComponent {
   }
 
   private remainingBalance(invoice: InvoiceListItem): number {
-    const applied = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.amount, 0);
+    const applied = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.amount + a.discount, 0);
     return Math.round((invoice.balanceDue - applied) * 100) / 100;
+  }
+
+  private inWindow(invoice: InvoiceListItem): boolean {
+    return inDiscountWindow(invoice.discountDeadline, this.paymentDateValue());
+  }
+
+  /** The discount still open on the invoice for this payment's date, less what this payment already takes. */
+  private discountOffered(invoice: InvoiceListItem): number {
+    if (!this.inWindow(invoice)) return 0;
+    const used = this.applications().filter(a => a.invoiceId === invoice.id).reduce((sum, a) => sum + a.discount, 0);
+    return Math.max(0, roundMoney((invoice.discountAvailable ?? 0) - used));
+  }
+
+  private overAppliedError(value: { amount: number | null; discount: number | null }): { overApplied: { message: string } } | null {
+    const remaining = this.applicationRemaining();
+    if (remaining == null) return null;
+    return roundMoney((value.amount ?? 0) + (value.discount ?? 0)) > remaining
+      ? { overApplied: { message: this.translate.instant('payments.discountExceedsBalance') } }
+      : null;
   }
 
   private capApplicationAmount(remaining: number | null): void {
@@ -243,8 +292,9 @@ export class PaymentDialogComponent {
       invoiceId: f.invoiceId!,
       invoiceNumber: f.invoiceNumber!,
       amount: f.amount!,
+      discount: roundMoney(f.discount ?? 0),
     }]);
-    this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null });
+    this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null, discount: 0 });
   }
 
   protected removeApplication(index: number): void {
@@ -259,6 +309,7 @@ export class PaymentDialogComponent {
     const appRequests: CreatePaymentApplicationRequest[] = this.applications().map(a => ({
       invoiceId: a.invoiceId,
       amount: a.amount,
+      discountAmount: a.discount,
     }));
     const currencyField = this.documentCurrency();
 

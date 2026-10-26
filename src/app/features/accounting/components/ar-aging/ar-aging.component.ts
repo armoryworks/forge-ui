@@ -7,6 +7,7 @@ import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
@@ -34,6 +35,8 @@ interface AgingTableRow {
   openBalance: number;
   currencyCode: string | null;
   openTxnBalance: number | null;
+  discountAvailable: number;
+  nextDiscountDeadline: string | null;
   [bucketKey: string]: string | number | null;
 }
 
@@ -42,6 +45,7 @@ interface AgingTableRow {
   standalone: true,
   imports: [
     TranslatePipe,
+    DateOnlyPipe,
     PageHeaderComponent,
     CurrencyDisplayComponent,
     DataTableComponent,
@@ -129,6 +133,9 @@ export class ArAgingComponent {
       ...(this.currencyCatalog.isMultiCurrency()
         ? [{ field: 'openTxnBalance', header: this.translate.instant('accounting.currency.openInDocumentCurrency'), sortable: true, type: 'number' as const, align: 'right' as const, width: '150px' }]
         : []),
+      ...(r.customers.some(p => (p.discountAvailable ?? 0) > 0)
+        ? [{ field: 'discountAvailable', header: this.translate.instant('paymentTerms.discountOpen'), sortable: true, type: 'number' as const, align: 'right' as const, width: '170px' }]
+        : []),
     ];
   });
 
@@ -136,7 +143,8 @@ export class ArAgingComponent {
     const r = this.report();
     if (!r) return [];
     return r.customers.map((c) => {
-      const row: AgingTableRow = { partyName: c.customerName ?? '—', openBalance: c.openBalance, currencyCode: c.currencyCode ?? null, openTxnBalance: c.openTxnBalance ?? null };
+      const row: AgingTableRow = { partyName: c.customerName ?? '—', openBalance: c.openBalance, currencyCode: c.currencyCode ?? null, openTxnBalance: c.openTxnBalance ?? null,
+        discountAvailable: c.discountAvailable ?? 0, nextDiscountDeadline: c.nextDiscountDeadline ?? null };
       c.buckets.forEach((b, i) => (row[`b${i}`] = b.amount));
       return row;
     });

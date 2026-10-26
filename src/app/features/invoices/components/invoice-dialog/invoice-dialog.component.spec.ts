@@ -12,6 +12,7 @@ import { SelectOption } from '../../../../shared/components/select/select.compon
 import { InvoiceSources } from '../../models/invoice-sources.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CustomerDetail } from '../../../customers/models/customer-detail.model';
+import { SEEDED_PAYMENT_TERMS } from '../../../../shared/models/payment-terms.fixture';
 import { InvoiceDialogComponent } from './invoice-dialog.component';
 
 class FakeLoader implements TranslateLoader {
@@ -26,7 +27,7 @@ interface DialogInternals {
     shipmentId: FormControl<number | null>;
     invoiceDate: FormControl<Date | null>;
     dueDate: FormControl<Date | null>;
-    creditTerms: FormControl<string | null>;
+    paymentTermsId: FormControl<number | null>;
     taxRate: FormControl<number | null>;
   }>;
   violations(): string[];
@@ -50,6 +51,7 @@ interface DialogInternals {
   toggleTaxable(index: number): void;
   onCustomerSelected(customer: Record<string, unknown> | null): void;
   draftConfig: { snapshotFn(): Record<string, unknown> };
+  discountOffer(): { percent: number; date: string; amount: number } | null;
 }
 
 const acmeSources: InvoiceSources = {
@@ -94,6 +96,7 @@ function setup() {
   const httpMock = TestBed.inject(HttpTestingController);
 
   httpMock.match(r => r.url === `${environment.apiUrl}/system/currencies`).forEach(r => r.flush([]));
+  httpMock.match(r => r.url === `${environment.apiUrl}/payment-terms`).forEach(r => r.flush(SEEDED_PAYMENT_TERMS));
 
   return { internals: component as unknown as DialogInternals, httpMock };
 }
@@ -389,7 +392,7 @@ describe('InvoiceDialogComponent — dates and credit terms', () => {
 
     selectCustomer(internals, httpMock, 5, acmeSources, null, { defaultCreditTerms: 'Net30' });
 
-    expect(internals.invoiceForm.controls.creditTerms.value).toBe('Net30');
+    expect(internals.invoiceForm.controls.paymentTermsId.value).toBe(4);
     expect(internals.invoiceForm.controls.dueDate.value?.toDateString()).toBe(new Date(2026, 10, 18).toDateString());
   });
 
@@ -400,7 +403,7 @@ describe('InvoiceDialogComponent — dates and credit terms', () => {
 
     internals.invoiceForm.controls.salesOrderId.setValue(42);
 
-    expect(internals.invoiceForm.controls.creditTerms.value).toBe('Net45');
+    expect(internals.invoiceForm.controls.paymentTermsId.value).toBe(5);
     expect(internals.invoiceForm.controls.dueDate.value?.toDateString()).toBe(new Date(2026, 11, 3).toDateString());
   });
 
@@ -408,13 +411,24 @@ describe('InvoiceDialogComponent — dates and credit terms', () => {
     const { internals } = setup();
     const controls = internals.invoiceForm.controls;
     controls.invoiceDate.setValue(new Date(2026, 9, 19));
-    controls.creditTerms.setValue('Net30');
+    controls.paymentTermsId.setValue(4);
 
     controls.dueDate.setValue(new Date(2026, 10, 3));
     expect(controls.dueDate.hasError('termsMismatch')).toBe(true);
 
-    controls.creditTerms.setValue(null);
+    controls.paymentTermsId.setValue(null);
     expect(controls.dueDate.valid).toBe(true);
+  });
+
+  it('dates the invoice from discount terms and shows the discount it offers', () => {
+    const { internals, httpMock } = setup();
+    internals.invoiceForm.controls.invoiceDate.setValue(new Date(2026, 0, 25));
+    selectCustomer(internals, httpMock, 5, acmeSources, null, { paymentTermsId: 9 });
+    internals.lines.set([{ partId: null, partNumber: '', description: 'Widget', quantity: 1, unitPrice: 9800, taxable: false }]);
+
+    expect(internals.invoiceForm.controls.paymentTermsId.value).toBe(9);
+    expect(internals.invoiceForm.controls.dueDate.value?.toDateString()).toBe(new Date(2026, 1, 24).toDateString());
+    expect(internals.discountOffer()).toEqual({ percent: 2, date: '02/04/2026', amount: 196 });
   });
 });
 

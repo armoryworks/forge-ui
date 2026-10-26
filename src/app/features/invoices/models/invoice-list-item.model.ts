@@ -14,4 +14,10 @@ export interface InvoiceListItem {
   currencyId?: number | null;
   fxRate?: number;
   totalFunctional?: number | null;
+  paymentTermsId?: number | null;
+  discountPercent?: number;
+  discountDueDate?: Date | string | null;
+  discountDeadline?: Date | string | null;
+  discountsTaken?: number;
+  discountAvailable?: number;
 }

@@ -87,3 +87,9 @@
     font-size: $font-size-sm;
   }
 }
+
+.portal-list__terms {
+  display: block;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}

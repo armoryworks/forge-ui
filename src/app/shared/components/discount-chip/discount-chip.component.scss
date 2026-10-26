@@ -1,0 +1,9 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: inline-block;
+}
+
+.discount-chip {
+  margin-left: $sp-xs;
+}

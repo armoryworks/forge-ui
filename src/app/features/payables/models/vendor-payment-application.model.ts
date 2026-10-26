@@ -6,4 +6,5 @@ export interface VendorPaymentApplication {
   billNumber: string;
   amount: number;
   settlementFxRate: number;
+  discountAmount?: number;
 }

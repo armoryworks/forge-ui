@@ -97,6 +97,7 @@
               <tr>
                 <th scope="col">{{ 'payments.invoiceNumber' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'payments.amount' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'paymentTerms.discount' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -104,6 +105,7 @@
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="payment.currencyCode ?? null" /></td>
+                  <td class="lines-table__right" data-testid="payment-detail-app-discount"><app-currency-display [value]="app.discountAmount ?? 0" [currency]="payment.currencyCode ?? null" /></td>
                 </tr>
               }
             </tbody>

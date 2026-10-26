@@ -1,0 +1,54 @@
+<div class="pay-bills" [formGroup]="filters">
+  <div class="pay-bills__filters">
+    <app-datepicker [label]="'paymentTerms.payDate' | translate" formControlName="payDate" [required]="true" data-testid="pay-bills-pay-date" />
+    <app-datepicker [label]="'paymentTerms.dueThrough' | translate" formControlName="dueThrough" data-testid="pay-bills-due-through" />
+    <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" data-testid="pay-bills-vendor" />
+    <app-select [label]="'payables.method' | translate" formControlName="method" [options]="methodOptions" [required]="true" data-testid="pay-bills-method" />
+  </div>
+
+  <div class="pay-bills__table" [appLoadingBlock]="loading()">
+    <app-data-table tableId="payables-pay-bills" [columns]="columns" [data]="suggestions()" [selectable]="true" trackByField="vendorBillId"
+      emptyIcon="event_available" [emptyMessage]="'paymentTerms.noSuggestions' | translate"
+      (selectionChange)="onSelectionChange($event)">
+      <ng-template appColumnCell="billNumber" let-row>
+        <span class="doc-number">{{ row.billNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="dueDate" let-row>
+        <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
+      </ng-template>
+      <ng-template appColumnCell="balanceDue" let-row>
+        <app-currency-display [value]="row.balanceDue" [currency]="row.currencyCode ?? null" />
+      </ng-template>
+      <ng-template appColumnCell="suggestedDiscount" let-row>
+        @if (row.suggestedDiscount > 0) {
+          <span class="pay-bills__saving"><app-currency-display [value]="row.suggestedDiscount" [currency]="row.currencyCode ?? null" /></span>
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="discountDeadline" let-row>
+        @if (row.discountDeadline) {
+          <span>{{ row.discountDeadline | dateOnly }}</span>
+          <span class="text-muted"> · {{ 'paymentTerms.daysLeft' | translate: { count: row.daysLeft ?? 0 } }}</span>
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="suggestedPayAmount" let-row>
+        <app-currency-display [value]="row.suggestedPayAmount" [currency]="row.currencyCode ?? null" />
+      </ng-template>
+    </app-data-table>
+  </div>
+
+  <div class="pay-bills__footer">
+    <div class="pay-bills__totals" data-testid="pay-bills-totals">
+      <span>{{ 'paymentTerms.selectedCount' | translate: { count: selected().length } }}</span>
+      <span>{{ 'paymentTerms.cashTotal' | translate }} <app-currency-display [value]="cashTotal()" [currency]="totalsCurrency()" /></span>
+      <span class="pay-bills__saving">{{ 'paymentTerms.savingsTotal' | translate }} <app-currency-display [value]="savingsTotal()" [currency]="totalsCurrency()" /></span>
+    </div>
+    <button class="action-btn action-btn--primary" data-testid="pay-bills-create"
+      [disabled]="selected().length === 0 || filters.invalid || paying()" (click)="pay()">
+      <span class="material-icons-outlined">payments</span> {{ 'paymentTerms.createPayments' | translate }}
+    </button>
+  </div>
+</div>

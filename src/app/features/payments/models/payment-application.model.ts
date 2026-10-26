@@ -3,4 +3,5 @@ export interface PaymentApplication {
   invoiceId: number;
   invoiceNumber: string;
   amount: number;
+  discountAmount?: number;
 }

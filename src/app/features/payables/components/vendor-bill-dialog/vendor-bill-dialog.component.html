@@ -11,6 +11,15 @@
     </div>
 
     <div class="dialog-row">
+      <app-select [label]="'paymentTerms.label' | translate" formControlName="paymentTermsId" [options]="paymentTermsOptions()" data-testid="bill-payment-terms" />
+      @if (discountUntil(); as offer) {
+        <p class="bill-discount-note" role="note" data-testid="bill-discount-note">
+          {{ 'paymentTerms.discountUntil' | translate: { percent: offer.percent, date: offer.date } }}
+        </p>
+      }
+    </div>
+
+    <div class="dialog-row">
       <div class="tax-amount-field">
         <app-currency-input [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
         @if (billForm.controls.taxAmount.hasError('min')) {

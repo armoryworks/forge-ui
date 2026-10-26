@@ -3681,7 +3681,8 @@
       "updates": "Actualizaciones",
       "tariffs": "Tasas arancelarias",
       "workingCalendars": "Calendarios laborales",
-      "database": "Transferencia de base de datos"
+      "database": "Transferencia de base de datos",
+      "paymentTerms": "Condiciones de pago"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -6303,7 +6304,9 @@
     "voidReason": "Motivo de Anulación",
     "paymentVoided": "Pago anulado.",
     "void": "Anular",
-    "invoiceOptionLabel": "{{number}} — {{balance}} pendiente"
+    "invoiceOptionLabel": "{{number}} — {{balance}} pendiente",
+    "invoiceOptionLabelDiscount": "{{number}} — {{balance}} pendiente · {{percent}} % de descuento hasta el {{date}}",
+    "discountExceedsBalance": "El importe más el descuento supera el saldo de la factura."
   },
   "vendorContacts": {
     "contactsTab": "Contactos",
@@ -12268,7 +12271,8 @@
       "amountExceedsBalance": "Aplicación {{row}}: el monto excede el saldo de la factura (máx. {{max}})",
       "amountInvalid": "Aplicación {{row}}: el monto no puede ser negativo",
       "fxRateInvalid": "Aplicación {{row}}: el tipo de cambio de liquidación debe ser mayor que 0",
-      "amountDecimals": "Aplicación {{row}}: el monto admite como máximo 2 decimales"
+      "amountDecimals": "Aplicación {{row}}: el monto admite como máximo 2 decimales",
+      "discountExceedsBalance": "Fila {{row}}: el importe más el descuento supera el saldo de la factura."
     },
     "applications": "Aplicaciones a Facturas",
     "noApplications": "Sin aplicaciones a facturas",
@@ -14340,7 +14344,14 @@
       "determinationAccountNotFound": "Elija una cuenta del catálogo de cuentas de este libro.",
       "determinationAccountNotPostable": "Elija una cuenta activa que acepte asientos.",
       "determinationAccountControl": "Las cuentas de control no se pueden asignar aquí.",
-      "determinationAccountType": "Este asiento necesita una cuenta de otro tipo."
+      "determinationAccountType": "Este asiento necesita una cuenta de otro tipo.",
+      "discountNotAllowed": "Ese descuento por pronto pago está fuera de las condiciones: el plazo terminó o el importe supera lo que permiten.",
+      "paymentTermsNotFound": "Esas condiciones de pago ya no existen. Elija otras.",
+      "paymentTermsInactive": "Esas condiciones de pago están inactivas. Elija condiciones activas.",
+      "paymentTermsDueDate": "La fecha de vencimiento no coincide con las condiciones de pago.",
+      "paymentTermsDiscountDays": "Un descuento necesita días de descuento mayores que 0 y menores que los días netos.",
+      "paymentTermsDuplicate": "Ya existen condiciones de pago con ese código.",
+      "paymentTermsSystem": "Las condiciones del sistema solo se pueden renombrar."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",
@@ -14428,5 +14439,45 @@
     "freightOutAccount": "Flete de salida (entrega)",
     "clearsPoAccrual": "Liquida la provisión de flete de la recepción de la OC; el excedente va a Flete de entrada.",
     "freightForPo": "Flete de {{po}}"
+  },
+  "paymentTerms": {
+    "label": "Condiciones de pago",
+    "vendorDefault": "Condiciones del proveedor",
+    "discount": "Descuento",
+    "discountShort": "Descuento",
+    "discountsTaken": "Descuentos por pronto pago",
+    "discountUntil": "{{percent}} % de descuento hasta el {{date}}",
+    "discountOpenUntil": "Descuento disponible hasta el {{date}}",
+    "discountOpen": "Descuento disponible",
+    "discountDeadline": "Fecha límite del descuento",
+    "unmatchedText": "Texto de condiciones actual: {{text}}",
+    "payAmount": "Pagar",
+    "payDate": "Fecha de pago",
+    "dueThrough": "Vencen hasta",
+    "noSuggestions": "No hay facturas que venzan ni con descuento disponible para estas fechas.",
+    "daysLeft": "quedan {{count}} días",
+    "selectedCount": "{{count}} seleccionadas",
+    "cashTotal": "Efectivo:",
+    "savingsTotal": "Descuentos:",
+    "createPayments": "Crear pagos",
+    "paymentsCreated": "Se crearon {{count}} pagos.",
+    "payBillsTab": "Pagar facturas",
+    "portalOffer": "Pague {{currency}} {{amount}} antes del {{date}} para obtener el descuento.",
+    "title": "Condiciones de pago",
+    "hint": "Condiciones que eligen clientes, proveedores, pedidos, facturas y facturas de proveedor. El descuento por pronto pago (por ejemplo 2/10 neto 30) se aplica automáticamente cuando el pago llega a tiempo.",
+    "newTerms": "Nuevas condiciones",
+    "editTerms": "Editar condiciones",
+    "empty": "Aún no hay condiciones de pago.",
+    "fieldName": "Nombre",
+    "fieldCode": "Código",
+    "fieldNetDays": "Días netos",
+    "fieldDiscountPercent": "% de descuento",
+    "fieldDiscountDays": "Días de descuento",
+    "fieldSortOrder": "Orden",
+    "colSystem": "Sistema",
+    "system": "Sistema",
+    "systemNote": "Son condiciones del sistema: solo puede cambiar el nombre y el orden.",
+    "saved": "Condiciones de pago guardadas.",
+    "discountDaysInvalid": "Un descuento necesita días de descuento mayores que 0 y menores que los días netos."
   }
 }

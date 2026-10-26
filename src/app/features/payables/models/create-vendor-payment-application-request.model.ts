@@ -5,4 +5,6 @@ export interface CreateVendorPaymentApplicationRequest {
   vendorBillId: number;
   amount: number;
   settlementFxRate?: number;
+  discountAmount?: number;
+  allowDiscountOverride?: boolean;
 }

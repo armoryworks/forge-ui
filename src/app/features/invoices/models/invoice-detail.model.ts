@@ -1,3 +1,4 @@
+import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
 import { InvoiceLine } from './invoice-line.model';
 
 export interface InvoiceDetail {
@@ -29,4 +30,11 @@ export interface InvoiceDetail {
   fxRate?: number;
   freightSubtotal?: number;
   salesTaxRateId?: number | null;
+  paymentTermsId?: number | null;
+  paymentTerms?: PaymentTermsSummary | null;
+  discountPercent?: number;
+  discountDueDate?: string | Date | null;
+  discountDeadline?: string | Date | null;
+  discountsTaken?: number;
+  discountAvailable?: number;
 }

@@ -19,6 +19,11 @@
             <span class="credit-lines__rate">{{ app.settlementFxRate }}</span>
           }
           <app-currency-display [value]="app.amount" [currency]="paymentCurrencyCode()" />
+          @if (app.discount > 0) {
+            <span class="credit-lines__discount" data-testid="apply-credit-line-discount">
+              {{ 'paymentTerms.discountShort' | translate }} <app-currency-display [value]="app.discount" [currency]="paymentCurrencyCode()" />
+            </span>
+          }
           <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above"
             [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
             <span class="material-icons-outlined">close</span>
@@ -30,11 +35,12 @@
     <div class="lines-empty">{{ 'payments.noApplicationsYet' | translate }}</div>
   }
 
-  <div class="add-line" [class.add-line--3col]="!showSettlementFxRate()" [class.add-line--4col]="showSettlementFxRate()" [formGroup]="appForm">
+  <div class="add-line" [class.add-line--4col]="!showSettlementFxRate()" [class.add-line--5col]="showSettlementFxRate()" [formGroup]="appForm">
     <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0"
       [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="apply-credit-invoice" />
     <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount"
       [placeholder]="'payments.amountPlaceholder' | translate" data-testid="apply-credit-amount" />
+    <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" data-testid="apply-credit-discount" />
     @if (showSettlementFxRate()) {
       <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate"
         step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" />

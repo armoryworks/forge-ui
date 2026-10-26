@@ -8,4 +8,5 @@ export interface VendorResponse {
    */
   isActive: boolean;
   currencyId?: number | null;
+  paymentTermsId?: number | null;
 }

@@ -227,6 +227,10 @@
           <ng-template appColumnCell="total" let-row>{{ row.total | currency }}</ng-template>
           <ng-template appColumnCell="amountPaid" let-row>{{ row.amountPaid | currency }}</ng-template>
           <ng-template appColumnCell="balanceDue" let-row>{{ row.balanceDue | currency }}</ng-template>
+          <ng-template appColumnCell="dueDate" let-row>
+            {{ row.dueDate | dateOnly }}
+            <app-discount-chip [deadline]="row.discountDeadline" [available]="row.discountAvailable" />
+          </ng-template>
         </app-data-table>
       }
 

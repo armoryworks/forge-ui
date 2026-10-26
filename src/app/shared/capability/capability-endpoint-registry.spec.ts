@@ -33,6 +33,11 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/vendors/5')).toBe('CAP-MD-VENDORS');
     });
 
+    it('resolves the payment terms list to the customer or vendor master, not cash receipts', () => {
+      expect(resolveCapabilityForUrl('/api/v1/payment-terms?includeInactive=true')).toBe('CAP-MD-CUSTOMERS');
+      expect(resolveCapabilityForUrl('/api/v1/payments')).toBe('CAP-O2C-CASH');
+    });
+
     it('resolves the conversion endpoints to CAP-ACCT-MIGRATION, not the GL view', () => {
       expect(resolveCapabilityForUrl('/api/v1/accounting/conversion/opening-journal')).toBe('CAP-ACCT-MIGRATION');
       expect(resolveCapabilityForUrl('/api/v1/accounting/trial-balance')).toBe('CAP-ACCT-GL-VIEW');

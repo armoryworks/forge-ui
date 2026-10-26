@@ -109,3 +109,10 @@
   color: var(--error);
   font-size: $font-size-sm;
 }
+
+.bill-discount-note {
+  margin: 0;
+  align-self: center;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}

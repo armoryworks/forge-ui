@@ -125,6 +125,7 @@
               <tr>
                 <th scope="col">{{ 'payables.billNumber' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'payables.amount' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'paymentTerms.discount' | translate }}</th>
                 @if (showFxColumn()) {
                   <th scope="col" class="lines-table__right">{{ 'accounting.currency.settlementFxRate' | translate }}</th>
                 }
@@ -137,6 +138,7 @@
                     <app-entity-link type="vendor-bill" [entityId]="app.vendorBillId">{{ app.billNumber }}</app-entity-link>
                   </td>
                   <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
+                  <td class="lines-table__right" data-testid="vendor-payment-detail-app-discount"><app-currency-display [value]="app.discountAmount ?? 0" [currency]="null" /></td>
                   @if (showFxColumn()) {
                     <td class="lines-table__right">{{ app.settlementFxRate }}</td>
                   }

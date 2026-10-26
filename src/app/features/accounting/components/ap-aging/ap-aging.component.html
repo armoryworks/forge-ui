@@ -52,6 +52,16 @@
     <ng-template appColumnCell="openBalance" let-row>
       <app-currency-display [value]="row.openBalance" />
     </ng-template>
+    <ng-template appColumnCell="discountAvailable" let-row>
+      @if (row.discountAvailable > 0) {
+        <span class="aging-discount" data-testid="ap-aging-discount">
+          <app-currency-display [value]="row.discountAvailable" />
+          <span class="text-muted">{{ 'paymentTerms.discountOpenUntil' | translate: { date: (row.nextDiscountDeadline | dateOnly) } }}</span>
+        </span>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
     <ng-template appColumnCell="openTxnBalance" let-row>
       @if (row.openTxnBalance !== null && row.currencyCode) {
         <app-currency-display [value]="row.openTxnBalance" [currency]="row.currencyCode" [showCodeWhenBase]="true" />

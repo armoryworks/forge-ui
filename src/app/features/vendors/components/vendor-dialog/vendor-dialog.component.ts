@@ -13,7 +13,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
 import { Address } from '../../../../shared/models/address.model';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
-import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address.utils';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -39,6 +39,7 @@ export class VendorDialogComponent implements OnInit {
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
 
   readonly vendor = input<VendorDetail | null>(null);
@@ -64,7 +65,7 @@ export class VendorDialogComponent implements OnInit {
     phone: new FormControl(''),
     fax: new FormControl('', [Validators.maxLength(50)]),
     address: new FormControl<Address | null>(null),
-    paymentTerms: new FormControl(''),
+    paymentTermsId: new FormControl<number | null>(null),
     notes: new FormControl(''),
     isActive: new FormControl(true),
     is1099: new FormControl(false),
@@ -83,7 +84,7 @@ export class VendorDialogComponent implements OnInit {
     email: 'Email',
     phone: 'Phone',
     fax: 'Fax',
-    paymentTerms: 'Payment Terms',
+    paymentTermsId: 'Payment Terms',
     notes: 'Notes',
     isActive: 'Active',
     is1099: '1099 Vendor',
@@ -91,7 +92,11 @@ export class VendorDialogComponent implements OnInit {
     offTierVariancePct: this.translate.instant('vendors.offTierVariancePct'),
   });
 
-  protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
+  protected readonly paymentTermsOptions = this.paymentTerms.options;
+  protected readonly unmatchedTermsText = computed(() => {
+    const v = this.vendor();
+    return v && v.paymentTermsId == null && v.paymentTerms ? v.paymentTerms : null;
+  });
 
   ngOnInit(): void {
     const v = this.vendor();
@@ -104,7 +109,7 @@ export class VendorDialogComponent implements OnInit {
         phone: v.phone ?? '',
         fax: v.fax ?? '',
         address: toAddress({ address: v.address, city: v.city, state: v.state, zipCode: v.zipCode, country: v.country }),
-        paymentTerms: v.paymentTerms ?? '',
+        paymentTermsId: v.paymentTermsId ?? null,
         notes: v.notes ?? '',
         isActive: v.isActive,
         is1099: v.is1099 ?? false,
@@ -113,6 +118,11 @@ export class VendorDialogComponent implements OnInit {
         currencyId: v.currencyId ?? null,
       });
     }
+  }
+
+  private termsPayload(paymentTermsId: number | null): { paymentTermsId?: number; paymentTerms?: string } {
+    if (paymentTermsId != null) return { paymentTermsId };
+    return this.vendor() && this.form.controls.paymentTermsId.dirty ? { paymentTerms: '' } : {};
   }
 
   protected get isEditing(): boolean {
@@ -139,7 +149,7 @@ export class VendorDialogComponent implements OnInit {
       phone: contactValue(f.phone),
       fax: contactValue(f.fax),
       ...fromAddressToVendor(addr),
-      paymentTerms: f.paymentTerms || undefined,
+      ...this.termsPayload(f.paymentTermsId ?? null),
       notes: f.notes || undefined,
       is1099: f.is1099 ?? false,
       taxId: f.taxId?.trim() || undefined,

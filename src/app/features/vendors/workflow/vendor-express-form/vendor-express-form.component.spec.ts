@@ -61,6 +61,7 @@ describe('VendorExpressFormComponent Save', () => {
       stepId: 'identity', componentName: 'VendorExpressFormComponent', runId: 7, entityId, entity,
     });
     TestBed.flushEffects();
+    httpMock.match(r => r.url.endsWith('/payment-terms')).forEach(r => r.flush([]));
     return component as unknown as ExpressForm;
   }
 

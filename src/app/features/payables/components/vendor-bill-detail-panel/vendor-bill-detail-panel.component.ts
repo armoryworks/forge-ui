@@ -12,6 +12,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DiscountChipComponent } from '../../../../shared/components/discount-chip/discount-chip.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -26,7 +27,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
     DateOnlyPipe, DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
-    DetailLoadErrorComponent,
+    DetailLoadErrorComponent, DiscountChipComponent,
   ],
   templateUrl: './vendor-bill-detail-panel.component.html',
   styleUrl: './vendor-bill-detail-panel.component.scss',

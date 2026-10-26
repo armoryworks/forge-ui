@@ -127,6 +127,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'parts', capability: 'CAP-MD-PARTS' },
   // AP split: dedicated codes for vendor bills / payments (PO endpoints
   // themselves keep CAP-P2P-PO).
+  { prefix: 'payment-terms', capability: 'CAP-MD-CUSTOMERS', anyOf: ['CAP-MD-CUSTOMERS', 'CAP-MD-VENDORS'] },
   { prefix: 'payment-transmissions', capability: 'CAP-P2P-PAY' },
   { prefix: 'payments', capability: 'CAP-O2C-CASH' },
   { prefix: 'payroll', capability: 'CAP-HR-PAYROLL' },

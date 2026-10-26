@@ -27,14 +27,23 @@
           <span>{{ 'common.dueDate' | translate }}</span>
           <span class="app-line__right">{{ 'payables.balanceDue' | translate }}</span>
           <span>{{ 'payables.amountToApply' | translate }}</span>
+          <span>{{ 'paymentTerms.discount' | translate }}</span>
         </div>
         <div formArrayName="applications">
           @for (group of applications.controls; track group; let i = $index) {
             <div class="app-line" [formGroupName]="i">
               <span class="app-line__mono">{{ payableBills()[i].billNumber }}</span>
-              <span class="app-line__muted">{{ payableBills()[i].dueDate | dateOnly }}</span>
+              <span class="app-line__muted">
+                {{ payableBills()[i].dueDate | dateOnly }}
+                @if (discountOpen()[i]) {
+                  <button type="button" class="app-line__discount-link" data-testid="vendor-payment-take-discount" (click)="payWithDiscount(i)">
+                    {{ 'paymentTerms.discountUntil' | translate: { percent: payableBills()[i].discountPercent ?? 0, date: (payableBills()[i].discountDeadline | dateOnly) } }}
+                  </button>
+                }
+              </span>
               <span class="app-line__right"><app-currency-display [value]="payableBills()[i].balanceDue" [currency]="documentCurrencyCode()" /></span>
               <app-input [label]="'payables.amountToApply' | translate" type="number" formControlName="amount" min="0" [max]="payableBills()[i].balanceDue" step="0.01" data-testid="vendor-payment-app-amount" />
+              <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" min="0" step="0.01" data-testid="vendor-payment-app-discount" />
             </div>
           }
         </div>
@@ -51,6 +60,12 @@
         <span>{{ 'payables.totalApplied' | translate }}</span>
         <app-currency-display [value]="appliedTotal()" [currency]="documentCurrencyCode()" />
       </div>
+      @if (discountTotal() > 0) {
+        <div class="dlg-total-row" data-testid="vendor-payment-discount-total">
+          <span>{{ 'paymentTerms.discountsTaken' | translate }}</span>
+          <app-currency-display [value]="discountTotal()" [currency]="documentCurrencyCode()" />
+        </div>
+      }
       <div class="dlg-total-row" [class.payment-totals__over]="overApplied()">
         <span>{{ 'payables.unapplied' | translate }}</span>
         <app-currency-display [value]="unappliedTotal()" [currency]="documentCurrencyCode()" />

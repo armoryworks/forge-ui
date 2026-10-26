@@ -4,5 +4,6 @@ export interface InvoiceSourceSalesOrder {
   customerName: string;
   taxRate: number;
   creditTerms?: string | null;
+  paymentTermsId?: number | null;
   currencyId?: number | null;
 }

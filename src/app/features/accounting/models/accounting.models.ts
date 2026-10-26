@@ -137,6 +137,9 @@ export interface AgingPartyRow {
   openBalance: number;
   currencyCode?: string | null;
   openTxnBalance?: number | null;
+  /** Early-payment discounts still open on the as-of date (functional). */
+  discountAvailable?: number;
+  nextDiscountDeadline?: string | null;
   buckets: AgingBucket[];
 }
 

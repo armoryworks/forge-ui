@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -12,7 +13,7 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 @Component({
   selector: 'app-portal-invoices',
   standalone: true,
-  imports: [DateOnlyPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, CurrencyDisplayComponent],
+  imports: [DateOnlyPipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, CurrencyDisplayComponent],
   templateUrl: './portal-invoices.component.html',
   styleUrl: './portal-list.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +22,12 @@ export class PortalInvoicesComponent implements OnInit {
   private readonly portal = inject(PortalService);
 
   protected readonly invoices = signal<PortalInvoice[]>([]);
+
+  /** Invoices with the amount that takes the early-payment discount, when one is still open. */
+  protected readonly rows = computed(() => this.invoices().map(i => ({
+    ...i,
+    payToTakeDiscount: (i.discountAvailable ?? 0) > 0 && i.discountDeadline ? Math.round((i.balance - (i.discountAvailable ?? 0)) * 100) / 100 : null,
+  })));
   protected readonly totalCount = signal(0);
   protected readonly externalAccounting = signal(false);
   protected readonly loading = signal(true);

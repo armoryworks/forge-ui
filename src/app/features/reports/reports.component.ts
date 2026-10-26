@@ -14,6 +14,8 @@ import { dateOrderValidator } from '../../shared/validators/date-order.validator
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { DiscountChipComponent } from '../../shared/components/discount-chip/discount-chip.component';
+import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { formatMinutesAsHours } from './utils/format-minutes.utils';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { AuthService } from '../../shared/services/auth.service';
@@ -58,7 +60,7 @@ const BUILDER_PICKER_VALUE = 'builder';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, DrillableChartComponent, PageHeaderComponent, DataTableComponent, DatepickerComponent, SelectComponent, EmptyStateComponent, ColumnCellDirective, TranslatePipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, DrillableChartComponent, PageHeaderComponent, DataTableComponent, DatepickerComponent, SelectComponent, EmptyStateComponent, ColumnCellDirective, TranslatePipe, DiscountChipComponent, DateOnlyPipe],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -98,3 +98,62 @@ describe('PaymentDialogComponent invoice picker', () => {
     expect(date.toDateString()).toBe(new Date().toDateString());
   });
 });
+
+describe('PaymentDialogComponent early-payment discounts', () => {
+  interface DiscountInternals extends DialogInternals {
+    applications(): { invoiceId: number; amount: number; discount: number }[];
+    totalDiscount(): number;
+    addApplication(): void;
+  }
+  let dialog: DiscountInternals;
+
+  const discountInvoice = {
+    id: 5, invoiceNumber: 'INV-00005', status: 'Sent', balanceDue: 9800,
+    discountPercent: 2, discountDeadline: '2026-02-04T00:00:00Z', discountAvailable: 196,
+  } as InvoiceListItem;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService(),
+        { provide: PaymentService, useValue: {} },
+        { provide: InvoiceService, useValue: { getOpenInvoices: vi.fn(() => of([discountInvoice])) } },
+        { provide: ActiveCurrencyService, useValue: { listActiveCurrencies: () => of([]) } },
+        { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
+        { provide: SnackbarService, useValue: {} },
+        { provide: CurrencyService, useValue: { baseCurrency: signal('USD') } },
+      ],
+    });
+    dialog = TestBed.runInInjectionContext(() => new PaymentDialogComponent()) as unknown as DiscountInternals;
+    dialog.paymentForm.controls['customerId'].setValue(3);
+  });
+
+  it('fills the discount and the discounted amount when the invoice is paid in the window', () => {
+    dialog.paymentForm.controls['paymentDate'].setValue(new Date(2026, 1, 2));
+    dialog.appForm.controls['invoiceId'].setValue(5);
+
+    expect(dialog.appForm.controls['discount'].value).toBe(196);
+    expect(dialog.appForm.controls['amount'].value).toBe(9604);
+
+    dialog.addApplication();
+    expect(dialog.applications()).toEqual([expect.objectContaining({ invoiceId: 5, amount: 9604, discount: 196 })]);
+    expect(dialog.totalDiscount()).toBe(196);
+  });
+
+  it('offers no discount once the window has closed', () => {
+    dialog.paymentForm.controls['paymentDate'].setValue(new Date(2026, 1, 6));
+    dialog.appForm.controls['invoiceId'].setValue(5);
+
+    expect(dialog.appForm.controls['discount'].value).toBe(0);
+    expect(dialog.appForm.controls['amount'].value).toBe(9800);
+  });
+
+  it('works out the pro-rata discount for a partial payment', () => {
+    dialog.paymentForm.controls['paymentDate'].setValue(new Date(2026, 1, 2));
+    dialog.appForm.controls['invoiceId'].setValue(5);
+    dialog.appForm.controls['amount'].setValue(4900);
+
+    expect(dialog.appForm.controls['discount'].value).toBe(100);
+  });
+});

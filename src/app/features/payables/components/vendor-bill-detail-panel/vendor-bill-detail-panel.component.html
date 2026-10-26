@@ -63,6 +63,15 @@
           <span class="info-label">{{ 'common.dueDate' | translate }}</span>
           <span class="info-value">{{ bill.dueDate | dateOnly }}</span>
         </div>
+        @if (bill.paymentTerms) {
+          <div class="info-item" data-testid="bill-detail-terms">
+            <span class="info-label">{{ 'paymentTerms.label' | translate }}</span>
+            <span class="info-value">
+              {{ bill.paymentTerms.name }}
+              <app-discount-chip [percent]="bill.discountPercent" [deadline]="bill.discountDeadline" [available]="bill.discountAvailable" />
+            </span>
+          </div>
+        }
         @if ((bill.fxRate ?? 1) !== 1) {
           <div class="info-item" data-testid="bill-detail-fx-rate">
             <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
@@ -140,6 +149,12 @@
           <span class="totals-label">{{ 'payables.paid' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="bill.amountPaid" [currency]="bill.currencyCode ?? null" /></span>
         </div>
+        @if ((bill.discountsTaken ?? 0) > 0) {
+          <div class="totals-row" data-testid="bill-detail-discounts-taken">
+            <span class="totals-label">{{ 'paymentTerms.discountsTaken' | translate }}</span>
+            <span class="totals-value"><app-currency-display [value]="bill.discountsTaken ?? 0" [currency]="bill.currencyCode ?? null" /></span>
+          </div>
+        }
         <div class="totals-row totals-row--balance">
           <span class="totals-label">{{ 'payables.balanceDue' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="bill.balanceDue" [currency]="bill.currencyCode ?? null" /></span>

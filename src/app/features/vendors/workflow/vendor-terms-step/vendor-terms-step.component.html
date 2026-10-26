@@ -7,8 +7,8 @@
   <form [formGroup]="form" class="vendor-workflow-step__form">
     <app-select
       [label]="'vendors.workflow.terms.paymentTermsLabel' | translate"
-      formControlName="paymentTerms"
-      [options]="paymentTermsOptions"
+      formControlName="paymentTermsId"
+      [options]="paymentTermsOptions()"
       data-testid="vendor-terms-payment-terms" />
     <app-currency-input
       [label]="'vendors.workflow.terms.minOrderAmountLabel' | translate"

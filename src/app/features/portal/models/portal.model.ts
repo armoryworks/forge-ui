@@ -52,6 +52,10 @@ export interface PortalInvoice {
   balance: number;
   currencyCode: string | null;
   freight?: number;
+  termsName?: string | null;
+  /** The early-payment discount the customer still takes by paying before the deadline. */
+  discountAvailable?: number;
+  discountDeadline?: string | null;
 }
 
 export interface PortalShipment {

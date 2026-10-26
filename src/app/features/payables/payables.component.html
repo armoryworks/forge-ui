@@ -56,6 +56,12 @@
       <span class="material-icons-outlined">receipt_long</span>
       {{ 'payables.tabBills' | translate }}
     </button>
+    @if (canPayBills()) {
+      <button class="tab" [appTab]="activeTab() === 'pay-bills'" (click)="switchTab('pay-bills')" data-testid="payables-tab-pay-bills">
+        <span class="material-icons-outlined">event_available</span>
+        {{ 'paymentTerms.payBillsTab' | translate }}
+      </button>
+    }
     @if (canReadPayments) {
       <button class="tab" [appTab]="activeTab() === 'payments'" (click)="switchTab('payments')">
         <span class="material-icons-outlined">payments</span>
@@ -107,6 +113,7 @@
         </ng-template>
         <ng-template appColumnCell="dueDate" let-row>
           <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
+          <app-discount-chip [percent]="row.discountPercent" [deadline]="row.discountDeadline" [available]="row.discountAvailable" />
         </ng-template>
         <ng-template appColumnCell="total" let-row>
           <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
@@ -123,6 +130,12 @@
           <app-currency-display [value]="row.totalFunctional ?? row.total" [currency]="null" />
         </ng-template>
       </app-data-table>
+    </div>
+  }
+
+  @if (activeTab() === 'pay-bills') {
+    <div class="tab-content">
+      <app-pay-bills-panel [vendorOptions]="vendorOptions()" (paid)="onBillsPaid()" />
     </div>
   }
 

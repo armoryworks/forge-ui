@@ -1,0 +1,51 @@
+<app-page-layout [pageTitle]="'paymentTerms.title' | translate">
+  <ng-container content>
+    <section class="section">
+      <header class="section__header">
+        <p class="section__hint">{{ 'paymentTerms.hint' | translate }}</p>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--create" (click)="openNew()" data-testid="payment-terms-new-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'paymentTerms.newTerms' | translate }}
+        </button>
+      </header>
+      <div [appLoadingBlock]="loading()">
+        <app-data-table
+          tableId="admin-payment-terms"
+          [columns]="columns"
+          [data]="terms()"
+          [clickableRows]="true"
+          (rowClick)="openEdit($any($event))"
+          emptyIcon="event_note"
+          [emptyMessage]="'paymentTerms.empty' | translate">
+          <ng-template appColumnCell="discountPercent" let-row>
+            @if (row.discountPercent > 0) {
+              {{ row.discountPercent }}%
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="discountDays" let-row>
+            @if (row.discountPercent > 0) {
+              {{ row.discountDays }}
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="isSystem" let-row>
+            @if (row.isSystem) {
+              <span class="chip chip--info">{{ 'paymentTerms.system' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+  </ng-container>
+</app-page-layout>

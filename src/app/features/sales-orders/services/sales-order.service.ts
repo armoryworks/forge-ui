@@ -140,6 +140,7 @@ export class SalesOrderService {
     shippingAddressId?: number;
     billingAddressId?: number;
     creditTerms?: string;
+    paymentTermsId?: number;
     requestedDeliveryDate?: string;
     customerPO?: string;
     notes?: string;

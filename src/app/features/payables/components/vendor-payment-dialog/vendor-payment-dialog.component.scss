@@ -34,7 +34,7 @@
 // Application row: bill # | due date | balance | amount
 .app-line {
   display: grid;
-  grid-template-columns: 110px 100px 110px 1fr;
+  grid-template-columns: 110px 140px 110px 1fr 110px;
   gap: $sp-sm;
   align-items: center;
   padding: $sp-xs 0;
@@ -65,4 +65,15 @@
     font-size: $font-size-xs;
     color: var(--error);
   }
+}
+
+.app-line__discount-link {
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font-size: $font-size-sm;
+  text-align: left;
+  cursor: pointer;
 }

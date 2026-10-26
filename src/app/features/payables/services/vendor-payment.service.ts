@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { VendorPaymentListItem } from '../models/vendor-payment-list-item.model';
 import { VendorPaymentDetail } from '../models/vendor-payment-detail.model';
 import { CreateVendorPaymentRequest } from '../models/create-vendor-payment-request.model';
+import { VendorPaymentSuggestion } from '../models/vendor-payment-suggestion.model';
+import { CreateVendorPaymentsFromSuggestionsRequest } from '../models/create-vendor-payments-from-suggestions-request.model';
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of PaymentService.
 @Injectable({ providedIn: 'root' })
@@ -25,6 +27,19 @@ export class VendorPaymentService {
 
   createVendorPayment(request: CreateVendorPaymentRequest): Observable<VendorPaymentListItem> {
     return this.http.post<VendorPaymentListItem>(this.base, request);
+  }
+
+  /** The payment run: open bills due by `dueThrough` or with a discount still open on `payDate`. */
+  getPaymentSuggestions(payDate: string, dueThrough?: string, vendorId?: number): Observable<VendorPaymentSuggestion[]> {
+    let params = new HttpParams().set('payDate', payDate);
+    if (dueThrough) params = params.set('dueThrough', dueThrough);
+    if (vendorId) params = params.set('vendorId', String(vendorId));
+    return this.http.get<VendorPaymentSuggestion[]>(`${environment.apiUrl}/vendor-bills/payment-suggestions`, { params });
+  }
+
+  /** Pays the picked bills: one vendor payment per vendor and currency. */
+  createFromSuggestions(request: CreateVendorPaymentsFromSuggestionsRequest): Observable<VendorPaymentListItem[]> {
+    return this.http.post<VendorPaymentListItem[]>(`${this.base}/from-suggestions`, request);
   }
 
   /**

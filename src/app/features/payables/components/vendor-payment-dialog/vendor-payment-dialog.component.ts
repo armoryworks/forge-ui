@@ -23,12 +23,15 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { roundMoney } from '../../../../shared/utils/money.utils';
+import { automaticDiscount, inDiscountWindow } from '../../../../shared/utils/payment-terms.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { MONEY_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 
 type ApplicationGroup = FormGroup<{
   amount: FormControl<number>;
+  discount: FormControl<number>;
 }>;
 
 /** Draft shape of one application row — keyed by vendorBillId so a restore can
@@ -36,6 +39,7 @@ type ApplicationGroup = FormGroup<{
 interface DraftApplicationRow {
   vendorBillId: number | null;
   amount: number;
+  discount?: number;
 }
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of (customer) PaymentDialog. Picking
@@ -136,6 +140,17 @@ export class VendorPaymentDialogComponent {
     return this.applications.controls.reduce((sum, g) => sum + (g.controls.amount.value ?? 0), 0);
   });
 
+  protected readonly discountTotal = computed(() => {
+    this.formValue();
+    return roundMoney(this.applications.controls.reduce((sum, g) => sum + (g.controls.discount.value ?? 0), 0));
+  });
+
+  /** Per row, whether the bill's early-payment discount is still open on the payment date. */
+  protected readonly discountOpen = computed(() => {
+    const paymentDate = this.paymentDateValue();
+    return this.payableBills().map(b => (b.discountAvailable ?? 0) > 0 && inDiscountWindow(b.discountDeadline, paymentDate));
+  });
+
   private readonly amountValue = toSignal(
     this.paymentForm.controls.amount.valueChanges.pipe(startWith(this.paymentForm.controls.amount.value)),
     { initialValue: this.paymentForm.controls.amount.value },
@@ -202,6 +217,39 @@ export class VendorPaymentDialogComponent {
     this.paymentForm.controls.vendorId.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((vendorId) => this.loadPayableBills(vendorId));
+
+    this.paymentForm.controls.paymentDate.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applications.controls.forEach((group, i) => this.applyAutomaticDiscount(group, i)));
+  }
+
+  private offeredDiscount(index: number): number {
+    const bill = this.payableBills()[index];
+    return bill && inDiscountWindow(bill.discountDeadline, this.paymentForm.controls.paymentDate.value)
+      ? bill.discountAvailable ?? 0
+      : 0;
+  }
+
+  private applyAutomaticDiscount(group: ApplicationGroup, index: number): void {
+    const bill = this.payableBills()[index];
+    if (!bill) return;
+    const offered = this.offeredDiscount(index);
+    const { amount, discount } = group.controls;
+    if (discount.dirty && discount.value <= offered) return;
+    discount.setValue(automaticDiscount(amount.value ?? 0, bill.balanceDue, offered, bill.discountPercent ?? 0), { emitEvent: false });
+    group.updateValueAndValidity();
+  }
+
+  /** Fills a row with the bill's balance less the discount still open, the usual early-pay amount. */
+  protected payWithDiscount(index: number): void {
+    const group = this.applications.at(index);
+    const bill = this.payableBills()[index];
+    if (!group || !bill) return;
+    const offered = this.offeredDiscount(index);
+    group.controls.discount.setValue(offered, { emitEvent: false });
+    group.controls.discount.markAsPristine();
+    group.controls.amount.setValue(roundMoney(bill.balanceDue - offered));
+    group.controls.amount.markAsDirty();
   }
 
   protected close(): void {
@@ -234,8 +282,8 @@ export class VendorPaymentDialogComponent {
       .filter(b => !filterByCurrency || currencyId == null || b.currencyId == null || b.currencyId === currencyId);
     this.applications.clear();
     this.payableBills.set(payable);
-    for (const bill of payable) {
-      this.applications.push(new FormGroup({
+    payable.forEach((bill, index) => {
+      const group: ApplicationGroup = new FormGroup({
         amount: new FormControl(0, {
           nonNullable: true,
           validators: [
@@ -243,8 +291,18 @@ export class VendorPaymentDialogComponent {
             maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount'), this.translate),
           ],
         }),
-      }));
-    }
+        discount: new FormControl(0, {
+          nonNullable: true,
+          validators: [Validators.min(0), maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('paymentTerms.discount'), this.translate)],
+        }),
+      }, {
+        validators: g => roundMoney((g.value.amount ?? 0) + (g.value.discount ?? 0)) > bill.balanceDue ? { overBalance: true } : null,
+      });
+      group.controls.amount.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.applyAutomaticDiscount(group, index));
+      this.applications.push(group);
+    });
   }
 
   // ── Per-row application violation enumeration ─────────────────────────────
@@ -264,6 +322,9 @@ export class VendorPaymentDialogComponent {
       }
       if (amount.hasError('maxDecimals')) {
         messages.push(this.translate.instant('payables.applicationViolations.amountDecimals', { row }));
+      }
+      if (group.hasError('overBalance')) {
+        messages.push(this.translate.instant('payables.applicationViolations.discountExceedsBalance', { row }));
       }
     });
     return messages;
@@ -285,6 +346,7 @@ export class VendorPaymentDialogComponent {
       applications: f.applications.map((row, i): DraftApplicationRow => ({
         vendorBillId: bills[i]?.id ?? null,
         amount: row.amount,
+        discount: row.discount,
       })),
     };
   }
@@ -320,7 +382,7 @@ export class VendorPaymentDialogComponent {
     this.applications.controls.forEach((group, i) => {
       const match = drafted.find(d => d.vendorBillId === bills[i]?.id);
       if (match) {
-        group.patchValue({ amount: match.amount });
+        group.patchValue({ amount: match.amount, discount: match.discount ?? 0 });
       }
     });
     this.paymentForm.markAsDirty();
@@ -346,6 +408,7 @@ export class VendorPaymentDialogComponent {
       .map(x => ({
         vendorBillId: x.bill.id,
         amount: x.value.amount,
+        discountAmount: x.value.discount,
       }));
     const currencyField = this.documentCurrency();
 

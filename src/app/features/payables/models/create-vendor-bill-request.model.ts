@@ -12,5 +12,6 @@ export interface CreateVendorBillRequest {
   notes?: string;
   currencyId?: number;
   fxRate?: number | null;
+  paymentTermsId?: number;
   lines: CreateVendorBillLineRequest[];
 }

@@ -33,11 +33,21 @@
           </tr>
         </thead>
         <tbody>
-          @for (i of invoices(); track i.id) {
+          @for (i of rows(); track i.id) {
             <tr>
               <td>{{ i.invoiceNumber }}</td>
               <td>{{ i.invoiceDate | dateOnly }}</td>
-              <td>{{ i.dueDate ? (i.dueDate | dateOnly) : '—' }}</td>
+              <td>
+                {{ i.dueDate ? (i.dueDate | dateOnly) : '—' }}
+                @if (i.termsName) {
+                  <span class="portal-list__terms">{{ i.termsName }}</span>
+                }
+                @if (i.payToTakeDiscount !== null) {
+                  <span class="portal-list__terms" data-testid="portal-invoice-discount-offer">
+                    {{ 'paymentTerms.portalOffer' | translate: { currency: i.currencyCode ?? '', amount: (i.payToTakeDiscount | number: '1.2-2'), date: (i.discountDeadline | dateOnly) } }}
+                  </span>
+                }
+              </td>
               <td><span [class]="statusChip(i.status)">{{ statusLabelKey(i.status) | translate }}</span></td>
               <td class="portal-list__num"><app-currency-display [value]="i.freight ?? 0" [currency]="i.currencyCode" /></td>
               <td class="portal-list__num"><app-currency-display [value]="i.total" [currency]="i.currencyCode" /></td>

@@ -62,6 +62,7 @@
         </ng-template>
         <ng-template appColumnCell="dueDate" let-row>
           <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
+          <app-discount-chip [percent]="row.discountPercent" [deadline]="row.discountDeadline" [available]="row.discountAvailable" />
         </ng-template>
         <ng-template appColumnCell="total" let-row>
           <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />

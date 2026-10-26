@@ -29,7 +29,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
-import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -106,6 +106,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly accountingService = inject(AccountingService);
   private readonly capabilityService = inject(CapabilityService);
   private readonly auth = inject(AuthService);
@@ -332,10 +333,10 @@ export class SalesOrderDetailPanelComponent {
   // when already set, so post-convert (all null) there was no way to populate them.
   protected readonly editingHeader = signal(false);
   protected readonly savingHeader = signal(false);
-  protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
+  protected readonly creditTermsOptions = this.paymentTerms.options;
   protected readonly headerForm = new FormGroup({
     customerPO: new FormControl<string>('', { nonNullable: true }),
-    creditTerms: new FormControl<string | null>(null),
+    paymentTermsId: new FormControl<number | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     billingAddressId: new FormControl<number | null>(null),
     shippingAddressId: new FormControl<number | null>(null),
@@ -1131,7 +1132,7 @@ export class SalesOrderDetailPanelComponent {
     if (!so) return;
     this.headerForm.reset({
       customerPO: so.customerPO ?? '',
-      creditTerms: so.creditTerms ?? null,
+      paymentTermsId: so.paymentTermsId ?? this.paymentTerms.forLegacy(so.creditTerms)?.id ?? null,
       requestedDeliveryDate: fromIsoDate(so.requestedDeliveryDate),
       billingAddressId: so.billingAddressId ?? null,
       shippingAddressId: so.shippingAddressId ?? null,
@@ -1183,7 +1184,7 @@ export class SalesOrderDetailPanelComponent {
     // applies non-null fields, and an empty creditTerms string would fail enum-parse.
     this.soService.updateSalesOrder(so.id, {
       customerPO: v.customerPO || undefined,
-      creditTerms: v.creditTerms || undefined,
+      paymentTermsId: v.paymentTermsId ?? undefined,
       requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,
       billingAddressId: v.billingAddressId ?? undefined,
       shippingAddressId: v.shippingAddressId ?? undefined,

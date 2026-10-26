@@ -12,7 +12,8 @@
   margin-top: $sp-sm;
 }
 
-.tax-exempt-note {
+.tax-exempt-note,
+.terms-discount-note {
   display: flex;
   align-items: flex-start;
   gap: $sp-sm;

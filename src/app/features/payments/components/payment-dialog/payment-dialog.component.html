@@ -12,6 +12,7 @@
               <tr>
                 <th scope="col">{{ 'payments.invoiceNumber' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'payments.amount' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'paymentTerms.discount' | translate }}</th>
                 <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
               </tr>
             </thead>
@@ -20,6 +21,7 @@
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="documentCurrencyCode()" /></td>
+                  <td class="lines-table__right" data-testid="payment-app-discount-cell"><app-currency-display [value]="app.discount" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
                       <span class="material-icons-outlined">close</span>
@@ -32,6 +34,7 @@
               <tr>
                 <td class="lines-table__right lines-table__bold">{{ 'payments.totalApplied' | translate }}</td>
                 <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalApplied()" [currency]="documentCurrencyCode()" /></td>
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalDiscount()" [currency]="documentCurrencyCode()" /></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -41,9 +44,10 @@
         }
 
         <!-- Add Application Form -->
-        <div class="add-line add-line--3col" [formGroup]="appForm">
+        <div class="add-line add-line--4col" [formGroup]="appForm">
           <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0" [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="payment-app-invoice" />
           <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [max]="applicationRemaining()" data-testid="payment-app-amount" />
+          <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" data-testid="payment-app-discount" />
           <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid" aria-label="Add invoice application">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
@@ -81,6 +85,12 @@
           <span>{{ 'payments.totalApplied' | translate }}</span>
           <app-currency-display [value]="totalApplied()" [currency]="documentCurrencyCode()" />
         </div>
+        @if (totalDiscount() > 0) {
+          <div class="dlg-total-row" data-testid="payment-total-discount">
+            <span>{{ 'paymentTerms.discountsTaken' | translate }}</span>
+            <app-currency-display [value]="totalDiscount()" [currency]="documentCurrencyCode()" />
+          </div>
+        }
       </div>
     </div>
 

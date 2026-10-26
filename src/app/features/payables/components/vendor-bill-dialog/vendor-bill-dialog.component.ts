@@ -23,8 +23,10 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
+import { discountDateForTerms, dueDateForTerms } from '../../../../shared/utils/payment-terms.utils';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
-import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd, formatDate } from '../../../../shared/utils/date.utils';
 import { MONEY_DECIMALS, roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { onOrAfter } from '../../../../shared/validators/on-or-after.validator';
@@ -96,12 +98,15 @@ export class VendorBillDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
   private readonly vendorCurrencies = signal<Map<number, number | null>>(new Map());
+  private readonly vendorTerms = signal<Map<number, number | null>>(new Map());
   private readonly poCurrencyId = signal<number | null>(null);
   private readonly billService = inject(VendorBillService);
   private readonly vendorService = inject(VendorService);
   private readonly purchaseOrderService = inject(PurchaseOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
+  protected readonly paymentTermsOptions = this.paymentTerms.options;
   private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
@@ -151,6 +156,7 @@ export class VendorBillDialogComponent {
     ]),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
+    paymentTermsId: new FormControl<number | null>(null),
     notes: new FormControl(''),
     lines: this.standaloneLines,
     poLines: this.poLines,
@@ -177,6 +183,24 @@ export class VendorBillDialogComponent {
     return this.poCurrencyId() ?? (vendorId == null ? null : this.vendorCurrencies().get(vendorId) ?? null);
   });
   protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
+  private readonly paymentTermsIdValue = toSignal(
+    this.billForm.controls.paymentTermsId.valueChanges.pipe(startWith(this.billForm.controls.paymentTermsId.value)),
+    { initialValue: this.billForm.controls.paymentTermsId.value },
+  );
+
+  /** The discount date the picked terms give this bill, formatted, or null when they carry no discount. */
+  protected readonly discountUntil = computed(() => {
+    const terms = this.paymentTerms.find(this.paymentTermsIdValue());
+    const billDate = this.billDateValue();
+    const until = billDate ? discountDateForTerms(billDate, terms) : null;
+    return terms && until ? { percent: terms.discountPercent, date: formatDate(until) } : null;
+  });
+
+  private applyTermsDueDate(): void {
+    const { billDate, paymentTermsId, dueDate } = this.billForm.controls;
+    const due = billDate.value ? dueDateForTerms(billDate.value, this.paymentTerms.find(paymentTermsId.value)) : null;
+    if (due) dueDate.setValue(due);
+  }
 
   /** Reactivity tick for the computed totals — fires on any nested line edit. */
   private readonly formValue = toSignal(this.billForm.valueChanges, { initialValue: null });
@@ -272,6 +296,7 @@ export class VendorBillDialogComponent {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
         this.vendorCurrencies.set(new Map(list.map(vendor => [vendor.id, vendor.currencyId ?? null])));
+        this.vendorTerms.set(new Map(list.map(vendor => [vendor.id, vendor.paymentTermsId ?? null])));
         this.vendorOptions.set([
           { value: null, label: this.translate.instant('payables.selectVendor') },
           ...list.filter(vendor => vendor.isActive).map(vendor => ({ value: vendor.id, label: vendor.companyName })),
@@ -281,7 +306,21 @@ export class VendorBillDialogComponent {
 
     this.billForm.controls.billDate.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.billForm.controls.dueDate.updateValueAndValidity());
+      .subscribe(() => {
+        this.billForm.controls.dueDate.updateValueAndValidity();
+        this.applyTermsDueDate();
+      });
+
+    this.billForm.controls.paymentTermsId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyTermsDueDate());
+
+    this.billForm.controls.vendorId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(vendorId => {
+        const terms = this.billForm.controls.paymentTermsId;
+        if (!terms.dirty) terms.setValue(vendorId == null ? null : this.vendorTerms().get(vendorId) ?? null);
+      });
 
     // Switching mode clears the OTHER mode's lines (the create invariant is
     // all-or-nothing on purchaseOrderLineId).
@@ -629,6 +668,7 @@ export class VendorBillDialogComponent {
       notes: f.notes || undefined,
       currencyId,
       fxRate,
+      paymentTermsId: this.billForm.controls.paymentTermsId.dirty ? (f.paymentTermsId ?? undefined) : undefined,
       lines,
     }).subscribe({
       next: () => {

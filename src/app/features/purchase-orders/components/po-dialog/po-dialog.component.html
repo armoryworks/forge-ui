@@ -154,6 +154,7 @@
           [placeholder]="'salesOrders.optional' | translate" />
         <app-select data-testid="po-ship-to" [label]="'poCreate.shipTo' | translate" formControlName="shipToLocationId" [options]="shipToOptions()" />
         <app-datepicker data-testid="po-expected-delivery" [label]="'purchaseOrders.expectedDelivery' | translate" formControlName="expectedDeliveryDate" />
+        <app-select data-testid="po-payment-terms" [label]="'paymentTerms.label' | translate" formControlName="paymentTermsId" [options]="paymentTermsOptions()" />
         <app-toggle data-testid="po-is-blanket" [label]="'purchaseOrders.blanket.createAsBlanket' | translate" formControlName="isBlanket" />
         @if (isBlanket()) {
           <span class="po-blanket-hint">{{ 'purchaseOrders.blanket.createHint' | translate }}</span>

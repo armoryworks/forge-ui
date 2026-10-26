@@ -1,0 +1,50 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.pay-bills {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: $sp-sm;
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__table {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding: $sp-sm 0;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    font-size: $font-size-sm;
+  }
+
+  &__saving {
+    color: var(--success);
+  }
+}

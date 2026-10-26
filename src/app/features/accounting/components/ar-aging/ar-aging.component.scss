@@ -15,3 +15,10 @@
   justify-content: flex-end;
   margin-bottom: $sp-md;
 }
+
+.aging-discount {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: $font-size-sm;
+}

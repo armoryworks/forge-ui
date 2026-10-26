@@ -1,4 +1,5 @@
 import { FreightTerms } from '../../../shared/models/freight-terms.const';
+import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
 import { Contact } from './contact.model';
 import { CustomerJob } from './customer-job.model';
 
@@ -41,6 +42,8 @@ export interface CustomerDetail {
   exemptionExpiryDate?: string | null;
   freightTerms?: FreightTerms | null;
   defaultCreditTerms?: string | null;
+  paymentTermsId?: number | null;
+  paymentTerms?: PaymentTermsSummary | null;
   currencyId?: number | null;
   currencyLocked?: boolean;
 }

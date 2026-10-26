@@ -8,7 +8,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
@@ -37,6 +37,7 @@ export class VendorTermsStepComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('terms');
@@ -46,10 +47,10 @@ export class VendorTermsStepComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly saving = signal(false);
-  protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
+  protected readonly paymentTermsOptions = this.paymentTerms.options;
 
   protected readonly form = new FormGroup({
-    paymentTerms: new FormControl<string>('', { nonNullable: true }),
+    paymentTermsId: new FormControl<number | null>(null),
     minOrderAmount: new FormControl<number | null>(null, [Validators.min(0)]),
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
     notes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(4000)] }),
@@ -60,7 +61,7 @@ export class VendorTermsStepComponent {
       const vendor = this.entity() as VendorDetail | null;
       if (!vendor) return;
       this.form.patchValue({
-        paymentTerms: vendor.paymentTerms ?? '',
+        paymentTermsId: vendor.paymentTermsId ?? null,
         offTierVariancePct: vendor.offTierVariancePct,
         notes: vendor.notes ?? '',
       }, { emitEvent: false });
@@ -70,7 +71,7 @@ export class VendorTermsStepComponent {
     this.workflowService.registerStepForm(
       this.form,
       {
-        paymentTerms: this.translate.instant('vendors.workflow.terms.paymentTermsLabel'),
+        paymentTermsId: this.translate.instant('vendors.workflow.terms.paymentTermsLabel'),
         minOrderAmount: this.translate.instant('vendors.workflow.terms.minOrderAmountLabel'),
         offTierVariancePct: this.translate.instant('vendors.workflow.terms.offTierVariancePctLabel'),
         notes: this.translate.instant('vendors.workflow.terms.notesLabel'),
@@ -80,6 +81,11 @@ export class VendorTermsStepComponent {
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
+  private termsFields(paymentTermsId: number | null): Record<string, unknown> {
+    if (!this.form.controls.paymentTermsId.dirty) return {};
+    return paymentTermsId != null ? { paymentTermsId } : { paymentTerms: null };
+  }
+
   private save(): Observable<unknown> {
     const runId = this.runId();
     if (runId == null) return of(null);
@@ -87,7 +93,7 @@ export class VendorTermsStepComponent {
     const value = this.form.getRawValue();
     this.saving.set(true);
     return this.workflowService.patchStep(runId, this.stepId(), {
-      paymentTerms: value.paymentTerms || null,
+      ...this.termsFields(value.paymentTermsId),
       minOrderAmount: value.minOrderAmount,
       offTierVariancePct: value.offTierVariancePct,
       notes: value.notes.trim() || null,

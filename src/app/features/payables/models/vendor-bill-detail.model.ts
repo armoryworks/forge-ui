@@ -1,3 +1,4 @@
+import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
 import { VendorBillLine } from './vendor-bill-line.model';
 
 // ⚡ ACCOUNTING BOUNDARY — full detail projection of a vendor bill (header + lines).
@@ -27,4 +28,11 @@ export interface VendorBillDetail {
   /** Set when the bill was auto-promoted from a vendor-settled expense approval — voided via the expense, not directly. */
   sourceExpenseId: number | null;
   currencyCode?: string | null;
+  paymentTermsId?: number | null;
+  paymentTerms?: PaymentTermsSummary | null;
+  discountPercent?: number;
+  discountDueDate?: string | null;
+  discountDeadline?: string | null;
+  discountsTaken?: number;
+  discountAvailable?: number;
 }

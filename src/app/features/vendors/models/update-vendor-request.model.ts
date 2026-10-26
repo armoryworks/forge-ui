@@ -16,6 +16,7 @@ export interface UpdateVendorRequest {
   zipCode?: string;
   country?: string;
   paymentTerms?: string;
+  paymentTermsId?: number;
   notes?: string;
   isActive?: boolean;
   /** 1099 payee flag; omit to leave the stored value untouched. */

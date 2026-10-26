@@ -14,6 +14,7 @@ export interface VendorDetail {
   zipCode: string | null;
   country: string | null;
   paymentTerms: string | null;
+  paymentTermsId?: number | null;
   notes: string | null;
   isActive: boolean;
   /** Marks the vendor as a 1099 payee (drives the 1099 report). */
