@@ -278,7 +278,7 @@ export class PayablesComponent {
 
   private tabAllowed(tab: PayablesTab): boolean {
     if (tab === 'payments') return this.canReadPayments;
-    if (tab === 'pay-bills') return this.canManage;
+    if (tab === 'pay-bills') return this.canPayBills();
     if (tab === 'batches' || tab === 'accounts') return this.canManage;
     return true;
   }

@@ -176,9 +176,6 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./carriers/carriers.component').then((m) => m.CarriersComponent),
   },
-  // S3 — Terms & Conditions admin. Company-scope T&Cs plus a scope filter to
-  // browse/manage customer- and part-scoped terms. Company mutations are
-  // Admin-only (server-enforced + gated in-page). Lives in the terms feature.
   {
     path: 'payment-terms',
     data: { titleKey: 'admin.tabs.paymentTerms' },
@@ -186,6 +183,9 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./payment-terms/payment-terms-admin.component').then((m) => m.PaymentTermsAdminComponent),
   },
+  // S3 — Terms & Conditions admin. Company-scope T&Cs plus a scope filter to
+  // browse/manage customer- and part-scoped terms. Company mutations are
+  // Admin-only (server-enforced + gated in-page). Lives in the terms feature.
   {
     path: 'terms',
     data: { titleKey: 'admin.tabs.terms' },

@@ -38,6 +38,12 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/payments')).toBe('CAP-O2C-CASH');
     });
 
+    it('resolves the payment run to vendor payments, the rest of vendor bills to bills', () => {
+      expect(resolveCapabilityForUrl('/api/v1/vendor-bills/payment-suggestions?payDate=2026-01-01')).toBe('CAP-P2P-PAY');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-bills/5')).toBe('CAP-P2P-BILL');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-payments/from-suggestions')).toBe('CAP-P2P-PAY');
+    });
+
     it('resolves the conversion endpoints to CAP-ACCT-MIGRATION, not the GL view', () => {
       expect(resolveCapabilityForUrl('/api/v1/accounting/conversion/opening-journal')).toBe('CAP-ACCT-MIGRATION');
       expect(resolveCapabilityForUrl('/api/v1/accounting/trial-balance')).toBe('CAP-ACCT-GL-VIEW');
