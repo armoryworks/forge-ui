@@ -47,4 +47,19 @@ describe('PartWhereUsedComponent', () => {
     expect(rows.map(r => [r.parentPartNumber, r.level])).toEqual([['SA-051', 1], ['FG-053', 2], ['SA-052', 1], ['FG-053', 2]]);
     expect(new Set(rows.map(r => r.rowKey)).size).toBe(4);
   });
+
+  it('keys rows by their BOM-line chain, so a parent that lists the part on two lines keeps both rows distinct', () => {
+    response = [
+      usage('SA-061', 1, ['PRT-60', 'SA-061'], 3),
+      usage('FG-062', 2, ['PRT-60', 'SA-061', 'FG-062'], 9),
+      usage('SA-061', 1, ['PRT-60', 'SA-061'], 4),
+      usage('FG-062', 2, ['PRT-60', 'SA-061', 'FG-062'], 9),
+    ];
+    const component = TestBed.runInInjectionContext(() => new PartWhereUsedComponent());
+    mockSignalInputs(component, { partId: 60 });
+    TestBed.tick();
+
+    const rows = (component as unknown as { rows(): PartWhereUsedRow[] }).rows();
+    expect(rows.map(r => r.rowKey)).toEqual(['3', '3/9', '4', '4/9']);
+  });
 });

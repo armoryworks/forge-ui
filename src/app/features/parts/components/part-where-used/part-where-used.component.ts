@@ -48,11 +48,21 @@ export class PartWhereUsedComponent {
     return this.translate.instant(`parts.source${source}`);
   }
 
+  private withRowKeys(rows: PartWhereUsed[]): PartWhereUsedRow[] {
+    const chain: string[] = [];
+    return rows.map(row => {
+      const level = Math.max(1, row.level ?? 1);
+      chain.length = level - 1;
+      chain.push(String(row.bomLineId));
+      return { ...row, rowKey: chain.join('/') };
+    });
+  }
+
   private load(partId: number): void {
     this.loading.set(true);
     this.whereUsedService.getWhereUsed(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: rows => {
-        this.rows.set(rows.map(row => ({ ...row, rowKey: (row.path ?? [row.parentPartNumber]).join('>') })));
+        this.rows.set(this.withRowKeys(rows));
         this.loading.set(false);
       },
       error: () => {

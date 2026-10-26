@@ -4,6 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { PartsService } from '../../services/parts.service';
 
 /**
@@ -21,6 +22,7 @@ import { PartsService } from '../../services/parts.service';
 })
 export class PartFilesClusterComponent implements OnInit {
   protected readonly partsService = inject(PartsService);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly partId = input.required<number>();
   readonly uploaded = output<void>();
@@ -36,6 +38,11 @@ export class PartFilesClusterComponent implements OnInit {
     this.partsService.getPartFiles(id).subscribe({
       next: (files) => this.files.set(files),
     });
+  }
+
+  protected openFile(event: Event, file: FileAttachment): void {
+    event.preventDefault();
+    this.fileDownload.openOrDownload(this.partsService.getFileDownloadUrl(file.id), file.fileName, file.contentType);
   }
 
   protected onFileUploaded(): void {
