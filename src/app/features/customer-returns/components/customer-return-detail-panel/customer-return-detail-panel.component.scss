@@ -67,3 +67,11 @@
   margin: 0 0 $sp-md;
   color: var(--text);
 }
+
+.resolve-dialog__form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.resolve-dialog__note { margin: 0; font-size: $font-size-sm; color: var(--text-muted); }

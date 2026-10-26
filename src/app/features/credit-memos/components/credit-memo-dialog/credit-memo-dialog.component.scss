@@ -1,0 +1,31 @@
+@use 'styles/variables' as *;
+
+.memo-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm 0;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-sm;
+  }
+
+  &__main { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: $sp-sm; }
+  &__meta { font-size: $font-size-xs; color: var(--text-muted); }
+  &__qty { color: var(--text-secondary); white-space: nowrap; }
+  &__amount { font-family: $font-family-mono; white-space: nowrap; }
+}
+
+.memo-add-line {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: $sp-sm;
+  align-items: end;
+  margin-top: $sp-md;
+}

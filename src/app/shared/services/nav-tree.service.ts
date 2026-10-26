@@ -177,6 +177,7 @@ export class NavTreeService {
       children: [
         { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', capability: 'CAP-O2C-INVOICE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Credit Memos', i18nKey: 'nav.creditMemos', route: '/credit-memos', anyCapabilities: ['CAP-O2C-CREDITMEMO', 'CAP-O2C-RMA'], allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Controller'] },
         { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement', 'Controller'] },
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         // Tier-3 standard costing (overhead pools, budgets, freeze, rates).
@@ -478,6 +479,7 @@ export class NavTreeService {
 
   private isCapabilityAllowed(item: NavItem): boolean {
     if (item.capability && !this.capabilities.isEnabled(item.capability)) return false;
+    if (item.anyCapabilities?.length && !item.anyCapabilities.some(code => this.capabilities.isEnabled(code))) return false;
     return !(item.hiddenWithCapability && this.capabilities.isEnabled(item.hiddenWithCapability));
   }
 

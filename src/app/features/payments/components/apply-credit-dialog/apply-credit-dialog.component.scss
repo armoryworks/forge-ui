@@ -47,3 +47,13 @@
 .add-line--5col {
   grid-template-columns: 1fr 120px 110px 110px auto;
 }
+
+.open-memos {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin-top: $sp-md;
+
+  &__title { font-weight: 600; font-size: $font-size-sm; }
+  &__hint { font-size: $font-size-xs; color: var(--text-muted); }
+}

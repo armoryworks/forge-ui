@@ -112,3 +112,24 @@
   font-size: $font-size-base;
   color: var(--text-secondary);
 }
+
+.refunds-section { display: flex; flex-direction: column; gap: $sp-sm; }
+
+.refund-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding: $sp-sm 0;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-sm;
+
+    &--voided { opacity: 0.6; }
+  }
+
+  &__amount { font-family: $font-family-mono; }
+}

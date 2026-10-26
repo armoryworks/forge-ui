@@ -1,0 +1,16 @@
+@use 'styles/variables' as *;
+
+.apply-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__available {
+    display: flex;
+    justify-content: space-between;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__empty { margin: 0; font-size: $font-size-sm; color: var(--text-muted); }
+}

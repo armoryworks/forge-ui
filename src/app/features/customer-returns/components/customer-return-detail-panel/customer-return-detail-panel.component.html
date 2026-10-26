@@ -47,6 +47,49 @@
             <span class="detail-value">{{ r.notes }}</span>
           </div>
         }
+        @if (r.disposition) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.dispositionLabel' | translate }}</span>
+            <span class="detail-value" data-testid="return-detail-disposition">{{ ('customerReturns.disposition.' + r.disposition) | translate }}</span>
+          </div>
+        }
+        @if (r.partNumber) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.part' | translate }}</span>
+            <span class="detail-value">{{ r.partNumber }}</span>
+          </div>
+        }
+        @if (r.invoiceNumber) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.invoice' | translate }}</span>
+            <span class="detail-value">{{ r.invoiceNumber }}</span>
+          </div>
+        }
+        @if (r.quantityRestocked) {
+          <div class="detail-item detail-item--full" data-testid="return-detail-restock">
+            <span class="detail-label">{{ 'customerReturns.restocked' | translate }}</span>
+            <span class="detail-value">
+              {{ 'customerReturns.restockedInto' | translate: { quantity: (r.quantityRestocked | number:'1.0-4'), location: r.restockLocationName ?? '' } }}
+              @if (r.restockLotNumber) {
+                · {{ 'customerReturns.lot' | translate: { lot: r.restockLotNumber } }}
+              }
+            </span>
+          </div>
+        }
+        @if (r.quantityScrapped) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.scrapped' | translate }}</span>
+            <span class="detail-value">{{ r.quantityScrapped | number:'1.0-4' }}</span>
+          </div>
+        }
+        @if (r.creditMemoId) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.creditMemo' | translate }}</span>
+            <span class="detail-value">
+              <a routerLink="/credit-memos" [queryParams]="{ detail: 'credit-memo:' + r.creditMemoId }" data-testid="return-detail-credit-memo">{{ r.creditMemoNumber }}</a>
+            </span>
+          </div>
+        }
         @if (r.inspectionNotes) {
           <div class="detail-item detail-item--full">
             <span class="detail-label">{{ 'customerReturns.inspectionNotes' | translate }}</span>
@@ -97,7 +140,31 @@
     (closed)="closeResolveDialog()">
 
     <p class="resolve-dialog__message" data-testid="return-resolve-message">{{ 'customerReturns.resolveConfirm' | translate }}</p>
-    <div [formGroup]="resolveForm">
+    <div class="resolve-dialog__form" [formGroup]="resolveForm">
+      <app-select [label]="'customerReturns.dispositionLabel' | translate" formControlName="disposition" [options]="dispositionOptions"
+        data-testid="return-resolve-disposition" />
+      @if (selectedDisposition()) {
+        <app-input [label]="'customerReturns.fieldQuantity' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001"
+          [required]="true" data-testid="return-resolve-quantity" />
+      }
+      @if (selectedDisposition() === 'ReturnToStock') {
+        <app-select [label]="'customerReturns.restockLocation' | translate" formControlName="restockLocationId" [options]="locationOptions()"
+          [required]="true" data-testid="return-resolve-location" />
+        <app-input [label]="'customerReturns.lotNumber' | translate" formControlName="lotNumber" [maxlength]="100"
+          [required]="detail()?.partLotTracked === true" data-testid="return-resolve-lot" />
+      }
+      @if (selectedDisposition() && creditsEnabled() && canIssueCredit()) {
+        <app-toggle [label]="'customerReturns.issueCredit' | translate" formControlName="issueCredit" data-testid="return-resolve-issue-credit" />
+        @if (resolveForm.controls.issueCredit.value) {
+          <app-input [label]="'customerReturns.creditAmount' | translate" type="number" formControlName="creditAmount" step="0.01" min="0"
+            [placeholder]="'customerReturns.creditAmountPlaceholder' | translate" data-testid="return-resolve-credit-amount" />
+          <app-input [label]="'customerReturns.restockingFeePercent' | translate" type="number" formControlName="restockingFeePercent" step="0.01" min="0"
+            [placeholder]="'customerReturns.restockingFeePlaceholder' | translate" data-testid="return-resolve-fee" />
+        }
+      }
+      @if (selectedDisposition() && !canIssueCredit()) {
+        <p class="resolve-dialog__note" data-testid="return-resolve-channel-note">{{ 'customerReturns.channelCreditNote' | translate }}</p>
+      }
       <app-textarea
         [label]="'customerReturns.inspectionNotesOptional' | translate"
         formControlName="inspectionNotes"
@@ -108,7 +175,7 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closeResolveDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary" data-testid="return-resolve-confirm-btn"
-        [disabled]="resolveSaving()"
+        [disabled]="resolveSaving() || resolveBlocked()"
         (click)="resolve()">
         @if (resolveSaving()) {
           <span class="material-icons-outlined spin">sync</span>

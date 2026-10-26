@@ -1,5 +1,6 @@
 import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
 import { InvoiceLine } from './invoice-line.model';
+import { CreditMemoApplication } from '../../credit-memos/models/credit-memo-application.model';
 
 export interface InvoiceDetail {
   id: number;
@@ -37,4 +38,6 @@ export interface InvoiceDetail {
   discountDeadline?: string | Date | null;
   discountsTaken?: number;
   discountAvailable?: number;
+  creditsApplied?: number;
+  creditApplications?: CreditMemoApplication[];
 }

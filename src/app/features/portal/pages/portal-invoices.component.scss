@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+
+.portal-credits {
+  margin-top: $sp-xl;
+
+  &__title { font-size: $font-size-base; margin: 0 0 $sp-sm; }
+
+  &__list { list-style: none; margin: 0; padding: 0; }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm 0;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-sm;
+  }
+
+  &__number { font-weight: 600; }
+  &__meta { color: var(--text-muted); }
+  &__desc { flex: 1; }
+  &__amount { font-family: $font-family-mono; }
+  &__open { color: var(--text-secondary); }
+}

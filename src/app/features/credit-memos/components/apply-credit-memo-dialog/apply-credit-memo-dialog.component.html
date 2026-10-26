@@ -1,0 +1,26 @@
+<app-dialog [title]="'creditMemos.applyTitle' | translate: { number: memo().creditMemoNumber }" width="520px" (closed)="closed.emit()">
+  <div class="apply-form" [formGroup]="form">
+    <div class="apply-form__available">
+      <span>{{ 'creditMemos.open' | translate }}</span>
+      <app-currency-display [value]="memo().openAmount" [currency]="memo().currencyCode" />
+    </div>
+    @if (loaded() && invoices().length === 0) {
+      <p class="apply-form__empty" data-testid="apply-credit-memo-empty">{{ 'creditMemos.noOpenInvoices' | translate }}</p>
+    } @else {
+      <app-select [label]="'creditMemos.invoice' | translate" formControlName="invoiceId" [options]="invoiceOptions()" [required]="true"
+        data-testid="apply-credit-memo-invoice" />
+      <app-input [label]="'creditMemos.applyAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+        [required]="true" data-testid="apply-credit-memo-amount" />
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="apply-credit-memo-save"
+        [disabled]="!canSave() || saving()" (click)="save()">
+        <span class="material-icons-outlined" aria-hidden="true">playlist_add_check</span>
+        {{ 'creditMemos.apply' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

@@ -1,0 +1,259 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (memo(); as m) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon" aria-hidden="true">request_quote</span>
+        <div>
+          <div class="detail-name" data-testid="credit-memo-number">{{ m.creditMemoNumber }}</div>
+          <div class="detail-customer"><app-entity-link type="customer" [entityId]="m.customerId">{{ m.customerName }}</app-entity-link></div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" type="button" [matTooltip]="'common.close' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'common.close' | translate" (click)="closed.emit()">
+          <span class="material-icons-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value"><span [class]="statusClass(m.status)" data-testid="credit-memo-status">{{ ('creditMemos.status.' + m.status) | translate }}</span></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'creditMemos.creditDate' | translate }}</span>
+          <span class="info-value">{{ m.creditDate | dateOnly }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'creditMemos.reasonType' | translate }}</span>
+          <span class="info-value">{{ ('creditMemos.reason.' + m.reasonType) | translate }}</span>
+        </div>
+        @if (m.invoiceId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'creditMemos.invoice' | translate }}</span>
+            <span class="info-value"><app-entity-link type="invoice" [entityId]="m.invoiceId">{{ m.invoiceNumber }}</app-entity-link></span>
+          </div>
+        }
+        @if (m.customerReturnId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'creditMemos.customerReturn' | translate }}</span>
+            <span class="info-value"><app-entity-link type="customer-return" [entityId]="m.customerReturnId">{{ m.returnNumber }}</app-entity-link></span>
+          </div>
+        }
+        @if (m.fxRate !== 1) {
+          <div class="info-item">
+            <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
+            <span class="info-value">{{ m.fxRate | number:'1.2-8' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-section">
+        <span class="info-label">{{ 'creditMemos.reasonLabel' | translate }}</span>
+        <div class="info-notes">{{ m.reason }}</div>
+      </div>
+      @if (m.voidReason) {
+        <div class="info-section">
+          <span class="info-label">{{ 'creditMemos.voidReason' | translate }}</span>
+          <div class="info-notes">{{ m.voidReason }}</div>
+        </div>
+      }
+
+      <div class="cm-section">
+        <span class="info-label">{{ 'creditMemos.lines' | translate }} ({{ m.lines.length }})</span>
+        <ul class="cm-rows" [attr.aria-label]="'creditMemos.lines' | translate">
+          @for (line of m.lines; track line.id) {
+            <li class="cm-rows__row">
+              <span class="cm-rows__main">
+                {{ line.description }}
+                @if (line.lineType !== 'Item') {
+                  <span class="chip chip--primary">{{ ('creditMemos.lineType.' + line.lineType) | translate }}</span>
+                }
+                @if (line.partNumber) {
+                  <span class="cm-rows__meta">{{ line.partNumber }}</span>
+                }
+              </span>
+              <span class="cm-rows__qty">{{ line.quantity | number:'1.0-4' }} × <app-currency-display [value]="line.unitPrice" [currency]="m.currencyCode" [maximumFractionDigits]="4" /></span>
+              <span class="cm-rows__amount"><app-currency-display [value]="line.lineTotal" [currency]="m.currencyCode" /></span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="totals-label">{{ 'creditMemos.subtotal' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.subtotal" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'creditMemos.tax' | translate }} ({{ m.taxRate * 100 | number:'1.0-4' }}%)</span>
+          <span class="totals-value"><app-currency-display [value]="m.taxAmount" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row totals-row--total">
+          <span class="totals-label">{{ 'creditMemos.totalCredit' | translate }}</span>
+          <span class="totals-value" data-testid="credit-memo-total"><app-currency-display [value]="m.total" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'creditMemos.applied' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.amountApplied" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'creditMemos.refundedAmount' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.amountRefunded" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row totals-row--balance">
+          <span class="totals-label">{{ 'creditMemos.open' | translate }}</span>
+          <span class="totals-value" data-testid="credit-memo-open"><app-currency-display [value]="m.openAmount" [currency]="m.currencyCode" /></span>
+        </div>
+      </div>
+
+      @if (m.applications.length > 0) {
+        <div class="cm-section">
+          <span class="info-label">{{ 'creditMemos.applications' | translate }}</span>
+          <ul class="cm-rows" [attr.aria-label]="'creditMemos.applications' | translate">
+            @for (app of m.applications; track app.id) {
+              <li class="cm-rows__row" [class.cm-rows__row--reversed]="!!app.reversedAt">
+                <span class="cm-rows__main">
+                  <app-entity-link type="invoice" [entityId]="app.invoiceId">{{ app.invoiceNumber }}</app-entity-link>
+                  <span class="cm-rows__meta">{{ app.appliedAt | dateOnly }}</span>
+                  @if (app.reversedAt) {
+                    <span class="chip chip--muted">{{ 'creditMemos.unappliedChip' | translate }}</span>
+                  }
+                </span>
+                <span class="cm-rows__amount"><app-currency-display [value]="app.amount" [currency]="m.currencyCode" /></span>
+                @if (!app.reversedAt && canUnapply()) {
+                  <button class="icon-btn icon-btn--danger" type="button" [attr.data-testid]="'credit-memo-unapply-' + app.id"
+                    [matTooltip]="'creditMemos.unapply' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'creditMemos.unapply' | translate" [disabled]="busy()" (click)="unapply(app.id, app.invoiceNumber)">
+                    <span class="material-icons-outlined" aria-hidden="true">link_off</span>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (m.refunds.length > 0) {
+        <div class="cm-section">
+          <span class="info-label">{{ 'creditMemos.refunds' | translate }}</span>
+          <ul class="cm-rows" [attr.aria-label]="'creditMemos.refunds' | translate">
+            @for (refund of m.refunds; track refund.id) {
+              <li class="cm-rows__row" [class.cm-rows__row--reversed]="refund.status === 'Voided'">
+                <span class="cm-rows__main">
+                  {{ refund.refundNumber }}
+                  <span class="cm-rows__meta">{{ refund.refundDate | dateOnly }} · {{ ('creditMemos.method.' + refund.method) | translate }}</span>
+                  @if (refund.reference) {
+                    <span class="cm-rows__meta">{{ refund.reference }}</span>
+                  }
+                  @if (refund.status === 'Voided') {
+                    <span class="chip chip--muted">{{ 'creditMemos.status.Voided' | translate }}</span>
+                  }
+                </span>
+                <span class="cm-rows__amount"><app-currency-display [value]="refund.amount" [currency]="m.currencyCode" /></span>
+                @if (refund.status !== 'Voided' && canVoidRefund()) {
+                  <button class="icon-btn icon-btn--danger" type="button" [attr.data-testid]="'credit-memo-void-refund-' + refund.id"
+                    [matTooltip]="'creditMemos.voidRefund' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'creditMemos.voidRefund' | translate" [disabled]="busy()"
+                    (click)="openVoid({ kind: 'refund', refundId: refund.id, refundNumber: refund.refundNumber })">
+                    <span class="material-icons-outlined" aria-hidden="true">block</span>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (m.issueJournalEntryId && isController()) {
+        <div class="info-section" data-testid="credit-memo-journal">
+          <span class="info-label">{{ 'creditMemos.journal' | translate }}</span>
+          <a class="cm-journal-link" routerLink="/accounting/ledger">{{ 'creditMemos.journalEntry' | translate: { id: m.issueJournalEntryId } }}</a>
+        </div>
+      }
+
+      <div class="detail-actions">
+        @if (canDelete()) {
+          <button class="action-btn action-btn--danger" type="button" data-testid="credit-memo-delete-btn" [disabled]="busy()" (click)="deleteDraft()">
+            <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+        @if (canVoid()) {
+          <button class="action-btn action-btn--danger" type="button" data-testid="credit-memo-void-btn" [disabled]="busy()" (click)="openVoid({ kind: 'memo' })">
+            <span class="material-icons-outlined" aria-hidden="true">block</span>
+            {{ 'creditMemos.void' | translate }}
+          </button>
+        }
+        <button class="action-btn" type="button" data-testid="credit-memo-pdf-btn" [disabled]="downloadingPdf()" (click)="downloadPdf()">
+          <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
+          {{ 'creditMemos.downloadPdf' | translate }}
+        </button>
+        @if (canApplyOrRefund()) {
+          <button class="action-btn" type="button" data-testid="credit-memo-refund-btn" [disabled]="busy()" (click)="showRefund.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">currency_exchange</span>
+            {{ 'creditMemos.refund' | translate }}
+          </button>
+          <button class="action-btn action-btn--primary" type="button" data-testid="credit-memo-apply-btn" [disabled]="busy()" (click)="showApply.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">playlist_add_check</span>
+            {{ 'creditMemos.apply' | translate }}
+          </button>
+        }
+        @if (canIssue()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="credit-memo-issue-btn" [disabled]="busy()" (click)="issue()">
+            <span class="material-icons-outlined" aria-hidden="true">send</span>
+            {{ 'creditMemos.issue' | translate }}
+          </button>
+        }
+      </div>
+
+      <app-entity-activity-section entityType="CreditMemo" [entityId]="m.id" [refreshKey]="m" />
+    </div>
+
+    @if (showRefund()) {
+      <app-customer-refund-dialog
+        [title]="'creditMemos.refundTitle' | translate: { number: m.creditMemoNumber }"
+        [maxAmount]="m.openAmount"
+        [currencyCode]="m.currencyCode"
+        [defaultFxRate]="m.fxRate"
+        [saving]="busy()"
+        (closed)="showRefund.set(false)"
+        (submitted)="submitRefund($event)" />
+    }
+
+    @if (showApply()) {
+      <app-apply-credit-memo-dialog [memo]="m" (closed)="showApply.set(false)" (applied)="onApplied($event)" />
+    }
+
+    @if (voidTarget(); as target) {
+      <app-dialog
+        [title]="(target.kind === 'memo' ? 'creditMemos.voidTitle' : 'creditMemos.voidRefundTitle') | translate"
+        width="480px" (closed)="voidTarget.set(null)">
+        <div [formGroup]="voidForm">
+          <p class="cm-void-message">
+            @if (target.kind === 'memo') {
+              {{ 'creditMemos.voidMessage' | translate: { number: m.creditMemoNumber } }}
+            } @else {
+              {{ 'creditMemos.voidRefundMessage' | translate: { number: target.refundNumber } }}
+            }
+          </p>
+          <app-textarea [label]="'creditMemos.voidReason' | translate" formControlName="reason" [required]="true" data-testid="credit-memo-void-reason" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" type="button" (click)="voidTarget.set(null)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="voidViolations" [loading]="busy()">
+            <button class="action-btn action-btn--destructive" type="button" data-testid="credit-memo-void-confirm-btn"
+              [disabled]="voidForm.invalid || busy()" (click)="confirmVoid()">
+              <span class="material-icons-outlined" aria-hidden="true">block</span>
+              {{ 'creditMemos.void' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
+  }
+</div>

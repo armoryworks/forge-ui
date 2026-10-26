@@ -335,6 +335,13 @@ export const routes: Routes = [
           import('./features/invoices/invoices.routes').then((m) => m.INVOICES_ROUTES),
       },
       {
+        path: 'credit-memos',
+        data: { titleKey: 'nav.creditMemos' },
+        canActivate: routeAccessGuards('credit-memos'),
+        loadChildren: () =>
+          import('./features/credit-memos/credit-memos.routes').then((m) => m.CREDIT_MEMOS_ROUTES),
+      },
+      {
         path: 'payments',
         data: { titleKey: 'nav.payments' },
         canActivate: routeAccessGuards('payments'),

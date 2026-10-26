@@ -18,4 +18,19 @@ export interface CustomerReturnDetail {
   inspectionNotes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  channelId?: number | null;
+  invoiceId?: number | null;
+  invoiceNumber?: string | null;
+  disposition?: string | null;
+  quantityRestocked?: number | null;
+  quantityScrapped?: number | null;
+  restockLocationId?: number | null;
+  restockLocationName?: string | null;
+  restockLotNumber?: string | null;
+  restockBinMovementId?: number | null;
+  creditMemoId?: number | null;
+  creditMemoNumber?: string | null;
+  partId?: number | null;
+  partNumber?: string | null;
+  partLotTracked?: boolean;
 }

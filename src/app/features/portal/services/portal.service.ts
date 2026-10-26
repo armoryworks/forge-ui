@@ -16,6 +16,7 @@ import {
   PortalSummary,
   RequestMagicLinkResult,
 } from '../models/portal.model';
+import { PortalCredit } from '../models/portal-credit.model';
 
 const TOKEN_KEY = 'portal-token';
 const EXPIRES_KEY = 'portal-token-expires';
@@ -87,6 +88,10 @@ export class PortalService {
 
   getInvoices(): Observable<PortalList<PortalInvoice>> {
     return this.getList<PortalInvoice>('invoices');
+  }
+
+  getCredits(): Observable<PortalList<PortalCredit>> {
+    return this.getList<PortalCredit>('credits');
   }
 
   getShipments(): Observable<PortalList<PortalShipment>> {

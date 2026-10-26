@@ -1,0 +1,33 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.credits-card {
+  border: $border-width-thin solid var(--border);
+  padding: $sp-lg;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $sp-md;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__total { font-family: $font-family-mono; font-weight: 700; }
+
+  &__list { list-style: none; margin: 0; padding: 0; }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-xs 0;
+    font-size: $font-size-sm;
+  }
+
+  &__reason { flex: 1; color: var(--text-secondary); }
+
+  &__empty { margin: 0; font-size: $font-size-sm; color: var(--text-muted); }
+}

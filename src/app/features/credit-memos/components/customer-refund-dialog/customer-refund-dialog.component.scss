@@ -1,0 +1,14 @@
+@use 'styles/variables' as *;
+
+.refund-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__available {
+    display: flex;
+    justify-content: space-between;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}

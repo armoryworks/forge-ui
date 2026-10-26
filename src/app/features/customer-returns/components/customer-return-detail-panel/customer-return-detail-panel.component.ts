@@ -1,6 +1,8 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +17,13 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { InventoryService } from '../../../inventory/services/inventory.service';
+import { RETURN_DISPOSITIONS } from '../../models/return-dispositions.const';
+import { ResolveCustomerReturnRequest } from '../../models/resolve-customer-return-request.model';
 
 @Component({
   selector: 'app-customer-return-detail-panel',
@@ -30,6 +39,10 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
     TextareaComponent,
     LoadingBlockDirective,
     DetailLoadErrorComponent,
+    SelectComponent,
+    InputComponent,
+    ToggleComponent,
+    RouterLink,
   ],
   templateUrl: './customer-return-detail-panel.component.html',
   styleUrl: './customer-return-detail-panel.component.scss',
@@ -40,6 +53,9 @@ export class CustomerReturnDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly inventory = inject(InventoryService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly customerReturnId = input.required<number>();
   readonly closed = output<void>();
@@ -53,9 +69,29 @@ export class CustomerReturnDetailPanelComponent {
 
   protected readonly resolveForm = new FormGroup({
     inspectionNotes: new FormControl('', [Validators.maxLength(1000)]),
+    disposition: new FormControl<string | null>(null),
+    quantity: new FormControl<number | null>(null, [Validators.min(0.0001)]),
+    restockLocationId: new FormControl<number | null>(null),
+    lotNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+    issueCredit: new FormControl<boolean>(true, { nonNullable: true }),
+    creditAmount: new FormControl<number | null>(null, [Validators.min(0)]),
+    restockingFeePercent: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
+  });
+
+  protected readonly locationOptions = signal<SelectOption[]>([]);
+  protected readonly dispositionOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('customerReturns.dispositionNone') },
+    ...RETURN_DISPOSITIONS.map(d => ({ value: d, label: this.translate.instant(`customerReturns.disposition.${d}`) })),
+  ];
+  protected readonly selectedDisposition = signal<string | null>(null);
+  protected readonly canIssueCredit = computed(() => {
+    const r = this.detail();
+    return !!r && !r.channelId;
   });
 
   constructor() {
+    this.resolveForm.controls.disposition.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.selectedDisposition.set(value));
     effect(() => {
       const id = this.customerReturnId();
       if (id) {
@@ -77,8 +113,27 @@ export class CustomerReturnDetailPanelComponent {
   }
 
   protected openResolve(): void {
-    this.resolveForm.reset();
+    const r = this.detail();
+    this.resolveForm.reset({
+      inspectionNotes: '', disposition: null, quantity: r?.quantity ?? null, restockLocationId: null,
+      lotNumber: '', issueCredit: true, creditAmount: null, restockingFeePercent: null,
+    });
+    this.selectedDisposition.set(null);
+    if (this.locationOptions().length === 0) {
+      this.inventory.getAllActiveBinLocations().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: bins => this.locationOptions.set(bins.map(b => ({ value: b.id, label: b.locationPath || b.name }))),
+      });
+    }
     this.showResolveDialog.set(true);
+  }
+
+  protected resolveBlocked(): boolean {
+    const f = this.resolveForm.getRawValue();
+    if (this.resolveForm.invalid) return true;
+    if (!f.disposition) return false;
+    if (!(f.quantity && f.quantity > 0)) return true;
+    if (f.disposition === 'ReturnToStock' && !f.restockLocationId) return true;
+    return f.disposition === 'ReturnToStock' && this.detail()?.partLotTracked === true && !f.lotNumber.trim();
   }
 
   protected closeResolveDialog(): void {
@@ -89,8 +144,20 @@ export class CustomerReturnDetailPanelComponent {
     const r = this.detail();
     if (!r) return;
     this.resolveSaving.set(true);
-    const notes = this.resolveForm.value.inspectionNotes || undefined;
-    this.service.resolve(r.id, notes).subscribe({
+    const f = this.resolveForm.getRawValue();
+    const notes = f.inspectionNotes || undefined;
+    const disposition: ResolveCustomerReturnRequest | undefined = f.disposition
+      ? {
+        disposition: f.disposition,
+        quantity: f.quantity,
+        restockLocationId: f.disposition === 'ReturnToStock' ? f.restockLocationId : null,
+        lotNumber: f.disposition === 'ReturnToStock' ? (f.lotNumber.trim() || null) : null,
+        issueCredit: this.creditsEnabled() && this.canIssueCredit() && f.issueCredit,
+        creditAmount: f.creditAmount,
+        restockingFeePercent: f.restockingFeePercent,
+      }
+      : undefined;
+    this.service.resolve(r.id, notes, disposition).subscribe({
       next: () => {
         this.loadDetail(r.id);
         this.resolveSaving.set(false);
@@ -100,6 +167,10 @@ export class CustomerReturnDetailPanelComponent {
       },
       error: () => this.resolveSaving.set(false),
     });
+  }
+
+  protected creditsEnabled(): boolean {
+    return this.capabilities.isEnabled('CAP-O2C-RMA');
   }
 
   protected closeReturn(r: CustomerReturnDetail): void {

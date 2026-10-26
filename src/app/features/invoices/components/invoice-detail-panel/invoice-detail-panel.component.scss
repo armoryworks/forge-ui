@@ -117,6 +117,19 @@
     font-weight: 700;
     color: var(--primary);
   }
+
+  &--credit {
+    padding-left: $sp-md;
+    font-size: $font-size-xs;
+  }
+}
+
+.write-off-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__message { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }
 }
 
 .totals-label { color: var(--text-secondary); }

@@ -113,6 +113,20 @@
         }
       </div>
 
+      @if ((payment.refunds ?? []).length > 0) {
+        <div class="refunds-section" data-testid="payment-detail-refunds">
+          <span class="info-label">{{ 'creditMemos.refunds' | translate }}</span>
+          <ul class="refund-rows" [attr.aria-label]="'creditMemos.refunds' | translate">
+            @for (refund of payment.refunds; track refund.id) {
+              <li class="refund-rows__row" [class.refund-rows__row--voided]="refund.status === 'Voided'">
+                <span class="refund-rows__main">{{ refund.refundNumber }} · {{ refund.refundDate | dateOnly }} · {{ ('creditMemos.method.' + refund.method) | translate }}</span>
+                <span class="refund-rows__amount"><app-currency-display [value]="refund.amount" [currency]="payment.currencyCode ?? null" /></span>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'common.created' | translate }}</span>
@@ -136,6 +150,12 @@
           <button class="action-btn action-btn--primary" data-testid="payment-apply-credit-btn" (click)="openApplyCredit()">
             <span class="material-icons-outlined">playlist_add_check</span>
             {{ 'payments.applyCredit' | translate }}
+          </button>
+        }
+        @if (canRefund()) {
+          <button class="action-btn" type="button" data-testid="payment-refund-btn" (click)="showRefund.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">currency_exchange</span>
+            {{ 'creditMemos.refundUnapplied' | translate }}
           </button>
         }
         @if (canVoid()) {
@@ -175,6 +195,16 @@
           </app-validation-button>
         </div>
       </app-dialog>
+    }
+    @if (showRefund()) {
+      <app-customer-refund-dialog
+        [title]="'creditMemos.refundPaymentTitle' | translate: { number: payment.paymentNumber }"
+        [maxAmount]="payment.unappliedAmount"
+        [currencyCode]="payment.currencyCode ?? null"
+        [defaultFxRate]="payment.fxRate ?? 1"
+        [saving]="refunding()"
+        (closed)="showRefund.set(false)"
+        (submitted)="submitRefund($event)" />
     }
     @if (applyingCredit()) {
       <app-apply-credit-dialog [payment]="payment" (closed)="closeApplyCredit()" (saved)="onCreditApplied()" />

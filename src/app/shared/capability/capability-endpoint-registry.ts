@@ -114,6 +114,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'fmeas', capability: 'CAP-QC-FMEA' },
   { prefix: 'identity-documents', capability: 'CAP-QC-COMPLIANCE-FORMS' },
   { prefix: 'inventory', capability: 'CAP-INV-CORE' },
+  { prefix: 'credit-memos', capability: 'CAP-O2C-CREDITMEMO', anyOf: ['CAP-O2C-CREDITMEMO', 'CAP-O2C-RMA'] },
   { prefix: 'invoices', capability: 'CAP-O2C-INVOICE' },
   { prefix: 'job-operations', capability: 'CAP-MFG-MULTIOP' },
   { prefix: 'jobs', capability: 'CAP-MFG-WO-RELEASE' },

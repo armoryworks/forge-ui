@@ -164,6 +164,18 @@
             <span class="totals-value"><app-currency-display [value]="inv.discountsTaken ?? 0" [currency]="currencyCode()" /></span>
           </div>
         }
+        @if (creditsApplied() > 0) {
+          <div class="totals-row" data-testid="invoice-detail-credits">
+            <span class="totals-label">{{ 'creditMemos.creditsApplied' | translate }}</span>
+            <span class="totals-value"><app-currency-display [value]="creditsApplied()" [currency]="currencyCode()" /></span>
+          </div>
+          @for (credit of inv.creditApplications ?? []; track credit.id) {
+            <div class="totals-row totals-row--credit">
+              <a class="totals-label" routerLink="/credit-memos" [queryParams]="{ detail: 'credit-memo:' + credit.creditMemoId }">{{ credit.creditMemoNumber }}</a>
+              <span class="totals-value"><app-currency-display [value]="credit.amount" [currency]="currencyCode()" /></span>
+            </div>
+          }
+        }
         <div class="totals-row totals-row--balance">
           <span class="totals-label">{{ 'invoices.balanceDue' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="inv.balanceDue" [currency]="currencyCode()" /></span>
@@ -195,6 +207,18 @@
             {{ 'invoices.void' | translate }}
           </button>
         }
+        @if (canWriteOff()) {
+          <button class="action-btn" type="button" data-testid="invoice-write-off-btn" (click)="openWriteOff()">
+            <span class="material-icons-outlined" aria-hidden="true">money_off</span>
+            {{ 'creditMemos.writeOffBalance' | translate }}
+          </button>
+        }
+        @if (canIssueCreditMemo()) {
+          <button class="action-btn" type="button" data-testid="invoice-credit-memo-btn" (click)="showCreditMemoDialog.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">request_quote</span>
+            {{ 'creditMemos.issueCreditMemo' | translate }}
+          </button>
+        }
         <button class="action-btn" type="button" data-testid="invoice-download-pdf-btn"
           [disabled]="downloadingPdf()" (click)="downloadPdf()">
           <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
@@ -217,6 +241,31 @@
           </button>
         }
       </div>
+
+      @if (showCreditMemoDialog()) {
+        <app-credit-memo-dialog [invoiceId]="inv.id" (closed)="showCreditMemoDialog.set(false)" (saved)="onCreditMemoCreated($event)" />
+      }
+
+      @if (showWriteOffDialog()) {
+        <app-dialog [title]="'creditMemos.writeOffTitle' | translate: { number: inv.invoiceNumber }" width="480px" (closed)="showWriteOffDialog.set(false)">
+          <div class="write-off-form" [formGroup]="writeOffForm">
+            <p class="write-off-form__message">{{ 'creditMemos.writeOffMessage' | translate }}</p>
+            <app-input [label]="'creditMemos.writeOffAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+              [required]="true" data-testid="invoice-write-off-amount" />
+            <app-textarea [label]="'creditMemos.writeOffReason' | translate" formControlName="reason" [required]="true" data-testid="invoice-write-off-reason" />
+          </div>
+          <div dialog-footer>
+            <button class="action-btn" type="button" (click)="showWriteOffDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+            <app-validation-button [violations]="writeOffViolations" [loading]="writingOff()">
+              <button class="action-btn action-btn--destructive" type="button" data-testid="invoice-write-off-confirm-btn"
+                [disabled]="writeOffForm.invalid || writingOff()" (click)="confirmWriteOff()">
+                <span class="material-icons-outlined" aria-hidden="true">money_off</span>
+                {{ 'creditMemos.writeOff' | translate }}
+              </button>
+            </app-validation-button>
+          </div>
+        </app-dialog>
+      }
 
       <!-- Activity -->
       <app-entity-activity-section entityType="Invoice" [entityId]="invoiceIdValue()" [refreshKey]="inv" />

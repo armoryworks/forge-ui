@@ -7,6 +7,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { CurrencyDisplayComponent } from '../../../shared/components/currency-display/currency-display.component';
 import { portalStatusChip, portalStatusLabelKey } from '../portal-status';
 import { PortalInvoice } from '../models/portal.model';
+import { PortalCredit } from '../models/portal-credit.model';
 import { PortalService } from '../services/portal.service';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 
@@ -15,13 +16,14 @@ import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
   standalone: true,
   imports: [DateOnlyPipe, DecimalPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, CurrencyDisplayComponent],
   templateUrl: './portal-invoices.component.html',
-  styleUrl: './portal-list.shared.scss',
+  styleUrls: ['./portal-list.shared.scss', './portal-invoices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PortalInvoicesComponent implements OnInit {
   private readonly portal = inject(PortalService);
 
   protected readonly invoices = signal<PortalInvoice[]>([]);
+  protected readonly credits = signal<PortalCredit[]>([]);
 
   /** Invoices with the amount that takes the early-payment discount, when one is still open. */
   protected readonly rows = computed(() => this.invoices().map(i => ({
@@ -48,6 +50,10 @@ export class PortalInvoicesComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => { this.loading.set(false); this.loadError.set(true); },
+    });
+    this.portal.getCredits().subscribe({
+      next: data => this.credits.set(data.items),
+      error: () => this.credits.set([]),
     });
   }
 

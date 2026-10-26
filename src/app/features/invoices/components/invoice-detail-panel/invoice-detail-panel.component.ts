@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -26,9 +26,19 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { SendInvoiceEmailDialogComponent } from '../send-invoice-email-dialog/send-invoice-email-dialog.component';
 import { SendInvoiceEmailDialogData } from '../../models/send-invoice-email-dialog-data.model';
 import { EnumLabelPipe } from '../../../../shared/pipes/enum-label.pipe';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { CreditMemoService } from '../../../credit-memos/services/credit-memo.service';
+import { CreditMemoDialogComponent } from '../../../credit-memos/components/credit-memo-dialog/credit-memo-dialog.component';
 
 const EMAILABLE_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue', 'Paid']);
 const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
+const CREDITABLE_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue', 'Paid']);
+const WRITE_OFF_STATUSES = new Set(['Sent', 'PartiallyPaid', 'Overdue']);
 
 @Component({
   selector: 'app-invoice-detail-panel',
@@ -39,6 +49,7 @@ const VOIDABLE_STATUSES = new Set(['Sent', 'Overdue']);
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent, DiscountChipComponent,
+    DialogComponent, TextareaComponent, ValidationButtonComponent, CreditMemoDialogComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',
@@ -51,6 +62,10 @@ export class InvoiceDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly manualNumbers = inject(ManualNumberSettingsService);
+  private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly creditMemos = inject(CreditMemoService);
+  private readonly router = inject(Router);
 
   readonly invoiceId = input.required<number>();
   readonly closed = output<void>();
@@ -81,6 +96,26 @@ export class InvoiceDetailPanelComponent {
     this.manualNumbers.isEnabled('invoices') && this.invoice()?.status === 'Draft',
   );
   protected readonly canEmail = computed(() => EMAILABLE_STATUSES.has(this.invoice()?.status ?? ''));
+
+  private readonly creditMemosOn = computed(() => this.capabilities.isEnabled('CAP-O2C-CREDITMEMO'));
+  protected readonly creditsApplied = computed(() => this.invoice()?.creditsApplied ?? 0);
+  protected readonly canIssueCreditMemo = computed(() =>
+    this.creditMemosOn() && this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager'])
+    && CREDITABLE_STATUSES.has(this.invoice()?.status ?? ''));
+  protected readonly canWriteOff = computed(() =>
+    this.creditMemosOn() && this.auth.hasAnyRole(['Admin', 'Manager'])
+    && WRITE_OFF_STATUSES.has(this.invoice()?.status ?? '') && (this.invoice()?.balanceDue ?? 0) > 0);
+  protected readonly showCreditMemoDialog = signal(false);
+  protected readonly showWriteOffDialog = signal(false);
+  protected readonly writingOff = signal(false);
+  protected readonly writeOffForm = new FormGroup({
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    reason: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
+  });
+  protected readonly writeOffViolations = FormValidationService.getViolations(this.writeOffForm, {
+    amount: this.translate.instant('creditMemos.writeOffAmount'),
+    reason: this.translate.instant('creditMemos.writeOffReason'),
+  });
 
   constructor() {
     effect(() => {
@@ -235,7 +270,38 @@ export class InvoiceDetailPanelComponent {
   }
 
   protected canSend(status: string): boolean { return status === 'Draft'; }
-  protected canVoid(status: string): boolean { return VOIDABLE_STATUSES.has(status); }
+  protected canVoid(status: string): boolean { return VOIDABLE_STATUSES.has(status) && this.creditsApplied() === 0; }
+
+  protected onCreditMemoCreated(id: number): void {
+    this.showCreditMemoDialog.set(false);
+    void this.router.navigate(['/credit-memos'], { queryParams: { detail: `credit-memo:${id}` } });
+  }
+
+  protected openWriteOff(): void {
+    const balance = this.invoice()?.balanceDue ?? 0;
+    this.writeOffForm.reset({ amount: balance, reason: '' });
+    this.writeOffForm.controls.amount.setValidators([Validators.required, Validators.min(0.01), Validators.max(balance)]);
+    this.writeOffForm.controls.amount.updateValueAndValidity();
+    this.showWriteOffDialog.set(true);
+  }
+
+  protected confirmWriteOff(): void {
+    const inv = this.invoice();
+    if (!inv || this.writeOffForm.invalid || this.writingOff()) return;
+    const f = this.writeOffForm.getRawValue();
+    const amount = Math.round((f.amount ?? 0) * 100) / 100;
+    this.writingOff.set(true);
+    this.creditMemos.writeOffInvoice(inv.id, amount === inv.balanceDue ? null : amount, f.reason.trim()).subscribe({
+      next: memo => {
+        this.writingOff.set(false);
+        this.showWriteOffDialog.set(false);
+        this.loadInvoice(inv.id);
+        this.invoiceChanged.emit();
+        this.snackbar.success(this.translate.instant('creditMemos.writtenOff', { number: inv.invoiceNumber, memo: memo.creditMemoNumber }));
+      },
+      error: () => this.writingOff.set(false),
+    });
+  }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
 
   private loadInvoice(id: number): void {

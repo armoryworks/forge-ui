@@ -1,4 +1,5 @@
 import { PaymentApplication } from './payment-application.model';
+import { CustomerRefund } from '../../credit-memos/models/customer-refund.model';
 
 export interface PaymentDetail {
   id: number;
@@ -20,4 +21,6 @@ export interface PaymentDetail {
   currencyId?: number | null;
   currencyCode?: string | null;
   fxRate?: number;
+  refundedAmount?: number;
+  refunds?: CustomerRefund[];
 }

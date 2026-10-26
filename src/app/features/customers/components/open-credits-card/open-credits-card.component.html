@@ -1,0 +1,23 @@
+<section class="credits-card" data-testid="customer-open-credits">
+  <div class="credits-card__header">
+    <span class="credits-card__title">{{ 'creditMemos.openCreditBalance' | translate }}</span>
+    @for (total of totals(); track total.currencyCode) {
+      <span class="credits-card__total"><app-currency-display [value]="total.amount" [currency]="total.currencyCode" /></span>
+    } @empty {
+      <span class="credits-card__total"><app-currency-display [value]="0" /></span>
+    }
+  </div>
+  @if (memos().length > 0) {
+    <ul class="credits-card__list" [attr.aria-label]="'creditMemos.openCreditBalance' | translate">
+      @for (memo of memos(); track memo.id) {
+        <li class="credits-card__row">
+          <a routerLink="/credit-memos" [queryParams]="{ detail: 'credit-memo:' + memo.id }">{{ memo.creditMemoNumber }}</a>
+          <span class="credits-card__reason">{{ memo.reason }}</span>
+          <app-currency-display [value]="memo.openAmount" [currency]="memo.currencyCode" />
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="credits-card__empty">{{ 'creditMemos.noOpenCredit' | translate }}</p>
+  }
+</section>

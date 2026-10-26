@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, map, of } from 'rxjs';
@@ -16,6 +17,9 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CurrencyService } from '../../../../shared/services/currency.service';
 import { automaticDiscount, inDiscountWindow } from '../../../../shared/utils/payment-terms.utils';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { CreditMemoService } from '../../../credit-memos/services/credit-memo.service';
+import { CreditMemoListItem } from '../../../credit-memos/models/credit-memo-list-item.model';
 
 interface CreditApplication {
   invoiceId: number;
@@ -31,7 +35,7 @@ const round2 = (value: number): number => Math.round(value * 100) / 100;
   selector: 'app-apply-credit-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, MatTooltipModule, TranslatePipe,
+    ReactiveFormsModule, MatTooltipModule, TranslatePipe, RouterLink,
     DialogComponent, InputComponent, AutocompleteComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './apply-credit-dialog.component.html',
@@ -45,6 +49,8 @@ export class ApplyCreditDialogComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly creditMemoService = inject(CreditMemoService);
 
   readonly payment = input.required<PaymentDetail>();
   readonly closed = output<void>();
@@ -53,6 +59,7 @@ export class ApplyCreditDialogComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly openInvoices = signal<InvoiceListItem[]>([]);
   protected readonly applications = signal<CreditApplication[]>([]);
+  protected readonly openCreditMemos = signal<CreditMemoListItem[]>([]);
   protected readonly paymentCurrencyCode = computed(() => this.payment().currencyCode ?? null);
   protected readonly showSettlementFxRate = computed(() => {
     const code = this.paymentCurrencyCode();
@@ -81,6 +88,13 @@ export class ApplyCreditDialogComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.capabilities.isEnabled('CAP-O2C-CREDITMEMO') || this.capabilities.isEnabled('CAP-O2C-RMA')) {
+      this.creditMemoService.getCreditMemos({ customerId: this.payment().customerId, openOnly: true }).pipe(
+        catchError(() => of<CreditMemoListItem[]>([])),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(list => this.openCreditMemos.set(list));
+    }
+
     this.invoiceService.getOpenInvoices(this.payment().customerId).pipe(
       map(list => list.filter(inv => inv.balanceDue > 0 && inv.status !== 'Draft' && inv.status !== 'Voided')),
       catchError(() => of<InvoiceListItem[]>([])),

@@ -58,6 +58,24 @@
         </tbody>
       </table>
     </div>
+    @if (credits().length > 0) {
+      <section class="portal-credits" data-testid="portal-credits">
+        <h2 class="portal-credits__title">{{ 'portal.credits.title' | translate }}</h2>
+        <ul class="portal-credits__list" [attr.aria-label]="'portal.credits.title' | translate">
+          @for (c of credits(); track c.kind + c.id) {
+            <li class="portal-credits__row">
+              <span class="portal-credits__number">{{ c.number }}</span>
+              <span class="portal-credits__meta">{{ c.date | dateOnly }} · {{ ('portal.credits.kind' + c.kind) | translate }}</span>
+              <span class="portal-credits__desc">{{ c.kind === 'Refund' ? (('creditMemos.method.' + c.description) | translate) : c.description }}</span>
+              <span class="portal-credits__amount"><app-currency-display [value]="c.amount" [currency]="c.currencyCode" /></span>
+              @if (c.kind === 'CreditMemo') {
+                <span class="portal-credits__open">{{ 'portal.credits.open' | translate }} <app-currency-display [value]="c.openAmount" [currency]="c.currencyCode" /></span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
     @if (totalCount() > invoices().length) {
       <p class="portal-list__notice" data-testid="portal-invoices-truncated">
         {{ 'portal.list.truncated' | translate: { shown: invoices().length, total: totalCount() } }}

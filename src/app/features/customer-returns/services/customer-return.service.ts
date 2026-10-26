@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CustomerReturnListItem } from '../models/customer-return-list-item.model';
 import { CustomerReturnDetail } from '../models/customer-return-detail.model';
+import { ResolveCustomerReturnRequest } from '../models/resolve-customer-return-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerReturnService {
@@ -44,8 +45,8 @@ export class CustomerReturnService {
     return this.http.put<CustomerReturnDetail>(`${this.base}/${id}`, request);
   }
 
-  resolve(id: number, inspectionNotes?: string): Observable<void> {
-    return this.http.post<void>(`${this.base}/${id}/resolve`, { inspectionNotes });
+  resolve(id: number, inspectionNotes?: string, disposition?: ResolveCustomerReturnRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/resolve`, { inspectionNotes, ...disposition });
   }
 
   close(id: number): Observable<void> {

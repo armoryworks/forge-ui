@@ -224,6 +224,12 @@
         </div>
         <app-data-table tableId="report-ar-aging" [columns]="arAgingColumns" [data]="arAgingData()"
                         emptyIcon="account_balance" [emptyMessage]="'reports.emptyNoOutstandingInvoices' | translate">
+          <ng-template appColumnCell="invoiceNumber" let-row>
+            {{ row.invoiceNumber }}
+            @if (row.documentType === 'CreditMemo') {
+              <span class="chip chip--info" data-testid="report-ar-aging-credit">{{ 'creditMemos.creditChip' | translate }}</span>
+            }
+          </ng-template>
           <ng-template appColumnCell="total" let-row>{{ row.total | currency }}</ng-template>
           <ng-template appColumnCell="amountPaid" let-row>{{ row.amountPaid | currency }}</ng-template>
           <ng-template appColumnCell="balanceDue" let-row>{{ row.balanceDue | currency }}</ng-template>
@@ -247,6 +253,12 @@
                         emptyIcon="attach_money" [emptyMessage]="'reports.emptyNoRevenueData' | translate">
           <ng-template appColumnCell="subtotal" let-row>{{ row.subtotal | currency }}</ng-template>
           <ng-template appColumnCell="taxAmount" let-row>{{ row.taxAmount | currency }}</ng-template>
+          <ng-template appColumnCell="invoiceNumber" let-row>
+            {{ row.invoiceNumber }}
+            @if (row.documentType === 'CreditMemo') {
+              <span class="chip chip--info" data-testid="report-ar-aging-credit">{{ 'creditMemos.creditChip' | translate }}</span>
+            }
+          </ng-template>
           <ng-template appColumnCell="total" let-row>{{ row.total | currency }}</ng-template>
           <ng-template appColumnCell="amountPaid" let-row>{{ row.amountPaid | currency }}</ng-template>
         </app-data-table>

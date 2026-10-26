@@ -25,6 +25,10 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { ApplyCreditDialogComponent } from '../apply-credit-dialog/apply-credit-dialog.component';
+import { CustomerRefundDialogComponent } from '../../../credit-memos/components/customer-refund-dialog/customer-refund-dialog.component';
+import { CustomerRefundRequest } from '../../../credit-memos/models/customer-refund-request.model';
+import { CreditMemoService } from '../../../credit-memos/services/credit-memo.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 
 @Component({
   selector: 'app-payment-detail-panel',
@@ -34,6 +38,7 @@ import { ApplyCreditDialogComponent } from '../apply-credit-dialog/apply-credit-
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent, ApplyCreditDialogComponent, DialogComponent, TextareaComponent, ValidationButtonComponent,
+    CustomerRefundDialogComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',
@@ -45,6 +50,8 @@ export class PaymentDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly manualNumbers = inject(ManualNumberSettingsService);
+  private readonly creditMemos = inject(CreditMemoService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly paymentId = input.required<number>();
   readonly closed = output<void>();
@@ -58,6 +65,10 @@ export class PaymentDetailPanelComponent {
   protected readonly activityTabs: ActivityFilterTab[] = ['history'];
   protected readonly applyingCredit = signal(false);
   protected readonly canApplyCredit = computed(() => (this.payment()?.unappliedAmount ?? 0) > 0);
+  protected readonly canRefund = computed(() =>
+    this.capabilities.isEnabled('CAP-O2C-CREDITMEMO') && (this.payment()?.unappliedAmount ?? 0) > 0);
+  protected readonly showRefund = signal(false);
+  protected readonly refunding = signal(false);
 
   // Inline rename of the payment number — only offered when manual numbers are
   // enabled and the payment has no applications (matches the server's rule).
@@ -150,9 +161,25 @@ export class PaymentDetailPanelComponent {
     this.paymentChanged.emit();
   }
 
+  protected submitRefund(request: CustomerRefundRequest): void {
+    const payment = this.payment();
+    if (!payment || this.refunding()) return;
+    this.refunding.set(true);
+    this.creditMemos.refundPayment(payment.id, request).subscribe({
+      next: refund => {
+        this.refunding.set(false);
+        this.showRefund.set(false);
+        this.snackbar.success(this.translate.instant('creditMemos.paymentRefunded', { number: refund.refundNumber }));
+        this.loadPayment(payment.id);
+        this.paymentChanged.emit();
+      },
+      error: () => this.refunding.set(false),
+    });
+  }
+
   protected canDelete(): boolean {
     const payment = this.payment();
-    return !!payment && payment.applications.length === 0;
+    return !!payment && payment.applications.length === 0 && (payment.refunds ?? []).length === 0;
   }
 
   protected deletePayment(): void {

@@ -1,0 +1,91 @@
+<app-dialog [title]="'creditMemos.newCreditMemo' | translate" width="1000px" [splitLayout]="true" (closed)="closed.emit()">
+  <div class="dlg-body">
+    <div class="dlg-main">
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'creditMemos.lines' | translate }}</span>
+        @if (lines().length > 0) {
+          <ul class="memo-lines" [attr.aria-label]="'creditMemos.lines' | translate">
+            @for (line of lines(); track $index) {
+              <li class="memo-lines__row">
+                <span class="memo-lines__main">
+                  {{ line.description }}
+                  @if (line.lineType !== 'Item') {
+                    <span class="chip chip--primary">{{ ('creditMemos.lineType.' + line.lineType) | translate }}</span>
+                  }
+                  @if (line.partNumber) {
+                    <span class="memo-lines__meta">{{ line.partNumber }}</span>
+                  }
+                </span>
+                <span class="memo-lines__qty">{{ line.quantity | number:'1.0-4' }} × <app-currency-display [value]="line.unitPrice" [currency]="currencyCode()" [maximumFractionDigits]="4" /></span>
+                <span class="memo-lines__amount"><app-currency-display [value]="lineAmounts()[$index]" [currency]="currencyCode()" /></span>
+                <button class="icon-btn" type="button" [attr.aria-pressed]="line.taxable"
+                  [matTooltip]="(line.taxable ? 'creditMemos.taxableLine' : 'creditMemos.nonTaxableLine') | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'creditMemos.taxable' | translate" [attr.data-testid]="'memo-line-taxable-' + $index" (click)="toggleTaxable($index)">
+                  <span class="material-icons-outlined" aria-hidden="true">{{ line.taxable ? 'check_box' : 'check_box_outline_blank' }}</span>
+                </button>
+                <button class="icon-btn icon-btn--danger" type="button" [matTooltip]="'common.remove' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
+                  <span class="material-icons-outlined" aria-hidden="true">close</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="lines-empty">{{ 'creditMemos.noLinesYet' | translate }}</div>
+        }
+
+        <div class="memo-add-line" [formGroup]="lineForm">
+          <app-select [label]="'creditMemos.lineTypeLabel' | translate" formControlName="lineType" [options]="lineTypeOptions" data-testid="memo-line-type" />
+          @if (invoice()) {
+            <app-select [label]="'creditMemos.invoiceLine' | translate" formControlName="invoiceLineId" [options]="invoiceLineOptions()" data-testid="memo-line-invoice-line" />
+          }
+          <app-input [label]="'common.description' | translate" formControlName="description" data-testid="memo-line-desc" />
+          <app-input [label]="'creditMemos.quantity' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="memo-line-qty" />
+          <app-input [label]="'creditMemos.unitPrice' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="memo-line-price" />
+          <button class="action-btn action-btn--sm" type="button" data-testid="memo-add-line-btn" [disabled]="lineForm.invalid" (click)="addLine()">
+            <span class="material-icons-outlined" aria-hidden="true">add</span>
+            {{ 'common.add' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dlg-sidebar" [formGroup]="form">
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'creditMemos.details' | translate }}</span>
+        <app-entity-picker [label]="'common.customer' | translate" entityType="customers" displayField="name" [filters]="customerFilters"
+          formControlName="customerId" [required]="true" [placeholder]="'customers.searchPlaceholder' | translate" data-testid="memo-customer" />
+        <app-select [label]="'creditMemos.invoice' | translate" formControlName="invoiceId" [options]="invoiceOptions()" data-testid="memo-invoice" />
+        <app-select [label]="'creditMemos.reasonType' | translate" formControlName="reasonType" [options]="reasonOptions" data-testid="memo-reason-type" />
+        <app-textarea [label]="'creditMemos.reasonLabel' | translate" formControlName="reason" [rows]="2" [required]="true" data-testid="memo-reason" />
+        <app-datepicker [label]="'creditMemos.creditDate' | translate" formControlName="creditDate" [required]="true" data-testid="memo-date" />
+        <app-input [label]="'creditMemos.taxRate' | translate" type="number" formControlName="taxRate" step="0.0001" min="0" data-testid="memo-tax-rate" />
+        @if (!invoice()) {
+          <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
+            [documentDate]="documentDate()" testIdPrefix="memo" />
+        }
+      </div>
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
+        <app-textarea formControlName="notes" [rows]="3" data-testid="memo-notes" />
+      </div>
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
+        <div class="dlg-total-row">
+          <span>{{ 'creditMemos.subtotal' | translate }}</span>
+          <app-currency-display [value]="subtotal()" [currency]="currencyCode()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="memo-save-btn" [disabled]="!canSave()" (click)="save()">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'creditMemos.saveDraft' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

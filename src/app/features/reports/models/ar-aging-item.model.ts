@@ -11,4 +11,5 @@ export interface ArAgingItem {
   agingBucket: string;
   discountDeadline?: string | null;
   discountAvailable?: number;
+  documentType?: string;
 }

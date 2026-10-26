@@ -8,6 +8,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CustomerSummary } from '../../../models/customer-summary.model';
 import { CustomerService } from '../../../services/customer.service';
 import { CreditStatusCardComponent } from '../../../components/credit-status-card/credit-status-card.component';
+import { OpenCreditsCardComponent } from '../../../components/open-credits-card/open-credits-card.component';
+import { CapabilityService } from '../../../../../shared/services/capability.service';
 import { ContactInteractionDialogComponent, ContactInteractionDialogData } from '../../../components/contact-interaction-dialog/contact-interaction-dialog.component';
 import { ContactInteraction } from '../../../models/contact-interaction.model';
 import { CapDirective } from '../../../../../shared/directives/cap.directive';
@@ -28,7 +30,7 @@ interface ComplianceFlagDef {
   standalone: true,
   imports: [
     DatePipe, TranslatePipe, MatSlideToggleModule, ReactiveFormsModule,
-    CreditStatusCardComponent, CapDirective, RecentCommunicationsComponent, TextareaComponent,
+    CreditStatusCardComponent, OpenCreditsCardComponent, CapDirective, RecentCommunicationsComponent, TextareaComponent,
   ],
   templateUrl: './customer-overview-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
@@ -40,11 +42,14 @@ export class CustomerOverviewTabComponent {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly customer = input.required<CustomerSummary>();
   readonly customerUpdated = output<void>();
 
   protected readonly canSeeCredit = this.auth.hasAnyRole(CUSTOMER_COMMERCIAL_TERMS_ROLES);
+  protected readonly showOpenCredits = computed(() => this.canSeeCredit
+    && (this.capabilities.isEnabled('CAP-O2C-CREDITMEMO') || this.capabilities.isEnabled('CAP-O2C-RMA')));
   protected readonly pendingFlags = signal<Set<string>>(new Set());
   protected readonly editingNotes = signal(false);
   protected readonly notesControl = new FormControl<string>('', { nonNullable: true });

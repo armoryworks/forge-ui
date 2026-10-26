@@ -1,0 +1,28 @@
+<app-dialog [title]="title()" width="480px" (closed)="closed.emit()">
+  <div class="refund-form" [formGroup]="form">
+    <div class="refund-form__available">
+      <span>{{ 'creditMemos.refundAvailable' | translate }}</span>
+      <app-currency-display [value]="maxAmount()" [currency]="currencyCode()" />
+    </div>
+    <app-input [label]="'creditMemos.refundAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+      [required]="true" data-testid="refund-amount" />
+    <app-select [label]="'creditMemos.refundMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="refund-method" />
+    <app-datepicker [label]="'creditMemos.refundDate' | translate" formControlName="refundDate" [required]="true" data-testid="refund-date" />
+    <app-input [label]="'creditMemos.refundReference' | translate" formControlName="reference" [maxlength]="100"
+      [placeholder]="'common.optional' | translate" data-testid="refund-reference" />
+    @if (showFxRate()) {
+      <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate"
+        step="0.0000001" min="0.0000001" data-testid="refund-fx-rate" />
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="refund-submit-btn"
+        [disabled]="form.invalid || saving()" (click)="submit()">
+        <span class="material-icons-outlined" aria-hidden="true">currency_exchange</span>
+        {{ 'creditMemos.refund' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

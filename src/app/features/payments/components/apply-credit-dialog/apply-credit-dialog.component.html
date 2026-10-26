@@ -52,6 +52,21 @@
     </button>
   </div>
 
+  @if (openCreditMemos().length > 0) {
+    <div class="open-memos" data-testid="apply-credit-open-memos">
+      <span class="open-memos__title">{{ 'creditMemos.openCreditsForCustomer' | translate }}</span>
+      <ul class="credit-lines" [attr.aria-label]="'creditMemos.openCreditsForCustomer' | translate">
+        @for (memo of openCreditMemos(); track memo.id) {
+          <li class="credit-lines__row">
+            <a class="credit-lines__invoice" routerLink="/credit-memos" [queryParams]="{ detail: 'credit-memo:' + memo.id }" (click)="close()">{{ memo.creditMemoNumber }}</a>
+            <app-currency-display [value]="memo.openAmount" [currency]="memo.currencyCode" />
+          </li>
+        }
+      </ul>
+      <span class="open-memos__hint">{{ 'creditMemos.applyFromMemoHint' | translate }}</span>
+    </div>
+  }
+
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary" data-testid="apply-credit-save"

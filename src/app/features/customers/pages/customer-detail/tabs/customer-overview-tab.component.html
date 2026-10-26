@@ -58,6 +58,10 @@
       </ng-container>
     }
 
+    @if (showOpenCredits()) {
+      <app-open-credits-card [customerId]="customer().id" />
+    }
+
     <!-- Phase 1r / Batch 15 — regulated-industry flags. Each toggle PATCHes
          independently and emits a rolled-up activity row. Surfaced in
          Overview because it's static-ish customer metadata (not a

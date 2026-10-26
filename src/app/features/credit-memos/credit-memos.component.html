@@ -1,0 +1,45 @@
+<app-page-header [title]="'creditMemos.title' | translate" [subtitle]="'creditMemos.subtitle' | translate" />
+
+<div class="page-header">
+  <app-input [label]="'common.search' | translate" [formControl]="searchControl" data-testid="credit-memo-search" />
+  <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" data-testid="credit-memo-status-filter" />
+  <button class="action-btn" type="button" (click)="load()">
+    <span class="material-icons-outlined" aria-hidden="true">search</span>
+    {{ 'common.filter' | translate }}
+  </button>
+  <span class="page-header__spacer"></span>
+  @if (canCreate()) {
+    <button class="action-btn action-btn--create" type="button" data-testid="new-credit-memo-btn" (click)="openCreate()">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'creditMemos.newCreditMemo' | translate }}
+    </button>
+  }
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="credit-memos"
+    [columns]="columns"
+    [data]="memos()"
+    emptyIcon="request_quote"
+    [emptyMessage]="'creditMemos.empty' | translate"
+    [clickableRows]="true"
+    (rowClick)="openRow($event)">
+    <ng-template appColumnCell="reasonType" let-row>
+      {{ ('creditMemos.reason.' + row.reasonType) | translate }}
+    </ng-template>
+    <ng-template appColumnCell="total" let-row>
+      <app-currency-display [value]="row.total" [currency]="row.currencyCode" />
+    </ng-template>
+    <ng-template appColumnCell="openAmount" let-row>
+      <app-currency-display [value]="row.openAmount" [currency]="row.currencyCode" />
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="statusClass(row.status)">{{ ('creditMemos.status.' + row.status) | translate }}</span>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showCreateDialog()) {
+  <app-credit-memo-dialog (closed)="closeCreate()" (saved)="onCreated($event)" />
+}
