@@ -223,7 +223,7 @@
                 @if (msg.fileAttachment) {
                   <div class="message__attachment">
                     <span class="material-icons-outlined message__attachment-icon">{{ getFileIcon(msg.fileAttachment.contentType) }}</span>
-                    <a class="message__attachment-name" [href]="'/api/v1/files/' + msg.fileAttachment.id + '/download'" target="_blank" rel="noopener">
+                    <a class="message__attachment-name" [href]="attachmentUrl(msg.fileAttachment)" (click)="downloadAttachment($event, msg.fileAttachment)">
                       {{ msg.fileAttachment.fileName }}
                     </a>
                     <span class="message__attachment-size">{{ formatFileSize(msg.fileAttachment.size) }}</span>

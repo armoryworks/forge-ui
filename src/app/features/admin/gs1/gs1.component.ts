@@ -18,8 +18,8 @@ import { Gs1Settings } from './models/gs1-settings.model';
  * Admin GS1 settings — optional GTIN barcode identity. An install that has
  * licensed GS1 enters its company prefix here; once set, parts can be assigned
  * globally-unique GTINs (for retail / marketplace channels). Leaving the prefix
- * blank keeps every part on its free internal barcode. Admin/Manager can view;
- * only Admin can save. The whole page is capability-gated at the route
+ * blank keeps every part on its free internal barcode. Admin, Manager and
+ * OfficeManager can view; only Admin can save. The whole page is capability-gated at the route
  * (CAP-MD-GS1) and again server-side.
  */
 @Component({

@@ -114,15 +114,15 @@ export class PartDetailLayoutResolverService {
     }
     // Buy + Raw (B1)
     if (ps === 'Buy' && ic === 'Raw') {
-      return [SOURCING, INVENTORY, QUALITY, COST, PRICING];
+      return [SOURCING, MATERIAL, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
     // Buy + Component / Subassembly / FinishedGood (B2 / B3 / B4)
     if (ps === 'Buy' && (ic === 'Component' || ic === 'Subassembly' || ic === 'FinishedGood')) {
       return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
-    // Buy + Consumable (B5) — no Quality
+    // Buy + Consumable (B5)
     if (ps === 'Buy' && ic === 'Consumable') {
-      return [SOURCING, INVENTORY, COST, PRICING];
+      return [SOURCING, INVENTORY, QUALITY, COST, PRICING];
     }
     // Buy + Tool (B6)
     if (ps === 'Buy' && ic === 'Tool') {

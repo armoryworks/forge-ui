@@ -5,7 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { PartWhereUsed } from '../../models/part-where-used.model';
+import { PartWhereUsed, PartWhereUsedRow } from '../../models/part-where-used.model';
 import { PartWhereUsedService } from '../../services/part-where-used.service';
 
 @Component({
@@ -23,16 +23,16 @@ export class PartWhereUsedComponent {
   readonly partId = input.required<number>();
   readonly partOpened = output<number>();
 
-  protected readonly rows = signal<PartWhereUsed[]>([]);
+  protected readonly rows = signal<PartWhereUsedRow[]>([]);
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'parentPartNumber', header: this.translate.instant('partBom.whereUsed.parentPart'), sortable: true },
-    { field: 'parentName', header: this.translate.instant('partBom.whereUsed.parentName'), sortable: true },
+    { field: 'parentPartNumber', header: this.translate.instant('partBom.whereUsed.parentPart') },
+    { field: 'parentName', header: this.translate.instant('partBom.whereUsed.parentName') },
     { field: 'parentRevision', header: this.translate.instant('partBom.whereUsed.revision'), width: '80px', align: 'center' },
-    { field: 'quantityPer', header: this.translate.instant('partBom.whereUsed.quantityPer'), width: '90px', align: 'right', type: 'number', sortable: true },
-    { field: 'sourceType', header: this.translate.instant('partBom.whereUsed.source'), width: '90px', sortable: true },
-    { field: 'openWorkOrderCount', header: this.translate.instant('partBom.whereUsed.openWorkOrders'), width: '130px', align: 'right', type: 'number', sortable: true },
+    { field: 'quantityPer', header: this.translate.instant('partBom.whereUsed.quantityPer'), width: '90px', align: 'right', type: 'number' },
+    { field: 'sourceType', header: this.translate.instant('partBom.whereUsed.source'), width: '90px' },
+    { field: 'openWorkOrderCount', header: this.translate.instant('partBom.whereUsed.openWorkOrders'), width: '130px', align: 'right', type: 'number' },
   ];
 
   constructor() {
@@ -48,11 +48,21 @@ export class PartWhereUsedComponent {
     return this.translate.instant(`parts.source${source}`);
   }
 
+  private withRowKeys(rows: PartWhereUsed[]): PartWhereUsedRow[] {
+    const chain: string[] = [];
+    return rows.map(row => {
+      const level = Math.max(1, row.level ?? 1);
+      chain.length = level - 1;
+      chain.push(String(row.bomLineId));
+      return { ...row, rowKey: chain.join('/') };
+    });
+  }
+
   private load(partId: number): void {
     this.loading.set(true);
     this.whereUsedService.getWhereUsed(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: rows => {
-        this.rows.set(rows);
+        this.rows.set(this.withRowKeys(rows));
         this.loading.set(false);
       },
       error: () => {

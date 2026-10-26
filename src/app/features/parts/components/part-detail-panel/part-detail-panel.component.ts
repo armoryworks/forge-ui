@@ -474,6 +474,7 @@ export class PartDetailPanelComponent {
     if ('inspectionFrequency' in patch) request['inspectionFrequency'] = patch.inspectionFrequency;
     if ('inspectionSkipAfterN' in patch) request['inspectionSkipAfterN'] = patch.inspectionSkipAfterN;
     if ('hazmatClass' in patch) request['hazmatClass'] = patch.hazmatClass;
+    if ('htsCode' in patch) request['htsCode'] = patch.htsCode ?? '';
     if ('shelfLifeDays' in patch) request['shelfLifeDays'] = patch.shelfLifeDays;
     if ('backflushPolicy' in patch) request['backflushPolicy'] = patch.backflushPolicy;
     if ('procurementSource' in patch) request['procurementSource'] = patch.procurementSource;

@@ -1687,6 +1687,7 @@
         "inspectionSkipAfter": "Skip After N Receipts",
         "inspectionTemplate": "Receiving Inspection Template",
         "hazmatClass": "Hazmat Class",
+        "htsCode": "HTS Code",
         "shelfLifeDays": "Shelf Life (days)",
         "backflushPolicy": "Backflush Policy"
       }
@@ -11365,6 +11366,7 @@
       "removeLine": "Remove line",
       "account": "Account",
       "balanced": "Balanced",
+      "outOfBalanceViolation": "Out of balance: total debits must equal total credits.",
       "post": "Post entry",
       "posted": "Entry #{{number}} posted",
       "correctionMemo": "Correction of entry #{{number}}: ",

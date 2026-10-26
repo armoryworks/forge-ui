@@ -284,6 +284,7 @@ export class PartsComponent {
 
   constructor() {
     this.scanner.setContext('parts');
+    this.restoreListState();
     this.loadParts();
     this.loadEntitylessDrafts();
 
@@ -328,6 +329,7 @@ export class PartsComponent {
   // ── List ──
 
   protected loadParts(): void {
+    this.syncListStateToUrl();
     this.loading.set(true);
     const status = (this.statusFilter() ?? '') || undefined;
     const procurementSource = (this.procurementFilter() ?? '') || undefined;
@@ -353,6 +355,56 @@ export class PartsComponent {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  private lastSyncedListState = '';
+
+  /**
+   * Restores the applied search and the server sort after a reload: from the `q`, `sort` and
+   * `order` query params, and for the sort, from the table's saved preference when the URL has
+   * none. A sort on a column that is not sortable is ignored.
+   */
+  private restoreListState(): void {
+    const params = this.route.snapshot?.queryParamMap;
+    const term = (params?.get('q') ?? '').trim();
+    if (term) {
+      this.searchControl.setValue(term, { emitEvent: false });
+      this.appliedSearch.set(term);
+    }
+
+    const sortable = new Set(this.partColumns.filter(c => c.sortable).map(c => c.sortField ?? c.field));
+    const urlSort = params?.get('sort');
+    const urlOrder: 'asc' | 'desc' = params?.get('order') === 'desc' ? 'desc' : 'asc';
+    const saved = this.userPreferences.get<TablePreferences>('table:parts')?.sortState?.[0];
+    const savedColumn = saved ? this.partColumns.find(c => c.field === saved.field) : undefined;
+    const restored: Pick<ServerPageRequest, 'sort' | 'order'> | null = urlSort && sortable.has(urlSort)
+      ? { sort: urlSort, order: urlOrder }
+      : savedColumn && saved && sortable.has(savedColumn.sortField ?? savedColumn.field)
+        ? { sort: savedColumn.sortField ?? savedColumn.field, order: saved.direction }
+        : null;
+    if (restored) this.pageRequest.update(page => ({ ...page, ...restored }));
+    this.lastSyncedListState = this.listStateKey(params?.get('q') ?? null, urlSort ?? null, params?.get('order') ?? null);
+  }
+
+  private syncListStateToUrl(): void {
+    const page = this.pageRequest();
+    const isDefaultSort = page.sort === PartsComponent.defaultSort.sort && page.order === PartsComponent.defaultSort.order;
+    const q = this.appliedSearch() || null;
+    const sort = isDefaultSort ? null : page.sort;
+    const order = isDefaultSort ? null : page.order;
+    const key = this.listStateKey(q, sort, order);
+    if (key === this.lastSyncedListState) return;
+    this.lastSyncedListState = key;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q, sort, order },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  private listStateKey(q: string | null, sort: string | null, order: string | null): string {
+    return JSON.stringify([q || null, sort || null, sort ? order || 'asc' : null]);
   }
 
   private loadFirstPage(): void {

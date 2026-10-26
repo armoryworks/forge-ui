@@ -115,6 +115,8 @@
   <app-dialog [title]="editingPartner() ? ('adminPanels.edi.editPartner' | translate) : ('adminPanels.edi.newPartnerTitle' | translate)" width="520px" (closed)="showPartnerDialog.set(false)">
     <div [formGroup]="partnerForm">
       <app-input [label]="'adminPanels.edi.name' | translate" formControlName="name" [required]="true" />
+      <app-entity-picker #customerPicker [label]="'adminPanels.edi.cols.customer' | translate" entityType="customers" displayField="name"
+        formControlName="customerId" [placeholder]="'customers.searchPlaceholder' | translate" data-testid="edi-partner-customer" />
       <div class="dialog-row">
         <app-input [label]="'adminPanels.edi.qualifierId' | translate" formControlName="qualifierId" [required]="true" />
         <app-input [label]="'adminPanels.edi.qualifierValue' | translate" formControlName="qualifierValue" [required]="true" />

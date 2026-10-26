@@ -2,7 +2,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -18,6 +18,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
@@ -42,7 +43,7 @@ import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
     MatTooltipModule,
     DateTimePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
-    SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
+    SelectComponent, InputComponent, TextareaComponent, ToggleComponent, EntityPickerComponent,
     DialogComponent, LoadingBlockDirective, ValidationButtonComponent,
   ],
   templateUrl: './edi-panel.component.html',
@@ -66,6 +67,7 @@ export class EdiPanelComponent {
   protected readonly showTransactionDetail = signal(false);
   protected readonly editingPartner = signal<EdiTradingPartner | null>(null);
   protected readonly mapPartner = signal<EdiTradingPartner | null>(null);
+  private readonly customerPicker = viewChild<EntityPickerComponent>('customerPicker');
 
   protected readonly statusFilter = new FormControl<EdiTransactionStatus | ''>('');
   protected readonly directionFilter = new FormControl<EdiDirection | ''>('');
@@ -128,6 +130,7 @@ export class EdiPanelComponent {
 
   protected readonly partnerForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
+    customerId: new FormControl<number | null>(null),
     qualifierId: new FormControl('ZZ', { nonNullable: true, validators: [Validators.required, Validators.maxLength(10)] }),
     qualifierValue: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
     defaultFormat: new FormControl<EdiFormat>('X12', { nonNullable: true }),
@@ -156,6 +159,11 @@ export class EdiPanelComponent {
 
   constructor() {
     this.loadPartners();
+    effect(() => {
+      const picker = this.customerPicker();
+      const partner = untracked(this.editingPartner);
+      if (picker && partner?.customerId && partner.customerName) picker.setSelected(partner.customerId, partner.customerName);
+    });
   }
 
   protected switchSubTab(tab: 'partners' | 'transactions'): void {
@@ -188,7 +196,7 @@ export class EdiPanelComponent {
   protected openCreatePartner(): void {
     this.editingPartner.set(null);
     this.partnerForm.reset({
-      name: '', qualifierId: 'ZZ', qualifierValue: '', defaultFormat: 'X12', transportMethod: 'Manual',
+      name: '', customerId: null, qualifierId: 'ZZ', qualifierValue: '', defaultFormat: 'X12', transportMethod: 'Manual',
       autoProcess: true, requireAcknowledgment: true,
       sftpHost: '', sftpPort: 22, sftpUsername: '', sftpPassword: '', sftpOutboundDir: '/inbound', sftpInboundDir: '/outbound',
     });
@@ -207,6 +215,7 @@ export class EdiPanelComponent {
     this.editingPartner.set(partner);
     this.partnerForm.patchValue({
       name: partner.name,
+      customerId: partner.customerId,
       qualifierId: partner.qualifierId,
       qualifierValue: partner.qualifierValue,
       defaultFormat: partner.defaultFormat,
@@ -233,6 +242,7 @@ export class EdiPanelComponent {
     // Typed transport fields ride only for the SFTP method (the server composes + encrypts).
     const payload: EdiTradingPartnerSaveRequest = {
       name: val.name,
+      customerId: val.customerId,
       qualifierId: val.qualifierId,
       qualifierValue: val.qualifierValue,
       defaultFormat: val.defaultFormat,

@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CustomerService } from '../../services/customer.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -37,6 +38,7 @@ export class CustomerDocumentsClusterComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly customerId = input.required<number>();
 
@@ -62,7 +64,7 @@ export class CustomerDocumentsClusterComponent {
   }
 
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.customerService.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.customerService.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {

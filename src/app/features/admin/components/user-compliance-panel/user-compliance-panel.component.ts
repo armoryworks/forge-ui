@@ -7,6 +7,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { environment } from '../../../../../environments/environment';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -40,6 +42,7 @@ export class UserCompliancePanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly userId = input<number | null>(null);
   protected readonly detail = signal<UserComplianceDetail | null>(null);
@@ -180,7 +183,7 @@ export class UserCompliancePanelComponent {
 
   protected downloadSignedPdf(sub: ComplianceFormSubmission): void {
     if (!sub.signedPdfFileId) return;
-    window.open(`/api/v1/files/${sub.signedPdfFileId}`, '_blank');
+    this.fileDownload.open(`${environment.apiUrl}/files/${sub.signedPdfFileId}/download`, `${sub.templateName}.pdf`);
   }
 
   protected openCompleteI9Dialog(sub: ComplianceFormSubmission): void {

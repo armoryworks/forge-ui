@@ -9,6 +9,7 @@ import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { GlAccount } from '../../models/accounting.models';
 import { ConversionStatus } from '../../models/conversion-status.model';
@@ -144,6 +145,18 @@ describe('OpeningJournalComponent', () => {
 
     expect(c.form.valid).toBe(false);
     http.expectNone(`${base}/opening-journal`);
+  });
+
+  it('tells the validation popover the journal is out of balance', () => {
+    const c = open();
+    c.form.controls['asOfDate'].setValue(new Date(2026, 0, 1));
+    c.lines.at(0).patchValue({ glAccountId: 11, debit: 10000 });
+    c.lines.at(1).patchValue({ glAccountId: 30, credit: 9000 });
+
+    expect(FormValidationService.collectViolations(c.form, {})).toContain('accounting.journalEditor.outOfBalanceViolation');
+
+    c.lines.at(1).patchValue({ credit: 10000 });
+    expect(FormValidationService.collectViolations(c.form, {})).not.toContain('accounting.journalEditor.outOfBalanceViolation');
   });
 
   it('shows the tie-out straight away for a book already converted', () => {

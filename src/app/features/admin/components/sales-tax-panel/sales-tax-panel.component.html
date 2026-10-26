@@ -40,12 +40,14 @@
           [matTooltip]="'common.edit' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">edit</span>
         </button>
-        <button class="icon-btn icon-btn--danger"
-          (click)="deleteRate(row)"
-          [attr.aria-label]="'common.delete' | translate"
-          [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
-          <span class="material-icons-outlined">delete</span>
-        </button>
+        @if (canDelete) {
+          <button class="icon-btn icon-btn--danger"
+            (click)="deleteRate(row)"
+            [attr.aria-label]="'common.delete' | translate"
+            [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        }
       </div>
     </ng-template>
   </app-data-table>

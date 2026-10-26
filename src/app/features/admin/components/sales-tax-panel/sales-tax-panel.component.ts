@@ -13,6 +13,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 
@@ -32,6 +33,9 @@ export class SalesTaxPanelComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canDelete = this.auth.hasRole('Admin');
 
   protected readonly loading = signal(false);
   protected readonly rates = signal<SalesTaxRate[]>([]);

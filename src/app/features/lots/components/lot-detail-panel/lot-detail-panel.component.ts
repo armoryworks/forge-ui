@@ -16,6 +16,7 @@ import {
   InitiateRecallDialogData,
 } from '../../../quality/components/initiate-recall-dialog/initiate-recall-dialog.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
@@ -81,6 +82,7 @@ export class LotDetailPanelComponent {
   private readonly router = inject(Router);
   private readonly hostDialogRef = inject(MatDialogRef, { optional: true });
   private readonly snackbar = inject(SnackbarService);
+  private readonly fileDownload = inject(FileDownloadService);
 
   readonly lotId = input.required<number>();
   readonly lotNumber = input.required<string>();
@@ -163,7 +165,7 @@ export class LotDetailPanelComponent {
   }
 
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.service.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.service.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {

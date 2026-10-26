@@ -15,6 +15,7 @@ import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -80,6 +81,7 @@ export class PoDetailPanelComponent implements OnInit {
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly currencyService = inject(CurrencyService);
   private readonly vendorService = inject(VendorService);
+  private readonly fileDownload = inject(FileDownloadService);
 
   /** Whether the PO number may be renamed (manual numbers on AND PO still in Draft). */
   protected readonly allowManualPoNumbers = computed(() => this.manualNumberSettings.isEnabled('purchaseOrders'));
@@ -716,7 +718,7 @@ export class PoDetailPanelComponent implements OnInit {
   }
 
   protected downloadFile(doc: FileAttachment): void {
-    window.open(this.poService.downloadFileUrl(doc.id), '_blank');
+    this.fileDownload.openOrDownload(this.poService.downloadFileUrl(doc.id), doc.fileName, doc.contentType);
   }
 
   protected deleteFile(doc: FileAttachment): void {

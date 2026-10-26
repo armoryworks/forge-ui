@@ -163,6 +163,27 @@ describe('PartQualityClusterComponent', () => {
     expect(cb.mock.calls[0][0].shelfLifeDays).toBe(30);
   });
 
+  it('seeds and emits the part-level HTS code, sending an empty string to clear it', () => {
+    const component = TestBed.runInInjectionContext(() => new PartQualityClusterComponent());
+    mockSignalInputs(component, { part: makePart({ htsCode: '7604.29.1000' }), editing: true, saving: false });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { value: Record<string, unknown>; patchValue(v: Record<string, unknown>): void };
+      onSave(): void;
+    };
+    expect(c.form.value['htsCode']).toBe('7604.29.1000');
+    const cb = vi.fn();
+    component.save.subscribe(cb);
+
+    c.form.patchValue({ htsCode: ' 3901.10.0000 ' });
+    c.onSave();
+    c.form.patchValue({ htsCode: null });
+    c.onSave();
+
+    expect(cb.mock.calls[0][0].htsCode).toBe('3901.10.0000');
+    expect(cb.mock.calls[1][0].htsCode).toBe('');
+  });
+
   it('loads the quality summary for the part when CAP-QC-INSPECTION is enabled', () => {
     const cap = TestBed.inject(CapabilityService);
     vi.spyOn(cap, 'isEnabled').mockImplementation((code: string) => code === 'CAP-QC-INSPECTION');

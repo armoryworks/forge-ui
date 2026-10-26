@@ -10,6 +10,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { formatDate, formatTime as formatClockTime } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../shared/services/auth.service';
+import { FileDownloadService } from '../../shared/services/file-download.service';
+import { environment } from '../../../environments/environment';
 import { LanguageService } from '../../shared/services/language.service';
 import { matchesSearch } from '../../shared/utils/fold-for-search';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
@@ -17,7 +19,7 @@ import { ChatHubService } from '../../shared/services/chat-hub.service';
 import { ChatService } from './services/chat.service';
 import { ChatBroadcastService } from './services/chat-broadcast.service';
 import { ChatConversation } from './models/chat-conversation.model';
-import { ChatMessage } from './models/chat-message.model';
+import { ChatFileAttachment, ChatMessage } from './models/chat-message.model';
 import { ChatMessageEvent } from './models/chat-message-event.model';
 import { ChatRoom } from './models/chat-room.model';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
@@ -54,6 +56,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly chatBroadcast = inject(ChatBroadcastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly fileDownload = inject(FileDownloadService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -368,6 +371,15 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   protected isImageFile(contentType: string): boolean {
     return contentType.startsWith('image/');
+  }
+
+  protected attachmentUrl(file: ChatFileAttachment): string {
+    return `${environment.apiUrl}/files/${file.id}/download`;
+  }
+
+  protected downloadAttachment(event: Event, file: ChatFileAttachment): void {
+    event.preventDefault();
+    this.fileDownload.openOrDownload(this.attachmentUrl(file), file.fileName, file.contentType);
   }
 
   protected getFileIcon(contentType: string): string {

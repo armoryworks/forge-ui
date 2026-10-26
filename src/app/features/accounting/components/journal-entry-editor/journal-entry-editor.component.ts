@@ -71,7 +71,7 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
       memo: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
       lines: new FormArray<FormGroup>([this.buildLine(), this.buildLine()]),
     },
-    { validators: [balancedValidator] },
+    { validators: [balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation'))] },
   );
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });

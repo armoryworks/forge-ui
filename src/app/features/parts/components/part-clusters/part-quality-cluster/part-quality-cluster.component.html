@@ -34,6 +34,11 @@
         [label]="'parts.detail.quality.hazmatClass' | translate"
         formControlName="hazmatClass"
         [isReadonly]="!editing()" />
+      <app-input data-testid="part-quality-hts"
+        [label]="'parts.detail.quality.htsCode' | translate"
+        formControlName="htsCode"
+        [maxlength]="20"
+        [isReadonly]="!editing()" />
       <app-input data-testid="part-quality-shelf-life"
         [label]="'parts.detail.quality.shelfLifeDays' | translate"
         type="number"
