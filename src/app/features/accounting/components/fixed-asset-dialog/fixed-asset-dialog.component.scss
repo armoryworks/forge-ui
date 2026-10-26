@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+.fa-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+}

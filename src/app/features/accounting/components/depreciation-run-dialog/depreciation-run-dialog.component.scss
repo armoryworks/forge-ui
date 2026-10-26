@@ -1,0 +1,31 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.dep-run {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__total,
+  &__result {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__link {
+    color: var(--primary);
+  }
+}

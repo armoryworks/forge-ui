@@ -1,0 +1,46 @@
+<app-page-layout
+  [pageTitle]="'accounting.fixedAssets.title' | translate"
+  [pageSubtitle]="'accounting.fixedAssets.subtitle' | translate">
+  <ng-container toolbar>
+    <button type="button" class="action-btn" (click)="runDepreciation()" data-testid="fixed-assets-run-depreciation">
+      <span class="material-icons-outlined" aria-hidden="true">event_repeat</span>
+      {{ 'accounting.fixedAssets.runDepreciation' | translate }}
+    </button>
+    <button type="button" class="action-btn action-btn--primary" (click)="register()" data-testid="fixed-assets-register">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'accounting.fixedAssets.register' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="fa" [appLoadingBlock]="loading()">
+      <div class="fa__filters">
+        <app-input [label]="'common.search' | translate" [formControl]="searchControl" data-testid="fixed-assets-search" />
+        <app-select [label]="'accounting.common.status' | translate" [options]="statusOptions" [formControl]="statusControl" data-testid="fixed-assets-status" />
+        <app-select [label]="'accounting.fixedAssets.methodLabel' | translate" [options]="methodOptions" [formControl]="methodControl" data-testid="fixed-assets-method" />
+      </div>
+
+      <div class="totals-strip" data-testid="fixed-assets-totals">
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.cost' | translate }} <app-currency-display [value]="totals().cost" /></span>
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.accumulated' | translate }} <app-currency-display [value]="totals().accumulated" /></span>
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.netBookValue' | translate }} <app-currency-display [value]="totals().netBookValue" /></span>
+      </div>
+
+      <div class="acct-table-block">
+        <app-data-table
+          tableId="acct-fixed-assets"
+          [columns]="columns"
+          [data]="rows()"
+          [clickableRows]="true"
+          (rowClick)="open($event)"
+          emptyIcon="precision_manufacturing"
+          [emptyMessage]="'accounting.fixedAssets.empty' | translate">
+          <ng-template appColumnCell="inServiceDate" let-row>{{ row.inServiceDate | dateOnly }}</ng-template>
+          <ng-template appColumnCell="cost" let-row><app-currency-display [value]="row.cost" /></ng-template>
+          <ng-template appColumnCell="accumulatedDepreciation" let-row><app-currency-display [value]="row.accumulatedDepreciation" /></ng-template>
+          <ng-template appColumnCell="netBookValue" let-row><app-currency-display [value]="row.netBookValue" /></ng-template>
+        </app-data-table>
+      </div>
+    </div>
+  </ng-container>
+</app-page-layout>

@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.fad {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: $sp-sm $sp-lg;
+    margin: 0;
+
+    dt {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+    }
+  }
+}

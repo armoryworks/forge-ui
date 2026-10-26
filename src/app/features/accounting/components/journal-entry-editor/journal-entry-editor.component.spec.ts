@@ -7,6 +7,7 @@ import { FormArray, FormGroup } from '@angular/forms';
 
 import { JournalEntryEditorComponent } from './journal-entry-editor.component';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
+import { JournalTemplateService } from '../../services/journal-template.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 interface EditorApi {
@@ -28,7 +29,11 @@ const ACCOUNTS = [
 ];
 
 describe('JournalEntryEditorComponent', () => {
-  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), resubmitJournalEntry: vi.fn() };
+  const gl = {
+    getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), resubmitJournalEntry: vi.fn(),
+    getDeterminationRules: vi.fn(),
+  };
+  const templates = { get: vi.fn() };
   const router = { navigate: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn(), info: vi.fn() };
   let queryParams: Record<string, string>;
@@ -38,6 +43,7 @@ describe('JournalEntryEditorComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: GeneralLedgerService, useValue: gl },
+        { provide: JournalTemplateService, useValue: templates },
         { provide: Router, useValue: router },
         {
           provide: ActivatedRoute,
@@ -102,6 +108,47 @@ describe('JournalEntryEditorComponent', () => {
     expect(gl.resubmitJournalEntry).toHaveBeenCalledWith(9, expect.objectContaining({ memo: 'Accrue rent', entryDate: '2026-07-06' }));
     expect(gl.createManualJournalEntry).not.toHaveBeenCalled();
     expect(api.isDirty()).toBe(false);
+  });
+
+  it('prefills from ?fromTemplate, resolving key lines and carrying the counterparty, and posts through the normal path', () => {
+    queryParams = { fromTemplate: '3' };
+    gl.getDeterminationRules.mockReturnValue(of([{ key: 'REVENUE', glAccountId: 101, accountNumber: '4000', accountName: 'Revenue', configurable: true, requiredAccountType: null }]));
+    templates.get.mockReturnValue(of({
+      id: 3, bookId: 1, name: 'Monthly service fee', description: null, memo: 'Service fee', autoReverseNextPeriod: false, isActive: true,
+      lines: [
+        { accountDeterminationKey: null, glAccountId: 100, debit: 0, credit: 0, description: 'Billed', partyType: 'Customer', partyId: 21 },
+        { accountDeterminationKey: 'REVENUE', glAccountId: null, debit: 0, credit: 250, description: null, partyType: null, partyId: null },
+      ],
+    }));
+    const api = create();
+    const lines = api.form.get('lines') as FormArray;
+
+    expect(templates.get).toHaveBeenCalledWith(3);
+    expect(api.form.get('memo')!.value).toBe('Service fee');
+    expect(lines.at(1).value.glAccountId).toBe(101);
+    expect(lines.at(1).value.credit).toBe(250);
+    expect(lines.at(0).value.debit).toBeNull();
+    expect(api.form.valid).toBe(false);
+
+    lines.at(0).patchValue({ debit: 250 });
+    api.save();
+
+    expect(gl.createManualJournalEntry).toHaveBeenCalledWith(expect.objectContaining({
+      memo: 'Service fee',
+      lines: [
+        expect.objectContaining({ glAccountId: 100, debit: 250, partyType: 'Customer', partyId: 21 }),
+        expect.objectContaining({ glAccountId: 101, credit: 250 }),
+      ],
+    }));
+  });
+
+  it('sends no counterparty on a line that has none', () => {
+    const api = create();
+    fillBalanced(api);
+    api.save();
+
+    const request = gl.createManualJournalEntry.mock.calls[0][0] as { lines: Record<string, unknown>[] };
+    expect(request.lines[0]).not.toHaveProperty('partyType');
   });
 
   it('rejects a negative amount on a line', () => {

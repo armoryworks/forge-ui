@@ -1,0 +1,83 @@
+<app-page-layout
+  [pageTitle]="'accounting.overhead.title' | translate"
+  [pageSubtitle]="'accounting.overhead.subtitle' | translate">
+  <ng-container toolbar>
+    <app-datepicker [label]="'accounting.period.asOf' | translate" [formControl]="asOfControl" [required]="true" data-testid="overhead-as-of" />
+  </ng-container>
+
+  <ng-container content>
+    <div class="oh" [appLoadingBlock]="loading()">
+      @if (status(); as s) {
+        @if (!s.isConfigured) {
+          <p class="acct-caveat" data-testid="overhead-not-configured">{{ 'accounting.overhead.notConfigured' | translate }}</p>
+        }
+        <section class="oh__section" data-testid="overhead-status">
+          <h2 class="acct-subhead">{{ 'accounting.overhead.poolTitle' | translate }}</h2>
+          <div class="totals-strip">
+            <span class="totals-strip__metric">{{ 'accounting.overhead.actual' | translate }} <app-currency-display [value]="s.actualOverhead" /></span>
+            <span class="totals-strip__metric">{{ 'accounting.overhead.applied' | translate }} <app-currency-display [value]="s.appliedOverhead" /></span>
+            <span class="totals-strip__metric" [class.oh__under]="s.variance > 0" data-testid="overhead-variance">
+              {{ (s.variance > 0 ? 'accounting.overhead.underApplied' : 'accounting.overhead.overApplied') | translate }}
+              <app-currency-display [value]="s.variance < 0 ? -s.variance : s.variance" />
+            </span>
+            <span class="totals-strip__label">
+              @if (s.closedOnDate) {
+                {{ 'accounting.overhead.closedOn' | translate: { date: (s.asOf | dateOnly) } }}
+              } @else if (s.lastClosedOn) {
+                {{ 'accounting.overhead.lastClosed' | translate: { date: (s.lastClosedOn | dateOnly) } }}
+              } @else {
+                {{ 'accounting.overhead.neverClosed' | translate }}
+              }
+            </span>
+          </div>
+          <div class="oh__actions">
+            <button type="button" class="action-btn action-btn--primary" (click)="confirmClose()" [disabled]="!canClose()" data-testid="overhead-close">
+              <span class="material-icons-outlined" aria-hidden="true">event_available</span>
+              {{ 'accounting.overhead.close' | translate }}
+            </button>
+          </div>
+          @if (closeResult(); as r) {
+            <p class="oh__result" data-testid="overhead-close-result">
+              @if (r.posted) {
+                {{ 'accounting.overhead.closeResult' | translate }} <app-currency-display [value]="r.spendingVariance" />
+              } @else {
+                {{ 'accounting.overhead.nothingToClose' | translate }}
+              }
+            </p>
+          }
+        </section>
+      }
+
+      <section class="oh__section" [formGroup]="recordForm" data-testid="overhead-record">
+        <h2 class="acct-subhead">{{ 'accounting.overhead.recordTitle' | translate }}</h2>
+        <div class="oh__record">
+          <app-currency-input [label]="'accounting.common.amount' | translate" formControlName="amount" [required]="true" data-testid="overhead-amount" />
+          <app-datepicker [label]="'accounting.common.date' | translate" formControlName="entryDate" [required]="true" data-testid="overhead-date" />
+          <app-select [label]="'accounting.overhead.sourceAccount' | translate" [options]="sourceOptions()" formControlName="sourceGlAccountId"
+            data-testid="overhead-source" />
+          <app-input [label]="'accounting.journalEditor.memo' | translate" formControlName="memo" data-testid="overhead-memo" />
+        </div>
+        <div class="oh__actions">
+          <app-validation-button [violations]="recordViolations" [loading]="busy()">
+            <button type="button" class="action-btn" [disabled]="recordForm.invalid || busy()" (click)="record()" data-testid="overhead-record-save">
+              {{ 'accounting.overhead.record' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </section>
+
+      <section class="oh__section">
+        <h2 class="acct-subhead">{{ 'accounting.overhead.variancesTitle' | translate }}</h2>
+        <div class="acct-table-block">
+          <app-data-table tableId="acct-overhead-variances" [columns]="varianceColumns" [data]="varianceRows()"
+            emptyIcon="query_stats" [emptyMessage]="'accounting.overhead.noVariances' | translate">
+            <ng-template appColumnCell="amount" let-row><app-currency-display [value]="row.amount" /></ng-template>
+          </app-data-table>
+        </div>
+        @if (variances(); as v) {
+          <p class="oh__total">{{ 'accounting.common.total' | translate }} <app-currency-display [value]="v.total" /></p>
+        }
+      </section>
+    </div>
+  </ng-container>
+</app-page-layout>

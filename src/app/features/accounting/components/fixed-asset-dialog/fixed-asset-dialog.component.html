@@ -1,0 +1,56 @@
+<app-dialog
+  [title]="(editing ? 'accounting.fixedAssets.editTitle' : 'accounting.fixedAssets.registerTitle') | translate"
+  width="800px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+  <div [formGroup]="form" class="fa-dialog">
+    <div class="dialog-row">
+      <app-input [label]="'accounting.fixedAssets.name' | translate" formControlName="name" [required]="true" data-testid="fixed-asset-name" />
+      <app-input [label]="'accounting.fixedAssets.assetTag' | translate" formControlName="assetTag" data-testid="fixed-asset-tag" />
+    </div>
+    <div class="dialog-row">
+      <app-select [label]="'accounting.fixedAssets.linkedAsset' | translate" [options]="linkableOptions()" formControlName="linkedAssetId"
+        [required]="unitsBased()" data-testid="fixed-asset-linked" />
+      <app-select [label]="'accounting.fixedAssets.methodLabel' | translate" [options]="methodOptions" formControlName="method" [required]="true"
+        data-testid="fixed-asset-method" />
+    </div>
+    <div class="dialog-row">
+      <app-currency-input [label]="'accounting.fixedAssets.cost' | translate" formControlName="cost" [required]="true" data-testid="fixed-asset-cost" />
+      <app-currency-input [label]="'accounting.fixedAssets.salvage' | translate" formControlName="salvageValue" data-testid="fixed-asset-salvage" />
+    </div>
+    <div class="dialog-row">
+      <app-datepicker [label]="'accounting.fixedAssets.inServiceDate' | translate" formControlName="inServiceDate" [required]="true"
+        data-testid="fixed-asset-in-service" />
+      <app-input [label]="'accounting.fixedAssets.lifeMonths' | translate" type="number" formControlName="usefulLifeMonths" [required]="true"
+        data-testid="fixed-asset-life-months" />
+    </div>
+    @if (unitsBased()) {
+      <div class="dialog-row">
+        <app-input [label]="'accounting.fixedAssets.lifeUnits' | translate" type="number" formControlName="usefulLifeUnits" [required]="true"
+          data-testid="fixed-asset-life-units" />
+        <p class="fa-dialog__hint">{{ 'accounting.fixedAssets.unitsHint' | translate }}</p>
+      </div>
+    }
+    <div class="dialog-row">
+      <app-select [label]="'accounting.fixedAssets.assetAccount' | translate" [options]="assetAccountOptions()" formControlName="assetGlAccountId"
+        [required]="true" data-testid="fixed-asset-asset-account" />
+      <app-select [label]="'accounting.fixedAssets.accumulatedAccount' | translate" [options]="assetAccountOptions()"
+        formControlName="accumulatedDepreciationGlAccountId" [required]="true" data-testid="fixed-asset-accumulated-account" />
+    </div>
+    <div class="dialog-row">
+      <app-select [label]="'accounting.fixedAssets.expenseAccount' | translate" [options]="expenseAccountOptions()"
+        formControlName="depreciationExpenseGlAccountId" [required]="true" data-testid="fixed-asset-expense-account" />
+    </div>
+    <p class="fa-dialog__hint">{{ 'accounting.fixedAssets.noAcquisitionJournal' | translate }}</p>
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()" data-testid="fixed-asset-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()"
+        data-testid="fixed-asset-save">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

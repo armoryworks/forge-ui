@@ -1,0 +1,84 @@
+<app-page-layout
+  [pageTitle]="(templateId() ? 'accounting.journalTemplates.editTitle' : 'accounting.journalTemplates.newTitle') | translate"
+  [pageSubtitle]="'accounting.journalTemplates.editorSubtitle' | translate">
+  <ng-container content>
+    <form [formGroup]="form" class="jte">
+      <div class="jte__header">
+        <app-input [label]="'accounting.journalTemplates.name' | translate" formControlName="name" [required]="true" data-testid="jt-name" />
+        <app-input [label]="'accounting.common.description' | translate" formControlName="description" data-testid="jt-description" />
+        <app-input [label]="'accounting.journalTemplates.defaultMemo' | translate" formControlName="memo" data-testid="jt-memo" />
+      </div>
+      <div class="jte__flags">
+        <app-toggle [label]="'accounting.journalTemplates.autoReverse' | translate" formControlName="autoReverseNextPeriod" data-testid="jt-auto-reverse" />
+        @if (templateId()) {
+          <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="jt-active" />
+        }
+      </div>
+      <p class="jte__hint">{{ 'accounting.journalTemplates.amountHint' | translate }}</p>
+
+      <div class="jte__lines" formArrayName="lines">
+        <div class="jte__lines-head">
+          <span class="jte__lines-title">{{ 'accounting.journalTemplates.lines' | translate }}</span>
+          <button type="button" class="action-btn action-btn--sm" (click)="addLine()" data-testid="jt-add-line">
+            <span class="material-icons-outlined" aria-hidden="true">add</span>
+            {{ 'accounting.journalEditor.addLine' | translate }}
+          </button>
+        </div>
+
+        @for (line of lines.controls; track $index; let i = $index) {
+          <div class="jte__line" [formGroupName]="i">
+            @if (lineInfo()[i]?.keyLabel; as keyLabel) {
+              <span class="jte__key" data-testid="jt-line-key">{{ 'accounting.journalTemplates.keyLine' | translate: { key: keyLabel } }}</span>
+            } @else {
+              <app-select class="jte__account" [label]="'accounting.journalEditor.account' | translate" [options]="accountOptions()"
+                formControlName="glAccountId" [required]="true" data-testid="jt-line-account" />
+            }
+            <app-currency-input class="jte__amt" [label]="'accounting.common.debit' | translate" formControlName="debit" data-testid="jt-line-debit" />
+            <app-currency-input class="jte__amt" [label]="'accounting.common.credit' | translate" formControlName="credit" data-testid="jt-line-credit" />
+            <app-input class="jte__desc" [label]="'accounting.common.description' | translate" formControlName="description"
+              data-testid="jt-line-description" />
+            <button type="button" class="icon-btn icon-btn--danger" [attr.aria-label]="'accounting.journalEditor.removeLine' | translate"
+              [disabled]="lines.length <= 2" (click)="removeLine(i)" data-testid="jt-remove-line">
+              <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            </button>
+            @if (lineInfo()[i]?.isControl) {
+              <div class="jte__party">
+                <app-select [label]="'accounting.journalTemplates.partyType' | translate" [options]="partyTypeOptions" formControlName="partyType"
+                  [required]="true" data-testid="jt-line-party-type" />
+                @if (lineInfo()[i].partyName) {
+                  <span class="jte__party-name" data-testid="jt-line-party-name">{{ lineInfo()[i].partyName }}</span>
+                  <button type="button" class="icon-btn" [attr.aria-label]="'accounting.journalTemplates.changeParty' | translate"
+                    (click)="clearParty(i)" data-testid="jt-line-party-clear">
+                    <span class="material-icons-outlined" aria-hidden="true">close</span>
+                  </button>
+                } @else if (lineInfo()[i].partyType) {
+                  <app-entity-picker [label]="'accounting.journalTemplates.party' | translate" entityType="accounting/journal-templates/parties"
+                    [filters]="lineInfo()[i].partyFilters" formControlName="partyId" [required]="true"
+                    (selected)="onPartySelected(i, $event)" data-testid="jt-line-party" />
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="jte__totals" data-testid="jt-totals">
+        <span>{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="totals().debit" /></span>
+        <span>{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="totals().credit" /></span>
+        @if (totals().open > 0) {
+          <span class="jte__open">{{ 'accounting.journalTemplates.openLines' | translate: { count: totals().open } }}</span>
+        }
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container actions>
+    <button type="button" class="action-btn" (click)="cancel()" data-testid="jt-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="jt-save">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </ng-container>
+</app-page-layout>

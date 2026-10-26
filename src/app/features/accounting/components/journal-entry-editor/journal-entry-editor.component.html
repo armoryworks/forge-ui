@@ -28,6 +28,10 @@
       </section>
     }
 
+    @if (fromTemplate(); as t) {
+      <p class="je-template" data-testid="je-from-template">{{ 'accounting.journalEditor.fromTemplate' | translate: { name: t.name } }}</p>
+    }
+
     <form [formGroup]="form" class="je-editor">
       <div class="je-editor__header">
         <app-datepicker [label]="'accounting.journalEditor.date' | translate" formControlName="entryDate" [required]="true" />

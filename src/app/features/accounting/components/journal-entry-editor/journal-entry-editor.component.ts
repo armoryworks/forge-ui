@@ -20,6 +20,9 @@ import { parseDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { HasDirtyForm } from '../../../../shared/guards/unsaved-changes.guard';
 import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
+import { DeterminationRule } from '../../models/determination-rule.model';
+import { JournalPartyType, JournalTemplate } from '../../models/journal-template.model';
+import { JournalTemplateService } from '../../services/journal-template.service';
 import { balancedValidator, lineValidator } from '../../utils/journal-line.validators';
 
 const DEFAULT_BOOK_ID = 1; // overridable via ?bookId= (training sandbox, §5A.4)
@@ -51,6 +54,7 @@ const DEFAULT_CURRENCY_ID = 1;
 })
 export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly templates = inject(JournalTemplateService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
@@ -64,6 +68,8 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   protected readonly original = signal<LedgerRegisterEntry | null>(null);
   /** A rejected draft being edited: saving resubmits it in place (same entry number) for approval. */
   protected readonly resubmitting = signal(false);
+  /** The template this entry was pre-filled from (`?fromTemplate=<id>`); posting still goes through this editor. */
+  protected readonly fromTemplate = signal<JournalTemplate | null>(null);
 
   protected readonly form = new FormGroup(
     {
@@ -101,6 +107,20 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
     // URL is the source of truth — a shared/bookmarked link reopens the same correction.
     // Options MUST be set before the lines are patched or the account selects render blank
     // (value-vs-options race, caught by visual verification 2026-07-07) — hence the forkJoin.
+    const fromTemplate = Number(this.route.snapshot.queryParamMap.get('fromTemplate'));
+    if (fromTemplate > 0) {
+      forkJoin([accounts$, this.templates.get(fromTemplate), this.gl.getDeterminationRules(this.bookId)])
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: ([accounts, template, rules]) => {
+            this.accountOptions.set(accounts.map((a) => this.toOption(a)));
+            this.prefillFromTemplate(template, rules);
+          },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'accounting.journalTemplates.loadFailed'),
+        });
+      return;
+    }
+
     const correctionOf = Number(this.route.snapshot.queryParamMap.get('correctionOf'));
     const resubmitOf = Number(this.route.snapshot.queryParamMap.get('resubmitOf'));
     const sourceId = resubmitOf > 0 ? resubmitOf : correctionOf;
@@ -149,6 +169,26 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
     this.patchLines(original);
   }
 
+  private prefillFromTemplate(template: JournalTemplate, rules: DeterminationRule[]): void {
+    this.fromTemplate.set(template);
+    this.form.controls.memo.setValue(template.memo ?? template.name);
+    const byKey = new Map(rules.map((r) => [r.key, r.glAccountId]));
+    const needed = Math.max(template.lines.length, 2);
+    while (this.lines.length > needed) this.lines.removeAt(this.lines.length - 1);
+    while (this.lines.length < needed) this.lines.push(this.buildLine());
+    template.lines.forEach((line, i) =>
+      this.lines.at(i).patchValue({
+        glAccountId: line.accountDeterminationKey ? byKey.get(line.accountDeterminationKey) ?? null : line.glAccountId,
+        debit: line.debit || null,
+        credit: line.credit || null,
+        description: line.description ?? '',
+        partyType: line.partyType,
+        partyId: line.partyId,
+      }),
+    );
+    this.form.markAsDirty();
+  }
+
   private patchLines(original: LedgerRegisterEntry): void {
     // Resize then patch IN PLACE — never clear()+push(). The @for tracks $index, so replacing the
     // controls under reused rows leaves formGroupName bound to the dead controls and the inputs
@@ -194,12 +234,15 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
           debit: number | null;
           credit: number | null;
           description: string;
+          partyType: JournalPartyType | null;
+          partyId: number | null;
         };
         return {
           glAccountId: line.glAccountId as number,
           debit: line.debit ?? 0,
           credit: line.credit ?? 0,
           description: line.description?.trim() || null,
+          ...(line.partyType && line.partyId ? { partyType: line.partyType, partyId: line.partyId } : {}),
         };
       }),
     };
@@ -240,6 +283,8 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
         debit: new FormControl<number | null>(null),
         credit: new FormControl<number | null>(null),
         description: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+        partyType: new FormControl<JournalPartyType | null>(null),
+        partyId: new FormControl<number | null>(null),
       },
       { validators: [lineValidator] },
     );
