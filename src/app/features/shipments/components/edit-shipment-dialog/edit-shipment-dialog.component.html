@@ -33,6 +33,10 @@
       <app-input [label]="'shipments.edit.trackingNumber' | translate" formControlName="trackingNumber" />
       <app-currency-input [label]="'shipments.edit.shippingCost' | translate" formControlName="shippingCost" />
     </div>
+    <app-currency-input [label]="'freight.freightToBill' | translate" formControlName="freightCharge" data-testid="edit-shipment-freight-charge" />
+    @if (shipment().shippingCost !== null && shipment().shippingCost !== undefined) {
+      <span class="dims-hint">{{ 'freight.carrierCostHint' | translate: { cost: (shipment().shippingCost | number:'1.2-2') } }}</span>
+    }
     <app-input [label]="'shipments.edit.weight' | translate" type="number" formControlName="weight" />
     <span class="dims-hint">{{ 'shipments.edit.dimsHint' | translate }}</span>
     <div class="dims-row">

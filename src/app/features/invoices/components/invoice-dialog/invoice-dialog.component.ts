@@ -31,6 +31,8 @@ import { roundMoney } from '../../../../shared/utils/money.utils';
 import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
 import { CREDIT_TERMS_OPTIONS, dueDateForCreditTerms } from '../../../../shared/models/credit-terms.const';
 import { CustomerDetail } from '../../../customers/models/customer-detail.model';
+import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
+import { SalesTaxRate } from '../../../admin/models/sales-tax-rate.model';
 
 interface LineEntry {
   partId: number | null;
@@ -40,6 +42,7 @@ interface LineEntry {
   unitPrice: number;
   taxable: boolean;
   salesOrderLineId?: number | null;
+  lineType?: DocumentLineType;
 }
 
 // ---- ACCOUNTING BOUNDARY ----
@@ -90,6 +93,7 @@ export class InvoiceDialogComponent {
   private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
   protected readonly customerDetail = signal<CustomerDetail | null>(null);
+  private readonly jurisdiction = signal<SalesTaxRate | null>(null);
 
   protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
 
@@ -153,8 +157,14 @@ export class InvoiceDialogComponent {
     notes: this.translate.instant('common.notes'),
   });
 
+  protected readonly lineTypeOptions: SelectOption[] = [
+    { value: 'Item', label: this.translate.instant('freight.lineTypeItem') },
+    { value: 'Freight', label: this.translate.instant('freight.lineTypeFreight') },
+  ];
+
   // Line item form
   protected readonly lineForm = new FormGroup({
+    lineType: new FormControl<DocumentLineType>('Item', { nonNullable: true }),
     partId: new FormControl<number | null>(null),
     partNumber: new FormControl(''),
     description: new FormControl('', [Validators.required]),
@@ -170,6 +180,20 @@ export class InvoiceDialogComponent {
   protected readonly lineTotal = computed(() =>
     roundMoney(this.lineAmounts().reduce((sum, amount) => sum + amount, 0))
   );
+
+  protected readonly freightTotal = computed(() =>
+    roundMoney(this.lineAmounts().reduce((sum, amount, i) => (this.lines()[i].lineType === 'Freight' ? sum + amount : sum), 0))
+  );
+
+  protected readonly itemsTotal = computed(() => roundMoney(this.lineTotal() - this.freightTotal()));
+
+  protected readonly addingFreight = toSignal(
+    this.lineForm.controls.lineType.valueChanges.pipe(startWith(this.lineForm.controls.lineType.value)),
+    { initialValue: this.lineForm.controls.lineType.value },
+  );
+
+  /** Shipment-source warnings (e.g. the order's freight was already billed), as translation keys. */
+  protected readonly sourceWarnings = signal<string[]>([]);
 
   protected readonly taxableTotal = computed(() =>
     roundMoney(this.lineAmounts().reduce((sum, amount, i) => (this.lines()[i].taxable ? sum + amount : sum), 0))
@@ -271,12 +295,28 @@ export class InvoiceDialogComponent {
     controls.customerId.valueChanges.pipe(
       startWith(controls.customerId.value),
       distinctUntilChanged(),
-      switchMap(customerId => customerId == null
-        ? EMPTY
-        : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY))),
+      switchMap(customerId => {
+        this.jurisdiction.set(null);
+        return customerId == null
+          ? EMPTY
+          : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY));
+      }),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(rate => {
+      this.jurisdiction.set(rate ?? null);
       if (controls.salesOrderId.value == null) this.applyDefaultTaxRate(rate?.rate ?? 0);
+    });
+
+    this.lineForm.controls.lineType.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(lineType => {
+      const { partId, partNumber, description } = this.lineForm.controls;
+      if (lineType === 'Freight') {
+        partId.setValue(null);
+        partNumber.setValue('');
+        partId.disable();
+        if (!description.value) description.setValue(this.translate.instant('freight.defaultDescription'));
+      } else {
+        partId.enable();
+      }
     });
 
     controls.salesOrderId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((salesOrderId) => {
@@ -371,7 +411,17 @@ export class InvoiceDialogComponent {
     this.lines.update(prev => prev.map((l, i) => (i === index ? { ...l, taxable: !l.taxable } : l)));
   }
 
+  /** A new freight line is taxable only when the customer's jurisdiction taxes freight and the customer is not exempt. */
+  private freightStartsTaxable(): boolean {
+    return (this.jurisdiction()?.freightTaxable ?? false) && !this.customerTaxExempt();
+  }
+
+  protected startFreightLine(): void {
+    this.lineForm.controls.lineType.setValue('Freight');
+  }
+
   private prefillLinesFrom(shipment: InvoiceSourceShipment | undefined): void {
+    this.sourceWarnings.set((shipment?.warnings ?? []).map(code => `freight.warnings.${code}`));
     const untouched = this.lines().length === 0 || this.lines() === this.prefilledLines;
     if (!untouched) return;
     if (!shipment || shipment.lines.length === 0) {
@@ -385,8 +435,9 @@ export class InvoiceDialogComponent {
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,
-      taxable: l.taxable ?? true,
+      taxable: l.lineType === 'Freight' && l.salesOrderLineId == null ? this.freightStartsTaxable() : (l.taxable ?? true),
       salesOrderLineId: l.salesOrderLineId ?? null,
+      lineType: l.lineType ?? 'Item',
     }));
     this.prefilledLines = entries;
     this.lines.set(entries);
@@ -408,15 +459,22 @@ export class InvoiceDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
-    this.lines.update(prev => [...prev, {
-      partId: f.partId ?? null,
-      partNumber: f.partNumber ?? '',
+    const isFreight = f.lineType === 'Freight';
+    const entry: LineEntry = {
+      partId: isFreight ? null : (f.partId ?? null),
+      partNumber: isFreight ? '' : (f.partNumber ?? ''),
       description: f.description ?? '',
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
-      taxable: true,
-    }]);
-    this.lineForm.reset({ partId: null, partNumber: '', description: '', quantity: 1, unitPrice: 0 });
+      taxable: isFreight ? this.freightStartsTaxable() : true,
+      lineType: f.lineType,
+    };
+    this.lines.update(prev => {
+      if (isFreight) return [...prev, entry];
+      const firstFreight = prev.findIndex(l => l.lineType === 'Freight');
+      return firstFreight < 0 ? [...prev, entry] : [...prev.slice(0, firstFreight), entry, ...prev.slice(firstFreight)];
+    });
+    this.lineForm.reset({ lineType: 'Item', partId: null, partNumber: '', description: '', quantity: 1, unitPrice: 0 });
   }
 
   protected removeLine(index: number): void {
@@ -435,6 +493,7 @@ export class InvoiceDialogComponent {
       unitPrice: l.unitPrice,
       taxable: l.taxable,
       salesOrderLineId: l.salesOrderLineId ?? undefined,
+      lineType: l.lineType ?? 'Item',
     }));
 
     const currencyField = this.documentCurrency();
@@ -453,6 +512,7 @@ export class InvoiceDialogComponent {
       currencyId,
       fxRate,
       notes: f.notes || undefined,
+      salesTaxRateId: this.jurisdiction()?.id,
       lines: lineRequests,
     }).subscribe({
       next: () => {

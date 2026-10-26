@@ -1,3 +1,5 @@
+import { DocumentLineType } from '../../../shared/models/document-line-type.type';
+
 export interface CreateInvoiceLineRequest {
   partId?: number;
   description: string;
@@ -6,4 +8,5 @@ export interface CreateInvoiceLineRequest {
   taxable: boolean;
   notes?: string;
   salesOrderLineId?: number;
+  lineType?: DocumentLineType;
 }

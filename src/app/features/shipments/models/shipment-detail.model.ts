@@ -16,6 +16,8 @@ export interface ShipmentDetail {
   shippedDate: Date | null;
   deliveredDate: Date | null;
   shippingCost: number | null;
+  freightCharge?: number | null;
+  freightTerms?: string | null;
   weight: number | null;
   length: number | null;
   width: number | null;

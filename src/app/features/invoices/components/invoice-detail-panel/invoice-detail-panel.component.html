@@ -107,10 +107,15 @@
               </tr>
             </thead>
             <tbody>
-              @for (line of inv.lines; track line.id) {
+              @for (line of sortedLines(); track line.id) {
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.lineType === 'Freight') {
+                      <span class="chip chip--primary">{{ 'freight.lineTypeFreight' | translate }}</span>
+                    }
+                  </td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="currencyCode()" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="currencyCode()" /></td>
@@ -125,8 +130,14 @@
       <div class="totals-section">
         <div class="totals-row">
           <span class="totals-label">{{ 'invoices.subtotal' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="inv.subtotal" [currency]="currencyCode()" /></span>
+          <span class="totals-value"><app-currency-display [value]="itemsSubtotal()" [currency]="currencyCode()" /></span>
         </div>
+        @if (freightSubtotal() !== 0) {
+          <div class="totals-row" data-testid="invoice-detail-freight">
+            <span class="totals-label">{{ 'freight.freight' | translate }}</span>
+            <span class="totals-value"><app-currency-display [value]="freightSubtotal()" [currency]="currencyCode()" /></span>
+          </div>
+        }
         <div class="totals-row">
           <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate * 100 | number:'1.0-4' }}%)</span>
           <span class="totals-value"><app-currency-display [value]="inv.taxAmount" [currency]="currencyCode()" /></span>

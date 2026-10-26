@@ -44,7 +44,7 @@ describe('ChartOfAccountsComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) } } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: convertToParamMap({}) }, queryParamMap: of(convertToParamMap({})) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn() } },
       ],
     });

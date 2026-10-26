@@ -34,13 +34,18 @@ import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-roles';
+import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
+import { FREIGHT_TERMS, FreightTerms } from '../../../../shared/models/freight-terms.const';
+import { SalesTaxRate } from '../../../admin/models/sales-tax-rate.model';
 
 interface LineEntry {
-  partId: number;
+  partId: number | null;
   partNumber: string;
   description: string;
   quantity: number;
   unitPrice: number;
+  lineType?: DocumentLineType;
+  taxable?: boolean;
 }
 
 @Component({
@@ -105,6 +110,17 @@ export class SoDialogComponent {
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
+  protected readonly freightTermsOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('freight.terms.customerDefault') },
+    ...FREIGHT_TERMS.map(t => ({ value: t, label: this.translate.instant(`freight.terms.${t}`) })),
+  ];
+
+  private readonly jurisdiction = signal<SalesTaxRate | null>(null);
+
+  protected readonly freightForm = new FormGroup({
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+  });
+
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     shippingAddressId: new FormControl<number | null>(null),
@@ -115,6 +131,7 @@ export class SoDialogComponent {
     creditTerms: new FormControl<string | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    freightTerms: new FormControl<FreightTerms | null>(null),
     notes: new FormControl(''),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
@@ -152,7 +169,14 @@ export class SoDialogComponent {
     this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
     { initialValue: this.form.controls.taxRate.value ?? 0 }
   );
-  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
+  protected readonly freightTotal = computed(() =>
+    this.lines().filter(l => l.lineType === 'Freight').reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
+  );
+  protected readonly itemsTotal = computed(() => this.lineTotal() - this.freightTotal());
+  private readonly taxableTotal = computed(() =>
+    this.lines().filter(l => l.lineType !== 'Freight' || l.taxable).reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
+  );
+  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.taxableTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
 
   protected readonly draftConfig: DraftConfig = {
@@ -217,7 +241,10 @@ export class SoDialogComponent {
           : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY));
       }),
       takeUntilDestroyed(this.destroyRef),
-    ).subscribe(rate => this.form.controls.taxRate.setValue(rate == null ? 0 : +(rate.rate * 100).toFixed(4)));
+    ).subscribe(rate => {
+      this.jurisdiction.set(rate ?? null);
+      this.form.controls.taxRate.setValue(rate == null ? 0 : +(rate.rate * 100).toFixed(4));
+    });
 
     customerChanges.pipe(
       switchMap(customerId => customerId == null
@@ -344,17 +371,36 @@ export class SoDialogComponent {
     const f = this.lineForm.getRawValue();
     const part = this.selectedPart();
     if (!part || part.id !== f.partId) return;
-    this.lines.update(prev => [...prev, {
-      partId: part.id,
-      partNumber: part.partNumber,
-      // Phase-4 Name+Description split: line carries the part's short
-      // identifier — Name is now the canonical short identifier.
-      description: part.name,
-      quantity: f.quantity!,
-      unitPrice: f.unitPrice!,
-    }]);
+    this.lines.update(prev => {
+      const entry: LineEntry = {
+        partId: part.id,
+        partNumber: part.partNumber,
+        // Phase-4 Name+Description split: line carries the part's short
+        // identifier — Name is now the canonical short identifier.
+        description: part.name,
+        quantity: f.quantity!,
+        unitPrice: f.unitPrice!,
+      };
+      const firstFreight = prev.findIndex(l => l.lineType === 'Freight');
+      return firstFreight < 0 ? [...prev, entry] : [...prev.slice(0, firstFreight), entry, ...prev.slice(firstFreight)];
+    });
     this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
     this.priceIsListPrice.set(false);
+  }
+
+  protected addFreight(): void {
+    if (this.freightForm.invalid) return;
+    const amount = Number(this.freightForm.controls.amount.value ?? 0);
+    this.lines.update(prev => [...prev, {
+      partId: null,
+      partNumber: '',
+      description: this.translate.instant('freight.defaultDescription'),
+      quantity: 1,
+      unitPrice: amount,
+      lineType: 'Freight',
+      taxable: this.jurisdiction()?.freightTaxable ?? false,
+    }]);
+    this.freightForm.reset({ amount: null });
   }
 
   protected removeLine(index: number): void {
@@ -366,12 +412,9 @@ export class SoDialogComponent {
     this.saving.set(true);
 
     const f = this.form.getRawValue();
-    const lineRequests: CreateSalesOrderLineRequest[] = this.lines().map(l => ({
-      partId: l.partId,
-      description: l.description,
-      quantity: l.quantity,
-      unitPrice: l.unitPrice,
-    }));
+    const lineRequests: CreateSalesOrderLineRequest[] = this.lines().map(l => l.lineType === 'Freight'
+      ? { description: l.description, quantity: l.quantity, unitPrice: l.unitPrice, lineType: 'Freight', taxable: l.taxable ?? false }
+      : { partId: l.partId ?? undefined, description: l.description, quantity: l.quantity, unitPrice: l.unitPrice });
 
     this.soService.createSalesOrder({
       customerId: f.customerId!,
@@ -383,6 +426,7 @@ export class SoDialogComponent {
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
       taxRate: (f.taxRate ?? 0) / 100,
+      freightTerms: f.freightTerms ?? undefined,
       currencyId: this.documentCurrency()?.visible() ? (f.currencyId ?? undefined) : undefined,
       fxRate: this.documentCurrency()?.visible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,
       lines: lineRequests,

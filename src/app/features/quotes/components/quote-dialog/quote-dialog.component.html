@@ -22,7 +22,12 @@
               @for (line of lines(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.lineType === 'Freight') {
+                      <span class="chip chip--primary" [attr.data-testid]="'quote-line-freight-' + $index">{{ 'freight.lineTypeFreight' | translate }}</span>
+                    }
+                  </td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="documentCurrencyCode()" [maximumFractionDigits]="4" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="lineAmount(line)" [currency]="documentCurrencyCode()" /></td>
@@ -54,6 +59,14 @@
           <button data-testid="quote-add-line-btn" class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
+          </button>
+        </div>
+
+        <div class="add-line add-line--freight" [formGroup]="freightForm">
+          <app-input [label]="'freight.freightAmount' | translate" type="number" formControlName="amount" step="0.01" min="0" data-testid="quote-freight-amount" />
+          <button class="action-btn action-btn--sm" type="button" data-testid="quote-add-freight-btn" (click)="addFreight()" [disabled]="freightForm.invalid">
+            <span class="material-icons-outlined">local_shipping</span>
+            {{ 'freight.addFreight' | translate }}
           </button>
         </div>
       </div>
@@ -109,8 +122,14 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
+          <app-currency-display [value]="itemsTotal()" [currency]="documentCurrencyCode()" />
         </div>
+        @if (freightTotal() !== 0) {
+          <div class="dlg-total-row" data-testid="quote-freight-total">
+            <span>{{ 'freight.freight' | translate }}</span>
+            <app-currency-display [value]="freightTotal()" [currency]="documentCurrencyCode()" />
+          </div>
+        }
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() | number:'1.0-4' }}%)</span>
           <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />

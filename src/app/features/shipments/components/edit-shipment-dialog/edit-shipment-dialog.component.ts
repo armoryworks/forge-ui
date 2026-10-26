@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -33,7 +34,7 @@ const ADD_NEW = -1;
   selector: 'app-edit-shipment-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe,
+    ReactiveFormsModule, TranslatePipe, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
     CurrencyInputComponent, AddressFormComponent, ValidationButtonComponent, LoadingBlockDirective,
   ],
@@ -72,6 +73,7 @@ export class EditShipmentDialogComponent implements OnInit {
     shipTo: new FormControl<number | null>(null, { validators: [Validators.required] }),
     trackingNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     shippingCost: new FormControl<number | null>(null),
+    freightCharge: new FormControl<number | null>(null, [Validators.min(0)]),
     weight: new FormControl<number | null>(null),
     length: new FormControl<number | null>(null),
     width: new FormControl<number | null>(null),
@@ -130,6 +132,7 @@ export class EditShipmentDialogComponent implements OnInit {
       shipTo: s.shippingAddressId,
       trackingNumber: s.trackingNumber ?? '',
       shippingCost: s.shippingCost,
+      freightCharge: s.freightCharge ?? null,
       weight: s.weight,
       length: s.length,
       width: s.width,
@@ -185,6 +188,7 @@ export class EditShipmentDialogComponent implements OnInit {
       shippingAddressId: addressId,
       trackingNumber: v.trackingNumber.trim(),
       shippingCost: v.shippingCost ?? undefined,
+      freightCharge: v.freightCharge ?? undefined,
       weight: v.weight ?? undefined,
       length: v.length ?? undefined,
       width: v.width ?? undefined,

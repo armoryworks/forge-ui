@@ -27,4 +27,6 @@ export interface InvoiceDetail {
   currencyCode?: string | null;
   currencyId?: number | null;
   fxRate?: number;
+  freightSubtotal?: number;
+  salesTaxRateId?: number | null;
 }

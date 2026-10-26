@@ -12,4 +12,5 @@ export interface SalesTaxRate {
   // Phase 3 F5 — full-record fields surfaced on the GET response.
   exemptFlag?: boolean;
   glPostingAccount?: string | null;
+  freightTaxable?: boolean;
 }

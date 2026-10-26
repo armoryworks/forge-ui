@@ -13,4 +13,5 @@ export interface CreateSalesTaxRateRequest {
   // F5 — full-record fields. Both optional.
   exemptFlag?: boolean;
   glPostingAccount?: string | null;
+  freightTaxable?: boolean;
 }

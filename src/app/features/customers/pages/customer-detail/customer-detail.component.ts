@@ -301,6 +301,7 @@ export class CustomerDetailComponent {
       phone: patch.phone ?? c.phone,
       isActive: patch.isActive ?? c.isActive,
       ...(patch.currencyId !== undefined && patch.currencyId !== null ? { currencyId: patch.currencyId } : {}),
+      ...(patch.freightTerms === undefined ? {} : patch.freightTerms === null ? { clearFreightTerms: true } : { freightTerms: patch.freightTerms }),
       ...this.commercialTermsChanges(patch),
     }).subscribe({
       next: () => {

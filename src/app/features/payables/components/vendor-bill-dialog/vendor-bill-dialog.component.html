@@ -85,6 +85,31 @@
       </div>
     }
 
+    <div class="bill-lines">
+      <span class="bill-lines__title">{{ 'freight.freight' | translate }}</span>
+      <div formArrayName="freightLines">
+        @for (group of freightLines.controls; track group; let i = $index) {
+          <div class="line-row line-row--freight" [formGroupName]="i">
+            <app-input [label]="'common.description' | translate" formControlName="description" data-testid="bill-freight-desc" />
+            <app-currency-input [label]="'freight.freightAmount' | translate" formControlName="amount" data-testid="bill-freight-amount" />
+            <app-select [label]="'freight.forPurchaseOrder' | translate" formControlName="purchaseOrderId" [options]="freightPoOptions()" data-testid="bill-freight-po" />
+            @if (!group.controls.purchaseOrderId.value) {
+              <app-select [label]="'freight.freightAccount' | translate" formControlName="accountKey" [options]="freightAccountOptions" data-testid="bill-freight-account" />
+            } @else {
+              <span class="po-line__hint">{{ 'freight.clearsPoAccrual' | translate }}</span>
+            }
+            <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeFreightLine(i)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        }
+      </div>
+      <button class="action-btn action-btn--sm bill-lines__add" type="button" data-testid="bill-add-freight-btn" (click)="addFreightLine()">
+        <span class="material-icons-outlined">local_shipping</span>
+        {{ 'freight.addFreight' | translate }}
+      </button>
+    </div>
+
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" data-testid="bill-notes" />
 
     <!-- Totals -->
@@ -93,6 +118,12 @@
         <span>{{ 'payables.subtotal' | translate }}</span>
         <app-currency-display [value]="linesTotal()" [currency]="documentCurrencyCode()" />
       </div>
+      @if (freightTotal() !== 0) {
+        <div class="dlg-total-row" data-testid="bill-freight-total">
+          <span>{{ 'freight.freight' | translate }}</span>
+          <app-currency-display [value]="freightTotal()" [currency]="documentCurrencyCode()" />
+        </div>
+      }
       <div class="dlg-total-row">
         <span>{{ 'payables.tax' | translate }}</span>
         <app-currency-display [value]="taxAmountValue() ?? 0" [currency]="documentCurrencyCode()" />

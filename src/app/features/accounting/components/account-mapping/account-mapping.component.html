@@ -1,0 +1,31 @@
+<div class="account-mapping">
+  <p class="account-mapping__intro">{{ 'accounting.mapping.intro' | translate }}</p>
+  <app-data-table tableId="account-mapping" [columns]="columns" [data]="rows()" [loading]="loading()"
+    emptyIcon="account_tree" [emptyMessage]="'accounting.mapping.unmapped' | translate">
+    <ng-template appColumnCell="label" let-row>
+      <span class="account-mapping__label">{{ row.label }}</span>
+      <span class="account-mapping__key">{{ row.key }}</span>
+    </ng-template>
+    <ng-template appColumnCell="account" let-row>
+      @if (row.control) {
+        <app-select [label]="'accounting.mapping.account' | translate" [formControl]="row.control" [options]="row.options"
+          [attr.data-testid]="'mapping-select-' + row.key" />
+        @if (!row.rule.glAccountId) {
+          <span class="account-mapping__unmapped">{{ 'accounting.mapping.unmapped' | translate }}</span>
+        }
+      } @else if (row.rule.accountNumber) {
+        {{ row.rule.accountNumber }} — {{ row.rule.accountName }}
+      } @else {
+        <span class="account-mapping__unmapped">{{ 'accounting.mapping.unmapped' | translate }}</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.control) {
+        <button class="action-btn action-btn--sm" type="button" [disabled]="savingKey() === row.key"
+          [attr.data-testid]="'mapping-save-' + row.key" (click)="save(row); $event.stopPropagation()">{{ 'common.save' | translate }}</button>
+      } @else {
+        <span class="account-mapping__system">{{ 'accounting.mapping.systemManaged' | translate }}</span>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

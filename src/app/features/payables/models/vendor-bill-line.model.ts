@@ -1,3 +1,5 @@
+import { DocumentLineType } from '../../../shared/models/document-line-type.type';
+
 // ⚡ ACCOUNTING BOUNDARY — one line of a VendorBillDetail. PurchaseOrderLineId
 // is non-null on PO-matched (3-way-match) bills.
 export interface VendorBillLine {
@@ -13,4 +15,8 @@ export interface VendorBillLine {
   glAccountId: number | null;
   glAccountName: string | null;
   purchaseOrderLineLabel?: string | null;
+  lineType?: DocumentLineType;
+  freightForPurchaseOrderId?: number | null;
+  freightForPurchaseOrderNumber?: string | null;
+  freightClearedAmount?: number | null;
 }

@@ -93,6 +93,7 @@
           </div>
         </div>
         <app-input [label]="'shipments.shippingCost' | translate" type="number" formControlName="shippingCost" [placeholder]="'shipments.optional' | translate" data-testid="shipment-cost" />
+        <app-input [label]="'freight.freightToBill' | translate" type="number" formControlName="freightCharge" min="0" [placeholder]="'freight.freightToBillPlaceholder' | translate" data-testid="shipment-freight-charge" />
       </div>
 
       <div class="dlg-sidebar-section">

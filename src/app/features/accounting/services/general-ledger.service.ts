@@ -37,6 +37,7 @@ import {
   YearEndCloseResult,
   CloseChecklistResult,
 } from '../models/accounting.models';
+import { DeterminationRule } from '../models/determination-rule.model';
 import { InventoryValuationReconciliation, InventoryValuationRow } from '../models/inventory-valuation.model';
 import { JobCostCloseCandidate, JobProductionCostCloseResult } from '../models/job-cost-close.model';
 import { FxRevaluationResult } from '../models/fx-revaluation-result.model';
@@ -258,6 +259,16 @@ export class GeneralLedgerService {
   /** Full chart of accounts (incl. inactive + HasPostings) for the management screen. */
   listGlAccountsForManagement(bookId: number): Observable<GlAccountAdmin[]> {
     return this.http.get<GlAccountAdmin[]>(`${this.base}/accounts/manage`, { params: new HttpParams().set('bookId', bookId) });
+  }
+
+  /** The book's account-determination map: which GL account each posting key resolves to. */
+  getDeterminationRules(bookId: number): Observable<DeterminationRule[]> {
+    return this.http.get<DeterminationRule[]>(`${this.base}/gl/determination-rules`, { params: new HttpParams().set('bookId', bookId) });
+  }
+
+  /** Re-points a configurable determination key at another account; future postings only. */
+  updateDeterminationRule(key: string, glAccountId: number): Observable<DeterminationRule> {
+    return this.http.put<DeterminationRule>(`${this.base}/gl/determination-rules/${encodeURIComponent(key)}`, { glAccountId });
   }
 
   /** Create a new postable GL account. */

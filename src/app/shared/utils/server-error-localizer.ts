@@ -39,6 +39,15 @@ const CODE_KEYS: Record<string, string> = {
   'invoice-so-currency-mismatch': 'apiErrors.codes.invoiceSoCurrencyMismatch',
   'fx-rate-invalid': 'apiErrors.codes.fxRateInvalid',
   'fx-rate-same-currency': 'apiErrors.codes.fxRateSameCurrency',
+  'freight-line-part': 'apiErrors.codes.freightLinePart',
+  'freight-line-po-line': 'apiErrors.codes.freightLinePoLine',
+  'so-freight-already-billed': 'apiErrors.codes.soFreightAlreadyBilled',
+  'freight-purchase-order-not-found': 'apiErrors.codes.freightPurchaseOrderNotFound',
+  'determination-key-not-configurable': 'apiErrors.codes.determinationKeyNotConfigurable',
+  'determination-account-not-found': 'apiErrors.codes.determinationAccountNotFound',
+  'determination-account-not-postable': 'apiErrors.codes.determinationAccountNotPostable',
+  'determination-account-control': 'apiErrors.codes.determinationAccountControl',
+  'determination-account-type': 'apiErrors.codes.determinationAccountType',
 };
 
 const PROBLEM_CODE_KEYS: Record<string, string> = {

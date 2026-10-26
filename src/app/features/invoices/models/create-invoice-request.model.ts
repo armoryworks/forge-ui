@@ -18,5 +18,7 @@ export interface CreateInvoiceRequest {
   currencyId?: number;
   /** Booking FX rate (txn → functional). Defaults to 1 for the base currency. */
   fxRate?: number | null;
+  /** The sales-tax jurisdiction the tax rate came from; decides whether freight starts taxable. */
+  salesTaxRateId?: number;
   lines: CreateInvoiceLineRequest[];
 }

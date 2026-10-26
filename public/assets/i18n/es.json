@@ -9493,7 +9493,8 @@
       "colTotal": "Total",
       "colPaid": "Pagado",
       "colBalance": "Saldo",
-      "externalAccounting": "Su proveedor gestiona las facturas a través de un sistema contable externo. Consulte el portal de facturación del proveedor para ver sus facturas y saldos."
+      "externalAccounting": "Su proveedor gestiona las facturas a través de un sistema contable externo. Consulte el portal de facturación del proveedor para ver sus facturas y saldos.",
+      "colFreight": "Flete"
     },
     "shipments": {
       "title": "Sus envíos",
@@ -12118,6 +12119,32 @@
       "source": "Origen",
       "amount": "Importe",
       "loadFailed": "No se pudo cargar la valoración de inventario"
+    },
+    "mapping": {
+      "title": "Asignación de cuentas",
+      "intro": "A qué cuenta contable va cada tipo de asiento. Los cambios se aplican a los asientos que se registren a partir de ahora; los asientos registrados no cambian.",
+      "posting": "Asiento",
+      "account": "Cuenta",
+      "unmapped": "Sin asignar",
+      "systemManaged": "Gestionado por el sistema",
+      "saved": "{{key}} ahora se registra en la cuenta seleccionada.",
+      "loadFailed": "No se pudo cargar la asignación de cuentas.",
+      "saveFailed": "No se pudo guardar la asignación de cuentas.",
+      "keys": {
+        "FREIGHT_INCOME": "Ingresos por flete",
+        "FREIGHT_IN": "Flete de entrada",
+        "FREIGHT_OUT": "Flete de salida (gasto de entrega)",
+        "SALES_DISCOUNTS": "Descuentos sobre ventas",
+        "PURCHASE_DISCOUNTS": "Descuentos sobre compras",
+        "BAD_DEBT_EXPENSE": "Gasto por cuentas incobrables",
+        "OPENING_BALANCE_EQUITY": "Patrimonio de saldos iniciales",
+        "SALES_REVENUE": "Ingresos por ventas",
+        "AR_CONTROL": "Cuentas por cobrar",
+        "AP_CONTROL": "Cuentas por pagar",
+        "FREIGHT_CLEARING": "Compensación de flete",
+        "COGS": "Costo de ventas",
+        "SALES_TAX_PAYABLE": "Impuesto sobre ventas por pagar"
+      }
     }
   },
   "subcontractUi": {
@@ -12362,7 +12389,9 @@
     "poLineFallback": "Línea de OC #{{id}}",
     "accountKeys": {
       "OPERATING_EXPENSE": "Gasto operativo",
-      "GRNI": "Mercancía recibida no facturada"
+      "GRNI": "Mercancía recibida no facturada",
+      "FREIGHT_IN": "Flete de entrada",
+      "FREIGHT_OUT": "Flete de salida (entrega)"
     },
     "taxNegative": "El impuesto no puede ser negativo."
   },
@@ -14302,7 +14331,16 @@
       "partyCurrencyLocked": "Este tercero ya tiene documentos emitidos o pagos, por lo que su moneda no puede cambiar.",
       "documentCurrencyLocked": "La moneda y el tipo de cambio solo pueden cambiar mientras el documento es un borrador.",
       "baseCurrencyLocked": "La moneda base no puede cambiar una vez que existen asientos, pagos o facturas emitidas.",
-      "openingInventoryUseStockLoad": "Las cuentas de inventario no se pueden registrar en el asiento de apertura. Cargue el inventario inicial como una carga de existencias con costo (Contabilidad > Existencias iniciales) para que las cantidades disponibles y la valoración coincidan con el libro mayor; registre el resto con el capital de saldos iniciales como contrapartida."
+      "openingInventoryUseStockLoad": "Las cuentas de inventario no se pueden registrar en el asiento de apertura. Cargue el inventario inicial como una carga de existencias con costo (Contabilidad > Existencias iniciales) para que las cantidades disponibles y la valoración coincidan con el libro mayor; registre el resto con el capital de saldos iniciales como contrapartida.",
+      "freightLinePart": "Una línea de flete no puede indicar una pieza.",
+      "freightLinePoLine": "Una línea de flete no puede indicar una línea de orden de compra.",
+      "soFreightAlreadyBilled": "El flete de este pedido ya está facturado en otra factura.",
+      "freightPurchaseOrderNotFound": "Una línea de flete indica una orden de compra que no existe.",
+      "determinationKeyNotConfigurable": "Esta asignación de cuenta la gestiona el sistema y no se puede cambiar.",
+      "determinationAccountNotFound": "Elija una cuenta del catálogo de cuentas de este libro.",
+      "determinationAccountNotPostable": "Elija una cuenta activa que acepte asientos.",
+      "determinationAccountControl": "Las cuentas de control no se pueden asignar aquí.",
+      "determinationAccountType": "Este asiento necesita una cuenta de otro tipo."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",
@@ -14358,5 +14396,37 @@
       "confirmMessage": "Se volverán a valorar {{count}} entradas de tiempo en {{jobs}} trabajo(s). Los costos ya absorbidos en producto terminado no se revierten; cualquier disminución aparece como variación al cierre.",
       "applied": "Se volvieron a valorar {{count}} entradas de tiempo."
     }
+  },
+  "freight": {
+    "freight": "Flete",
+    "lineType": "Tipo",
+    "lineTypeItem": "Artículo",
+    "lineTypeFreight": "Flete",
+    "defaultDescription": "Flete",
+    "addFreight": "Agregar flete",
+    "freightAmount": "Importe del flete",
+    "freightTerms": "Condiciones de flete",
+    "terms": {
+      "Prepaid": "Prepagado",
+      "PrepaidAndAdd": "Prepagado y cargado",
+      "Collect": "Por cobrar",
+      "ThirdParty": "Tercero",
+      "customerDefault": "Condiciones del cliente",
+      "installDefault": "Predeterminado de la empresa"
+    },
+    "warnings": {
+      "so-freight-already-billed": "Este pedido cotiza su propio flete, que se factura una sola vez, por lo que no se agrega el cargo de flete del envío."
+    },
+    "freightTaxable": "El flete está gravado en esta jurisdicción",
+    "freightToBill": "Flete a facturar al cliente",
+    "freightToBillPlaceholder": "Según las condiciones de flete",
+    "carrierCostHint": "Costo del transportista: {{cost}}",
+    "forPurchaseOrder": "Para la orden de compra",
+    "noPurchaseOrder": "Sin orden de compra",
+    "freightAccount": "Cuenta",
+    "freightInAccount": "Flete de entrada",
+    "freightOutAccount": "Flete de salida (entrega)",
+    "clearsPoAccrual": "Liquida la provisión de flete de la recepción de la OC; el excedente va a Flete de entrada.",
+    "freightForPo": "Flete de {{po}}"
   }
 }

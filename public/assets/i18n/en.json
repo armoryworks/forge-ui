@@ -9500,7 +9500,8 @@
       "colTotal": "Total",
       "colPaid": "Paid",
       "colBalance": "Balance",
-      "externalAccounting": "Your supplier handles invoices through an external accounting provider. See their billing portal for your invoices and balances."
+      "externalAccounting": "Your supplier handles invoices through an external accounting provider. See their billing portal for your invoices and balances.",
+      "colFreight": "Freight"
     },
     "shipments": {
       "title": "Your Shipments",
@@ -12118,6 +12119,32 @@
       "source": "Source",
       "amount": "Amount",
       "loadFailed": "Could not load the inventory valuation"
+    },
+    "mapping": {
+      "title": "Account mapping",
+      "intro": "Which GL account each kind of posting goes to. Changes apply to postings made from now on; posted entries are not changed.",
+      "posting": "Posting",
+      "account": "Account",
+      "unmapped": "Not mapped",
+      "systemManaged": "System-managed",
+      "saved": "{{key}} now posts to the selected account.",
+      "loadFailed": "Could not load the account mapping.",
+      "saveFailed": "Could not save the account mapping.",
+      "keys": {
+        "FREIGHT_INCOME": "Freight Income",
+        "FREIGHT_IN": "Freight-In",
+        "FREIGHT_OUT": "Freight-Out (Delivery Expense)",
+        "SALES_DISCOUNTS": "Sales Discounts",
+        "PURCHASE_DISCOUNTS": "Purchase Discounts",
+        "BAD_DEBT_EXPENSE": "Bad Debt Expense",
+        "OPENING_BALANCE_EQUITY": "Opening Balance Equity",
+        "SALES_REVENUE": "Sales Revenue",
+        "AR_CONTROL": "Accounts Receivable",
+        "AP_CONTROL": "Accounts Payable",
+        "FREIGHT_CLEARING": "Freight Clearing",
+        "COGS": "Cost of Goods Sold",
+        "SALES_TAX_PAYABLE": "Sales Tax Payable"
+      }
     }
   },
   "subcontractUi": {
@@ -12362,7 +12389,9 @@
     "poLineFallback": "PO line #{{id}}",
     "accountKeys": {
       "OPERATING_EXPENSE": "Operating expense",
-      "GRNI": "Goods received not invoiced"
+      "GRNI": "Goods received not invoiced",
+      "FREIGHT_IN": "Freight-In",
+      "FREIGHT_OUT": "Freight-Out (delivery)"
     },
     "taxNegative": "Tax cannot be negative."
   },
@@ -14302,7 +14331,16 @@
       "partyCurrencyLocked": "This party already has issued documents or payments, so its currency can't change.",
       "documentCurrencyLocked": "The currency and exchange rate can only change while the document is a draft.",
       "baseCurrencyLocked": "The base currency can't change once journal entries, payments or issued invoices and bills exist.",
-      "openingInventoryUseStockLoad": "Inventory accounts cannot be posted in the opening journal. Load opening inventory as a costed stock load (Accounting > Opening stock) so on-hand quantities and the valuation match the ledger; post the rest with Opening Balance Equity as the offset."
+      "openingInventoryUseStockLoad": "Inventory accounts cannot be posted in the opening journal. Load opening inventory as a costed stock load (Accounting > Opening stock) so on-hand quantities and the valuation match the ledger; post the rest with Opening Balance Equity as the offset.",
+      "freightLinePart": "A freight line can't name a part.",
+      "freightLinePoLine": "A freight line can't name a purchase-order line.",
+      "soFreightAlreadyBilled": "This sales order's freight is already billed on another invoice.",
+      "freightPurchaseOrderNotFound": "A freight line names a purchase order that does not exist.",
+      "determinationKeyNotConfigurable": "This account mapping is managed by the system and can't be changed.",
+      "determinationAccountNotFound": "Choose an account from this book's chart of accounts.",
+      "determinationAccountNotPostable": "Choose an active account that accepts postings.",
+      "determinationAccountControl": "Control accounts can't be mapped here.",
+      "determinationAccountType": "This posting needs an account of a different type."
     },
     "validators": {
       "required": "{{field}} is required.",
@@ -14358,5 +14396,37 @@
       "confirmMessage": "{{count}} time entries on {{jobs}} job(s) will be re-priced. Costs already absorbed into finished goods are not reversed; any decrease shows up as variance at close.",
       "applied": "Re-priced {{count}} time entries."
     }
+  },
+  "freight": {
+    "freight": "Freight",
+    "lineType": "Type",
+    "lineTypeItem": "Item",
+    "lineTypeFreight": "Freight",
+    "defaultDescription": "Freight",
+    "addFreight": "Add freight",
+    "freightAmount": "Freight amount",
+    "freightTerms": "Freight terms",
+    "terms": {
+      "Prepaid": "Prepaid",
+      "PrepaidAndAdd": "Prepaid and add",
+      "Collect": "Collect",
+      "ThirdParty": "Third party",
+      "customerDefault": "Customer's terms",
+      "installDefault": "Company default"
+    },
+    "warnings": {
+      "so-freight-already-billed": "This order quotes its own freight, which bills once, so the shipment's freight charge is not added."
+    },
+    "freightTaxable": "Freight is taxable in this jurisdiction",
+    "freightToBill": "Freight to bill customer",
+    "freightToBillPlaceholder": "From freight terms",
+    "carrierCostHint": "Carrier cost: {{cost}}",
+    "forPurchaseOrder": "For purchase order",
+    "noPurchaseOrder": "No purchase order",
+    "freightAccount": "Account",
+    "freightInAccount": "Freight-In (inbound)",
+    "freightOutAccount": "Freight-Out (delivery)",
+    "clearsPoAccrual": "Clears the PO's receipt freight accrual; any excess goes to Freight-In.",
+    "freightForPo": "Freight for {{po}}"
   }
 }

@@ -7,12 +7,13 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { FREIGHT_TERMS, FreightTerms } from '../../../../shared/models/freight-terms.const';
 import { CustomerSummary } from '../../models/customer-summary.model';
 
 /**
@@ -54,6 +55,10 @@ export class CustomerIdentityClusterComponent {
   /** Gated by the `customers.allow_manual_numbers` system setting. */
   protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
+  protected readonly freightTermsOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('freight.terms.installDefault') },
+    ...FREIGHT_TERMS.map(t => ({ value: t, label: this.translate.instant(`freight.terms.${t}`) })),
+  ];
 
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
@@ -67,6 +72,7 @@ export class CustomerIdentityClusterComponent {
     taxExemptionId: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     defaultCreditTerms: new FormControl<string | null>(null),
     currencyId: new FormControl<number | null>(null),
+    freightTerms: new FormControl<FreightTerms | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -98,6 +104,7 @@ export class CustomerIdentityClusterComponent {
         taxExemptionId: c.taxExemptionId ?? '',
         defaultCreditTerms: c.defaultCreditTerms ?? null,
         currencyId: c.currencyId ?? null,
+        freightTerms: c.freightTerms ?? null,
       });
       if (this.editing()) {
         this.form.enable();
@@ -124,6 +131,7 @@ export class CustomerIdentityClusterComponent {
       if (this.creditLimitsEnabled()) patch.creditLimit = v.creditLimit;
       patch.defaultCreditTerms = v.defaultCreditTerms;
     }
+    if (v.freightTerms !== (this.customer().freightTerms ?? null)) patch.freightTerms = v.freightTerms;
     if (!this.customer().currencyLocked && this.form.controls.currencyId.dirty && v.currencyId !== (this.customer().currencyId ?? null)) {
       patch.currencyId = v.currencyId;
     }

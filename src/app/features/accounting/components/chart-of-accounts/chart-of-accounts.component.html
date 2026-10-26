@@ -6,6 +6,13 @@
   </ng-container>
 
   <ng-container content>
+    <div class="tab-bar" appTabList>
+      <button class="tab" type="button" [appTab]="activeTab() === 'accounts'" (click)="switchTab('accounts')" data-testid="coa-tab-accounts">{{ 'accounting.coa.title' | translate }}</button>
+      <button class="tab" type="button" [appTab]="activeTab() === 'mapping'" (click)="switchTab('mapping')" data-testid="coa-tab-mapping">{{ 'accounting.mapping.title' | translate }}</button>
+    </div>
+    @if (activeTab() === 'mapping') {
+      <app-account-mapping [bookId]="bookId" [accounts]="accounts()" />
+    } @else {
     <app-data-table tableId="chart-of-accounts" [columns]="columns" [data]="accounts()" [loading]="loading()"
       emptyIcon="account_balance" [emptyMessage]="'accounting.coa.none' | translate" [clickableRows]="true"
       (rowClick)="openEdit($any($event))">
@@ -24,6 +31,7 @@
         </span>
       </ng-template>
     </app-data-table>
+    }
   </ng-container>
 </app-page-layout>
 

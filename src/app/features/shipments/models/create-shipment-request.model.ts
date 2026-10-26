@@ -11,6 +11,7 @@ export interface CreateShipmentRequest {
   carrierId?: number;
   trackingNumber?: string;
   shippingCost?: number;
+  freightCharge?: number;
   weight?: number;
   notes?: string;
   lines: CreateShipmentLineRequest[];

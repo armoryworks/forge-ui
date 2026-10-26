@@ -1,3 +1,4 @@
+import { DocumentLineType } from '../../../shared/models/document-line-type.type';
 import { SalesOrderLineJob } from './sales-order-line-job.model';
 
 export interface SalesOrderLine {
@@ -16,4 +17,6 @@ export interface SalesOrderLine {
   jobs: SalesOrderLineJob[];
   needsJob: boolean;
   shipsGoods?: boolean;
+  lineType?: DocumentLineType;
+  taxable?: boolean;
 }

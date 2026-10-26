@@ -61,6 +61,12 @@ export class InvoiceDetailPanelComponent {
 
   protected readonly invoiceIdValue = computed(() => this.invoice()?.id ?? 0);
   protected readonly currencyCode = computed(() => this.invoice()?.currencyCode ?? null);
+  protected readonly sortedLines = computed(() => {
+    const lines = this.invoice()?.lines ?? [];
+    return [...lines.filter(l => l.lineType !== 'Freight'), ...lines.filter(l => l.lineType === 'Freight')];
+  });
+  protected readonly freightSubtotal = computed(() => this.invoice()?.freightSubtotal ?? 0);
+  protected readonly itemsSubtotal = computed(() => (this.invoice()?.subtotal ?? 0) - this.freightSubtotal());
   protected readonly downloadingPdf = signal(false);
 
   // Inline rename of the invoice number — only offered while Draft and when the

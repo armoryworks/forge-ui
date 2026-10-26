@@ -51,6 +51,7 @@ export interface PortalInvoice {
   amountPaid: number;
   balance: number;
   currencyCode: string | null;
+  freight?: number;
 }
 
 export interface PortalShipment {

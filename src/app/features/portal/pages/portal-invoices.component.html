@@ -26,6 +26,7 @@
             <th scope="col">{{ 'portal.invoices.colDate' | translate }}</th>
             <th scope="col">{{ 'portal.invoices.colDueDate' | translate }}</th>
             <th scope="col">{{ 'portal.invoices.colStatus' | translate }}</th>
+            <th scope="col" class="portal-list__num">{{ 'portal.invoices.colFreight' | translate }}</th>
             <th scope="col" class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
             <th scope="col" class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
             <th scope="col" class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
@@ -38,6 +39,7 @@
               <td>{{ i.invoiceDate | dateOnly }}</td>
               <td>{{ i.dueDate ? (i.dueDate | dateOnly) : '—' }}</td>
               <td><span [class]="statusChip(i.status)">{{ statusLabelKey(i.status) | translate }}</span></td>
+              <td class="portal-list__num"><app-currency-display [value]="i.freight ?? 0" [currency]="i.currencyCode" /></td>
               <td class="portal-list__num"><app-currency-display [value]="i.total" [currency]="i.currencyCode" /></td>
               <td class="portal-list__num"><app-currency-display [value]="i.amountPaid" [currency]="i.currencyCode" /></td>
               <td class="portal-list__num"><app-currency-display [value]="i.balance" [currency]="i.currencyCode" /></td>

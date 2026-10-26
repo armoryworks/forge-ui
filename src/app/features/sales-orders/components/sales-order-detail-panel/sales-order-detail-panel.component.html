@@ -178,6 +178,12 @@
                 <span class="info-value">{{ so.creditTerms }}</span>
               </div>
             }
+            @if (so.freightTerms) {
+              <div class="info-item" data-testid="so-freight-terms-value">
+                <span class="info-label">{{ 'freight.freightTerms' | translate }}</span>
+                <span class="info-value">{{ 'freight.terms.' + so.freightTerms | translate }}</span>
+              </div>
+            }
             @if (so.requestedDeliveryDate) {
               <div class="info-item">
                 <span class="info-label">{{ 'salesOrders.requestedDelivery' | translate }}</span>
@@ -280,8 +286,14 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
-              <span class="info-value"><app-currency-display [value]="so.subtotal" [currency]="so.currencyCode ?? null" /></span>
+              <span class="info-value"><app-currency-display [value]="so.subtotal - (so.freightSubtotal ?? 0)" [currency]="so.currencyCode ?? null" /></span>
             </div>
+            @if (so.freightSubtotal) {
+              <div class="info-item" data-testid="so-detail-freight">
+                <span class="info-label">{{ 'freight.freight' | translate }}</span>
+                <span class="info-value"><app-currency-display [value]="so.freightSubtotal" [currency]="so.currencyCode ?? null" /></span>
+              </div>
+            }
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ taxPercent() | number:'1.0-4' }}%)</span>
               <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="so.currencyCode ?? null" /></span>

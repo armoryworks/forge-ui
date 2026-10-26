@@ -47,6 +47,13 @@ type StandaloneLineGroup = FormGroup<{
   glAccountId: FormControl<number | null>;
 }>;
 
+type FreightLineGroup = FormGroup<{
+  description: FormControl<string>;
+  amount: FormControl<number>;
+  purchaseOrderId: FormControl<number | null>;
+  accountKey: FormControl<string>;
+}>;
+
 type PoLineGroup = FormGroup<{
   quantityToBill: FormControl<number>;
   unitPrice: FormControl<number>;
@@ -110,6 +117,13 @@ export class VendorBillDialogComponent {
   // ── Lines — standalone mode ────────────────────────────────────────────────
   protected readonly standaloneLines = new FormArray<StandaloneLineGroup>([]);
 
+  protected readonly freightLines = new FormArray<FreightLineGroup>([]);
+  protected readonly freightPoOptions = signal<SelectOption[]>([]);
+  protected readonly freightAccountOptions: SelectOption[] = [
+    { value: 'FREIGHT_IN', label: this.translate.instant('freight.freightInAccount') },
+    { value: 'FREIGHT_OUT', label: this.translate.instant('freight.freightOutAccount') },
+  ];
+
   // ── Lines — from-PO mode ──────────────────────────────────────────────────
   protected readonly poLines = new FormArray<PoLineGroup>([]);
   protected readonly poLineMeta = signal<PoLineMeta[]>([]);
@@ -140,6 +154,7 @@ export class VendorBillDialogComponent {
     notes: new FormControl(''),
     lines: this.standaloneLines,
     poLines: this.poLines,
+    freightLines: this.freightLines,
   });
 
   /** Mode toggle — false = standalone lines, true = from purchase order. */
@@ -174,6 +189,11 @@ export class VendorBillDialogComponent {
     { initialValue: this.billForm.status },
   );
 
+  protected readonly freightTotal = computed(() => {
+    this.formValue();
+    return this.freightLines.controls.reduce((sum, g) => sum + roundMoney(g.controls.amount.value ?? 0), 0);
+  });
+
   protected readonly linesTotal = computed(() => {
     this.formValue();
     if (this.fromPo()) {
@@ -189,15 +209,16 @@ export class VendorBillDialogComponent {
     { initialValue: this.billForm.controls.taxAmount.value ?? 0 },
   );
 
-  protected readonly grandTotal = computed(() => roundMoney(this.linesTotal() + (this.taxAmountValue() ?? 0)));
+  protected readonly grandTotal = computed(() => roundMoney(this.linesTotal() + this.freightTotal() + (this.taxAmountValue() ?? 0)));
 
   /** Lines that would actually be submitted (PO rows with qty 0 are omitted). */
   protected readonly activeLineCount = computed(() => {
     this.formValue();
+    const freight = this.freightLines.length;
     if (this.fromPo()) {
-      return this.poLines.controls.filter(g => (g.controls.quantityToBill.value ?? 0) > 0).length;
+      return this.poLines.controls.filter(g => (g.controls.quantityToBill.value ?? 0) > 0).length + freight;
     }
-    return this.standaloneLines.length;
+    return this.standaloneLines.length + freight;
   });
 
   private readonly formViolations = FormValidationService.getViolations(this.billForm, {
@@ -317,6 +338,43 @@ export class VendorBillDialogComponent {
 
   protected removeLine(index: number): void {
     this.standaloneLines.removeAt(index);
+  }
+
+  protected addFreightLine(): void {
+    this.freightLines.push(new FormGroup({
+      description: new FormControl(this.translate.instant('freight.defaultDescription'), { nonNullable: true }),
+      amount: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0), this.unitPriceDecimals] }),
+      purchaseOrderId: new FormControl<number | null>(this.fromPo() ? this.billForm.controls.purchaseOrderId.value : null),
+      accountKey: new FormControl('FREIGHT_IN', { nonNullable: true }),
+    }));
+    if (this.freightPoOptions().length === 0) this.loadFreightPos();
+  }
+
+  protected removeFreightLine(index: number): void {
+    this.freightLines.removeAt(index);
+  }
+
+  private loadFreightPos(): void {
+    this.purchaseOrderService.getPurchaseOrders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (list) => this.freightPoOptions.set([
+        { value: null, label: this.translate.instant('freight.noPurchaseOrder') },
+        ...list.map(po => ({ value: po.id, label: `${po.poNumber} — ${po.vendorName}` })),
+      ]),
+    });
+  }
+
+  private freightRequests(): CreateVendorBillLineRequest[] {
+    return this.freightLines.controls.map(g => {
+      const value = g.getRawValue();
+      return {
+        description: value.description,
+        quantity: 1,
+        unitPrice: value.amount,
+        lineType: 'Freight',
+        freightForPurchaseOrderId: value.purchaseOrderId ?? undefined,
+        accountDeterminationKey: value.purchaseOrderId == null ? value.accountKey : undefined,
+      };
+    });
   }
 
   // ── From-PO lines ─────────────────────────────────────────────────────────
@@ -554,6 +612,8 @@ export class VendorBillDialogComponent {
         };
       });
     }
+
+    lines = [...lines, ...this.freightRequests()];
 
     const currencyField = this.documentCurrency();
     const currencyId = currencyField?.visible() ? (f.currencyId ?? undefined) : undefined;

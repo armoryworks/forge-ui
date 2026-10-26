@@ -1,3 +1,5 @@
+import { FreightTerms } from '../../../shared/models/freight-terms.const';
+
 export interface CustomerSummary {
   id: number;
   name: string;
@@ -30,6 +32,7 @@ export interface CustomerSummary {
   isTaxExempt?: boolean;
   taxExemptionId?: string | null;
   rowVersion?: number;
+  freightTerms?: FreightTerms | null;
   defaultCreditTerms?: string | null;
   isOnCreditHold?: boolean;
   currencyId?: number | null;

@@ -7,4 +7,6 @@ export interface InvoiceSourceShipment {
   salesOrderNumber: string;
   shippedDate: string | null;
   lines: InvoiceSourceShipmentLine[];
+  freightCharge?: number | null;
+  warnings?: string[] | null;
 }

@@ -29,13 +29,15 @@ import { ManualNumberSettingsService } from '../../../../shared/services/manual-
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
+import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
 
 interface LineEntry {
-  partId: number;
+  partId: number | null;
   partNumber: string;
   description: string;
   quantity: number;
   unitPrice: number;
+  lineType?: DocumentLineType;
 }
 
 // S2 note: this dialog deliberately has NO payment-schedule editor. Schedules
@@ -149,7 +151,14 @@ export class QuoteDialogComponent {
 
   protected readonly lineTotal = computed(() =>
     roundMoney(this.lines().reduce((sum, l) => sum + this.lineAmount(l), 0)));
-  protected readonly taxAmount = computed(() => roundMoney(this.lineTotal() * (this.taxRateValue() ?? 0) / 100));
+  protected readonly freightTotal = computed(() =>
+    roundMoney(this.lines().filter(l => l.lineType === 'Freight').reduce((sum, l) => sum + this.lineAmount(l), 0)));
+  protected readonly itemsTotal = computed(() => roundMoney(this.lineTotal() - this.freightTotal()));
+  protected readonly taxAmount = computed(() => roundMoney(this.itemsTotal() * (this.taxRateValue() ?? 0) / 100));
+
+  protected readonly freightForm = new FormGroup({
+    amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+  });
   protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
 
   protected lineAmount(line: LineEntry): number {
@@ -268,17 +277,34 @@ export class QuoteDialogComponent {
     const f = this.lineForm.getRawValue();
     const part = this.selectedPart();
     if (!part || part.id !== f.partId) return;
-    this.lines.update(prev => [...prev, {
-      partId: part.id,
-      partNumber: part.partNumber,
-      // Phase-4 Name+Description split: line carries the part's short
-      // identifier — Name is now the canonical short identifier.
-      description: part.name,
-      quantity: f.quantity!,
-      unitPrice: f.unitPrice!,
-    }]);
+    this.lines.update(prev => {
+      const entry: LineEntry = {
+        partId: part.id,
+        partNumber: part.partNumber,
+        // Phase-4 Name+Description split: line carries the part's short
+        // identifier — Name is now the canonical short identifier.
+        description: part.name,
+        quantity: f.quantity!,
+        unitPrice: f.unitPrice!,
+      };
+      const firstFreight = prev.findIndex(l => l.lineType === 'Freight');
+      return firstFreight < 0 ? [...prev, entry] : [...prev.slice(0, firstFreight), entry, ...prev.slice(firstFreight)];
+    });
     this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
     this.priceIsDefault.set(false);
+  }
+
+  protected addFreight(): void {
+    if (this.freightForm.invalid) return;
+    this.lines.update(prev => [...prev, {
+      partId: null,
+      partNumber: '',
+      description: this.translate.instant('freight.defaultDescription'),
+      quantity: 1,
+      unitPrice: Number(this.freightForm.controls.amount.value ?? 0),
+      lineType: 'Freight',
+    }]);
+    this.freightForm.reset({ amount: null });
   }
 
   protected removeLine(index: number): void {
@@ -291,12 +317,9 @@ export class QuoteDialogComponent {
 
     const f = this.form.getRawValue();
     const taxRateDecimal = (f.taxRate ?? 0) / 100;
-    const lineRequests: CreateQuoteLineRequest[] = this.lines().map(l => ({
-      partId: l.partId,
-      description: l.description,
-      quantity: l.quantity,
-      unitPrice: l.unitPrice,
-    }));
+    const lineRequests: CreateQuoteLineRequest[] = this.lines().map(l => l.lineType === 'Freight'
+      ? { description: l.description, quantity: l.quantity, unitPrice: l.unitPrice, lineType: 'Freight' }
+      : { partId: l.partId ?? undefined, description: l.description, quantity: l.quantity, unitPrice: l.unitPrice });
 
     this.quoteService.createQuote({
       customerId: f.customerId!,

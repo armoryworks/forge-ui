@@ -240,7 +240,7 @@ describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
     internals.invoiceForm.controls.shipmentId.setValue(7);
 
     expect(internals.lines()).toEqual([
-      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true, salesOrderLineId: 901 },
+      { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 4, unitPrice: 12.5, taxable: true, salesOrderLineId: 901, lineType: 'Item' },
     ]);
   });
 
@@ -444,5 +444,100 @@ describe('InvoiceDialogComponent — tax-exempt customer', () => {
 
     expect(internals.customerTaxExempt()).toBe(false);
     expect(internals.taxAmount()).toBeCloseTo(1.45, 6);
+  });
+});
+
+describe('InvoiceDialogComponent — freight', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  const freightSources: InvoiceSources = {
+    salesOrders: [{ id: 42, orderNumber: 'SO-00042', customerName: 'Acme', taxRate: 0.0725 }],
+    shipments: [{
+      id: 9, shipmentNumber: 'SHP-00009', salesOrderId: 42, salesOrderNumber: 'SO-00042', shippedDate: null,
+      lines: [
+        { partId: 4711, partNumber: 'PN-1001', description: 'Bracket', quantity: 1, unitPrice: 9685, taxable: true, salesOrderLineId: 901 },
+        { partId: null, partNumber: null, description: 'Freight', quantity: 1, unitPrice: 300, taxable: false, lineType: 'Freight' },
+      ],
+      freightCharge: 300,
+      warnings: ['so-freight-already-billed'],
+    }],
+  };
+
+  function selectWithJurisdiction(freightTaxable: boolean) {
+    const { internals, httpMock } = setup();
+    internals.invoiceForm.controls.customerId.setValue(5);
+    httpMock.expectOne(r => r.url === `${environment.apiUrl}/invoices/sources`).flush(freightSources);
+    httpMock.expectOne(`${environment.apiUrl}/customers/5`).flush({ id: 5, name: 'Acme', isTaxExempt: false });
+    httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`)
+      .flush({ id: 53, code: 'UT-UTCO', rate: 0.0725, freightTaxable });
+    return { internals: internals as unknown as FreightInternals, httpMock };
+  }
+
+  interface FreightInternals extends Omit<DialogInternals, 'lineForm'> {
+    lineForm: FormGroup<{
+      lineType: FormControl<string>;
+      partId: FormControl<number | null>;
+      description: FormControl<string | null>;
+      quantity: FormControl<number | null>;
+      unitPrice: FormControl<number | null>;
+    }>;
+    freightTotal(): number;
+    itemsTotal(): number;
+    sourceWarnings(): string[];
+    addLine(): void;
+    startFreightLine(): void;
+    save(): void;
+  }
+
+  it('keeps shipment freight out of the subtotal and out of the tax base when the jurisdiction does not tax freight', () => {
+    const { internals } = selectWithJurisdiction(false);
+
+    internals.invoiceForm.controls.shipmentId.setValue(9);
+
+    expect(internals.itemsTotal()).toBe(9685);
+    expect(internals.freightTotal()).toBe(300);
+    expect(internals.taxAmount()).toBeCloseTo(702.16, 2);
+    expect(internals.grandTotal()).toBeCloseTo(10687.16, 2);
+    expect(internals.sourceWarnings()).toEqual(['freight.warnings.so-freight-already-billed']);
+  });
+
+  it('starts shipment freight taxable when the jurisdiction taxes freight', () => {
+    const { internals } = selectWithJurisdiction(true);
+
+    internals.invoiceForm.controls.shipmentId.setValue(9);
+
+    expect(internals.lines()[1].taxable).toBe(true);
+    expect(internals.taxAmount()).toBeCloseTo(723.91, 2);
+  });
+
+  it('adds a freight line below the items with no part, and an item line above it', () => {
+    const { internals } = selectWithJurisdiction(false);
+    const line = internals.lineForm.controls;
+
+    internals.startFreightLine();
+    expect(line.partId.disabled).toBe(true);
+    line.unitPrice.setValue(25);
+    internals.addLine();
+
+    line.description.setValue('Bracket');
+    line.unitPrice.setValue(10);
+    internals.addLine();
+
+    expect(internals.lines().map(l => (l as { lineType?: string }).lineType)).toEqual(['Item', 'Freight']);
+    expect(internals.lines()[1].partId).toBeNull();
+    expect(internals.lines()[1].taxable).toBe(false);
+    expect(line.lineType.value).toBe('Item');
+  });
+
+  it('sends the line type and the jurisdiction on save', () => {
+    const { internals, httpMock } = selectWithJurisdiction(false);
+    internals.invoiceForm.controls.shipmentId.setValue(9);
+    internals.invoiceForm.controls.dueDate.setValue(new Date(2030, 0, 1));
+
+    internals.save();
+
+    const req = httpMock.expectOne(r => r.method === 'POST' && r.url === `${environment.apiUrl}/invoices`);
+    expect(req.request.body.salesTaxRateId).toBe(53);
+    expect(req.request.body.lines.map((l: { lineType: string }) => l.lineType)).toEqual(['Item', 'Freight']);
   });
 });

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, OnInit } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { filter } from 'rxjs';
+import { filter, map } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -16,9 +16,11 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { GlAccountAdmin } from '../../models/accounting.models';
+import { AccountMappingComponent } from '../account-mapping/account-mapping.component';
 
 const DEFAULT_BOOK_ID = 1;
 const TYPES = ['Asset', 'Liability', 'Equity', 'Income', 'Expense'];
@@ -38,6 +40,7 @@ const conventionalBalance = (type: string | null): 'Debit' | 'Credit' =>
   imports: [
     ReactiveFormsModule, TranslatePipe, PageLayoutComponent, DataTableComponent, ColumnCellDirective,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
+    TabListDirective, TabDirective, AccountMappingComponent,
   ],
   templateUrl: './chart-of-accounts.component.html',
   styleUrl: './chart-of-accounts.component.scss',
@@ -45,13 +48,24 @@ const conventionalBalance = (type: string | null): 'Debit' | 'Credit' =>
 })
 export class ChartOfAccountsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly fb = inject(FormBuilder);
   private readonly gl = inject(GeneralLedgerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private bookId = DEFAULT_BOOK_ID;
+  protected bookId = DEFAULT_BOOK_ID;
+
+  /** `?tab=mapping` shows the account mapping; the URL is the source of truth. */
+  protected readonly activeTab = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('tab') === 'mapping' ? 'mapping' : 'accounts'))),
+    { initialValue: 'accounts' as 'accounts' | 'mapping' },
+  );
+
+  protected switchTab(tab: 'accounts' | 'mapping'): void {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab: tab === 'accounts' ? null : tab }, queryParamsHandling: 'merge' });
+  }
 
   protected readonly accounts = signal<GlAccountAdmin[]>([]);
   protected readonly loading = signal(false);

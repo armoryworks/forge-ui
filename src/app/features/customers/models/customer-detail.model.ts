@@ -1,3 +1,4 @@
+import { FreightTerms } from '../../../shared/models/freight-terms.const';
 import { Contact } from './contact.model';
 import { CustomerJob } from './customer-job.model';
 
@@ -38,6 +39,7 @@ export interface CustomerDetail {
   taxExemptionId?: string | null;
   rowVersion?: number;
   exemptionExpiryDate?: string | null;
+  freightTerms?: FreightTerms | null;
   defaultCreditTerms?: string | null;
   currencyId?: number | null;
   currencyLocked?: boolean;

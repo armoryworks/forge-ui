@@ -47,6 +47,11 @@
       formControlName="exemptFlag"
       data-testid="sales-tax-exempt-flag" />
 
+    <app-toggle
+      [label]="'freight.freightTaxable' | translate"
+      formControlName="freightTaxable"
+      data-testid="sales-tax-freight-taxable" />
+
     <app-input
       [label]="'salesTax.glPostingAccountOptional' | translate"
       formControlName="glPostingAccount"

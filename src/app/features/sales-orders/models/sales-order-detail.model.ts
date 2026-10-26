@@ -29,4 +29,6 @@ export interface SalesOrderDetail {
   currencyId?: number | null;
   currencyCode?: string | null;
   fxRate?: number;
+  freightTerms?: string | null;
+  freightSubtotal?: number;
 }

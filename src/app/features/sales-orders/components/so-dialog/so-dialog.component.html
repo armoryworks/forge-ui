@@ -22,7 +22,12 @@
               @for (line of lines(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.lineType === 'Freight') {
+                      <span class="chip chip--primary" [attr.data-testid]="'so-line-freight-' + $index">{{ 'freight.lineTypeFreight' | translate }}</span>
+                    }
+                  </td>
                   <!-- Phase 3 / WU-10 — fractional qty + 4-decimal price. Trim trailing zeros. -->
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
@@ -59,6 +64,14 @@
             {{ 'common.add' | translate }}
           </button>
         </div>
+
+        <div class="add-line add-line--freight" [formGroup]="freightForm">
+          <app-input [label]="'freight.freightAmount' | translate" type="number" formControlName="amount" step="0.01" min="0" data-testid="so-freight-amount" />
+          <button class="action-btn action-btn--sm" type="button" data-testid="so-add-freight-btn" (click)="addFreight()" [disabled]="freightForm.invalid">
+            <span class="material-icons-outlined">local_shipping</span>
+            {{ 'freight.addFreight' | translate }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -84,6 +97,7 @@
         <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
         <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-credit-terms" />
         <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-delivery-date" />
+        <app-select [label]="'freight.freightTerms' | translate" formControlName="freightTerms" [options]="freightTermsOptions" data-testid="so-freight-terms" />
         <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
           [documentDate]="null" [defaultCurrencyId]="customerCurrencyId()" testIdPrefix="so" />
         <div class="tax-field">
@@ -106,8 +120,14 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
+          <app-currency-display [value]="itemsTotal()" [currency]="documentCurrencyCode()" />
         </div>
+        @if (freightTotal() !== 0) {
+          <div class="dlg-total-row" data-testid="so-freight-total">
+            <span>{{ 'freight.freight' | translate }}</span>
+            <app-currency-display [value]="freightTotal()" [currency]="documentCurrencyCode()" />
+          </div>
+        }
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() }}%)</span>
           <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />

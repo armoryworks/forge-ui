@@ -23,7 +23,12 @@
               @for (line of lines(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.lineType === 'Freight') {
+                      <span class="chip chip--primary" [attr.data-testid]="'invoice-line-freight-' + $index">{{ 'freight.lineTypeFreight' | translate }}</span>
+                    }
+                  </td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="documentCurrencyCode()" [maximumFractionDigits]="4" /></td>
                   <td class="lines-table__right"><app-currency-display [value]="lineAmounts()[$index]" [currency]="documentCurrencyCode()" /></td>
@@ -54,7 +59,15 @@
         }
 
         <!-- Add Line Form -->
-        <div class="add-line add-line--5col" [formGroup]="lineForm">
+        @for (warning of sourceWarnings(); track warning) {
+          <div class="tax-exempt-note" role="note" data-testid="invoice-freight-warning">
+            <span class="material-icons-outlined" aria-hidden="true">info</span>
+            {{ warning | translate }}
+          </div>
+        }
+
+        <div class="add-line add-line--6col" [formGroup]="lineForm">
+          <app-select [label]="'freight.lineType' | translate" formControlName="lineType" [options]="lineTypeOptions" data-testid="invoice-line-type" />
           <app-entity-picker [label]="'invoices.partId' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" [placeholder]="'common.optional' | translate" (selected)="onPartPicked($event)" data-testid="invoice-line-part" />
           <app-input [label]="'common.description' | translate" formControlName="description" data-testid="invoice-line-desc" />
           <app-input [label]="'invoices.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="invoice-line-qty" />
@@ -64,6 +77,12 @@
             {{ 'common.add' | translate }}
           </button>
         </div>
+        @if (addingFreight() !== 'Freight') {
+          <button class="action-btn action-btn--sm add-freight-btn" type="button" data-testid="invoice-add-freight-btn" (click)="startFreightLine()">
+            <span class="material-icons-outlined">local_shipping</span>
+            {{ 'freight.addFreight' | translate }}
+          </button>
+        }
       </div>
     </div>
 
@@ -102,8 +121,14 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
+          <app-currency-display [value]="itemsTotal()" [currency]="documentCurrencyCode()" />
         </div>
+        @if (freightTotal() !== 0) {
+          <div class="dlg-total-row" data-testid="invoice-freight-total">
+            <span>{{ 'freight.freight' | translate }}</span>
+            <app-currency-display [value]="freightTotal()" [currency]="documentCurrencyCode()" />
+          </div>
+        }
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ effectiveTaxRate() | number:'1.0-4' }}%)</span>
           <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />

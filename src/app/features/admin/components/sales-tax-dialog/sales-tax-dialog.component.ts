@@ -67,6 +67,7 @@ export class SalesTaxDialogComponent {
     // is optional (populated by accounting-sync when one is configured).
     exemptFlag: new FormControl(false),
     glPostingAccount: new FormControl<string | null>(null, [Validators.maxLength(100)]),
+    freightTaxable: new FormControl(false),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -89,6 +90,7 @@ export class SalesTaxDialogComponent {
         description: r.description ?? '',
         exemptFlag: r.exemptFlag ?? false,
         glPostingAccount: r.glPostingAccount ?? null,
+        freightTaxable: r.freightTaxable ?? false,
       });
     }
   }
@@ -117,6 +119,7 @@ export class SalesTaxDialogComponent {
       // path already accepts these because update reuses the create DTO.
       exemptFlag: f.exemptFlag ?? false,
       glPostingAccount: f.glPostingAccount || null,
+      freightTaxable: f.freightTaxable ?? false,
     };
 
     const r = this.rate();

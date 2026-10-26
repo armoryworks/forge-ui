@@ -1,3 +1,5 @@
+import { FreightTerms } from '../../../shared/models/freight-terms.const';
+
 export interface UpdateCustomerRequest {
   name?: string;
   /** User-settable business number. Only honored server-side when
@@ -23,4 +25,6 @@ export interface UpdateCustomerRequest {
   clearDefaultCreditTerms?: boolean;
   currencyId?: number;
   clearCurrency?: boolean;
+  freightTerms?: FreightTerms;
+  clearFreightTerms?: boolean;
 }

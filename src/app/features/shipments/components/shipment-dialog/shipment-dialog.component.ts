@@ -111,6 +111,7 @@ export class ShipmentDialogComponent implements OnInit {
     carrier: new FormControl(''),
     trackingNumber: new FormControl(''),
     shippingCost: new FormControl<number | null>(null),
+    freightCharge: new FormControl<number | null>(null, [Validators.min(0)]),
     weight: new FormControl<number>(0, { nonNullable: true }),
     notes: new FormControl(''),
   });
@@ -304,6 +305,7 @@ export class ShipmentDialogComponent implements OnInit {
       carrier: f.carrier || undefined,
       trackingNumber: f.trackingNumber || undefined,
       shippingCost: f.shippingCost ?? undefined,
+      freightCharge: f.freightCharge ?? undefined,
       weight: weightLbs > 0 ? Number(weightLbs.toFixed(4)) : undefined,
       notes: f.notes || undefined,
       lines: lineRequests,

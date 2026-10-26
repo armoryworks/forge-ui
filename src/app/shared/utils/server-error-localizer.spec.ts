@@ -20,6 +20,12 @@ describe('serverErrorKey', () => {
     expect(serverErrorKey('invalid-date')).toBe('apiErrors.codes.invalidDate');
   });
 
+  it('maps the freight and account-mapping codes', () => {
+    expect(serverErrorKey('freight-line-part')).toBe('apiErrors.codes.freightLinePart');
+    expect(serverErrorKey('so-freight-already-billed')).toBe('apiErrors.codes.soFreightAlreadyBilled');
+    expect(serverErrorKey('determination-account-type')).toBe('apiErrors.codes.determinationAccountType');
+  });
+
   it('leaves predicate rules and missing codes unmapped', () => {
     expect(serverErrorKey('PredicateValidator')).toBeUndefined();
     expect(serverErrorKey(null)).toBeUndefined();

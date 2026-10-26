@@ -36,6 +36,10 @@
   &--with-account {
     grid-template-columns: 150px 1fr 80px 100px 180px auto;
   }
+
+  &--freight {
+    grid-template-columns: 1fr 120px 200px 180px auto;
+  }
 }
 
 // PO line row: part/desc | received | billable | qty input | price input

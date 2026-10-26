@@ -1,0 +1,32 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.account-mapping__intro {
+  margin: 0 0 $sp-md;
+  color: var(--text-secondary);
+  font-size: $font-size-sm;
+}
+
+.account-mapping__label {
+  display: block;
+}
+
+.account-mapping__key {
+  display: block;
+  font-family: $font-family-mono;
+  font-size: var(--font-size-xxs);
+  color: var(--text-muted);
+}
+
+.account-mapping__unmapped {
+  color: var(--warning);
+  font-size: $font-size-sm;
+}
+
+.account-mapping__system {
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}

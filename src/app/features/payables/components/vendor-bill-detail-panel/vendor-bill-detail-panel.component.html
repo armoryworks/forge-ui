@@ -101,7 +101,12 @@
               @for (line of bill.lines; track line.id) {
                 <tr>
                   <td class="lines-table__mono">{{ line.lineNumber }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.lineType === 'Freight') {
+                      <span class="chip chip--primary" data-testid="bill-line-freight">{{ line.freightForPurchaseOrderNumber ? ('freight.freightForPo' | translate: { po: line.freightForPurchaseOrderNumber }) : ('freight.lineTypeFreight' | translate) }}</span>
+                    }
+                  </td>
                   @if (bill.purchaseOrderId) {
                     <td class="lines-table__mono">{{ line.purchaseOrderLineLabel ?? (line.purchaseOrderLineId ? ('payables.poLineFallback' | translate: { id: line.purchaseOrderLineId }) : '—') }}</td>
                   } @else {

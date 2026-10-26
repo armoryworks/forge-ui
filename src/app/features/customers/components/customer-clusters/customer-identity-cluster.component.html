@@ -75,6 +75,9 @@
       <app-select data-testid="customer-identity-credit-terms" [label]="'customers.workflow.creditAndTax.defaultCreditTermsLabel' | translate" formControlName="defaultCreditTerms" [options]="creditTermsOptions" [isReadonly]="!editing()" />
     </div>
     <div class="cluster__form-row">
+      <app-select data-testid="customer-identity-freight-terms" [label]="'freight.freightTerms' | translate" formControlName="freightTerms" [options]="freightTermsOptions" [isReadonly]="!editing()" />
+    </div>
+    <div class="cluster__form-row">
       <app-document-currency [currencyControl]="form.controls.currencyId" [defaultCurrencyId]="currencyId()"
         [locked]="currencyLocked()" [readonly]="!editing()" testIdPrefix="customer-identity" />
     </div>

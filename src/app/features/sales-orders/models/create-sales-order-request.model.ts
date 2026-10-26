@@ -1,5 +1,6 @@
 import { CreateSalesOrderLineRequest } from './create-sales-order-line-request.model';
 
+import { FreightTerms } from '../../../shared/models/freight-terms.const';
 export interface CreateSalesOrderRequest {
   customerId: number;
   /** Optional manual override; blank/omitted → server auto-generates. Gated by the `sales_orders.allow_manual_numbers` setting. */
@@ -13,6 +14,7 @@ export interface CreateSalesOrderRequest {
   notes?: string;
   taxRate: number;
   lines: CreateSalesOrderLineRequest[];
+  freightTerms?: FreightTerms;
   currencyId?: number;
   fxRate?: number | null;
 }

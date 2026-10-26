@@ -80,6 +80,12 @@
             <span class="info-value"><app-currency-display [value]="shipment.shippingCost" [currency]="null" /></span>
           </div>
         }
+        @if (shipment.freightCharge !== null && shipment.freightCharge !== undefined) {
+          <div class="info-item" data-testid="shipment-freight-charge-value">
+            <span class="info-label">{{ 'freight.freightToBill' | translate }}</span>
+            <span class="info-value"><app-currency-display [value]="shipment.freightCharge" [currency]="null" /></span>
+          </div>
+        }
         @if (shipment.invoiceId) {
           <div class="info-item">
             <span class="info-label">{{ 'shipments.linkedInvoice' | translate }}</span>
