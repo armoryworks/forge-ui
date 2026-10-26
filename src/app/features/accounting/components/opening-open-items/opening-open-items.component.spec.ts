@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FormArray, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { OpeningOpenItemsComponent } from './opening-open-items.component';
 import { OpeningOpenItemsService } from '../../services/opening-open-items.service';
@@ -80,7 +80,7 @@ describe('OpeningOpenItemsComponent', () => {
     expect(api.payablesDifference()).toBe(0);
   });
 
-  it('posts only after a clean check that ties out, with the party lines and the equity offset', () => {
+  it('posts the checked rows with the legacy control balances only after a clean check that ties out', () => {
     const api = create();
     fill(api);
     expect(api.canPost()).toBe(false);
@@ -94,10 +94,9 @@ describe('OpeningOpenItemsComponent', () => {
     expect(api.canPost()).toBe(true);
 
     api.post();
-    expect(service.post).toHaveBeenCalledWith(1, '2026-01-01', [
-      expect.objectContaining({ accountDeterminationKey: 'AR_CONTROL', debit: 1500, partyId: 7, documentNumber: 'INV-1' }),
-      expect.objectContaining({ accountDeterminationKey: 'AP_CONTROL', credit: 450, partyId: 9 }),
-      expect.objectContaining({ accountDeterminationKey: 'OPENING_BALANCE_EQUITY', credit: 1050 }),
+    expect(service.post).toHaveBeenCalledWith(1, '2026-01-01', 1500, 450, [
+      expect.objectContaining({ partyType: 'Customer', partyRef: 'CUST-0001', documentNumber: 'INV-1', amount: 1500 }),
+      expect.objectContaining({ partyType: 'Vendor', partyRef: 'VEND-0001', amount: 450 }),
     ]);
     expect(api.isDirty()).toBe(false);
     expect(api.canPost()).toBe(false);
@@ -114,6 +113,19 @@ describe('OpeningOpenItemsComponent', () => {
     api.form.patchValue({ payablesControl: 450 });
     api.runCheck();
     expect(api.rowResults()[0].messages).toEqual(['accounting.openItems.errors.party-not-found']);
+    expect(api.canPost()).toBe(false);
+  });
+
+  it('drops the check and reports a refused post so the rows can be checked again', () => {
+    const api = create();
+    fill(api);
+    api.runCheck();
+    service.post.mockReturnValue(throwError(() => new Error('409')));
+
+    api.post();
+
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.any(Error), 'accounting.openItems.postFailed');
+    expect(api.check()).toBeNull();
     expect(api.canPost()).toBe(false);
   });
 

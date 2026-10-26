@@ -186,6 +186,7 @@ export class NavTreeService {
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
+        { icon: 'request_quote', label: 'Opening Receivables & Payables', i18nKey: 'nav.openingOpenItems', route: '/accounting/opening-open-items', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',

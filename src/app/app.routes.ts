@@ -6,6 +6,7 @@ import { shellAuthGuard } from './shared/guards/shell-auth.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { routeAccessGuards } from './shared/guards/route-access.guard';
+import { unsavedChangesGuard } from './shared/guards/unsaved-changes.guard';
 import { rootRedirectGuard } from './shared/guards/root-redirect.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
 import { devOnlyRoutes } from './shared/utils/dev-only-routes';
@@ -226,6 +227,14 @@ export const routes: Routes = [
         canActivate: routeAccessGuards('accounting/opening-stock'),
         loadComponent: () =>
           import('./features/accounting/components/opening-stock/opening-stock.component').then((m) => m.OpeningStockComponent),
+      },
+      {
+        path: 'accounting/opening-open-items',
+        data: { titleKey: 'nav.openingOpenItems' },
+        canActivate: routeAccessGuards('accounting/opening-open-items'),
+        canDeactivate: [unsavedChangesGuard],
+        loadComponent: () =>
+          import('./features/accounting/components/opening-open-items/opening-open-items.component').then((m) => m.OpeningOpenItemsComponent),
       },
       {
         // GL accounting suite — gated by CAP-ACCT-GL-VIEW (the read-only view surface) so the

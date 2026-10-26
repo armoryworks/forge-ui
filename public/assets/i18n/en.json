@@ -12317,6 +12317,7 @@
       "posted": "Opening open items posted as journal entry #{{number}}.",
       "alreadyPosted": "This book's opening receivables and payables are already posted.",
       "checkFailed": "Could not check the open items.",
+      "postFailed": "The open items were not posted. Check them again and fix any problems.",
       "csvBadRows": "These CSV lines could not be read: {{rows}}",
       "csvEmpty": "The CSV has no open items.",
       "csvLoaded": "{{count}} open item(s) loaded. Check them before posting.",

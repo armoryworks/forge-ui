@@ -26,7 +26,7 @@ import {
   OPENING_OPEN_ITEMS_TEMPLATE_HEADER,
   parseOpeningOpenItemsCsv,
 } from '../../utils/opening-open-items-csv';
-import { openingOpenItemsLines, tieOutDifference } from '../../utils/opening-open-items-lines';
+import { tieOutDifference } from '../../utils/opening-open-items-lines';
 import { pickFile } from '../../utils/pick-file';
 
 const DEFAULT_BOOK_ID = 1;
@@ -207,12 +207,11 @@ export class OpeningOpenItemsComponent implements OnInit, HasDirtyForm {
   }
 
   protected post(): void {
-    const check = this.check();
-    if (!check || !this.canPost() || this.form.invalid) return;
-    const asOf = (toIsoDate(this.form.controls.asOfDate.value) ?? '').slice(0, 10);
-    const lines = openingOpenItemsLines(this.items(), check.rows.map((r) => r.partyId));
+    if (!this.check() || !this.canPost() || this.form.invalid) return;
+    const raw = this.form.getRawValue();
+    const asOf = (toIsoDate(raw.asOfDate) ?? '').slice(0, 10);
     this.posting.set(true);
-    this.service.post(this.bookId, asOf, lines)
+    this.service.post(this.bookId, asOf, Number(raw.receivablesControl) || 0, Number(raw.payablesControl) || 0, this.items())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -221,7 +220,11 @@ export class OpeningOpenItemsComponent implements OnInit, HasDirtyForm {
           this.form.markAsPristine();
           this.snackbar.success(this.translate.instant('accounting.openItems.posted', { number: result.entryNumber }));
         },
-        error: () => this.posting.set(false),
+        error: (err: unknown) => {
+          this.posting.set(false);
+          this.check.set(null);
+          this.snackbar.errorFrom(err, 'accounting.openItems.postFailed');
+        },
       });
   }
 

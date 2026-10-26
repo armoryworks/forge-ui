@@ -29,6 +29,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'expenses': { roles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
   'accounting/opening-journal': { roles: ['Controller'], capabilities: ['CAP-ACCT-MIGRATION'] },
   'accounting/opening-stock': { roles: ['Controller'], anyCapabilities: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
+  'accounting/opening-open-items': { roles: ['Controller'], anyCapabilities: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
   'accounting': { roles: ['Controller'], capabilities: ['CAP-ACCT-GL-VIEW'] },
   'assets': { roles: ['Admin', 'Manager', 'Engineer'] },
   'maintenance': { roles: ['Admin', 'Manager'] },

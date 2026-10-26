@@ -55,6 +55,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   // ── Specific sub-paths first (must precede their parent prefix) ──
   { prefix: 'accounting/cash-flow', capability: 'CAP-RPT-FINANCIALS' },
   { prefix: 'accounting/conversion/stock-loads', capability: 'CAP-ACCT-MIGRATION', anyOf: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
+  { prefix: 'accounting/conversion/open-items', capability: 'CAP-ACCT-MIGRATION', anyOf: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
   { prefix: 'accounting/conversion', capability: 'CAP-ACCT-MIGRATION' },
   { prefix: 'accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
   { prefix: 'accounting/bank-statements', capability: 'CAP-ACCT-FULLGL' },

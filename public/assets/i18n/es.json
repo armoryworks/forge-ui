@@ -12317,6 +12317,7 @@
       "posted": "Partidas abiertas iniciales contabilizadas como asiento #{{number}}.",
       "alreadyPosted": "Los saldos iniciales por cobrar y por pagar de este libro ya están contabilizados.",
       "checkFailed": "No se pudieron revisar las partidas abiertas.",
+      "postFailed": "Las partidas abiertas no se contabilizaron. Revíselas de nuevo y corrija los problemas.",
       "csvBadRows": "No se pudieron leer estas líneas del CSV: {{rows}}",
       "csvEmpty": "El CSV no tiene partidas abiertas.",
       "csvLoaded": "{{count}} partida(s) abierta(s) cargada(s). Revíselas antes de contabilizar.",

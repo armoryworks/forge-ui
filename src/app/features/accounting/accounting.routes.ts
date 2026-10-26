@@ -145,14 +145,6 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/pay-runs/pay-runs.component').then((m) => m.PayRunsComponent),
   },
   {
-    path: 'opening-open-items',
-    data: { titleKey: 'nav.openingOpenItems' },
-    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
-    canDeactivate: [unsavedChangesGuard],
-    loadComponent: () =>
-      import('./components/opening-open-items/opening-open-items.component').then((m) => m.OpeningOpenItemsComponent),
-  },
-  {
     path: 'bank-statements',
     data: { titleKey: 'nav.bankStatements' },
     loadComponent: () =>
