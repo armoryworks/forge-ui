@@ -12,6 +12,8 @@ import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
 import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
+import { VENDOR_MANAGE_ROLES } from '../../../vendors/vendor-roles';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 /**
  * Sourcing step — designates the preferred vendor for the part. Per-vendor
@@ -39,6 +41,7 @@ export class PartSourcingStepComponent {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly matDialog = inject(MatDialog);
+  protected readonly canCreateVendor = inject(AuthService).hasAnyRole(VENDOR_MANAGE_ROLES);
 
   readonly stepId = input<string>('sourcing');
   readonly componentName = input<string>('PartSourcingStepComponent');
