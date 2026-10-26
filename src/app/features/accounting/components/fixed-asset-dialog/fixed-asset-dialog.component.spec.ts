@@ -117,6 +117,19 @@ describe('FixedAssetDialogComponent', () => {
     expect(dialogRef.close).toHaveBeenCalledWith({ id: 9 });
   });
 
+  it('shows the units field when editing a units-of-production asset', () => {
+    const c = create({
+      bookId: 1,
+      detail: { ...DETAIL, asset: { ...DETAIL.asset, method: 'UnitsOfProduction', usefulLifeUnits: 50000, linkedAssetId: 7 } },
+    });
+
+    expect(c.unitsBased()).toBe(true);
+    expect(c.form.get('usefulLifeUnits')!.value).toBe(50000);
+    expect(c.form.get('linkedAssetId')!.value).toBe(7);
+    expect(c.form.get('name')!.value).toBe('CNC Mill');
+    expect(c.form.valid).toBe(true);
+  });
+
   it('edits an existing asset with a PUT', () => {
     const c = create({ bookId: 1, detail: DETAIL });
     expect(c.form.get('name')!.value).toBe('CNC Mill');

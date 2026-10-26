@@ -228,6 +228,7 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
       entryDate: (toIsoDate(raw.entryDate) ?? '').slice(0, 10),
       memo: raw.memo.trim(),
       allowSoftClosedOverride: false,
+      ...(this.fromTemplate()?.autoReverseNextPeriod ? { autoReverseNextPeriod: true } : {}),
       lines: this.lines.controls.map((control) => {
         const line = control.getRawValue() as {
           glAccountId: number | null;
@@ -277,7 +278,7 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   }
 
   private buildLine(): FormGroup {
-    return new FormGroup(
+    const group = new FormGroup(
       {
         glAccountId: new FormControl<number | null>(null, [Validators.required]),
         debit: new FormControl<number | null>(null),
@@ -288,6 +289,10 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
       },
       { validators: [lineValidator] },
     );
+    group.controls.glAccountId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => group.patchValue({ partyType: null, partyId: null }, { emitEvent: false }));
+    return group;
   }
 
   private toOption(account: GlAccount): SelectOption {

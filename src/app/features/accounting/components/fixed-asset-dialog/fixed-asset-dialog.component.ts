@@ -191,7 +191,6 @@ export class FixedAssetDialogComponent implements OnInit {
     this.form.patchValue({
       name: a.name,
       assetTag: a.assetTag ?? '',
-      method: a.method,
       cost: a.cost,
       salvageValue: a.salvageValue,
       inServiceDate: parseDateOnly(a.inServiceDate),
@@ -202,7 +201,7 @@ export class FixedAssetDialogComponent implements OnInit {
       depreciationExpenseGlAccountId: detail.depreciationExpenseGlAccountId,
     }, { emitEvent: false });
     this.form.controls.linkedAssetId.setValue(a.linkedAssetId, { emitEvent: false });
-    this.applyMethodRules();
+    this.form.controls.method.setValue(a.method);
   }
 
   private optionsFor(type: string): SelectOption[] {

@@ -488,6 +488,7 @@ export interface ManualJournalEntryInput {
   currencyId: number;
   memo?: string | null;
   allowSoftClosedOverride?: boolean;
+  autoReverseNextPeriod?: boolean;
   lines: ManualJournalLineInput[];
 }
 

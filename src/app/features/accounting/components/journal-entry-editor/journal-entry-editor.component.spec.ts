@@ -142,6 +142,29 @@ describe('JournalEntryEditorComponent', () => {
     }));
   });
 
+  it('posts an auto-reversing template as an auto-reversing entry and drops the counterparty when the account changes', () => {
+    queryParams = { fromTemplate: '4' };
+    gl.getDeterminationRules.mockReturnValue(of([]));
+    templates.get.mockReturnValue(of({
+      id: 4, bookId: 1, name: 'Accrued rent', description: null, memo: 'Rent accrual', autoReverseNextPeriod: true, isActive: true,
+      lines: [
+        { accountDeterminationKey: null, glAccountId: 100, debit: 400, credit: 0, description: null, partyType: 'Customer', partyId: 21 },
+        { accountDeterminationKey: null, glAccountId: 101, debit: 0, credit: 400, description: null, partyType: null, partyId: null },
+      ],
+    }));
+    const api = create();
+    const lines = api.form.get('lines') as FormArray;
+    expect(lines.at(0).value.partyId).toBe(21);
+
+    lines.at(0).patchValue({ glAccountId: 101 });
+    lines.at(1).patchValue({ glAccountId: 100 });
+    api.save();
+
+    const request = gl.createManualJournalEntry.mock.calls[0][0] as { autoReverseNextPeriod?: boolean; lines: Record<string, unknown>[] };
+    expect(request.autoReverseNextPeriod).toBe(true);
+    expect(request.lines[0]).not.toHaveProperty('partyType');
+  });
+
   it('sends no counterparty on a line that has none', () => {
     const api = create();
     fillBalanced(api);
@@ -149,6 +172,7 @@ describe('JournalEntryEditorComponent', () => {
 
     const request = gl.createManualJournalEntry.mock.calls[0][0] as { lines: Record<string, unknown>[] };
     expect(request.lines[0]).not.toHaveProperty('partyType');
+    expect(request).not.toHaveProperty('autoReverseNextPeriod');
   });
 
   it('rejects a negative amount on a line', () => {

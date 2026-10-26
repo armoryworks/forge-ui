@@ -7,7 +7,7 @@ import { DepreciationPreview } from '../models/depreciation-preview.model';
 import { DepreciationRunResult } from '../models/depreciation-run-result.model';
 import { FixedAsset } from '../models/fixed-asset.model';
 import { FixedAssetDetail } from '../models/fixed-asset-detail.model';
-import { DisposeFixedAssetInput, FixedAssetDisposalResult } from '../models/fixed-asset-disposal.model';
+import { DisposeFixedAssetInput, FixedAssetDisposalPreview, FixedAssetDisposalResult } from '../models/fixed-asset-disposal.model';
 import { FixedAssetInput } from '../models/fixed-asset-input.model';
 import { LinkableAsset } from '../models/linkable-asset.model';
 
@@ -48,6 +48,10 @@ export class FixedAssetService {
 
   runDepreciation(bookId: number, periodMonth: string): Observable<DepreciationRunResult> {
     return this.http.post<DepreciationRunResult>(`${this.base}/depreciation/run`, { bookId, periodMonth });
+  }
+
+  previewDisposal(id: number, disposalDate: string, proceeds: number): Observable<FixedAssetDisposalPreview> {
+    return this.http.post<FixedAssetDisposalPreview>(`${this.base}/fixed-assets/${id}/dispose/preview`, { disposalDate, proceeds });
   }
 
   dispose(id: number, input: DisposeFixedAssetInput): Observable<FixedAssetDisposalResult> {

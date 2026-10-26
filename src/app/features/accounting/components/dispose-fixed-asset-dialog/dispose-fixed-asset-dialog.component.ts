@@ -3,6 +3,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+import { catchError, of, startWith, switchMap } from 'rxjs';
+
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
@@ -17,6 +19,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toDateOnly } from '../../../../shared/utils/date.utils';
 import { GlAccount } from '../../models/accounting.models';
 import { FixedAssetDetail } from '../../models/fixed-asset-detail.model';
+import { FixedAssetDisposalPreview } from '../../models/fixed-asset-disposal.model';
 import { FixedAssetService } from '../../services/fixed-asset.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 
@@ -77,23 +80,17 @@ export class DisposeFixedAssetDialogComponent implements OnInit {
       .map((a) => ({ value: a.id, label: `${a.accountNumber} — ${a.name}` })),
   ]);
 
-  /** Book value at the disposal date: the schedule's accumulated depreciation for the months before it. */
-  protected readonly bookValueAtDisposal = computed(() => {
-    const date = this.value().disposalDate ?? null;
-    const { asset, schedule } = this.data.detail;
-    if (!date) return asset.netBookValue;
-    const month = toDateOnly(new Date(date.getFullYear(), date.getMonth(), 1)) ?? '';
-    const before = schedule.filter((row) => row.periodMonth < month);
-    const posted = schedule.filter((row) => row.posted);
-    const accumulated = Math.max(
-      before.length ? before[before.length - 1].accumulatedDepreciation : 0,
-      posted.length ? posted[posted.length - 1].accumulatedDepreciation : 0,
-    );
-    return Math.round((asset.cost - accumulated) * 100) / 100;
-  });
+  private readonly preview = signal<FixedAssetDisposalPreview | null>(null);
 
-  protected readonly gainLoss = computed(() =>
-    Math.round(((this.value().proceeds ?? 0) - this.bookValueAtDisposal()) * 100) / 100);
+  /** The server's book value at the disposal date, after the catch-up depreciation the disposal would post. */
+  protected readonly bookValueAtDisposal = computed(() => this.preview()?.netBookValue ?? null);
+  protected readonly catchUp = computed(() => this.preview()?.catchUpDepreciation ?? null);
+
+  protected readonly gainLoss = computed(() => {
+    const bookValue = this.bookValueAtDisposal();
+    if (bookValue === null) return null;
+    return Math.round(((this.value().proceeds ?? 0) - bookValue) * 100) / 100;
+  });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     disposalDate: this.translate.instant('accounting.fixedAssets.disposalDate'),
@@ -107,6 +104,25 @@ export class DisposeFixedAssetDialogComponent implements OnInit {
       account.setValidators((proceeds ?? 0) > 0 ? [Validators.required] : []);
       account.updateValueAndValidity();
     });
+
+    const dateControl = this.form.controls.disposalDate;
+    dateControl.valueChanges
+      .pipe(
+        startWith(dateControl.value),
+        switchMap((date) => {
+          this.preview.set(null);
+          const disposalDate = toDateOnly(date);
+          if (!disposalDate) return of(null);
+          return this.service.previewDisposal(this.data.detail.asset.id, disposalDate, 0).pipe(
+            catchError((err: unknown) => {
+              this.snackbar.errorFrom(err, 'accounting.fixedAssets.previewFailed');
+              return of(null);
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((preview) => this.preview.set(preview));
 
     this.gl.getChartOfAccounts(this.data.detail.asset.bookId, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (accounts) => this.accounts.set(accounts),

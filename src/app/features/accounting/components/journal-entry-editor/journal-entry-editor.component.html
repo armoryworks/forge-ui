@@ -29,7 +29,12 @@
     }
 
     @if (fromTemplate(); as t) {
-      <p class="je-template" data-testid="je-from-template">{{ 'accounting.journalEditor.fromTemplate' | translate: { name: t.name } }}</p>
+      <p class="je-template" data-testid="je-from-template">
+        {{ 'accounting.journalEditor.fromTemplate' | translate: { name: t.name } }}
+        @if (t.autoReverseNextPeriod) {
+          {{ 'accounting.journalEditor.fromTemplateAutoReverse' | translate }}
+        }
+      </p>
     }
 
     <form [formGroup]="form" class="je-editor">

@@ -11431,7 +11431,8 @@
       "correcting": "Correcting entry #{{number}}",
       "pendingApproval": "Entry {{number}} is waiting for a second approver",
       "resubmitting": "Resubmitting rejected entry #{{number}}",
-      "fromTemplate": "Pre-filled from template “{{name}}”. Enter amounts on any empty line, check the date, then post."
+      "fromTemplate": "Pre-filled from template “{{name}}”. Enter amounts on any empty line, check the date, then post.",
+      "fromTemplateAutoReverse": "This entry reverses automatically into the next period when its period closes."
     },
     "training": {
       "title": "GL Training",
@@ -12261,6 +12262,7 @@
       "gainLossAccount": "Gain or loss account",
       "bookDefault": "Book default (gain/loss on disposal)",
       "bookValueAtDisposal": "Book value at disposal",
+      "catchUp": "Catch-up depreciation",
       "gain": "Gain",
       "loss": "Loss",
       "disposeHint": "Any months not yet depreciated before the disposal month post first. The asset's cost and accumulated depreciation are written off.",

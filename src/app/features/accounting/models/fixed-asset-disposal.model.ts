@@ -18,3 +18,13 @@ export interface FixedAssetDisposalResult {
   proceeds: number;
   gainLoss: number;
 }
+
+/** What a disposal on a date would post (`POST accounting/fixed-assets/{id}/dispose/preview`), posting nothing. */
+export interface FixedAssetDisposalPreview {
+  fixedAssetId: number;
+  disposalDate: string;
+  catchUpDepreciation: number;
+  netBookValue: number;
+  proceeds: number;
+  gainLoss: number;
+}

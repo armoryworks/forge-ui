@@ -16,11 +16,18 @@
     <app-input [label]="'accounting.journalEditor.memo' | translate" formControlName="memo" data-testid="dispose-memo" />
 
     <div class="totals-strip" data-testid="dispose-outcome">
-      <span class="totals-strip__metric">{{ 'accounting.fixedAssets.bookValueAtDisposal' | translate }} <app-currency-display [value]="bookValueAtDisposal()" /></span>
-      <span class="totals-strip__metric" [class.fa-dispose__loss]="gainLoss() < 0">
-        {{ (gainLoss() < 0 ? 'accounting.fixedAssets.loss' : 'accounting.fixedAssets.gain') | translate }}
-        <app-currency-display [value]="gainLoss() < 0 ? -gainLoss() : gainLoss()" />
-      </span>
+      @let bookValue = bookValueAtDisposal();
+      @let result = gainLoss();
+      @if (bookValue !== null && result !== null) {
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.catchUp' | translate }} <app-currency-display [value]="catchUp() ?? 0" /></span>
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.bookValueAtDisposal' | translate }} <app-currency-display [value]="bookValue" /></span>
+        <span class="totals-strip__metric" [class.fa-dispose__loss]="result < 0">
+          {{ (result < 0 ? 'accounting.fixedAssets.loss' : 'accounting.fixedAssets.gain') | translate }}
+          <app-currency-display [value]="result < 0 ? -result : result" />
+        </span>
+      } @else {
+        <span class="totals-strip__metric acct-muted">—</span>
+      }
     </div>
     <p class="fa-dispose__hint">{{ 'accounting.fixedAssets.disposeHint' | translate }}</p>
   </div>

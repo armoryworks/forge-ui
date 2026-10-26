@@ -11431,7 +11431,8 @@
       "correcting": "Corrigiendo el asiento n.º {{number}}",
       "pendingApproval": "El asiento {{number}} espera un segundo aprobador",
       "resubmitting": "Reenviando el asiento rechazado #{{number}}",
-      "fromTemplate": "Prellenado desde la plantilla “{{name}}”. Ingrese los montos en las líneas vacías, revise la fecha y registre."
+      "fromTemplate": "Prellenado desde la plantilla “{{name}}”. Ingrese los montos en las líneas vacías, revise la fecha y registre.",
+      "fromTemplateAutoReverse": "Este asiento se revierte automáticamente en el siguiente período al cerrar su período."
     },
     "training": {
       "title": "Formación del libro mayor",
@@ -12261,6 +12262,7 @@
       "gainLossAccount": "Cuenta de ganancia o pérdida",
       "bookDefault": "Predeterminada del libro (ganancia/pérdida por baja)",
       "bookValueAtDisposal": "Valor en libros a la baja",
+      "catchUp": "Depreciación pendiente",
       "gain": "Ganancia",
       "loss": "Pérdida",
       "disposeHint": "Primero se registran los meses aún no depreciados antes del mes de baja. Se cancelan el costo y la depreciación acumulada del activo.",
