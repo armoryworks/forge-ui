@@ -96,6 +96,13 @@
               <span class="material-icons-outlined">build</span>
               {{ 'shopFloor.operations.startSetup' | translate }}
             </button>
+            <button type="button" class="op-tile__btn"
+                    [disabled]="busy()"
+                    (click)="startRework.emit(tile.row)"
+                    [attr.data-testid]="'kiosk-op-start-rework-' + tile.row.stepNumber">
+              <span class="material-icons-outlined">replay</span>
+              {{ 'shopFloor.operations.startRework' | translate }}
+            </button>
           }
           <button type="button" class="op-tile__btn"
                   [disabled]="busy()"

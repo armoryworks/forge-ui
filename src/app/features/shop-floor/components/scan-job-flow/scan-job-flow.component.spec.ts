@@ -139,7 +139,7 @@ interface TrackingInternals {
   startTimer(): void;
   stopTimer(): void;
   confirmAdvanceStage(): void;
-  startOperation(row: JobOperationRow, entryType?: 'Run' | 'Setup'): void;
+  startOperation(row: JobOperationRow, entryType?: 'Run' | 'Setup' | 'Rework'): void;
   stopOperation(row: JobOperationRow): void;
   stopRunningTimer(timer: { id: number; jobNumber: string; jobId?: number | null; operationId?: number | null; entryType?: string | null }): void;
   suggestedOperationId: () => number | null;
@@ -303,6 +303,9 @@ describe('ScanJobFlowComponent — operation tracking', () => {
 
     c.startOperation(opRow(1), 'Setup');
     expect(shopFloor.startOperationTimer).toHaveBeenLastCalledWith(5, 101, 'Setup');
+
+    c.startOperation(opRow(1), 'Rework');
+    expect(shopFloor.startOperationTimer).toHaveBeenLastCalledWith(5, 101, 'Rework');
   });
 
   it('a refused start shows the server reason', () => {

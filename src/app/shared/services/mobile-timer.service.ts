@@ -205,7 +205,7 @@ export class MobileTimerService {
     }
     const { jobId, operationId, entryType } = outcome.stopped;
     if (jobId === null || operationId === null) return;
-    await firstValueFrom(this.api.startOperationTimer(jobId, operationId, entryType === 'Setup' ? 'Setup' : 'Run', token));
+    await firstValueFrom(this.api.startOperationTimer(jobId, operationId, entryType === 'Setup' || entryType === 'Rework' ? entryType : 'Run', token));
     await this.refresh();
   }
 

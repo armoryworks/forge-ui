@@ -10,7 +10,7 @@ import {
 import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { fromEvent, filter, map, startWith } from 'rxjs';
+import { catchError, forkJoin, fromEvent, filter, map, of, startWith } from 'rxjs';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -39,6 +39,7 @@ import {
   OnboardingPolicyDocs,
   OnboardingService,
   OnboardingSigningUrl,
+  OnboardingStatus,
   OnboardingSubmitRequest,
   SaveOnboardingDraftRequest,
 } from './onboarding.service';
@@ -217,6 +218,7 @@ export class OnboardingWizardComponent {
   );
 
   private readonly reachableStepIndex = signal(0);
+  private serverReachableStep = 0;
 
   protected readonly currentStepIndex = computed(() =>
     Math.min(this.requestedStepIndex(), this.reachableStepIndex()));
@@ -673,12 +675,17 @@ export class OnboardingWizardComponent {
         email: user.email ?? '',
       });
     }
-    this.service.getDraft().subscribe({
-      next: status => {
-        this.applyDraftStatus(status);
-        setTimeout(() => this.clampStepToReachable());
-      },
-      error: () => this.clampStepToReachable(), // First-time user — empty draft is fine
+    forkJoin({
+      draft: this.service.getDraft().pipe(catchError(() => of(null))),
+      progress: this.service.getStatus().pipe(catchError(() => of(null))),
+    }).subscribe(({ draft, progress }) => {
+      this.serverReachableStep = OnboardingWizardComponent.lastServerCompleteStep(progress);
+      if (!draft) {
+        this.clampStepToReachable();
+        return;
+      }
+      this.applyDraftStatus(draft);
+      setTimeout(() => this.clampStepToReachable());
     });
 
     // Relax Validators.required on sensitive fields when the server tells us
@@ -1100,7 +1107,8 @@ export class OnboardingWizardComponent {
   private clampStepToReachable(): void {
     const forms = [this.personalForm, this.addressForm, this.w4Form, this.stateForm, this.i9Form, this.depositForm, this.ackForm];
     const firstInvalid = forms.findIndex(f => f.invalid);
-    this.reachableStepIndex.update(r => Math.max(r, firstInvalid === -1 ? 6 : firstInvalid));
+    const draftReachable = firstInvalid === -1 ? 6 : firstInvalid;
+    this.reachableStepIndex.update(r => Math.max(r, draftReachable, this.serverReachableStep));
     const requested = this.requestedStepIndex();
     if (requested > this.reachableStepIndex()) {
       this.router.navigate([], {
@@ -1110,6 +1118,25 @@ export class OnboardingWizardComponent {
         replaceUrl: true,
       });
     }
+  }
+
+  /**
+   * The furthest wizard step the server already records as complete; every
+   * step up to it stays reachable whatever the local draft looks like. A
+   * completed onboarding opens every step, so a worker can come back to
+   * change, say, the direct-deposit account.
+   */
+  private static lastServerCompleteStep(progress: OnboardingStatus | null): number {
+    if (!progress) return 0;
+    if (progress.allComplete) return 6;
+    const completeByStep: [number, boolean][] = [
+      [2, progress.w4Complete],
+      [3, progress.stateWithholdingComplete],
+      [4, progress.i9Complete],
+      [5, progress.directDepositComplete],
+      [6, progress.workersCompComplete && progress.handbookComplete],
+    ];
+    return completeByStep.reduce((reach, [step, done]) => (done ? Math.max(reach, step) : reach), 0);
   }
 
   /**

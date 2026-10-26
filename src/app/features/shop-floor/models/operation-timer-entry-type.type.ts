@@ -1,1 +1,1 @@
-export type OperationTimerEntryType = 'Run' | 'Setup';
+export type OperationTimerEntryType = 'Run' | 'Setup' | 'Rework';

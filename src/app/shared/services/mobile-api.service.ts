@@ -137,7 +137,7 @@ export class MobileApiService {
   }
 
   startOperationTimer(
-    jobId: number, operationId: number, entryType: 'Run' | 'Setup' = 'Run', token?: string,
+    jobId: number, operationId: number, entryType: 'Run' | 'Setup' | 'Rework' = 'Run', token?: string,
   ): Observable<JobOperationTimerResult | QueuedOffline> {
     return this.mutate<JobOperationTimerResult>(
       'POST', `/api/v1/jobs/${jobId}/operations/${operationId}/timer/start`, { entryType },

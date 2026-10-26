@@ -6,7 +6,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { OnboardingWizardComponent } from './onboarding-wizard.component';
-import { OnboardingDraftStatus, OnboardingService, SaveOnboardingDraftRequest } from './onboarding.service';
+import { OnboardingDraftStatus, OnboardingService, OnboardingStatus, SaveOnboardingDraftRequest } from './onboarding.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -42,7 +42,7 @@ describe('OnboardingWizardComponent date-only draft values west of UTC', () => {
       providers: [
         {
           provide: OnboardingService,
-          useValue: { getPolicyDocs: () => of({}), getDraft: () => of(status), saveDraft },
+          useValue: { getPolicyDocs: () => of({}), getDraft: () => of(status), getStatus: () => of(null), saveDraft },
         },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: Router, useValue: { navigate: vi.fn() } },
@@ -101,14 +101,19 @@ describe('OnboardingWizardComponent step gating', () => {
     w4Step3Total(): number;
   }
 
-  function create(step: string, draft: Partial<OnboardingDraftStatus> = {}) {
+  function create(step: string, draft: Partial<OnboardingDraftStatus> = {}, progress: Partial<OnboardingStatus> | null = null) {
     const navigate = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
         {
           provide: OnboardingService,
-          useValue: { getPolicyDocs: () => of({}), getDraft: () => of(draft as OnboardingDraftStatus), saveDraft: vi.fn(() => of(draft)) },
+          useValue: {
+            getPolicyDocs: () => of({}),
+            getDraft: () => of(draft as OnboardingDraftStatus),
+            getStatus: () => of(progress as OnboardingStatus | null),
+            saveDraft: vi.fn(() => of(draft)),
+          },
         },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: Router, useValue: { navigate } },
@@ -135,6 +140,28 @@ describe('OnboardingWizardComponent step gating', () => {
 
     expect(api.currentStepIndex()).toBe(0);
     expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { step: 0 }, replaceUrl: true }));
+  });
+
+  it('keeps every step of a completed onboarding reachable, so ?step=5 opens direct deposit', () => {
+    vi.useFakeTimers();
+    const { api, fixture, navigate } = create('5', {}, { allComplete: true, canBeAssigned: true });
+    fixture.detectChanges();
+    vi.runAllTimers();
+    vi.useRealTimers();
+
+    expect(api.currentStepIndex()).toBe(5);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('keeps steps the server records as complete reachable while the rest stay gated', () => {
+    vi.useFakeTimers();
+    const { api, fixture, navigate } = create('6', {}, { w4Complete: true, stateWithholdingComplete: true, allComplete: false });
+    fixture.detectChanges();
+    vi.runAllTimers();
+    vi.useRealTimers();
+
+    expect(api.currentStepIndex()).toBe(3);
+    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { step: 3 }, replaceUrl: true }));
   });
 
   it('rejects negative, fractional and absurd W-4 and state figures', () => {

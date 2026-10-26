@@ -104,6 +104,7 @@
             [gating]="ops.stepGating ?? 'Off'"
             (start)="startOperation($event)"
             (startSetup)="startOperation($event, 'Setup')"
+            (startRework)="startOperation($event, 'Rework')"
             (stop)="stopOperation($event)"
             (done)="openQuantity($event)"
             (addQuantity)="openQuantity($event)" />

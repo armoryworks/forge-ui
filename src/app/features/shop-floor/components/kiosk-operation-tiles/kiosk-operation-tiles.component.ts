@@ -46,6 +46,7 @@ export class KioskOperationTilesComponent {
 
   readonly start = output<JobOperationRow>();
   readonly startSetup = output<JobOperationRow>();
+  readonly startRework = output<JobOperationRow>();
   readonly stop = output<JobOperationRow>();
   readonly done = output<JobOperationRow>();
   readonly addQuantity = output<JobOperationRow>();

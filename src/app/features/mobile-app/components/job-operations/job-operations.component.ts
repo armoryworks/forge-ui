@@ -116,7 +116,7 @@ export class JobOperationsComponent {
     });
   }
 
-  protected start(view: OperationRowView, entryType: 'Run' | 'Setup' = 'Run'): void {
+  protected start(view: OperationRowView, entryType: 'Run' | 'Setup' | 'Rework' = 'Run'): void {
     this.guard(() => this.doStart(view.row, entryType));
   }
 
@@ -183,7 +183,7 @@ export class JobOperationsComponent {
     }
   }
 
-  private async doStart(row: JobOperationRow, entryType: 'Run' | 'Setup'): Promise<boolean> {
+  private async doStart(row: JobOperationRow, entryType: 'Run' | 'Setup' | 'Rework'): Promise<boolean> {
     const jobId = this.jobId();
     const operationId = row.operationId!;
     const token = this.sharedToken();
@@ -213,7 +213,8 @@ export class JobOperationsComponent {
     if (isQueued(result)) return this.offerQueuedUndo(result.entryId, token);
     this.changed();
     if (!result.stopped) return false;
-    const entryType = result.entry?.entryType === 'Setup' ? 'Setup' : 'Run';
+    const stoppedType = result.entry?.entryType;
+    const entryType = stoppedType === 'Setup' || stoppedType === 'Rework' ? stoppedType : 'Run';
     this.undo.offer(
       this.translate.instant('mobileApp.operations.stopped', { name: this.labelOf(row) }),
       async () => {

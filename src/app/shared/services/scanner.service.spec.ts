@@ -57,6 +57,12 @@ describe('ScannerService', () => {
       expect(service.listening()).toBe(true);
     });
 
+    it('passes probeRelay through to the RFID relay on restart', () => {
+      const rfid = TestBed.inject(WebHidRfidService) as unknown as { reconnect: ReturnType<typeof vi.fn> };
+      service.restart({ probeRelay: true });
+      expect(rfid.reconnect).toHaveBeenCalledWith({ probeRelay: true });
+    });
+
     it('should set listening to false when stopped', () => {
       service.start();
       service.stop();
