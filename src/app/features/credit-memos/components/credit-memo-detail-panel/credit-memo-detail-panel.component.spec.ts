@@ -14,7 +14,9 @@ interface PanelInternals {
   memo: { set(value: CreditMemoDetail | null): void; (): CreditMemoDetail | null };
   canIssue(): boolean;
   canDelete(): boolean;
-  canApplyOrRefund(): boolean;
+  canApply(): boolean;
+  canRefund(): boolean;
+  canUnapply(): boolean;
   canVoid(): boolean;
   issue(): void;
   unapply(applicationId: number, invoiceNumber: string | null): void;
@@ -73,13 +75,15 @@ describe('CreditMemoDetailPanelComponent', () => {
     panel.memo.set(memo());
     expect(panel.canIssue()).toBe(true);
     expect(panel.canDelete()).toBe(true);
-    expect(panel.canApplyOrRefund()).toBe(false);
+    expect(panel.canApply()).toBe(false);
+    expect(panel.canRefund()).toBe(false);
 
     panel.issue();
 
     expect(service['issue']).toHaveBeenCalledWith(4);
     expect(panel.memo()?.status).toBe('Issued');
-    expect(panel.canApplyOrRefund()).toBe(true);
+    expect(panel.canApply()).toBe(true);
+    expect(panel.canRefund()).toBe(true);
   });
 
   it('lets only Admin or Manager void, and only while nothing is applied or refunded', () => {
@@ -123,7 +127,24 @@ describe('CreditMemoDetailPanelComponent', () => {
     roles = ['Controller'];
     build();
     panel.memo.set(memo({ status: 'Issued', openAmount: 50 }));
-    expect(panel.canApplyOrRefund()).toBe(false);
+    expect(panel.canApply()).toBe(false);
+    expect(panel.canRefund()).toBe(false);
     expect(panel.canVoid()).toBe(false);
+  });
+
+  it('never offers a refund of a write-off and leaves applying it to Admin or Manager', () => {
+    const writeOff = memo({ reasonType: 'WriteOff', status: 'Issued', openAmount: 50 });
+    build();
+    panel.memo.set(writeOff);
+    expect(panel.canRefund()).toBe(false);
+    expect(panel.canApply()).toBe(false);
+    expect(panel.canUnapply()).toBe(false);
+
+    roles = ['Manager'];
+    build();
+    panel.memo.set(writeOff);
+    expect(panel.canRefund()).toBe(false);
+    expect(panel.canApply()).toBe(true);
+    expect(panel.canUnapply()).toBe(true);
   });
 });

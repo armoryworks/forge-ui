@@ -26,6 +26,13 @@ describe('serverErrorKey', () => {
     expect(serverErrorKey('determination-account-type')).toBe('apiErrors.codes.determinationAccountType');
   });
 
+  it('maps the credit memo, write-off and return codes', () => {
+    expect(serverErrorKey('credit-exceeds-invoice-line')).toBe('apiErrors.codes.creditExceedsInvoiceLine');
+    expect(serverErrorKey('invoice-has-credits')).toBe('apiErrors.codes.invoiceHasCredits');
+    expect(serverErrorKey('credit-memo-write-off-reserved')).toBe('apiErrors.codes.creditMemoWriteOffReserved');
+    expect(serverErrorKey('return-lot-required')).toBe('apiErrors.codes.returnLotRequired');
+  });
+
   it('leaves predicate rules and missing codes unmapped', () => {
     expect(serverErrorKey('PredicateValidator')).toBeUndefined();
     expect(serverErrorKey(null)).toBeUndefined();

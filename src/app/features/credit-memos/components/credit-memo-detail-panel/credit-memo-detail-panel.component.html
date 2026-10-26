@@ -191,11 +191,13 @@
           <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
           {{ 'creditMemos.downloadPdf' | translate }}
         </button>
-        @if (canApplyOrRefund()) {
+        @if (canRefund()) {
           <button class="action-btn" type="button" data-testid="credit-memo-refund-btn" [disabled]="busy()" (click)="showRefund.set(true)">
             <span class="material-icons-outlined" aria-hidden="true">currency_exchange</span>
             {{ 'creditMemos.refund' | translate }}
           </button>
+        }
+        @if (canApply()) {
           <button class="action-btn action-btn--primary" type="button" data-testid="credit-memo-apply-btn" [disabled]="busy()" (click)="showApply.set(true)">
             <span class="material-icons-outlined" aria-hidden="true">playlist_add_check</span>
             {{ 'creditMemos.apply' | translate }}

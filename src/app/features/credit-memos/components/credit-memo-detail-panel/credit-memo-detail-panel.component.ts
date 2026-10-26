@@ -72,13 +72,16 @@ export class CreditMemoDetailPanelComponent {
   });
   protected readonly canIssue = computed(() => this.isFinance() && this.memo()?.status === 'Draft');
   protected readonly canDelete = computed(() => this.isFinance() && this.memo()?.status === 'Draft');
-  protected readonly canApplyOrRefund = computed(() => this.isFinance() && this.isOpen() && (this.memo()?.openAmount ?? 0) > 0);
+  private readonly isWriteOff = computed(() => this.memo()?.reasonType === 'WriteOff');
+  private readonly hasOpenCredit = computed(() => this.isOpen() && (this.memo()?.openAmount ?? 0) > 0);
+  protected readonly canApply = computed(() => this.hasOpenCredit() && (this.isWriteOff() ? this.isApprover() : this.isFinance()));
+  protected readonly canRefund = computed(() => this.hasOpenCredit() && this.isFinance() && !this.isWriteOff());
   protected readonly canVoid = computed(() => {
     const m = this.memo();
     return this.isApprover() && !!m && m.status !== 'Draft' && m.status !== 'Voided'
       && m.amountApplied === 0 && m.amountRefunded === 0;
   });
-  protected readonly canUnapply = computed(() => this.isFinance());
+  protected readonly canUnapply = computed(() => (this.isWriteOff() ? this.isApprover() : this.isFinance()));
   protected readonly canVoidRefund = computed(() => this.isApprover());
   protected readonly liveApplications = computed(() => (this.memo()?.applications ?? []).filter(a => !a.reversedAt));
 
