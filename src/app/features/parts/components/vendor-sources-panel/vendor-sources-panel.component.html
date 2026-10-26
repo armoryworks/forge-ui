@@ -155,10 +155,10 @@
       <div class="vendor-sources__add-picker" data-testid="vendor-sources-add-picker">
         <app-entity-picker
           [label]="'vendorSources.pickVendor' | translate"
-          entityType="vendors"
-          displayField="companyName"
-          secondaryDisplayField="contactName"
-          [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
+          entityType="vendors/lookup"
+          displayField="name"
+          secondaryDisplayField="code"
+          [createNewLabel]="canCreateVendor ? ('vendors.vendor' | translate).toLowerCase() : null"
           [placeholder]="'vendors.searchByCompanyName' | translate"
           [formControl]="addVendorControl"
           (createNew)="onCreateNewVendor($event)" />

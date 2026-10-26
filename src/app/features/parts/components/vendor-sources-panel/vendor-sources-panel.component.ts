@@ -31,6 +31,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
+import { VENDOR_MANAGE_ROLES } from '../../../vendors/vendor-roles';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
 import { VendorPart, VendorPartPriceTier } from '../../models/vendor-part.model';
 import { VendorPartsService } from '../../services/vendor-parts.service';
@@ -154,6 +156,7 @@ export class VendorSourcesPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  protected readonly canCreateVendor = inject(AuthService).hasAnyRole(VENDOR_MANAGE_ROLES);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 

@@ -34,6 +34,8 @@ import { ActivityItem } from '../../../../shared/models/activity.model';
 import { environment } from '../../../../../environments/environment';
 import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
 import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
+import { VENDOR_MANAGE_ROLES } from '../../../vendors/vendor-roles';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SchedulingService } from '../../../scheduling/services/scheduling.service';
 import { WorkCenter } from '../../../scheduling/models/scheduling.model';
 import { WorkCenterQuickCreateDialogComponent, WorkCenterQuickCreateDialogData } from '../../../scheduling/components/work-center-quick-create-dialog/work-center-quick-create-dialog.component';
@@ -84,6 +86,7 @@ export class OperationDialogComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
+  protected readonly canCreateVendor = inject(AuthService).hasAnyRole(VENDOR_MANAGE_ROLES);
   protected readonly matDialogRef = inject(MatDialogRef<OperationDialogComponent>);
   protected readonly data = inject<OperationDialogData>(MAT_DIALOG_DATA);
 

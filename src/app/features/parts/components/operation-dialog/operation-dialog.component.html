@@ -98,10 +98,10 @@
           <app-entity-picker #subcontractVendorPicker
             data-testid="op-subcontract-vendor"
             [label]="'parts.subcontractVendor' | translate"
-            entityType="vendors"
-            displayField="companyName"
-            secondaryDisplayField="contactName"
-            [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
+            entityType="vendors/lookup"
+            displayField="name"
+            secondaryDisplayField="code"
+            [createNewLabel]="canCreateVendor ? ('vendors.vendor' | translate).toLowerCase() : null"
             (createNew)="onCreateNewSubcontractVendor($event)"
             formControlName="subcontractVendorId" />
           <app-input

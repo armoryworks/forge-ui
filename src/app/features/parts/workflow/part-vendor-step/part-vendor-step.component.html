@@ -7,10 +7,10 @@
   <form [formGroup]="form" class="part-vendor-step__form">
     <app-entity-picker
       [label]="'parts.workflow.vendor.preferredVendorLabel' | translate"
-      entityType="vendors"
-      displayField="companyName"
-      secondaryDisplayField="contactName"
-      [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
+      entityType="vendors/lookup"
+      displayField="name"
+      secondaryDisplayField="code"
+      [createNewLabel]="canCreateVendor ? ('vendors.vendor' | translate).toLowerCase() : null"
       [placeholder]="'vendors.searchByCompanyName' | translate"
       (createNew)="onCreateNewVendor($event)"
       formControlName="preferredVendorId"
