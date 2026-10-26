@@ -9,7 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PurchasingService } from '../../services/purchasing.service';
 import { VendorService } from '../../../vendors/services/vendor.service';
 import { VendorResponse } from '../../../vendors/models/vendor-response.model';
-import { RfqDetail, RfqVendorResponse } from '../../models/rfq.model';
+import { RfqDetail, RfqVendorResponse, SendRfqToVendorsResponse } from '../../models/rfq.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -159,13 +159,13 @@ export class RfqDetailDialogComponent {
       titleKey: 'purchasing.rfq.confirmSendTitle',
       messageKey: 'purchasing.rfq.confirmSendMessage',
       messageParams: { count: vendorIds.length },
-      confirmLabelKey: 'common.add',
+      confirmLabelKey: 'purchasing.send',
     }).subscribe(confirmed => {
       if (!confirmed) return;
       this.saving.set(true);
       this.purchasingService.sendToVendors(this.data.rfqId, { vendorIds }).subscribe({
-        next: () => {
-          this.snackbar.success(this.translate.instant('purchasing.snackbar.rfqSent'));
+        next: result => {
+          this.reportSendResult(result);
           this.saving.set(false);
           this.showSendForm.set(false);
           this.sendVendorControl.reset([]);
@@ -175,6 +175,22 @@ export class RfqDetailDialogComponent {
         error: () => this.saving.set(false),
       });
     });
+  }
+
+  private reportSendResult(result: SendRfqToVendorsResponse): void {
+    const parts: string[] = [];
+    if (result.emailedVendorIds.length > 0)
+      parts.push(this.translate.instant('purchasing.snackbar.rfqSent', { count: result.emailedVendorIds.length }));
+    if (result.alreadyInvitedVendorIds.length > 0)
+      parts.push(this.translate.instant('purchasing.snackbar.vendorsAlreadyInvited', { count: result.alreadyInvitedVendorIds.length }));
+    if (result.vendorsWithoutEmail.length > 0)
+      parts.push(this.translate.instant('purchasing.snackbar.vendorsWithoutEmail', {
+        vendors: result.vendorsWithoutEmail.map(v => v.vendorName).join(', '),
+      }));
+
+    const message = parts.join(' ');
+    if (result.vendorsWithoutEmail.length > 0 || result.emailedVendorIds.length === 0) this.snackbar.warn(message);
+    else this.snackbar.success(message);
   }
 
   // --- Record Response ---

@@ -77,6 +77,7 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { PartWhereUsedComponent } from '../part-where-used/part-where-used.component';
 import { defaultBomSourceFor } from './bom-source-default.util';
+import { PO_STATUSES, PO_STATUS_LABEL_KEYS } from '../../../purchase-orders/models/po-status.const';
 
 type BomViewMode = 'table' | 'tree';
 
@@ -273,14 +274,7 @@ export class PartDetailPanelComponent {
     { field: 'poNumber', header: this.translate.instant('parts.detail.purchaseHistory.poNumber'), sortable: true, width: '160px' },
     { field: 'vendorName', header: this.translate.instant('parts.detail.purchaseHistory.vendor'), sortable: true, filterable: true, type: 'text' },
     { field: 'status', header: this.translate.instant('parts.detail.purchaseHistory.status'), sortable: true, filterable: true, type: 'enum', width: '120px',
-      filterOptions: [
-        { value: 'Draft', label: 'Draft' },
-        { value: 'Submitted', label: 'Submitted' },
-        { value: 'Acknowledged', label: 'Acknowledged' },
-        { value: 'PartiallyReceived', label: 'Partially Received' },
-        { value: 'Closed', label: 'Closed' },
-        { value: 'Cancelled', label: 'Cancelled' },
-      ] },
+      filterOptions: PO_STATUSES.map(status => ({ value: status, label: this.translate.instant(PO_STATUS_LABEL_KEYS[status]) })) },
     { field: 'orderedQuantity', header: this.translate.instant('parts.detail.purchaseHistory.qty'), sortable: true, type: 'number', align: 'right', width: '90px' },
     { field: 'unitPrice', header: this.translate.instant('parts.detail.purchaseHistory.unitPrice'), sortable: true, type: 'number', align: 'right', width: '110px' },
     { field: 'lineTotal', header: this.translate.instant('parts.detail.purchaseHistory.total'), sortable: true, type: 'number', align: 'right', width: '110px' },
@@ -833,6 +827,7 @@ export class PartDetailPanelComponent {
   protected getPoStatusChipClass(status: string): string {
     switch (status) {
       case 'Draft':              return 'chip--muted';
+      case 'PendingApproval':    return 'chip--warning';
       case 'Submitted':          return 'chip--info';
       case 'Acknowledged':       return 'chip--info';
       case 'PartiallyReceived':  return 'chip--warning';

@@ -25,6 +25,9 @@ interface PanelInternals {
   canEditLines(status: string): boolean;
   canDeleteLine(po: PurchaseOrderDetail): boolean;
   canCancel(status: string): boolean;
+  canEmail(status: string): boolean;
+  canShortClose(po: PurchaseOrderDetail): boolean;
+  getStatusClass(status: string): string;
   incotermLabel(): string;
   showFxRate(): boolean;
   amountCurrency(): string | null;
@@ -105,8 +108,21 @@ describe('PoDetailPanelComponent', () => {
       expect(create(detail()).canReceive(status)).toBe(true);
     });
 
-    it.each(['Draft', 'Received', 'Closed', 'Cancelled'])('hides Receive Items on a %s PO', (status) => {
+    it.each(['Draft', 'PendingApproval', 'Received', 'Closed', 'Cancelled'])('hides Receive Items on a %s PO', (status) => {
       expect(create(detail()).canReceive(status)).toBe(false);
+    });
+  });
+
+  describe('a PO waiting for approval', () => {
+    it('can be cancelled but not e-mailed or short-closed', () => {
+      const panel = create(detail());
+      expect(panel.canCancel('PendingApproval')).toBe(true);
+      expect(panel.canEmail('PendingApproval')).toBe(false);
+      expect(panel.canShortClose(detail({ status: 'PendingApproval', lines: [line()] }))).toBe(false);
+    });
+
+    it('shows a warning chip', () => {
+      expect(create(detail()).getStatusClass('PendingApproval')).toBe('chip chip--warning');
     });
   });
 

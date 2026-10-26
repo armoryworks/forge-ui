@@ -32,6 +32,7 @@ export interface RequestPortalInput {
   recipientEmail: string;
   verificationKey: string;
   validDays?: number;
+  language?: 'en' | 'es';
 }
 
 /** Response for a public-portal link mint — the acceptance row plus its token. */

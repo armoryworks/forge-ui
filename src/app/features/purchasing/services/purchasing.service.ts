@@ -9,6 +9,7 @@ import {
   CreateRfqRequest,
   RecordVendorResponseRequest,
   SendRfqToVendorsRequest,
+  SendRfqToVendorsResponse,
   RfqVendorResponse,
 } from '../models/rfq.model';
 
@@ -36,8 +37,8 @@ export class PurchasingService {
     return this.http.put<void>(`${this.base}/rfqs/${id}`, request);
   }
 
-  sendToVendors(id: number, request: SendRfqToVendorsRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/rfqs/${id}/send`, request);
+  sendToVendors(id: number, request: SendRfqToVendorsRequest): Observable<SendRfqToVendorsResponse> {
+    return this.http.post<SendRfqToVendorsResponse>(`${this.base}/rfqs/${id}/send`, request);
   }
 
   recordVendorResponse(id: number, request: RecordVendorResponseRequest): Observable<void> {

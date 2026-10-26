@@ -50,6 +50,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
 import { UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
+import { PO_STATUS_CHIP_CLASSES } from '../../models/po-status.const';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -236,7 +237,7 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly expectedDateCtrl = new FormControl<Date | null>(null, [Validators.required]);
 
   protected canEditExpectedDate(status: string): boolean {
-    return status === 'Draft' || status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
+    return status === 'Draft' || status === 'PendingApproval' || status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
   }
 
   protected startEditExpectedDate(): void {
@@ -369,7 +370,7 @@ export class PoDetailPanelComponent implements OnInit {
   // with at least one line received < ordered. Mirror server gate.
   protected canShortClose(po: PurchaseOrderDetail): boolean {
     if (!this.canShortCloseRole) return false;
-    if (po.status === 'Draft' || po.status === 'Closed' || po.status === 'Cancelled') return false;
+    if (po.status === 'Draft' || po.status === 'PendingApproval' || po.status === 'Closed' || po.status === 'Cancelled') return false;
     return po.lines.some(l => l.orderedQuantity > l.receivedQuantity + (l.cancelledShortCloseQuantity ?? 0));
   }
 
@@ -572,16 +573,7 @@ export class PoDetailPanelComponent implements OnInit {
 
   // --- Helpers ---
   protected getStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      Draft: 'chip--muted',
-      Submitted: 'chip--info',
-      Acknowledged: 'chip--primary',
-      PartiallyReceived: 'chip--warning',
-      Received: 'chip--success',
-      Closed: 'chip--muted',
-      Cancelled: 'chip--error',
-    };
-    return `chip ${map[status] ?? ''}`.trim();
+    return `chip ${PO_STATUS_CHIP_CLASSES[status] ?? ''}`.trim();
   }
 
   protected getStatusLabel(status: string): string {
@@ -597,7 +589,7 @@ export class PoDetailPanelComponent implements OnInit {
   }
   protected canEditLines(status: string): boolean { return status === 'Draft'; }
   protected canDeleteLine(po: PurchaseOrderDetail): boolean { return this.canEditLines(po.status) && po.lines.length > 1; }
-  protected canEmail(status: string): boolean { return status !== 'Cancelled' && status !== 'Draft'; }
+  protected canEmail(status: string): boolean { return status !== 'Cancelled' && status !== 'Draft' && status !== 'PendingApproval'; }
 
   protected readonly showAddLineDialog = signal(false);
   protected readonly addLineSaving = signal(false);
@@ -761,7 +753,7 @@ export class PoDetailPanelComponent implements OnInit {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
   protected canCancel(status: string): boolean {
-    return status === 'Draft' || status === 'Submitted' || status === 'Acknowledged';
+    return status === 'Draft' || status === 'PendingApproval' || status === 'Submitted' || status === 'Acknowledged';
   }
   protected canClose(status: string): boolean { return status === 'Received'; }
   protected canDelete(status: string): boolean { return status === 'Draft'; }

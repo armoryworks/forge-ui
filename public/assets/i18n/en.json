@@ -5237,6 +5237,7 @@
     "draft": "Draft",
     "active": "Active",
     "pending": "Pending",
+    "pendingApproval": "Pending approval",
     "planned": "Planned",
     "inProgress": "In Progress",
     "completed": "Completed",
@@ -6565,6 +6566,7 @@
     "allVendors": "All Vendors",
     "statusDraft": "Draft",
     "statusSubmitted": "Submitted",
+    "statusPendingApproval": "Pending approval",
     "statusAcknowledged": "Acknowledged",
     "statusPartiallyReceived": "Partially Received",
     "statusReceived": "Received",
@@ -6962,14 +6964,15 @@
       "submitUrl": "Signing link",
       "copyLink": "Copy link",
       "linkCopied": "Link copied to clipboard.",
-      "portalTitle": "Request acceptance link",
+      "portalTitle": "E-mail acceptance link",
       "recipientEmail": "Recipient email",
       "verificationKey": "Verification key",
       "verificationKeyHint": "Optional key the customer must enter to accept.",
       "validDays": "Valid days",
-      "generateLink": "Generate link",
+      "generateLink": "Send link",
+      "emailLanguage": "E-mail language",
       "linkLabel": "Acceptance link",
-      "portalLinkCreated": "Acceptance link created.",
+      "portalLinkCreated": "Acceptance link e-mailed to the recipient.",
       "fromEmail": "From email",
       "register": "Register",
       "confirmBlockedHint": "Attach customer acceptance before releasing to production.",
@@ -9897,11 +9900,13 @@
     "snackbar": {
       "rfqUpdated": "RFQ updated",
       "rfqCreated": "RFQ created",
-      "sentToVendors": "Vendors added to RFQ. Send the RFQ to each vendor yourself.",
+      "sentToVendors": "RFQ e-mailed to {{count}} vendor(s).",
       "responseRecorded": "Vendor response recorded",
       "awardedPo": "RFQ awarded. PO created.",
       "rfqAwarded": "RFQ awarded",
-      "rfqSent": "Vendors added to RFQ. Send the RFQ to each vendor yourself."
+      "rfqSent": "RFQ e-mailed to {{count}} vendor(s).",
+      "vendorsWithoutEmail": "Not sent, no e-mail address on file: {{vendors}}. Add one to the vendor and send again.",
+      "vendorsAlreadyInvited": "Already on this RFQ, not e-mailed again: {{count}} vendor(s)."
     },
     "confirm": {
       "awardTitle": "Award RFQ?"
@@ -9933,7 +9938,7 @@
     "responseDeadline": "Response Deadline",
     "selectPart": "Select Part",
     "send": "Send",
-    "sendToVendors": "Add Vendors",
+    "sendToVendors": "Send to Vendors",
     "sentAt": "Sent At",
     "specialInstructions": "Special Instructions",
     "toolingCost": "Tooling Cost",
@@ -9941,8 +9946,8 @@
     "vendorResponses": "Vendor Responses",
     "vendors": "Vendors",
     "rfq": {
-      "confirmSendTitle": "Add vendors to RFQ?",
-      "confirmSendMessage": "Add the selected vendors ({{count}}) to this RFQ? This does not email them: download the RFQ PDF and send it to each vendor yourself."
+      "confirmSendTitle": "Send RFQ to vendors?",
+      "confirmSendMessage": "E-mail this RFQ with its PDF to the selected vendors ({{count}})? Vendors with no e-mail address on file are not sent."
     },
     "poNumberFallback": "PO #{{id}}",
     "viewPo": "View PO",

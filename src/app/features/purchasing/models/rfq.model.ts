@@ -65,3 +65,15 @@ export interface RecordVendorResponseRequest {
 export interface SendRfqToVendorsRequest {
   vendorIds: number[];
 }
+
+export interface RfqVendorWithoutEmail {
+  vendorId: number;
+  vendorName: string;
+}
+
+export interface SendRfqToVendorsResponse {
+  rfqId: number;
+  emailedVendorIds: number[];
+  vendorsWithoutEmail: RfqVendorWithoutEmail[];
+  alreadyInvitedVendorIds: number[];
+}
