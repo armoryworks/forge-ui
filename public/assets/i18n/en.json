@@ -12057,6 +12057,7 @@
         "stockLoadDateDiffers": "The as-of date differs from the opening journal's date.",
         "stockLoadNoOpeningInventory": "Valuation only is for a book whose posted opening journal already debited inventory, and this book's has no inventory lines.",
         "stockLoadExceedsOpeningJournal": "Valuation-only loads would exceed what the opening journal debited to an inventory account.",
+        "stockLoadOpeningJournalHasInventory": "The posted opening journal already debited this inventory account. Posting against Opening Balance Equity adds the value a second time; choose \"Valuation only\" to load the matching stock without a journal.",
         "stockLoadVoidStockMoved": "The loaded quantity is no longer all on hand and unreserved at its location, so the load cannot be voided.",
         "invalidNumber": "This cell is not a number.",
         "invalidDate": "This cell is not a date.",

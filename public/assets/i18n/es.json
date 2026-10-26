@@ -12057,6 +12057,7 @@
         "stockLoadDateDiffers": "La fecha de corte difiere de la fecha del asiento de apertura.",
         "stockLoadNoOpeningInventory": "Solo valoración es para un libro cuyo asiento de apertura registrado ya cargó inventario, y el de este libro no tiene líneas de inventario.",
         "stockLoadExceedsOpeningJournal": "Las cargas de solo valoración superarían lo que el asiento de apertura cargó a una cuenta de inventario.",
+        "stockLoadOpeningJournalHasInventory": "El asiento de apertura contabilizado ya cargó esta cuenta de inventario. Registrar contra el capital de saldos iniciales suma el valor por segunda vez; elija \"Solo valoración\" para cargar las existencias correspondientes sin asiento.",
         "stockLoadVoidStockMoved": "La cantidad cargada ya no está toda disponible y sin reservar en su ubicación, así que la carga no se puede anular.",
         "invalidNumber": "Esta celda no es un número.",
         "invalidDate": "Esta celda no es una fecha.",
