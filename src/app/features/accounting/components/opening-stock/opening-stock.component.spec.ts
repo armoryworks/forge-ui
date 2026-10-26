@@ -169,6 +169,23 @@ describe('OpeningStockComponent', () => {
     expect(snackbar.success).toHaveBeenCalled();
   });
 
+  it('holds Post back while the header has unsaved edits', () => {
+    const c = open();
+    c.csvText.set('x');
+    c.save();
+    http.expectOne((r) => r.method === 'POST' && r.url === base).flush(load());
+    http.expectOne(`${base}/9/validate`).flush(validation());
+    http.expectOne((r) => r.url === base && r.method === 'GET').flush([]);
+    expect(c.canPost()).toBe(true);
+
+    c.form.controls['notes'].setValue('changed');
+    c.form.controls['notes'].markAsDirty();
+
+    expect(c.canPost()).toBe(false);
+    c.post();
+    http.expectNone(`${base}/9/post`);
+  });
+
   it('voids a posted load once confirmed', () => {
     const c = open();
     c.csvText.set('x');

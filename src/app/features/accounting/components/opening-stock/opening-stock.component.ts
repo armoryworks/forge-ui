@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -96,6 +96,8 @@ export class OpeningStockComponent implements OnInit {
     notes: this.translate.instant('accounting.openingStock.notes'),
   });
 
+  private readonly formDirty = toSignal(this.form.events.pipe(map(() => this.form.dirty)), { initialValue: false });
+
   protected readonly isDraft = computed(() => (this.selected()?.status ?? 'Draft') === 'Draft');
   protected readonly canSave = computed(() => this.isDraft() && (this.selected() !== null || this.csvText() !== null));
   protected readonly hasOpeningInventory = computed(() => (this.context()?.openingJournalInventory.length ?? 0) > 0);
@@ -126,7 +128,7 @@ export class OpeningStockComponent implements OnInit {
     });
   });
   protected readonly canPost = computed(() =>
-    this.selected()?.status === 'Draft' && this.validation()?.isValid === true && !this.form.dirty && this.csvText() === null);
+    this.selected()?.status === 'Draft' && this.validation()?.isValid === true && !this.formDirty() && this.csvText() === null);
 
   protected readonly loadColumns: ColumnDef[] = [
     { field: 'loadNumber', header: this.translate.instant('accounting.openingStock.loadNumber'), sortable: true, width: '130px' },
