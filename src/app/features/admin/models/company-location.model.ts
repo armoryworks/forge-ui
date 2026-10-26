@@ -21,4 +21,6 @@ export interface CompanyProfile {
   email: string;
   ein: string;
   website: string;
+  timeZone: string;
+  booksAwaitingTimeZone: number;
 }

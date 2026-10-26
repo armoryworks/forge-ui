@@ -57,6 +57,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'accounting/conversion/stock-loads', capability: 'CAP-ACCT-MIGRATION', anyOf: ['CAP-ACCT-MIGRATION', 'CAP-ACCT-FULLGL'] },
   { prefix: 'accounting/conversion', capability: 'CAP-ACCT-MIGRATION' },
   { prefix: 'accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
+  { prefix: 'accounting/bank-statements', capability: 'CAP-ACCT-FULLGL' },
   { prefix: 'admin/accounting-mode', capability: 'CAP-ACCT-EXTERNAL' },
   { prefix: 'admin/bi-api-keys', capability: 'CAP-IDEN-AUTH-API-KEYS' },
   { prefix: 'admin/currencies', capability: 'CAP-MD-CURRENCIES' },

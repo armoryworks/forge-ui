@@ -1,0 +1,57 @@
+<app-dialog [title]="'accounting.bankMatch.title' | translate" width="800px" (closed)="close()">
+  <div class="bank-match" [appLoadingBlock]="loading()">
+    <div class="bank-match__line" data-testid="bank-match-line">
+      <span class="text-muted">{{ data.line.postedDate }}</span>
+      <span class="bank-match__description">{{ data.line.description }}</span>
+      <span class="bank-match__amount" [class.text-warning]="data.line.amount < 0">{{ data.line.amount | currency }}</span>
+    </div>
+    <p class="text-muted">{{ 'accounting.bankMatch.hint' | translate }}</p>
+
+    <app-data-table tableId="bank-match-candidates" [columns]="columns" [data]="candidates()"
+      trackByField="journalLineId" [clickableRows]="true" [rowClass]="rowClass"
+      emptyIcon="search_off" [emptyMessage]="'accounting.bankMatch.none' | translate"
+      (rowClick)="select($any($event))">
+      <ng-template appColumnCell="entryNumber" let-row>
+        <span class="doc-number" [attr.data-testid]="'bank-match-candidate-' + row.journalLineId">#{{ row.entryNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="amount" let-row>
+        <span [class.text-warning]="row.amount < 0">{{ row.amount | currency }}</span>
+      </ng-template>
+      <ng-template appColumnCell="memo" let-row>
+        <span>{{ row.memo ?? row.description ?? '' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="source" let-row>
+        <span class="text-muted">{{ row.sourceType ?? row.source }}</span>
+      </ng-template>
+      <ng-template appColumnCell="fit" let-row>
+        @if (row.amountDifference === 0) {
+          <span class="chip chip--success">{{ 'accounting.bankMatch.exact' | translate: { days: row.daysApart } }}</span>
+        } @else {
+          <span class="chip chip--warning">{{ 'accounting.bankMatch.off' | translate: { amount: (row.amountDifference | currency), days: row.daysApart } }}</span>
+        }
+      </ng-template>
+    </app-data-table>
+
+    @if (selected(); as pick) {
+      <p class="bank-match__selected" data-testid="bank-match-selected">
+        {{ 'accounting.bankMatch.selected' | translate: { number: pick.entryNumber, date: pick.entryDate } }}
+      </p>
+    }
+
+    @if (!widened()) {
+      <button type="button" class="action-btn action-btn--sm bank-match__widen" data-testid="bank-match-widen" (click)="widen()">
+        <span class="material-icons-outlined" aria-hidden="true">unfold_more</span>
+        {{ 'accounting.bankMatch.widen' | translate }}
+      </button>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="bank-match-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button type="button" class="action-btn action-btn--primary" data-testid="bank-match-confirm"
+      [disabled]="!selected() || matching()" (click)="confirm()">
+      <span class="material-icons-outlined" aria-hidden="true">link</span>
+      {{ 'accounting.bankMatch.confirm' | translate }}
+    </button>
+  </div>
+</app-dialog>

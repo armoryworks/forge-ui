@@ -245,6 +245,10 @@
                 <app-input [label]="'admin.ein' | translate" formControlName="ein" placeholder="XX-XXXXXXX" />
                 <app-input [label]="'admin.website' | translate" formControlName="website" placeholder="https://" />
               </div>
+              <div class="dialog-row">
+                <app-select [label]="'admin.companyTimeZone' | translate" [options]="timeZoneOptions()" formControlName="timeZone"
+                  data-testid="company-time-zone" />
+              </div>
             </div>
           </div>
         }

@@ -23,6 +23,7 @@ import {
   FiscalYearModel,
 } from '../../models/accounting.models';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { BookSettingsCardComponent } from '../book-settings-card/book-settings-card.component';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -42,7 +43,7 @@ interface ShownChecklist {
 @Component({
   selector: 'app-period-close',
   standalone: true,
-  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent, FxRevaluationComponent],
+  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent, FxRevaluationComponent, BookSettingsCardComponent],
   templateUrl: './period-close.component.html',
   styleUrl: './period-close.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

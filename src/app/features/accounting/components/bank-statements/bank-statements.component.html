@@ -82,6 +82,12 @@
               </button>
             }
             @if (row.matchStatus === 'Unmatched' || row.matchStatus === 'Suggested') {
+              <button class="icon-btn" [matTooltip]="'accounting.bankStatements.matchManually' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'accounting.bankStatements.matchManually' | translate"
+                [attr.data-testid]="'bank-line-match-' + row.id"
+                (click)="openMatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">link</span>
+              </button>
               <button class="icon-btn" [matTooltip]="'accounting.bankStatements.ignore' | translate" matTooltipPosition="above"
                 [attr.aria-label]="'accounting.bankStatements.ignore' | translate"
                 (click)="ignoreLine(row); $event.stopPropagation()">

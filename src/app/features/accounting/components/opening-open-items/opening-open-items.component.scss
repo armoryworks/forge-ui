@@ -1,0 +1,94 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.open-items {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__intro {
+    margin: 0;
+  }
+
+  &__posted,
+  &__blocked {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin: 0;
+    padding: $sp-sm $sp-md;
+  }
+
+  &__posted {
+    background: var(--success-light);
+  }
+
+  &__blocked {
+    background: var(--error-light);
+  }
+
+  &__header {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 220px));
+    gap: $sp-md;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__title {
+    flex: 1;
+    font-weight: 600;
+  }
+
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 130px minmax(140px, 1.4fr) 120px 140px 140px 130px minmax(120px, 1fr) $btn-icon-size;
+    gap: $sp-sm;
+    align-items: center;
+  }
+
+  @include tablet {
+    &__header,
+    &__row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &__result {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__tie-out {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-lg;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__metric {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__offset {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+}

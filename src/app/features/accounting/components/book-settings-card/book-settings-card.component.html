@@ -1,0 +1,44 @@
+<section class="book-settings" data-testid="book-settings-card" [appLoadingBlock]="loading()">
+  <header class="book-settings__head">
+    <span class="material-icons-outlined" aria-hidden="true">tune</span>
+    <span class="book-settings__title">{{ 'accounting.bookSettings.title' | translate: { book: settings()?.name ?? '' } }}</span>
+  </header>
+
+  <div class="book-settings__fields" [formGroup]="form">
+    <div class="book-settings__field">
+      <app-currency-input [label]="'accounting.bookSettings.threshold' | translate" formControlName="makerCheckerThreshold"
+        [min]="0" data-testid="book-settings-threshold" />
+      <span class="book-settings__hint">{{ 'accounting.bookSettings.thresholdHint' | translate }}</span>
+    </div>
+    <div class="book-settings__field">
+      <app-select [label]="'accounting.bookSettings.timeZone' | translate" [options]="zoneOptions()" formControlName="reportingTimeZone"
+        [required]="true" data-testid="book-settings-time-zone" />
+      @if (locked()) {
+        <span class="book-settings__hint" data-testid="book-settings-locked">
+          <span class="material-icons-outlined" aria-hidden="true">lock</span>
+          {{ 'accounting.bookSettings.lockedHint' | translate }}
+        </span>
+      } @else if (companyZoneDiffers() && canEdit()) {
+        <button type="button" class="action-btn action-btn--sm book-settings__use-company" data-testid="book-settings-use-company"
+          (click)="useCompanyZone()">
+          {{ 'accounting.bookSettings.useCompanyZone' | translate: { zone: settings()?.companyTimeZone ?? '' } }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (canEdit()) {
+    <div class="book-settings__actions">
+      <button type="button" class="action-btn" data-testid="book-settings-cancel" [disabled]="!form.dirty || saving()" (click)="cancel()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button type="button" class="action-btn action-btn--primary" data-testid="book-settings-save"
+          [disabled]="form.invalid || saving()" (click)="save()">
+          <span class="material-icons-outlined" aria-hidden="true">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  }
+</section>

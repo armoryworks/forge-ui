@@ -1,0 +1,108 @@
+<app-page-layout [pageTitle]="'accounting.openItems.title' | translate">
+  <ng-container content>
+    <form [formGroup]="form" class="open-items" [appLoadingBlock]="checking() || posting()">
+      <p class="text-muted open-items__intro">{{ 'accounting.openItems.intro' | translate }}</p>
+
+      @if (postedEntryNumber(); as number) {
+        <p class="open-items__posted" role="status" data-testid="open-items-posted">
+          <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+          {{ 'accounting.openItems.posted' | translate: { number: number } }}
+        </p>
+      }
+      @if (check()?.alreadyPosted) {
+        <p class="open-items__blocked" role="alert" data-testid="open-items-already-posted">
+          {{ 'accounting.openItems.alreadyPosted' | translate }}
+        </p>
+      }
+
+      <div class="open-items__header">
+        <app-datepicker [label]="'accounting.openItems.asOfDate' | translate" formControlName="asOfDate" [required]="true" data-testid="open-items-as-of" />
+        <app-currency-input [label]="'accounting.openItems.receivablesControl' | translate" formControlName="receivablesControl" [required]="true" data-testid="open-items-ar-control" />
+        <app-currency-input [label]="'accounting.openItems.payablesControl' | translate" formControlName="payablesControl" [required]="true" data-testid="open-items-ap-control" />
+      </div>
+
+      <div class="open-items__toolbar">
+        <span class="open-items__title">{{ 'accounting.openItems.items' | translate }}</span>
+        <button type="button" class="action-btn action-btn--sm" data-testid="open-items-template" (click)="downloadTemplate()">
+          <span class="material-icons-outlined" aria-hidden="true">download</span>
+          {{ 'accounting.openItems.template' | translate }}
+        </button>
+        <button type="button" class="action-btn action-btn--sm" data-testid="open-items-import" (click)="importCsv()">
+          <span class="material-icons-outlined" aria-hidden="true">upload_file</span>
+          {{ 'accounting.openItems.importCsv' | translate }}
+        </button>
+        <button type="button" class="action-btn action-btn--sm" data-testid="open-items-add" (click)="addRow()">
+          <span class="material-icons-outlined" aria-hidden="true">add</span>
+          {{ 'accounting.openItems.addRow' | translate }}
+        </button>
+      </div>
+
+      <div class="open-items__rows" formArrayName="rows">
+        @for (row of rows.controls; track $index; let i = $index) {
+          <div class="open-items__row" [formGroupName]="i" [attr.data-testid]="'open-item-row-' + i">
+            <app-select class="open-items__type" [label]="'accounting.openItems.type' | translate" [options]="partyTypeOptions" formControlName="partyType" />
+            <app-input class="open-items__party" [label]="'accounting.openItems.party' | translate" formControlName="partyRef" [required]="true" />
+            <app-input class="open-items__doc" [label]="'accounting.openItems.documentNumber' | translate" formControlName="documentNumber" />
+            <app-datepicker class="open-items__date" [label]="'accounting.openItems.documentDate' | translate" formControlName="documentDate" />
+            <app-datepicker class="open-items__date" [label]="'accounting.openItems.dueDate' | translate" formControlName="dueDate" />
+            <app-currency-input class="open-items__amount" [label]="'accounting.openItems.amount' | translate" formControlName="amount" [required]="true" />
+            <app-input class="open-items__desc" [label]="'accounting.common.description' | translate" formControlName="description" />
+            <button type="button" class="icon-btn icon-btn--danger"
+              [attr.aria-label]="'accounting.openItems.removeRow' | translate"
+              [disabled]="rows.length <= 1" (click)="removeRow(i)">
+              <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            </button>
+            @if (rowResults()[i]; as result) {
+              <div class="open-items__result" [attr.data-testid]="'open-item-result-' + i">
+                @if (result.partyName) {
+                  <span class="chip chip--success">{{ result.partyName }}</span>
+                }
+                @for (message of result.messages; track message) {
+                  <span class="chip chip--error">{{ message }}</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="open-items__tie-out" data-testid="open-items-tie-out">
+        <div class="open-items__metric">
+          <span>{{ 'accounting.openItems.receivablesTotal' | translate }}</span>
+          <strong>{{ receivablesTotal() | currency }}</strong>
+          @if (receivablesDifference() !== null) {
+            <span class="chip" [class.chip--success]="receivablesDifference() === 0" [class.chip--error]="receivablesDifference() !== 0"
+              data-testid="open-items-ar-difference">
+              {{ 'accounting.openItems.difference' | translate: { amount: (receivablesDifference() | currency) } }}
+            </span>
+          }
+        </div>
+        <div class="open-items__metric">
+          <span>{{ 'accounting.openItems.payablesTotal' | translate }}</span>
+          <strong>{{ payablesTotal() | currency }}</strong>
+          @if (payablesDifference() !== null) {
+            <span class="chip" [class.chip--success]="payablesDifference() === 0" [class.chip--error]="payablesDifference() !== 0"
+              data-testid="open-items-ap-difference">
+              {{ 'accounting.openItems.difference' | translate: { amount: (payablesDifference() | currency) } }}
+            </span>
+          }
+        </div>
+        <p class="text-muted open-items__offset">{{ 'accounting.openItems.offsetNote' | translate }}</p>
+      </div>
+    </form>
+  </ng-container>
+
+  <ng-container actions>
+    <button type="button" class="action-btn" data-testid="open-items-check" [disabled]="checking()" (click)="runCheck()">
+      <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
+      {{ 'accounting.openItems.check' | translate }}
+    </button>
+    <app-validation-button class="validation-button--inline" [violations]="violations" [loading]="posting()">
+      <button type="button" class="action-btn action-btn--primary" data-testid="open-items-post"
+        [disabled]="form.invalid || !canPost()" (click)="post()">
+        <span class="material-icons-outlined" aria-hidden="true">publish</span>
+        {{ 'accounting.openItems.post' | translate }}
+      </button>
+    </app-validation-button>
+  </ng-container>
+</app-page-layout>

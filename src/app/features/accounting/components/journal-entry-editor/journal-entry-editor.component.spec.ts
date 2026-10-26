@@ -20,7 +20,18 @@ interface EditorApi {
   removeLine(index: number): void;
   save(): void;
   isDirty(): boolean;
+  softClosed(): boolean;
+  hardClosed(): boolean;
 }
+
+const CALENDAR = [{
+  id: 1, name: 'FY2026', startDate: '2026-01-01', endDate: '2026-12-31', status: 'Open',
+  periods: [
+    { id: 11, fiscalYearId: 1, periodNumber: 1, name: 'Jan 2026', startDate: '2026-01-01', endDate: '2026-01-31', status: 'SoftClosed' },
+    { id: 12, fiscalYearId: 1, periodNumber: 2, name: 'Feb 2026', startDate: '2026-02-01', endDate: '2026-02-28', status: 'HardClosed' },
+    { id: 13, fiscalYearId: 1, periodNumber: 3, name: 'Mar 2026', startDate: '2026-03-01', endDate: '2026-03-31', status: 'Open' },
+  ],
+}];
 
 const ACCOUNTS = [
   { id: 100, accountNumber: '1000', name: 'Cash', accountType: 'Asset', normalBalance: 'Debit', isPostable: true, isControlAccount: false, requiresJob: false, requiresCostCenter: false },
@@ -28,7 +39,7 @@ const ACCOUNTS = [
 ];
 
 describe('JournalEntryEditorComponent', () => {
-  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), resubmitJournalEntry: vi.fn() };
+  const gl = { getChartOfAccounts: vi.fn(), createManualJournalEntry: vi.fn(), getLedgerRegister: vi.fn(), resubmitJournalEntry: vi.fn(), getFiscalCalendar: vi.fn() };
   const router = { navigate: vi.fn() };
   const snackbar = { success: vi.fn(), error: vi.fn(), errorFrom: vi.fn(), info: vi.fn() };
   let queryParams: Record<string, string>;
@@ -64,6 +75,7 @@ describe('JournalEntryEditorComponent', () => {
     vi.clearAllMocks();
     queryParams = {};
     gl.getChartOfAccounts.mockReturnValue(of(ACCOUNTS));
+    gl.getFiscalCalendar.mockReturnValue(of([]));
     gl.createManualJournalEntry.mockReturnValue(
       of({ id: 5, bookId: 1, entryNumber: 7, entryDate: '2026-01-10', status: 'Posted', memo: 'cash sale' }),
     );
@@ -202,5 +214,44 @@ describe('JournalEntryEditorComponent', () => {
     expect(lines.length).toBe(2);
     api.removeLine(0); // no-op at the minimum
     expect(lines.length).toBe(2);
+  });
+
+  it('shows the override only for a soft-closed period and sends it with the reason', () => {
+    gl.getFiscalCalendar.mockReturnValue(of(CALENDAR));
+    const api = create();
+    fillBalanced(api);
+    api.form.get('entryDate')!.setValue(new Date(2026, 2, 10));
+    expect(api.softClosed()).toBe(false);
+    expect(api.form.valid).toBe(true);
+
+    api.form.get('entryDate')!.setValue(new Date(2026, 0, 20));
+    expect(api.softClosed()).toBe(true);
+    expect(api.form.errors?.['softClosedOverrideRequired']).toBeTruthy();
+    api.save();
+    expect(gl.createManualJournalEntry).not.toHaveBeenCalled();
+
+    api.form.get('overrideSoftClose')!.setValue(true);
+    api.form.get('overrideReason')!.setValue('Late vendor invoice');
+    expect(api.form.valid).toBe(true);
+    api.save();
+    expect(gl.createManualJournalEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ allowSoftClosedOverride: true, overrideReason: 'Late vendor invoice', entryDate: '2026-01-20' }),
+    );
+  });
+
+  it('never posts into a hard-closed period and sends no override for an open one', () => {
+    gl.getFiscalCalendar.mockReturnValue(of(CALENDAR));
+    const api = create();
+    fillBalanced(api);
+    api.form.get('entryDate')!.setValue(new Date(2026, 1, 10));
+    expect(api.hardClosed()).toBe(true);
+    expect(api.form.errors?.['periodHardClosed']).toBeTruthy();
+
+    api.form.get('entryDate')!.setValue(new Date(2026, 2, 10));
+    api.form.get('overrideSoftClose')!.setValue(true);
+    api.save();
+    expect(gl.createManualJournalEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ allowSoftClosedOverride: false, overrideReason: null }),
+    );
   });
 });

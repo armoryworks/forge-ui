@@ -90,7 +90,9 @@
     "exchangeRates": "Tipos de cambio",
     "openingStock": "Existencias iniciales",
     "inventoryValuation": "Valoración de inventario",
-    "creditMemos": "Notas de crédito"
+    "creditMemos": "Notas de crédito",
+    "payRuns": "Nóminas",
+    "openingOpenItems": "Saldos iniciales por cobrar y por pagar"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -4475,7 +4477,13 @@
       "missing": "No se puede habilitar {{name}}: primero habilite estas dependencias: {{list}}.",
       "conflicts": "{{name}} entra en conflicto con: {{list}}. Primero deshabilite la otra capacidad.",
       "concurrency": "Otro administrador modificó {{name}}. La página se actualizó; inténtelo de nuevo."
-    }
+    },
+    "companyTimeZone": "Zona horaria de la empresa",
+    "companyTimeZoneApplyTitle": "¿Usar esta zona horaria en los libros?",
+    "companyTimeZoneApplyMessage": "{{count}} libro(s) sin asientos contabilizados usan otra zona horaria. ¿Cambiarlos a {{zone}}? Los libros con asientos contabilizados conservan su zona.",
+    "companyTimeZoneApplyConfirm": "Aplicar a los libros",
+    "companyTimeZoneApplied": "Zona horaria aplicada a {{count}} libro(s).",
+    "companyTimeZoneApplyFailed": "No se pudo aplicar la zona horaria a los libros."
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -11427,7 +11435,13 @@
       "correctionMemo": "Corrección del asiento n.º {{number}}: ",
       "correcting": "Corrigiendo el asiento n.º {{number}}",
       "pendingApproval": "El asiento {{number}} espera un segundo aprobador",
-      "resubmitting": "Reenviando el asiento rechazado #{{number}}"
+      "resubmitting": "Reenviando el asiento rechazado #{{number}}",
+      "softClosedNote": "{{period}} tiene cierre provisional. Para contabilizar en él se necesita una excepción con motivo.",
+      "overrideSoftClose": "Contabilizar en período con cierre provisional (excepción)",
+      "overrideReason": "Motivo de la excepción",
+      "softClosedViolation": "El período tiene cierre provisional: marque la excepción e indique un motivo",
+      "hardClosedNote": "{{period}} tiene cierre definitivo. Elija una fecha de un período abierto.",
+      "hardClosedViolation": "La fecha del asiento cae en un período con cierre definitivo"
     },
     "training": {
       "title": "Formación del libro mayor",
@@ -11616,7 +11630,11 @@
       "openingStock": "Existencias iniciales",
       "openingStockDesc": "Cargue el inventario inicial con cantidades y costos unitarios",
       "inventoryValuation": "Valoración de inventario",
-      "inventoryValuationDesc": "Valor disponible por pieza, conciliado con las cuentas de inventario"
+      "inventoryValuationDesc": "Valor disponible por pieza, conciliado con las cuentas de inventario",
+      "payRuns": "Nóminas",
+      "payRunsDesc": "Importe registros de nómina y contabilice las nóminas en el libro mayor",
+      "openingOpenItems": "Saldos iniciales por cobrar y por pagar",
+      "openingOpenItemsDesc": "Cargue las facturas de clientes y de proveedores abiertas al corte"
     },
     "exports": {
       "title": "Exportaciones para el contador",
@@ -11644,7 +11662,11 @@
       "pushConfirmMessage": "Esto envía un único asiento de resumen de diario para {{from}} – {{to}} a QuickBooks Online. QuickBooks sigue siendo una copia descendente — nada se sincroniza de vuelta.",
       "pushConfirmLabel": "Enviar",
       "pushSuccess": "Enviado a QuickBooks — asiento {{docId}}",
-      "rangeRequired": "Elija un período completo de inicio/fin antes de enviar."
+      "rangeRequired": "Elija un período completo de inicio/fin antes de enviar.",
+      "overlapTitle": "Rango ya enviado",
+      "overlapMessage": "Del {{from}} al {{to}} se superpone con un envío anterior a QuickBooks. ¿Enviar de nuevo de todos modos? Elimine primero el asiento anterior en QuickBooks o se registrará dos veces.",
+      "overlapConfirm": "Enviar de nuevo",
+      "pushFailed": "El envío a QuickBooks falló."
     },
     "trialBalance": {
       "title": "Balance de comprobación",
@@ -11915,7 +11937,8 @@
       "statusIgnored": "Ignorada",
       "confirm": "Confirmar coincidencia",
       "ignore": "Ignorar",
-      "unmatch": "Deshacer coincidencia"
+      "unmatch": "Deshacer coincidencia",
+      "matchManually": "Conciliar…"
     },
     "coa": {
       "title": "Plan de Cuentas",
@@ -12178,6 +12201,134 @@
         "FREIGHT_CLEARING": "Compensación de flete",
         "COGS": "Costo de ventas",
         "SALES_TAX_PAYABLE": "Impuesto sobre ventas por pagar"
+      }
+    },
+    "bankMatch": {
+      "title": "Conciliar línea del estado de cuenta",
+      "hint": "Asientos de efectivo contabilizados en la misma dirección, el más cercano primero. Elija uno para conciliar.",
+      "entry": "Asiento",
+      "memo": "Memo",
+      "source": "Origen",
+      "fit": "Coincidencia",
+      "exact": "Monto exacto · {{days}} día(s)",
+      "off": "Diferencia de {{amount}} · {{days}} día(s)",
+      "none": "Ningún asiento sin conciliar coincide con esta línea",
+      "widen": "Buscar en un rango de fechas más amplio",
+      "selected": "Asiento seleccionado #{{number}} del {{date}}",
+      "confirm": "Conciliar",
+      "matched": "Conciliado con el asiento #{{number}}",
+      "loadFailed": "No se pudieron cargar los asientos candidatos."
+    },
+    "bookSettings": {
+      "title": "Configuración del libro — {{book}}",
+      "threshold": "Umbral de doble aprobación",
+      "thresholdHint": "Los asientos manuales por encima de este monto esperan a un segundo aprobador. Déjelo en blanco para desactivar la revisión.",
+      "timeZone": "Zona horaria de reportes",
+      "lockedHint": "Bloqueada: el libro tiene asientos contabilizados.",
+      "useCompanyZone": "Usar la zona horaria de la empresa ({{zone}})",
+      "saved": "Configuración del libro guardada.",
+      "lockedError": "El libro tiene asientos contabilizados, así que su zona horaria ya no puede cambiar.",
+      "loadFailed": "No se pudo cargar la configuración del libro."
+    },
+    "payRuns": {
+      "title": "Nóminas",
+      "subtitle": "Registros de nómina importados como nóminas en borrador y contabilizados en el libro mayor",
+      "template": "Descargar plantilla",
+      "import": "Importar registro de nómina",
+      "importTitle": "Importar registro de nómina",
+      "payDate": "Fecha de pago",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "period": "Período",
+      "gross": "Bruto",
+      "net": "Neto",
+      "employerTax": "Impuestos del empleador",
+      "withholdings": "Retenciones",
+      "employee": "Empleado",
+      "journal": "Asiento",
+      "post": "Contabilizar",
+      "empty": "Todavía no hay nóminas",
+      "chooseFile": "Elegir archivo del registro",
+      "noFile": "Ningún archivo elegido",
+      "mapping": "Asignación de columnas",
+      "unmapped": "No encontrada",
+      "rows": "{{count}} fila(s) de empleados",
+      "mismatches": "{{count}} diferencia(s) en el neto",
+      "computedNet": "calculado {{amount}}",
+      "importConfirm": "Importar como borrador",
+      "imported": "Nómina importada para {{count}} empleado(s).",
+      "importWarnings": "{{count}} advertencia(s): revise el pago neto de la nómina.",
+      "previewFailed": "No se pudo leer el registro de nómina.",
+      "loadFailed": "No se pudieron cargar las nóminas.",
+      "postTitle": "Contabilizar la nómina del {{date}}",
+      "postNote": "Período del {{start}} al {{end}}. Estas líneas se contabilizarán en el libro mayor:",
+      "unmappedKey": "{{key}} no está asignada",
+      "unmappedBlocked": "Asigne estas cuentas antes de contabilizar: {{keys}}",
+      "postConfirm": "Contabilizar en el libro mayor",
+      "posted": "Nómina contabilizada como asiento #{{number}}.",
+      "statuses": {
+        "Draft": "Borrador",
+        "Posted": "Contabilizada"
+      },
+      "categories": {
+        "employee": "Empleado",
+        "gross": "Pago bruto",
+        "federal": "Retención federal",
+        "state": "Retención estatal",
+        "ficaEmployee": "FICA del empleado",
+        "otherDeductions": "Otras deducciones",
+        "employerTax": "Impuestos del empleador",
+        "net": "Pago neto"
+      },
+      "errors": {
+        "missing-required-columns": "El registro necesita una columna de empleado y una de pago bruto. Configure los nombres de columna en Administración > Configuración > Nómina si el proveedor usa otros encabezados.",
+        "no-employee-rows": "El registro no tiene filas de empleados."
+      },
+      "noLines": "No hay líneas de asiento",
+      "noRows": "No hay filas de empleados",
+      "totals": "Débitos {{debit}} · Créditos {{credit}}",
+      "runTotals": "Bruto {{gross}} · Retenido {{withheld}} · Impuestos del empleador {{employer}} · Neto {{net}}"
+    },
+    "openItems": {
+      "title": "Saldos iniciales por cobrar y por pagar",
+      "intro": "Ingrese las facturas de clientes y de proveedores abiertas al corte, revíselas, cuadre con los saldos de control de CxC y CxP del sistema anterior y luego contabilice. Los montos están en la moneda funcional del libro.",
+      "asOfDate": "Fecha de corte",
+      "receivablesControl": "Saldo de control CxC del sistema anterior",
+      "payablesControl": "Saldo de control CxP del sistema anterior",
+      "items": "Partidas abiertas",
+      "template": "Descargar plantilla",
+      "importCsv": "Importar CSV",
+      "addRow": "Agregar partida",
+      "removeRow": "Quitar partida",
+      "type": "Tipo",
+      "receivable": "Por cobrar (cliente)",
+      "payable": "Por pagar (proveedor)",
+      "party": "Cliente o proveedor (número o nombre)",
+      "documentNumber": "Número de documento",
+      "documentDate": "Fecha del documento",
+      "dueDate": "Fecha de vencimiento",
+      "amount": "Monto abierto",
+      "receivablesTotal": "Por cobrar",
+      "payablesTotal": "Por pagar",
+      "difference": "Diferencia {{amount}}",
+      "offsetNote": "El neto de cuentas por cobrar menos cuentas por pagar se contabiliza en Patrimonio de saldos iniciales, donde el asiento de apertura mantiene los saldos de CxC y CxP.",
+      "check": "Revisar",
+      "post": "Contabilizar partidas",
+      "posted": "Partidas abiertas iniciales contabilizadas como asiento #{{number}}.",
+      "alreadyPosted": "Los saldos iniciales por cobrar y por pagar de este libro ya están contabilizados.",
+      "checkFailed": "No se pudieron revisar las partidas abiertas.",
+      "csvBadRows": "No se pudieron leer estas líneas del CSV: {{rows}}",
+      "csvEmpty": "El CSV no tiene partidas abiertas.",
+      "csvLoaded": "{{count}} partida(s) abierta(s) cargada(s). Revíselas antes de contabilizar.",
+      "errors": {
+        "party-not-found": "Cliente o proveedor no encontrado",
+        "party-ambiguous": "Hay más de una coincidencia: use el número",
+        "party-type-invalid": "Tipo desconocido",
+        "amount-not-positive": "El monto debe ser mayor que cero",
+        "due-before-document": "La fecha de vencimiento es anterior a la del documento",
+        "document-number-duplicate": "El número de documento se repite en esta lista",
+        "document-number-in-use": "El número de documento ya está en uso",
+        "document-number-too-long": "El número de documento es demasiado largo"
       }
     }
   },

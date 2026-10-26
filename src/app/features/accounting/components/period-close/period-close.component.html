@@ -2,6 +2,8 @@
   @if (busy()) { <span class="acct-muted">{{ 'accounting.common.working' | translate }}</span> }</app-page-header>
 
 <div class="page-content">
+  <app-book-settings-card />
+
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
   }

@@ -486,6 +486,7 @@ export interface ManualJournalEntryInput {
   currencyId: number;
   memo?: string | null;
   allowSoftClosedOverride?: boolean;
+  overrideReason?: string | null;
   lines: ManualJournalLineInput[];
 }
 

@@ -112,3 +112,29 @@
     white-space: nowrap;
   }
 }
+
+.je-period {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+
+  &--soft {
+    background: var(--warning-light);
+  }
+
+  &--hard {
+    flex-direction: row;
+    align-items: center;
+    background: var(--error-light);
+    margin: 0;
+  }
+
+  &__note {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+  }
+}

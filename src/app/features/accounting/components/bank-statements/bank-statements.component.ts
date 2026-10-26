@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 
 import { BankStatementService } from '../../services/bank-statement.service';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
@@ -18,6 +19,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { BankMatchDialogComponent, BankMatchDialogData } from '../bank-match-dialog/bank-match-dialog.component';
 
 const DEFAULT_BOOK_ID = 1;
 
@@ -40,6 +42,7 @@ export class BankStatementsComponent {
   private readonly glService = inject(GeneralLedgerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   @ViewChild('fileInput') private fileInput!: ElementRef<HTMLInputElement>;
 
@@ -69,7 +72,7 @@ export class BankStatementsComponent {
     { field: 'amount', header: this.translate.instant('payables.amount'), sortable: true, width: '110px', align: 'right' },
     { field: 'matchStatus', header: this.translate.instant('common.status'), sortable: true, width: '110px' },
     { field: 'matched', header: this.translate.instant('accounting.bankStatements.matchedEntry'), width: '220px' },
-    { field: 'actions', header: this.translate.instant('common.actions'), width: '120px', align: 'right' },
+    { field: 'actions', header: this.translate.instant('common.actions'), width: '150px', align: 'right' },
   ];
 
   constructor() {
@@ -163,6 +166,15 @@ export class BankStatementsComponent {
     this.statementService.confirm(line.id).subscribe({
       next: () => this.loadImports(this.selectedImport()?.id),
     });
+  }
+
+  protected openMatch(line: BankStatementLineModel): void {
+    this.dialog
+      .open(BankMatchDialogComponent, { width: '800px', data: { line } satisfies BankMatchDialogData })
+      .afterClosed()
+      .subscribe((matched: BankStatementLineModel | undefined) => {
+        if (matched) this.loadImports(this.selectedImport()?.id);
+      });
   }
 
   protected ignoreLine(line: BankStatementLineModel): void {

@@ -1,0 +1,56 @@
+@use 'styles/variables' as *;
+
+.payroll-import {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__file {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__problems {
+    margin: 0;
+    padding: $sp-sm $sp-lg;
+    background: var(--error-light);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin: 0;
+    font-size: $font-size-title;
+  }
+
+  &__mapping {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: $sp-xs $sp-lg;
+    margin: 0;
+    font-size: $font-size-sm;
+
+    dd {
+      margin: 0;
+    }
+  }
+
+  &__totals {
+    margin: 0;
+    text-align: right;
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+  }
+}
+
+.row--mismatch {
+  background: var(--warning-light);
+}
