@@ -5236,6 +5236,7 @@
     "draft": "Borrador",
     "active": "Activo",
     "pending": "Pendiente",
+    "pendingApproval": "Pendiente de aprobación",
     "planned": "Planificado",
     "inProgress": "En Progreso",
     "completed": "Completado",
@@ -6955,14 +6956,15 @@
       "submitUrl": "Enlace de firma",
       "copyLink": "Copiar enlace",
       "linkCopied": "Enlace copiado al portapapeles.",
-      "portalTitle": "Solicitar enlace de aceptación",
+      "portalTitle": "Enviar enlace de aceptación por correo",
       "recipientEmail": "Correo del destinatario",
       "verificationKey": "Clave de verificación",
       "verificationKeyHint": "Clave opcional que el cliente debe ingresar para aceptar.",
       "validDays": "Días de validez",
-      "generateLink": "Generar enlace",
+      "generateLink": "Enviar enlace",
+      "emailLanguage": "Idioma del correo",
       "linkLabel": "Enlace de aceptación",
-      "portalLinkCreated": "Enlace de aceptación creado.",
+      "portalLinkCreated": "Enlace de aceptación enviado por correo al destinatario.",
       "fromEmail": "Correo de origen",
       "register": "Registrar",
       "confirmBlockedHint": "Adjunte la aceptación del cliente antes de liberar a producción.",
@@ -9824,7 +9826,7 @@
     "description": "Descripción",
     "specialInstructions": "Instrucciones Especiales",
     "notes": "Notas",
-    "sendToVendors": "Agregar Proveedores",
+    "sendToVendors": "Enviar a Proveedores",
     "recordResponse": "Registrar Respuesta",
     "recordVendorResponse": "Registrar Respuesta del Proveedor",
     "vendors": "Proveedores",
@@ -9917,11 +9919,13 @@
     "snackbar": {
       "rfqUpdated": "Solicitud actualizada",
       "rfqCreated": "Solicitud creada",
-      "sentToVendors": "Proveedores agregados a la solicitud de cotización. Envíe la solicitud a cada proveedor usted mismo.",
+      "sentToVendors": "Solicitud de cotización enviada por correo a {{count}} proveedor(es).",
       "responseRecorded": "Respuesta de proveedor registrada",
       "awardedPo": "Solicitud adjudicada. OC creada.",
       "rfqAwarded": "Solicitud de cotización adjudicada",
-      "rfqSent": "Proveedores agregados a la solicitud de cotización. Envíe la solicitud a cada proveedor usted mismo."
+      "rfqSent": "Solicitud de cotización enviada por correo a {{count}} proveedor(es).",
+      "vendorsWithoutEmail": "No enviada, sin correo electrónico registrado: {{vendors}}. Agregue uno al proveedor y vuelva a enviarla.",
+      "vendorsAlreadyInvited": "Ya están en esta solicitud, no se volvió a enviar el correo: {{count}} proveedor(es)."
     },
     "confirm": {
       "awardTitle": "¿Adjudicar solicitud?"
@@ -9932,8 +9936,8 @@
     "leadTime": "Tiempo de entrega",
     "selectPart": "Seleccionar pieza",
     "rfq": {
-      "confirmSendTitle": "¿Agregar proveedores a la RFQ?",
-      "confirmSendMessage": "¿Agregar los proveedores seleccionados ({{count}}) a esta RFQ? Esto no les envía un correo: descargue el PDF de la RFQ y envíelo usted mismo a cada proveedor."
+      "confirmSendTitle": "¿Enviar la RFQ a los proveedores?",
+      "confirmSendMessage": "¿Enviar por correo esta RFQ con su PDF a los proveedores seleccionados ({{count}})? A los proveedores sin correo electrónico registrado no se les envía."
     },
     "poNumberFallback": "OC #{{id}}",
     "viewPo": "Ver OC",

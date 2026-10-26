@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import { RfqDetailDialogComponent } from './rfq-detail-dialog.component';
 import { PurchasingService } from '../../services/purchasing.service';
 import { VendorService } from '../../../vendors/services/vendor.service';
-import { RfqDetail, RfqVendorResponse } from '../../models/rfq.model';
+import { RfqDetail, RfqVendorResponse, SendRfqToVendorsResponse } from '../../models/rfq.model';
 import { ConfirmSendService } from '../../../../shared/services/confirm-send.service';
 import { SnackbarNavOptions, SnackbarService } from '../../../../shared/services/snackbar.service';
 
@@ -17,6 +17,8 @@ class FakeLoader implements TranslateLoader {
 
 interface DialogInternals {
   awardVendor(response: RfqVendorResponse): void;
+  sendToVendors(): void;
+  sendVendorControl: { setValue(v: number[]): void };
   responseForm: { controls: Record<string, { setValue(v: unknown): void; valid: boolean }> };
 }
 
@@ -30,10 +32,13 @@ const rfq = {
   id: 3, rfqNumber: 'RFQ-20261019-002', vendorResponses: [response],
 } as unknown as RfqDetail;
 
-function setup() {
+function setup(sendResult: SendRfqToVendorsResponse = { rfqId: 3, emailedVendorIds: [], vendorsWithoutEmail: [], alreadyInvitedVendorIds: [] }) {
   const close = vi.fn();
   const successWithNav = vi.fn();
+  const success = vi.fn();
+  const warn = vi.fn();
   const awardRfq = vi.fn(() => of({ purchaseOrderId: 8 }));
+  const sendToVendors = vi.fn(() => of(sendResult));
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
@@ -41,14 +46,14 @@ function setup() {
       { provide: MAT_DIALOG_DATA, useValue: { rfqId: 3 } },
       { provide: MatDialogRef, useValue: { close } },
       { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(true) }) } },
-      { provide: PurchasingService, useValue: { getRfqById: () => of(rfq), awardRfq } },
+      { provide: PurchasingService, useValue: { getRfqById: () => of(rfq), awardRfq, sendToVendors } },
       { provide: VendorService, useValue: { getVendorDropdown: () => of([]) } },
-      { provide: ConfirmSendService, useValue: { confirmSend: () => of(false) } },
-      { provide: SnackbarService, useValue: { successWithNav, success: vi.fn() } },
+      { provide: ConfirmSendService, useValue: { confirmSend: () => of(true) } },
+      { provide: SnackbarService, useValue: { successWithNav, success, warn, info: vi.fn() } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new RfqDetailDialogComponent());
-  return { internals: component as unknown as DialogInternals, close, successWithNav, awardRfq };
+  return { internals: component as unknown as DialogInternals, close, successWithNav, awardRfq, sendToVendors, success, warn };
 }
 
 describe('RfqDetailDialogComponent', () => {
@@ -79,5 +84,28 @@ describe('RfqDetailDialogComponent', () => {
     expect(controls['leadTimeDays'].valid).toBe(false);
     expect(controls['minimumOrderQuantity'].valid).toBe(false);
     expect(controls['toolingCost'].valid).toBe(false);
+  });
+
+  it('confirms a send that e-mailed every vendor', () => {
+    const { internals, sendToVendors, success, warn } = setup({ rfqId: 3, emailedVendorIds: [4, 5], vendorsWithoutEmail: [], alreadyInvitedVendorIds: [] });
+
+    internals.sendVendorControl.setValue([4, 5]);
+    internals.sendToVendors();
+
+    expect(sendToVendors).toHaveBeenCalledWith(3, { vendorIds: [4, 5] });
+    expect(success).toHaveBeenCalledWith('purchasing.snackbar.rfqSent');
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('warns about vendors that could not be e-mailed', () => {
+    const { internals, success, warn } = setup({
+      rfqId: 3, emailedVendorIds: [4], vendorsWithoutEmail: [{ vendorId: 6, vendorName: 'Brindle Castings' }], alreadyInvitedVendorIds: [],
+    });
+
+    internals.sendVendorControl.setValue([4, 6]);
+    internals.sendToVendors();
+
+    expect(warn).toHaveBeenCalledWith('purchasing.snackbar.rfqSent purchasing.snackbar.vendorsWithoutEmail');
+    expect(success).not.toHaveBeenCalled();
   });
 });

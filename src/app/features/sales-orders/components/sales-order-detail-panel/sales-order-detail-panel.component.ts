@@ -62,6 +62,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
+import { LanguageService, SupportedLanguage } from '../../../../shared/services/language.service';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -109,6 +110,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly auth = inject(AuthService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly customerService = inject(CustomerService);
+  private readonly language = inject(LanguageService);
 
   /** Whether the shop allows editing the order number (only offered while Draft). */
   protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
@@ -216,7 +218,11 @@ export class SalesOrderDetailPanelComponent {
     recipientEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     verificationKey: new FormControl('', { nonNullable: true }),
     validDays: new FormControl<number | null>(null),
+    language: new FormControl<SupportedLanguage>('en', { nonNullable: true }),
   });
+
+  protected readonly emailLanguageOptions: SelectOption[] = this.language.availableLanguages
+    .map(l => ({ value: l.code, label: l.label }));
 
   protected readonly emailIngestForm = new FormGroup({
     fromEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
@@ -567,7 +573,7 @@ export class SalesOrderDetailPanelComponent {
   }
 
   protected openPortalDialog(): void {
-    this.portalForm.reset({ recipientEmail: '', verificationKey: '', validDays: null });
+    this.portalForm.reset({ recipientEmail: '', verificationKey: '', validDays: null, language: this.language.currentLanguage() });
     this.portalLink.set(null);
     this.showPortalDialog.set(true);
   }
@@ -581,6 +587,7 @@ export class SalesOrderDetailPanelComponent {
       recipientEmail: v.recipientEmail,
       verificationKey: v.verificationKey,
       validDays: v.validDays ?? undefined,
+      language: v.language,
     }).subscribe({
       next: (res) => {
         this.savingAcceptance.set(false);

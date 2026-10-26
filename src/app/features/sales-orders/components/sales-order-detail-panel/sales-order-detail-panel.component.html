@@ -1185,6 +1185,7 @@
           <app-input [label]="'salesOrders.acceptance.recipientEmail' | translate" type="email" formControlName="recipientEmail" [required]="true" />
           <app-input [label]="'salesOrders.acceptance.verificationKey' | translate" formControlName="verificationKey" [info]="'salesOrders.acceptance.verificationKeyHint' | translate" />
           <app-input [label]="'salesOrders.acceptance.validDays' | translate" type="number" formControlName="validDays" />
+          <app-select [label]="'salesOrders.acceptance.emailLanguage' | translate" formControlName="language" [options]="emailLanguageOptions" data-testid="so-portal-language" />
         </div>
         @if (portalLink(); as link) {
           <div class="acceptance-link-result">
@@ -1200,7 +1201,7 @@
         <div dialog-footer>
           <button class="action-btn" data-testid="so-portal-dismiss" (click)="showPortalDialog.set(false)">{{ (portalLink() ? 'common.close' : 'common.cancel') | translate }}</button>
           <button class="action-btn action-btn--primary" [disabled]="portalForm.invalid || savingAcceptance()" (click)="requestPortal()">
-            <span class="material-icons-outlined">link</span>
+            <span class="material-icons-outlined">send</span>
             {{ 'salesOrders.acceptance.generateLink' | translate }}
           </button>
         </div>

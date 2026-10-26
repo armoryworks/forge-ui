@@ -108,6 +108,9 @@ interface Panel {
   headerError: Signal<string | null>;
   editingHeader: Signal<boolean>;
   saveHeader(): void;
+  openPortalDialog(): void;
+  requestPortal(): void;
+  portalForm: FormGroup;
 }
 
 describe('SalesOrderDetailPanelComponent', () => {
@@ -118,6 +121,7 @@ describe('SalesOrderDetailPanelComponent', () => {
   let dialogResult: boolean;
   let enabledCaps: Set<string>;
   let standalone: WritableSignal<boolean>;
+  let requestPortal: ReturnType<typeof vi.fn>;
 
   function build(detail: SalesOrderDetail): Panel {
     const panel = TestBed.runInInjectionContext(() => new SalesOrderDetailPanelComponent()) as unknown as Panel;
@@ -130,6 +134,7 @@ describe('SalesOrderDetailPanelComponent', () => {
     dialogResult = true;
     enabledCaps = new Set();
     standalone = signal(true);
+    requestPortal = vi.fn(() => of({ acceptance: {}, token: 'tok' }));
     soService = {
       getSalesOrderById: vi.fn(() => of(order())),
       getDocuments: vi.fn(() => of([])),
@@ -150,7 +155,7 @@ describe('SalesOrderDetailPanelComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: SalesOrderService, useValue: soService },
-        { provide: SalesOrderAcceptanceService, useValue: { list: vi.fn(() => of([])) } },
+        { provide: SalesOrderAcceptanceService, useValue: { list: vi.fn(() => of([])), requestPortal } },
         { provide: CustomerService, useValue: customerService },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: { open: dialogOpen } },
@@ -543,5 +548,16 @@ describe('SalesOrderDetailPanelComponent', () => {
 
     expect(panel['headerError']()).toBe('A verified tax certificate is required to change the tax rate.');
     expect(panel['editingHeader']()).toBe(true);
+  });
+
+  it('e-mails the acceptance link in the language picked for the recipient', () => {
+    const panel = build(order({ status: 'Confirmed' }));
+
+    panel['openPortalDialog']();
+    panel['portalForm'].patchValue({ recipientEmail: 'buyer@example.com', verificationKey: 'PO-4410', language: 'es' });
+    panel['requestPortal']();
+
+    expect(requestPortal.mock.calls[0][1]).toEqual(expect.objectContaining({ recipientEmail: 'buyer@example.com', language: 'es' }));
+    expect(snackbar['success']).toHaveBeenCalledWith('salesOrders.acceptance.portalLinkCreated');
   });
 });

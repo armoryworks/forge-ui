@@ -37,6 +37,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { PO_STATUS_CHIP_CLASSES } from '../../../purchase-orders/models/po-status.const';
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -166,16 +167,7 @@ export class VendorDetailPanelComponent {
   }
 
   protected getPoStatusClass(status: string): string {
-    const map: Record<string, string> = {
-      Draft: 'chip--muted',
-      Submitted: 'chip--info',
-      Acknowledged: 'chip--primary',
-      PartiallyReceived: 'chip--warning',
-      Received: 'chip--success',
-      Closed: 'chip--muted',
-      Cancelled: 'chip--error',
-    };
-    return `chip ${map[status] ?? ''}`.trim();
+    return `chip ${PO_STATUS_CHIP_CLASSES[status] ?? ''}`.trim();
   }
 
   protected getPoStatusLabel(status: string): string {
