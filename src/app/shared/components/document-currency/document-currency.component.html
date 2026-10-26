@@ -1,0 +1,35 @@
+@if (visible()) {
+  <div class="document-currency">
+    @if (locked() || readonly()) {
+      <div class="document-currency__locked" [attr.data-testid]="testIdPrefix() + '-currency-locked'">
+        <span class="document-currency__label">{{ 'accounting.currency.currency' | translate }}</span>
+        <span>{{ lockedLabel() }}</span>
+        @if (locked()) {
+          <span class="material-icons-outlined document-currency__lock" aria-hidden="true">lock</span>
+          <span class="document-currency__hint">{{ 'accounting.currency.lockedHint' | translate }}</span>
+        }
+      </div>
+    } @else {
+      <app-select [label]="'accounting.currency.currency' | translate" [formControl]="currencyControl()"
+        [options]="options()" [required]="true" [attr.data-testid]="testIdPrefix() + '-currency'" />
+    }
+    @if (showRate()) {
+      @if (fxRateControl(); as rateControl) {
+        <app-input [label]="'accounting.currency.fxRate' | translate" type="number" [formControl]="rateControl"
+          step="0.00000001" min="0.00000001" [isReadonly]="!canEditRate() || locked()"
+          [placeholder]="'accounting.currency.fxRateAuto' | translate"
+          [attr.data-testid]="testIdPrefix() + '-fx-rate'" />
+      }
+      @if (rateAsOf(); as asOf) {
+        <p class="document-currency__hint" [attr.data-testid]="testIdPrefix() + '-fx-rate-as-of'">
+          {{ 'accounting.currency.rateAsOf' | translate: { date: asOf } }}
+        </p>
+      }
+      @if (rateMissing()) {
+        <p class="document-currency__hint document-currency__hint--warn" [attr.data-testid]="testIdPrefix() + '-fx-rate-missing'">
+          {{ 'accounting.currency.rateNotOnFile' | translate }}
+        </p>
+      }
+    }
+  </div>
+}

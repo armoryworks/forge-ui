@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal, viewChild } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -20,7 +20,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
@@ -29,7 +29,6 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
 
 type ApplicationGroup = FormGroup<{
   amount: FormControl<number>;
-  settlementFxRate: FormControl<number>;
 }>;
 
 /** Draft shape of one application row — keyed by vendorBillId so a restore can
@@ -37,7 +36,6 @@ type ApplicationGroup = FormGroup<{
 interface DraftApplicationRow {
   vendorBillId: number | null;
   amount: number;
-  settlementFxRate: number;
 }
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of (customer) PaymentDialog. Picking
@@ -49,7 +47,7 @@ interface DraftApplicationRow {
   imports: [
     DateOnlyPipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    CurrencyInputComponent, CurrencyDisplayComponent, ValidationButtonComponent, LoadingBlockDirective,
+    CurrencyInputComponent, CurrencyDisplayComponent, ValidationButtonComponent, LoadingBlockDirective, DocumentCurrencyComponent,
   ],
   templateUrl: './vendor-payment-dialog.component.html',
   styleUrl: './vendor-payment-dialog.component.scss',
@@ -57,10 +55,10 @@ interface DraftApplicationRow {
 })
 export class VendorPaymentDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
   private readonly paymentService = inject(VendorPaymentService);
   private readonly billService = inject(VendorBillService);
   private readonly vendorService = inject(VendorService);
-  private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -75,14 +73,13 @@ export class VendorPaymentDialogComponent {
     { value: null, label: this.translate.instant('payables.selectVendor') },
   ]);
 
-  /** The selected vendor's payable bills, aligned by index with `applications`. */
+  /** The selected vendor's payable bills in the payment's currency, aligned by index with `applications`. */
   protected readonly payableBills = signal<VendorBillListItem[]>([]);
+  private readonly allPayableBills = signal<VendorBillListItem[]>([]);
+  private readonly vendorCurrencies = signal<Map<number, number | null>>(new Map());
   protected readonly billsLoading = signal(false);
   protected readonly applications = new FormArray<ApplicationGroup>([]);
 
-  // Per-application settlement FX rate is only offered on multi-currency installs.
-  protected readonly activeCurrencyCount = signal(0);
-  protected readonly showSettlementFxRate = computed(() => this.activeCurrencyCount() > 1);
 
   protected readonly methodOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('payables.selectMethod') },
@@ -104,8 +101,24 @@ export class VendorPaymentDialogComponent {
     paymentDate: new FormControl<Date | null>(null, [Validators.required]),
     referenceNumber: new FormControl(''),
     notes: new FormControl(''),
+    currencyId: new FormControl<number | null>(null),
+    fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
     applications: this.applications,
   });
+
+  private readonly selectedVendorId = toSignal(
+    this.paymentForm.controls.vendorId.valueChanges.pipe(startWith(this.paymentForm.controls.vendorId.value)),
+    { initialValue: this.paymentForm.controls.vendorId.value },
+  );
+  protected readonly paymentDateValue = toSignal(
+    this.paymentForm.controls.paymentDate.valueChanges.pipe(startWith(this.paymentForm.controls.paymentDate.value)),
+    { initialValue: this.paymentForm.controls.paymentDate.value },
+  );
+  protected readonly vendorCurrencyId = computed(() => {
+    const vendorId = this.selectedVendorId();
+    return vendorId == null ? null : this.vendorCurrencies().get(vendorId) ?? null;
+  });
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
 
   /** Reactivity tick for computed totals — fires on any nested application edit. */
   private readonly formValue = toSignal(this.paymentForm.valueChanges, { initialValue: null });
@@ -172,15 +185,18 @@ export class VendorPaymentDialogComponent {
 
   constructor() {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.vendorOptions.set([
-        { value: null, label: this.translate.instant('payables.selectVendor') },
-        ...list.filter(vendor => vendor.isActive).map(vendor => ({ value: vendor.id, label: vendor.companyName })),
-      ]),
+      next: (list) => {
+        this.vendorCurrencies.set(new Map(list.map(vendor => [vendor.id, vendor.currencyId ?? null])));
+        this.vendorOptions.set([
+          { value: null, label: this.translate.instant('payables.selectVendor') },
+          ...list.filter(vendor => vendor.isActive).map(vendor => ({ value: vendor.id, label: vendor.companyName })),
+        ]);
+      },
     });
 
-    this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.activeCurrencyCount.set(list.length),
-    });
+    this.paymentForm.controls.currencyId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.rebuildApplications());
 
     // Vendor pick loads that vendor's payable bills into the applications grid.
     this.paymentForm.controls.vendorId.valueChanges
@@ -195,34 +211,40 @@ export class VendorPaymentDialogComponent {
   private loadPayableBills(vendorId: number | null): void {
     this.applications.clear();
     this.payableBills.set([]);
+    this.allPayableBills.set([]);
     if (!vendorId) return;
     this.billsLoading.set(true);
     // The endpoint takes a single status — load all and filter payable
     // (Approved | PartiallyPaid) client-side.
     this.billService.getVendorBills(vendorId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (bills) => {
-        const payable = bills.filter(b => b.status === 'Approved' || b.status === 'PartiallyPaid');
-        this.payableBills.set(payable);
-        for (const bill of payable) {
-          this.applications.push(new FormGroup({
-            amount: new FormControl(0, {
-              nonNullable: true,
-              validators: [
-                Validators.required, Validators.min(0), Validators.max(bill.balanceDue),
-                maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount'), this.translate),
-              ],
-            }),
-            settlementFxRate: new FormControl(1, {
-              nonNullable: true,
-              validators: [Validators.required, Validators.min(0.0000001)],
-            }),
-          }));
-        }
+        this.allPayableBills.set(bills.filter(b => b.status === 'Approved' || b.status === 'PartiallyPaid'));
+        this.rebuildApplications();
         this.applyPendingApplicationRestore();
         this.billsLoading.set(false);
       },
       error: () => this.billsLoading.set(false),
     });
+  }
+
+  private rebuildApplications(): void {
+    const currencyId = this.paymentForm.controls.currencyId.value;
+    const filterByCurrency = this.documentCurrency()?.visible() ?? false;
+    const payable = this.allPayableBills()
+      .filter(b => !filterByCurrency || currencyId == null || b.currencyId == null || b.currencyId === currencyId);
+    this.applications.clear();
+    this.payableBills.set(payable);
+    for (const bill of payable) {
+      this.applications.push(new FormGroup({
+        amount: new FormControl(0, {
+          nonNullable: true,
+          validators: [
+            Validators.required, Validators.min(0), Validators.max(bill.balanceDue),
+            maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.amount'), this.translate),
+          ],
+        }),
+      }));
+    }
   }
 
   // ── Per-row application violation enumeration ─────────────────────────────
@@ -242,10 +264,6 @@ export class VendorPaymentDialogComponent {
       }
       if (amount.hasError('maxDecimals')) {
         messages.push(this.translate.instant('payables.applicationViolations.amountDecimals', { row }));
-      }
-      const fx = group.controls.settlementFxRate;
-      if (fx.hasError('required') || fx.hasError('min')) {
-        messages.push(this.translate.instant('payables.applicationViolations.fxRateInvalid', { row }));
       }
     });
     return messages;
@@ -267,7 +285,6 @@ export class VendorPaymentDialogComponent {
       applications: f.applications.map((row, i): DraftApplicationRow => ({
         vendorBillId: bills[i]?.id ?? null,
         amount: row.amount,
-        settlementFxRate: row.settlementFxRate,
       })),
     };
   }
@@ -303,7 +320,7 @@ export class VendorPaymentDialogComponent {
     this.applications.controls.forEach((group, i) => {
       const match = drafted.find(d => d.vendorBillId === bills[i]?.id);
       if (match) {
-        group.patchValue({ amount: match.amount, settlementFxRate: match.settlementFxRate });
+        group.patchValue({ amount: match.amount });
       }
     });
     this.paymentForm.markAsDirty();
@@ -329,10 +346,8 @@ export class VendorPaymentDialogComponent {
       .map(x => ({
         vendorBillId: x.bill.id,
         amount: x.value.amount,
-        // Only attach a non-default settlement rate on multi-currency installs;
-        // single-currency stays unchanged (server defaults to 1).
-        settlementFxRate: this.showSettlementFxRate() ? (x.value.settlementFxRate ?? 1) : undefined,
       }));
+    const currencyField = this.documentCurrency();
 
     this.paymentService.createVendorPayment({
       vendorId: f.vendorId!,
@@ -341,6 +356,8 @@ export class VendorPaymentDialogComponent {
       paymentDate: toIsoDate(f.paymentDate!)!,
       referenceNumber: f.referenceNumber || undefined,
       notes: f.notes || undefined,
+      currencyId: currencyField?.visible() ? (f.currencyId ?? undefined) : undefined,
+      fxRate: currencyField?.visible() && currencyField.isForeign() ? f.fxRate : undefined,
       applications: appRequests.length > 0 ? appRequests : undefined,
     }).subscribe({
       next: () => {

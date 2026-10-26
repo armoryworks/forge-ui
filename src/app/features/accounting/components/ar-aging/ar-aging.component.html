@@ -16,6 +16,10 @@
   @if (report(); as r) {
     <div class="acct-view-bar">
       <app-statement-period mode="asOf" [to]="r.asOfDate" (periodChange)="setPeriod($event)" />
+      @if (currencyCatalog.isMultiCurrency()) {
+        <app-select class="acct-view-bar__currency" [label]="'accounting.currency.currency' | translate" [formControl]="currencyFilter"
+          [options]="currencyOptions()" data-testid="ar-aging-currency" />
+      }
       <app-view-mode-toggle [mode]="viewMode()" (modeChange)="setViewMode($event)" />
     </div>
   }
@@ -47,6 +51,13 @@
     <ng-template appColumnCell="b7" let-row><app-currency-display [value]="row.b7" /></ng-template>
     <ng-template appColumnCell="openBalance" let-row>
       <app-currency-display [value]="row.openBalance" />
+    </ng-template>
+    <ng-template appColumnCell="openTxnBalance" let-row>
+      @if (row.openTxnBalance !== null && row.currencyCode) {
+        <app-currency-display [value]="row.openTxnBalance" [currency]="row.currencyCode" [showCodeWhenBase]="true" />
+      } @else {
+        <span class="text-muted">{{ 'accounting.currency.mixedCurrencies' | translate }}</span>
+      }
     </ng-template>
   </app-data-table>
 

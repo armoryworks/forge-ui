@@ -42,6 +42,8 @@
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'common.settings' | translate }}</span>
         <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" data-testid="vendor-terms" />
+        <app-document-currency [currencyControl]="form.controls.currencyId" [defaultCurrencyId]="vendorCurrencyId()"
+          [locked]="currencyLocked()" testIdPrefix="vendor" />
         <!-- Bought-parts effort PR4 — per-vendor override for the off-tier
              prompt threshold at PO line entry. Empty = system default (5%). -->
         <app-input

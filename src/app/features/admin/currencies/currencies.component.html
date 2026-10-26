@@ -1,5 +1,6 @@
 <app-page-layout [pageTitle]="'admin.currencies.title' | translate">
   <ng-container content>
+    @if (!ratesOnly) {
     <section class="section">
       <header class="section__header">
         <h3 class="section__title">{{ 'admin.currencies.currenciesTitle' | translate }}</h3>
@@ -36,12 +37,15 @@
         </app-data-table>
       </div>
     </section>
+    }
 
     <section class="section">
       <header class="section__header">
         <h3 class="section__title">{{ 'admin.currencies.ratesTitle' | translate }}</h3>
         <p class="section__hint">{{ 'admin.currencies.ratesHint' | translate }}</p>
         <span appSpacer></span>
+        <app-select class="section__filter" [label]="'admin.currencies.colPair' | translate" [formControl]="pairFilter"
+          [options]="pairOptions()" data-testid="rate-pair-filter" />
         <button class="action-btn action-btn--create" (click)="openNewRate()" data-testid="rate-new-btn">
           <span class="material-icons-outlined">add</span>
           {{ 'admin.currencies.newExchangeRate' | translate }}
@@ -51,7 +55,7 @@
         <app-data-table
           tableId="admin-exchange-rates"
           [columns]="rateColumns"
-          [data]="rates()"
+          [data]="visibleRates()"
           emptyIcon="currency_exchange"
           [emptyMessage]="'admin.currencies.ratesEmpty' | translate">
 

@@ -63,16 +63,22 @@
         }
         <div class="info-item">
           <span class="info-label">{{ 'payments.amount' | translate }}</span>
-          <span class="info-value"><app-currency-display [value]="payment.amount" [currency]="null" /></span>
+          <span class="info-value"><app-currency-display [value]="payment.amount" [currency]="payment.currencyCode ?? null" /></span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payments.applied' | translate }}</span>
-          <span class="info-value"><app-currency-display [value]="payment.appliedAmount" [currency]="null" /></span>
+          <span class="info-value"><app-currency-display [value]="payment.appliedAmount" [currency]="payment.currencyCode ?? null" /></span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payments.unapplied' | translate }}</span>
-          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0"><app-currency-display [value]="payment.unappliedAmount" [currency]="null" /></span>
+          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0"><app-currency-display [value]="payment.unappliedAmount" [currency]="payment.currencyCode ?? null" /></span>
         </div>
+        @if ((payment.fxRate ?? 1) !== 1) {
+          <div class="info-item" data-testid="payment-detail-fx-rate">
+            <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
+            <span class="info-value">{{ payment.fxRate | number:'1.2-8' }}</span>
+          </div>
+        }
       </div>
 
       @if (payment.notes) {
@@ -97,7 +103,7 @@
               @for (app of payment.applications; track app.id) {
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="payment.currencyCode ?? null" /></td>
                 </tr>
               }
             </tbody>

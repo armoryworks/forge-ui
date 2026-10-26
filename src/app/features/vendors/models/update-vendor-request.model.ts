@@ -27,4 +27,6 @@ export interface UpdateVendorRequest {
   // 5% out of the box). Wider tolerance silences prompts for vendors with
   // genuinely noisy pricing.
   offTierVariancePct?: number | null;
+  currencyId?: number;
+  clearCurrency?: boolean;
 }

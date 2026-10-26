@@ -13,6 +13,9 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
@@ -42,6 +45,8 @@ export class SalesOrdersComponent implements OnInit {
   private readonly detailDialog = inject(DetailDialogService);
   private readonly draftResume = inject(DraftResumeService);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly showCreateDialog = signal(false);
@@ -74,7 +79,7 @@ export class SalesOrdersComponent implements OnInit {
     { value: 'Cancelled', label: this.translate.instant('status.cancelled') },
   ];
 
-  protected readonly soColumns: ColumnDef[] = [
+  private readonly soColumnsBase: ColumnDef[] = [
     { field: 'orderNumber', header: this.translate.instant('salesOrders.orderNumber'), sortable: true, width: '120px' },
     { field: 'customerName', header: this.translate.instant('salesOrders.customer'), sortable: true },
     { field: 'customerPO', header: this.translate.instant('salesOrders.custPo'), sortable: true, width: '100px' },
@@ -84,6 +89,9 @@ export class SalesOrdersComponent implements OnInit {
     { field: 'requestedDeliveryDate', header: this.translate.instant('salesOrders.delivery'), sortable: true, type: 'date', width: '110px' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
+  protected readonly soColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.soColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.soColumnsBase);
 
   protected readonly soRowClass = (_row: unknown) => '';
 

@@ -2,11 +2,11 @@
   <div class="credit-summary">
     <div class="credit-summary__row">
       <span>{{ 'payments.availableCredit' | translate }}</span>
-      <app-currency-display [value]="payment().unappliedAmount" [currency]="null" />
+      <app-currency-display [value]="payment().unappliedAmount" [currency]="paymentCurrencyCode()" />
     </div>
     <div class="credit-summary__row" [class.text-warning]="remainingCredit() < 0">
       <span>{{ 'payments.remainingCredit' | translate }}</span>
-      <app-currency-display [value]="remainingCredit()" [currency]="null" data-testid="apply-credit-remaining" />
+      <app-currency-display [value]="remainingCredit()" [currency]="paymentCurrencyCode()" data-testid="apply-credit-remaining" />
     </div>
   </div>
 
@@ -18,7 +18,7 @@
           @if (showSettlementFxRate()) {
             <span class="credit-lines__rate">{{ app.settlementFxRate }}</span>
           }
-          <app-currency-display [value]="app.amount" [currency]="null" />
+          <app-currency-display [value]="app.amount" [currency]="paymentCurrencyCode()" />
           <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above"
             [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
             <span class="material-icons-outlined">close</span>

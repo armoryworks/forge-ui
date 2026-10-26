@@ -33,6 +33,12 @@ const CODE_KEYS: Record<string, string> = {
   'invalid-option': 'apiErrors.codes.invalidOption',
   'body-required': 'apiErrors.codes.bodyRequired',
   'invalid-value': 'apiErrors.codes.invalidValue',
+  'currency-inactive': 'apiErrors.codes.currencyInactive',
+  'payment-currency-mismatch': 'apiErrors.codes.paymentCurrencyMismatch',
+  'bill-po-currency-mismatch': 'apiErrors.codes.billPoCurrencyMismatch',
+  'invoice-so-currency-mismatch': 'apiErrors.codes.invoiceSoCurrencyMismatch',
+  'fx-rate-invalid': 'apiErrors.codes.fxRateInvalid',
+  'fx-rate-same-currency': 'apiErrors.codes.fxRateSameCurrency',
 };
 
 const VALIDATOR_KEYS: Record<string, string> = {

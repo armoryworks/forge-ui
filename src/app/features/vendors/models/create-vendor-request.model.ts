@@ -15,4 +15,5 @@ export interface CreateVendorRequest {
   notes?: string;
   is1099?: boolean;
   taxId?: string;
+  currencyId?: number;
 }

@@ -86,7 +86,8 @@
     "openingJournal": "Opening Journal",
     "journalApprovals": "Journal Approvals",
     "maintenancePredictions": "Predictions",
-    "accountingTraining": "Accounting Training"
+    "accountingTraining": "Accounting Training",
+    "exchangeRates": "Exchange Rates"
   },
   "navGroups": {
     "operations": "Operations",
@@ -4090,7 +4091,8 @@
       "colPair": "Pair",
       "colRate": "Rate",
       "colSource": "Source",
-      "colFetched": "Fetched"
+      "colFetched": "Fetched",
+      "allPairs": "All pairs"
     },
     "tariffs": {
       "title": "Tariff Rates",
@@ -11307,7 +11309,15 @@
       "currency": "Currency",
       "fxRate": "FX Rate",
       "fxRatePlaceholder": "1.000000",
-      "settlementFxRate": "Settlement FX Rate"
+      "settlementFxRate": "Settlement FX Rate",
+      "fxRateAuto": "Rate on file",
+      "rateAsOf": "Rate as of {{date}}",
+      "rateNotOnFile": "No exchange rate on file for this date. Enter one, or add it under Admin > Currencies.",
+      "lockedHint": "Fixed once documents are issued",
+      "totalFunctional": "Total ({{code}})",
+      "allCurrencies": "All currencies",
+      "openInDocumentCurrency": "Open (document currency)",
+      "mixedCurrencies": "Mixed currencies"
     },
     "errors": {
       "trialBalanceLoadFailed": "Could not load the trial balance.",
@@ -11961,6 +11971,27 @@
     },
     "aging": {
       "current": "Current"
+    },
+    "fxRevaluation": {
+      "title": "Revalue foreign currency",
+      "hint": "Re-measures open foreign receivables, payables and cash at the period-end rate. The entry reverses on the first day of the next period.",
+      "preview": "Preview",
+      "run": "Post revaluation",
+      "nothingToRevalue": "No open foreign-currency balances on this date.",
+      "openPosition": "Open position",
+      "carryingValue": "Carrying value",
+      "periodEndRate": "Period-end rate",
+      "adjustment": "Adjustment",
+      "totalAdjustment": "Total adjustment",
+      "pastRuns": "Past revaluations",
+      "noRuns": "No revaluations posted yet.",
+      "entry": "Entry",
+      "reversed": "Reversed",
+      "confirmTitle": "Post the revaluation?",
+      "confirmMessage": "One entry posts per currency at the rates shown. Each reverses automatically in the next period.",
+      "posted": "Revaluation posted ({{count}} entries).",
+      "previewFailed": "Couldn't preview the revaluation.",
+      "runFailed": "Couldn't post the revaluation."
     }
   },
   "subcontractUi": {
@@ -14134,7 +14165,17 @@
       "invalidIdentifier": "{{field}} is not a valid identifier.",
       "invalidOption": "{{field}} is not one of the allowed values.",
       "bodyRequired": "The request is empty.",
-      "invalidValue": "{{field}} has an invalid value."
+      "invalidValue": "{{field}} has an invalid value.",
+      "currencyInactive": "That currency is inactive. Choose an active currency.",
+      "paymentCurrencyMismatch": "A payment can only be applied to documents in its own currency.",
+      "billPoCurrencyMismatch": "A bill for a purchase order must be in the purchase order's currency.",
+      "invoiceSoCurrencyMismatch": "An invoice for a sales order must be in the order's currency.",
+      "fxRateInvalid": "The exchange rate must be greater than zero.",
+      "fxRateSameCurrency": "Choose two different currencies.",
+      "fxRateMissing": "No exchange rate for {{from}} to {{to}} on or before {{date}}. Add one under Admin > Currencies.",
+      "partyCurrencyLocked": "This party already has issued documents or payments, so its currency can't change.",
+      "documentCurrencyLocked": "The currency and exchange rate can only change while the document is a draft.",
+      "baseCurrencyLocked": "The base currency can't change once journal entries, payments or issued invoices and bills exist."
     },
     "validators": {
       "required": "{{field}} is required.",

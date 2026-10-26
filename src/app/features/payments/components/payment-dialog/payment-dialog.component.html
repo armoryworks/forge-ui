@@ -12,9 +12,6 @@
               <tr>
                 <th scope="col">{{ 'payments.invoiceNumber' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'payments.amount' | translate }}</th>
-                @if (showSettlementFxRate()) {
-                  <th scope="col" class="lines-table__right">{{ 'accounting.currency.settlementFxRate' | translate }}</th>
-                }
                 <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
               </tr>
             </thead>
@@ -22,10 +19,7 @@
               @for (app of applications(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
-                  @if (showSettlementFxRate()) {
-                    <td class="lines-table__right">{{ app.settlementFxRate }}</td>
-                  }
+                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
                       <span class="material-icons-outlined">close</span>
@@ -37,10 +31,7 @@
             <tfoot>
               <tr>
                 <td class="lines-table__right lines-table__bold">{{ 'payments.totalApplied' | translate }}</td>
-                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalApplied()" [currency]="null" /></td>
-                @if (showSettlementFxRate()) {
-                  <td></td>
-                }
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalApplied()" [currency]="documentCurrencyCode()" /></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -50,12 +41,9 @@
         }
 
         <!-- Add Application Form -->
-        <div class="add-line" [class.add-line--3col]="!showSettlementFxRate()" [class.add-line--4col]="showSettlementFxRate()" [formGroup]="appForm">
+        <div class="add-line add-line--3col" [formGroup]="appForm">
           <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0" [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="payment-app-invoice" />
           <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [max]="applicationRemaining()" data-testid="payment-app-amount" />
-          @if (showSettlementFxRate()) {
-            <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate" step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="payment-settlement-fx-rate" />
-          }
           <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid" aria-label="Add invoice application">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
@@ -77,6 +65,8 @@
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
         <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
         <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="payment-date" />
+        <app-document-currency [currencyControl]="paymentForm.controls.currencyId" [fxRateControl]="paymentForm.controls.fxRate"
+          [documentDate]="paymentDateValue()" [defaultCurrencyId]="customerCurrencyId()" testIdPrefix="payment" />
         <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" data-testid="payment-ref" />
       </div>
 
@@ -89,7 +79,7 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'payments.totalApplied' | translate }}</span>
-          <app-currency-display [value]="totalApplied()" [currency]="null" />
+          <app-currency-display [value]="totalApplied()" [currency]="documentCurrencyCode()" />
         </div>
       </div>
     </div>

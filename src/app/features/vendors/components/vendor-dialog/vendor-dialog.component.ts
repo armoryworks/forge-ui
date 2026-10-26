@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal, ViewChild, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -18,6 +18,7 @@ import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 
 @Component({
@@ -26,7 +27,7 @@ import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
-    AddressFormComponent, ValidationButtonComponent, TranslatePipe,
+    AddressFormComponent, ValidationButtonComponent, TranslatePipe, DocumentCurrencyComponent,
   ],
   templateUrl: './vendor-dialog.component.html',
   styleUrl: './vendor-dialog.component.scss',
@@ -34,6 +35,7 @@ import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.
 })
 export class VendorDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -69,7 +71,11 @@ export class VendorDialogComponent implements OnInit {
     taxId: new FormControl('', [Validators.maxLength(32)]),
     // Bought-parts effort PR4 — per-vendor variance threshold override.
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0)]),
+    currencyId: new FormControl<number | null>(null),
   });
+
+  protected readonly vendorCurrencyId = computed(() => this.vendor()?.currencyId ?? null);
+  protected readonly currencyLocked = computed(() => this.vendor()?.currencyLocked ?? false);
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     companyName: 'Company Name',
@@ -104,6 +110,7 @@ export class VendorDialogComponent implements OnInit {
         is1099: v.is1099 ?? false,
         taxId: v.taxId ?? '',
         offTierVariancePct: v.offTierVariancePct ?? null,
+        currencyId: v.currencyId ?? null,
       });
     }
   }
@@ -137,6 +144,7 @@ export class VendorDialogComponent implements OnInit {
       is1099: f.is1099 ?? false,
       taxId: f.taxId?.trim() || undefined,
       offTierVariancePct: f.offTierVariancePct,
+      currencyId: this.documentCurrency()?.visible() && !this.currencyLocked() && (!v || this.form.controls.currencyId.dirty) ? (f.currencyId ?? undefined) : undefined,
     };
 
     if (v) {

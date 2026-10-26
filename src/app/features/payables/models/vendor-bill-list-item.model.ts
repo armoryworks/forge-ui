@@ -16,4 +16,8 @@ export interface VendorBillListItem {
   hasFailedTransmission: boolean;
   /** Set when the bill was auto-promoted from a vendor-settled expense approval. */
   sourceExpenseId: number | null;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

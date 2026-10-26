@@ -10,4 +10,6 @@ export interface CreateQuoteRequest {
   taxRate: number;
   customerPO?: string;
   lines: CreateQuoteLineRequest[];
+  currencyId?: number;
+  fxRate?: number | null;
 }

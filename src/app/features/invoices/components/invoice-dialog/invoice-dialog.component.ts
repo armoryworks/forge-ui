@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal, output, computed, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal, output, computed, ViewChild, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -25,8 +25,7 @@ import { ManualNumberSettingsService } from '../../../../shared/services/manual-
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
-import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { formatDate, toCalendarDate, toIsoDate, todayEnd, todayStart } from '../../../../shared/utils/date.utils';
 import { roundMoney } from '../../../../shared/utils/money.utils';
 import { dateOrderValidator } from '../../../../shared/validators/date-order.validator';
@@ -51,7 +50,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, EntityPickerComponent, DatepickerComponent, TextareaComponent,
-    CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule,
+    CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule, DocumentCurrencyComponent,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrl: './invoice-dialog.component.scss',
@@ -60,10 +59,10 @@ interface LineEntry {
 export class InvoiceDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
   private readonly adminService = inject(AdminService);
-  private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -101,19 +100,6 @@ export class InvoiceDialogComponent {
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
-  // ── Multi-currency (additive) ──────────────────────────────────────────────
-  // Hidden entirely for single-currency installs: the currency selector only
-  // renders when >1 active currency exists, and the FX-rate input only renders
-  // when a non-base currency is selected (base ⇒ rate is 1, hidden).
-  protected readonly currencies = signal<ActiveCurrency[]>([]);
-  protected readonly baseCurrencyId = computed<number | null>(
-    () => this.currencies().find(c => c.isBaseCurrency)?.id ?? this.currencies()[0]?.id ?? null,
-  );
-  protected readonly showCurrencySelector = computed(() => this.currencies().length > 1);
-  protected readonly currencyOptions = computed<SelectOption[]>(() =>
-    this.currencies().map(c => ({ value: c.id, label: `${c.code} — ${c.name}` })),
-  );
-
   protected readonly invoiceForm = new FormGroup({
     invoiceNumber: new FormControl('', [Validators.maxLength(20)]),
     customerId: new FormControl<number | null>(null, [Validators.required]),
@@ -124,26 +110,13 @@ export class InvoiceDialogComponent {
     creditTerms: new FormControl<string | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     currencyId: new FormControl<number | null>(null),
-    fxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
+    fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
     notes: new FormControl(''),
   }, {
     validators: [dateOrderValidator('invoiceDate', 'dueDate', () => this.translate.instant('validation.dateRangeOrder', {
       start: this.translate.instant('invoices.invoiceDate'),
       end: this.translate.instant('invoices.dueDate'),
     }))],
-  });
-
-  private readonly selectedCurrencyId = toSignal(
-    this.invoiceForm.controls.currencyId.valueChanges.pipe(
-      startWith(this.invoiceForm.controls.currencyId.value),
-    ),
-    { initialValue: this.invoiceForm.controls.currencyId.value },
-  );
-  /** FX rate is only relevant (and shown) when a non-base currency is chosen. */
-  protected readonly showFxRate = computed(() => {
-    const base = this.baseCurrencyId();
-    const selected = this.selectedCurrencyId();
-    return base !== null && selected !== null && selected !== base;
   });
 
   private readonly selectedSalesOrderId = toSignal(
@@ -206,7 +179,13 @@ export class InvoiceDialogComponent {
     this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
     { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
-  private readonly invoiceDateValue = toSignal(
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
+  protected readonly defaultCurrencyId = computed<number | null>(() => {
+    const salesOrderId = this.selectedSalesOrderId();
+    const order = salesOrderId == null ? undefined : this.sources().salesOrders.find(so => so.id === salesOrderId);
+    return order?.currencyId ?? this.customerDetail()?.currencyId ?? null;
+  });
+  protected readonly invoiceDateValue = toSignal(
     this.invoiceForm.controls.invoiceDate.valueChanges.pipe(startWith(this.invoiceForm.controls.invoiceDate.value)),
     { initialValue: this.invoiceForm.controls.invoiceDate.value },
   );
@@ -344,27 +323,6 @@ export class InvoiceDialogComponent {
       }
     });
 
-    // Load active currencies; default the form to the base currency. The
-    // selector only renders when >1 active currency exists, so single-currency
-    // installs see no visual change.
-    this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => {
-        this.currencies.set(list);
-        const base = this.baseCurrencyId();
-        if (base !== null && this.invoiceForm.controls.currencyId.value === null) {
-          this.invoiceForm.controls.currencyId.setValue(base);
-        }
-      },
-    });
-
-    // Returning to the base currency resets the booking rate to 1.
-    this.invoiceForm.controls.currencyId.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => {
-        if (id === this.baseCurrencyId()) {
-          this.invoiceForm.controls.fxRate.setValue(1);
-        }
-      });
   }
 
   protected onCustomerSelected(customer: Record<string, unknown> | null): void {
@@ -479,12 +437,9 @@ export class InvoiceDialogComponent {
       salesOrderLineId: l.salesOrderLineId ?? undefined,
     }));
 
-    // Only attach currency when the install is multi-currency; otherwise let
-    // the server resolve the functional currency (keeps single-currency callers
-    // byte-for-byte unchanged). FX rate defaults to 1 for the base currency.
-    const isBase = f.currencyId === this.baseCurrencyId();
-    const currencyId = this.showCurrencySelector() ? (f.currencyId ?? undefined) : undefined;
-    const fxRate = isBase ? 1 : (f.fxRate ?? 1);
+    const currencyField = this.documentCurrency();
+    const currencyId = currencyField?.visible() ? (f.currencyId ?? undefined) : undefined;
+    const fxRate = currencyField?.visible() && currencyField.isForeign() ? f.fxRate : undefined;
 
     this.invoiceService.createInvoice({
       invoiceNumber: this.allowManualInvoiceNumbers() ? (f.invoiceNumber?.trim() || undefined) : undefined,

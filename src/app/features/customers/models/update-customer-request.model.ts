@@ -21,4 +21,6 @@ export interface UpdateCustomerRequest {
   clearCreditLimit?: boolean;
   defaultCreditTerms?: string;
   clearDefaultCreditTerms?: boolean;
+  currencyId?: number;
+  clearCurrency?: boolean;
 }

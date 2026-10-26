@@ -15,4 +15,8 @@ export interface SalesOrderListItem {
   createdAt: Date;
   salesOrderId: number | null;
   jobId: number | null;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -44,6 +44,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -58,7 +59,7 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    CurrencyDisplayComponent, CurrencyInputComponent,
+    CurrencyDisplayComponent, CurrencyInputComponent, DocumentCurrencyComponent,
     DatepickerComponent, EntityPickerComponent, ToggleComponent,
     ValidationButtonComponent, TranslatePipe, MatTooltipModule,
     OffTierPromptDialogComponent, PriceOverrideReasonDialogComponent,
@@ -69,6 +70,9 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
 })
 export class PoDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
+  protected readonly documentCurrencyVisible = computed(() => this.documentCurrency()?.visible() ?? false);
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
   private readonly partsService = inject(PartsService);
@@ -206,6 +210,14 @@ export class PoDialogComponent {
     quoteCurrency: new FormControl<string>('USD', { nonNullable: true }),
     isBlanket: new FormControl<boolean>(false, { nonNullable: true }),
     blanketExpirationDate: new FormControl<Date | null>(null),
+    currencyId: new FormControl<number | null>(null),
+    fxRate: new FormControl<number | null>(null, [Validators.min(0.00000001)]),
+  });
+
+  private readonly selectedVendorId = toSignal(this.form.controls.vendorId.valueChanges, { initialValue: null });
+  protected readonly vendorCurrencyId = computed(() => {
+    const vendorId = this.selectedVendorId();
+    return this.vendors().find(v => v.id === vendorId)?.currencyId ?? null;
   });
 
   protected readonly isBlanket = toSignal(this.form.controls.isBlanket.valueChanges, { initialValue: false });
@@ -312,6 +324,15 @@ export class PoDialogComponent {
         this.applyDefaultRef(this.form.controls.shipToLocationId, locations);
       },
     });
+    this.form.controls.currencyId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const code = this.documentCurrency()?.selectedCode();
+        if (code && this.documentCurrencyVisible() && code !== this.form.controls.quoteCurrency.value) {
+          this.form.controls.quoteCurrency.setValue(code);
+          this.form.controls.quoteCurrency.markAsDirty();
+        }
+      });
     this.form.controls.vendorId.valueChanges
       .pipe(
         distinctUntilChanged(),
@@ -730,6 +751,8 @@ export class PoDialogComponent {
       incoterm: controls.incoterm.dirty ? f.incoterm : undefined,
       estimatedFreight: f.estimatedFreight ?? undefined,
       quoteCurrency: controls.quoteCurrency.dirty ? f.quoteCurrency : undefined,
+      currencyId: this.documentCurrencyVisible() ? (f.currencyId ?? undefined) : undefined,
+      fxRate: this.documentCurrencyVisible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,
       expectedDeliveryDate: toIsoDate(f.expectedDeliveryDate) ?? undefined,
       isBlanket: f.isBlanket || undefined,
       blanketExpirationDate: f.isBlanket ? (toIsoDate(f.blanketExpirationDate) ?? undefined) : undefined,

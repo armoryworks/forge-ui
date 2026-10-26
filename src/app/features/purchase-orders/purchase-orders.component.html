@@ -41,7 +41,7 @@
         </div>
 
         <div [appLoadingBlock]="loading()" class="po-list-content">
-          <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
+          <app-data-table tableId="purchase-orders" [columns]="poColumns()" [data]="purchaseOrders()"
             emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
             [clickableRows]="true" (rowClick)="openPurchaseOrderDetail($any($event))">
             <ng-template appColumnCell="poNumber" let-row>
@@ -78,6 +78,12 @@
             </ng-template>
             <ng-template appColumnCell="createdAt" let-row>
               <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+            </ng-template>
+            <ng-template appColumnCell="currencyCode" let-row>
+              <span class="text-muted">{{ row.currencyCode ?? baseCurrency() }}</span>
+            </ng-template>
+            <ng-template appColumnCell="totalFunctional" let-row>
+              <app-currency-display [value]="row.totalFunctional ?? 0" [currency]="null" />
             </ng-template>
           </app-data-table>
         </div>

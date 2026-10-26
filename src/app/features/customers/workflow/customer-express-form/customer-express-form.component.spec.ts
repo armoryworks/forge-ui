@@ -9,6 +9,7 @@ import { environment } from '../../../../../environments/environment';
 import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { CustomerExpressFormComponent } from './customer-express-form.component';
 
@@ -43,6 +44,7 @@ describe('CustomerExpressFormComponent Save', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActiveCurrencyService, useValue: { listActiveCurrencies: () => of([]) } },
       ],
     }).compileComponents();
     httpMock = TestBed.inject(HttpTestingController);

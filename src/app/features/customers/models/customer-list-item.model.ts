@@ -9,4 +9,5 @@ export interface CustomerListItem {
   contactCount: number;
   jobCount: number;
   createdAt: Date;
+  currencyId?: number | null;
 }

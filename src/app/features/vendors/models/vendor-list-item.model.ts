@@ -7,4 +7,5 @@ export interface VendorListItem {
   isActive: boolean;
   poCount: number;
   createdAt: Date;
+  currencyId?: number | null;
 }

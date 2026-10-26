@@ -81,7 +81,7 @@
     </div>
 
     <div class="tab-content" [appLoadingBlock]="billsLoading()">
-      <app-data-table tableId="payables-bills" [columns]="billColumns" [data]="bills()"
+      <app-data-table tableId="payables-bills" [columns]="billColumns()" [data]="bills()"
         emptyIcon="receipt_long" [emptyMessage]="'payables.noBillsFound' | translate" [emptyHelpText]="'payables.noBillsHelp' | translate"
         [clickableRows]="true"
         (rowClick)="openBillDetail($any($event))">
@@ -109,15 +109,18 @@
           <span class="text-muted">{{ row.dueDate | dateOnly }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
-          <app-currency-display [value]="row.total" [currency]="null" />
+          <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="amountPaid" let-row>
-          <app-currency-display [value]="row.amountPaid" [currency]="null" />
+          <app-currency-display [value]="row.amountPaid" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="balanceDue" let-row>
           <span [class.text-warning]="row.balanceDue > 0">
-            <app-currency-display [value]="row.balanceDue" [currency]="null" />
+            <app-currency-display [value]="row.balanceDue" [currency]="row.currencyCode ?? null" />
           </span>
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.total" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>
@@ -129,7 +132,7 @@
     </div>
 
     <div class="tab-content" [appLoadingBlock]="paymentsLoading()">
-      <app-data-table tableId="payables-payments" [columns]="paymentColumns" [data]="payments()"
+      <app-data-table tableId="payables-payments" [columns]="paymentColumns()" [data]="payments()"
         emptyIcon="payments" [emptyMessage]="'payables.noPaymentsFound' | translate"
         [clickableRows]="true" [rowStyle]="paymentRowStyle"
         (rowClick)="openPaymentDetail($any($event))">
@@ -140,14 +143,14 @@
           <span>{{ getMethodLabel(row.method) }}</span>
         </ng-template>
         <ng-template appColumnCell="amount" let-row>
-          <app-currency-display [value]="row.amount" [currency]="null" />
+          <app-currency-display [value]="row.amount" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="appliedAmount" let-row>
-          <app-currency-display [value]="row.appliedAmount" [currency]="null" />
+          <app-currency-display [value]="row.appliedAmount" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="unappliedAmount" let-row>
           <span [class.text-warning]="row.unappliedAmount > 0">
-            <app-currency-display [value]="row.unappliedAmount" [currency]="null" />
+            <app-currency-display [value]="row.unappliedAmount" [currency]="row.currencyCode ?? null" />
           </span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
@@ -159,6 +162,9 @@
           } @else {
             <span class="text-muted">—</span>
           }
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.amount" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>

@@ -15,6 +15,9 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
@@ -44,6 +47,8 @@ export class QuotesComponent implements OnInit {
   private readonly detailDialog = inject(DetailDialogService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly draftResume = inject(DraftResumeService);
 
   protected readonly showCreateDialog = signal(false);
@@ -75,7 +80,7 @@ export class QuotesComponent implements OnInit {
     { value: 'Superseded', label: this.translate.instant('quotes.statusSuperseded') },
   ];
 
-  protected readonly quoteColumns: ColumnDef[] = [
+  private readonly quoteColumnsBase: ColumnDef[] = [
     { field: 'quoteNumber', header: this.translate.instant('quotes.quoteNumber'), sortable: true, width: '120px' },
     { field: 'customerName', header: this.translate.instant('quotes.customer'), sortable: true },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
@@ -85,6 +90,9 @@ export class QuotesComponent implements OnInit {
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
     { field: 'actions', header: '', width: '70px', align: 'center' },
   ];
+  protected readonly quoteColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.quoteColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.quoteColumnsBase);
 
   constructor() {
     this.statusFilterControl.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => this.loadQuotes());

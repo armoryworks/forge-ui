@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -30,7 +30,7 @@ import { ApplyCreditDialogComponent } from '../apply-credit-dialog/apply-credit-
   selector: 'app-payment-detail-panel',
   standalone: true,
   imports: [
-    DateOnlyPipe, NumberLockInfoComponent, DatePipe, TranslatePipe, ReactiveFormsModule,
+    DateOnlyPipe, NumberLockInfoComponent, DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent, InputComponent,
     DetailLoadErrorComponent, ApplyCreditDialogComponent, DialogComponent, TextareaComponent, ValidationButtonComponent,

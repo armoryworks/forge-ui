@@ -10,4 +10,6 @@ export interface CreatePaymentRequest {
   referenceNumber?: string;
   notes?: string;
   applications: CreatePaymentApplicationRequest[];
+  currencyId?: number;
+  fxRate?: number | null;
 }

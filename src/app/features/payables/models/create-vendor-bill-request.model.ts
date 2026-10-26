@@ -11,6 +11,6 @@ export interface CreateVendorBillRequest {
   taxAmount: number;
   notes?: string;
   currencyId?: number;
-  fxRate?: number;
+  fxRate?: number | null;
   lines: CreateVendorBillLineRequest[];
 }

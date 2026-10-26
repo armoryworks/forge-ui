@@ -25,8 +25,8 @@
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
-                  <td class="lines-table__right"><app-currency-display [value]="lineAmounts()[$index]" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="documentCurrencyCode()" [maximumFractionDigits]="4" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="lineAmounts()[$index]" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn" type="button" [attr.aria-pressed]="line.taxable" [matTooltip]="(line.taxable ? 'invoices.taxableLine' : 'invoices.nonTaxableLine') | translate" matTooltipPosition="above" [attr.aria-label]="'invoices.taxable' | translate" [attr.data-testid]="'invoice-line-taxable-' + $index" (click)="toggleTaxable($index)">
                       <span class="material-icons-outlined">{{ line.taxable ? 'check_box' : 'check_box_outline_blank' }}</span>
@@ -43,7 +43,7 @@
             <tfoot>
               <tr>
                 <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
-                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="null" /></td>
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" /></td>
                 <td></td>
                 <td></td>
               </tr>
@@ -88,12 +88,8 @@
             {{ 'invoices.taxExemptNote' | translate: { id: customerDetail()?.taxExemptionId ?? '' } }}
           </div>
         }
-        @if (showCurrencySelector()) {
-          <app-select [label]="'accounting.currency.currency' | translate" formControlName="currencyId" [options]="currencyOptions()" [required]="true" data-testid="invoice-currency" />
-        }
-        @if (showFxRate()) {
-          <app-input [label]="'accounting.currency.fxRate' | translate" type="number" formControlName="fxRate" step="0.0000001" min="0.0000001" [required]="true" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="invoice-fx-rate" />
-        }
+        <app-document-currency [currencyControl]="invoiceForm.controls.currencyId" [fxRateControl]="invoiceForm.controls.fxRate"
+          [documentDate]="invoiceDateValue()" [defaultCurrencyId]="defaultCurrencyId()" testIdPrefix="invoice" />
         <app-select [label]="'invoices.shipmentId' | translate" formControlName="shipmentId" [options]="shipmentOptions()" data-testid="invoice-shipment" />
       </div>
 
@@ -106,15 +102,15 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="null" />
+          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ effectiveTaxRate() | number:'1.0-4' }}%)</span>
-          <app-currency-display [value]="taxAmount()" [currency]="null" />
+          <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">
           <span>{{ 'common.total' | translate }}</span>
-          <app-currency-display [value]="grandTotal()" [currency]="null" />
+          <app-currency-display [value]="grandTotal()" [currency]="documentCurrencyCode()" />
         </div>
       </div>
     </div>

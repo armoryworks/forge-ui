@@ -30,4 +30,7 @@ export interface VendorDetail {
   // genuinely noisy pricing.
   offTierVariancePct: number | null;
   rowVersion?: number;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  currencyLocked?: boolean;
 }

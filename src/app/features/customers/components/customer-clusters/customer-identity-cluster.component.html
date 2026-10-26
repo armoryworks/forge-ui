@@ -74,6 +74,10 @@
     <div class="cluster__form-row">
       <app-select data-testid="customer-identity-credit-terms" [label]="'customers.workflow.creditAndTax.defaultCreditTermsLabel' | translate" formControlName="defaultCreditTerms" [options]="creditTermsOptions" [isReadonly]="!editing()" />
     </div>
+    <div class="cluster__form-row">
+      <app-document-currency [currencyControl]="form.controls.currencyId" [defaultCurrencyId]="currencyId()"
+        [locked]="currencyLocked()" [readonly]="!editing()" testIdPrefix="customer-identity" />
+    </div>
     @if (form.controls.isTaxExempt.value) {
       <div class="cluster__form-row">
         <app-input data-testid="customer-identity-tax-exemption-id" [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate" formControlName="taxExemptionId" [required]="editing()" [maxlength]="50" [isReadonly]="!editing()" />

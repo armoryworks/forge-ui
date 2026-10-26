@@ -16,7 +16,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="so-list-content">
-      <app-data-table tableId="sales-orders" [columns]="soColumns" [data]="salesOrders()"
+      <app-data-table tableId="sales-orders" [columns]="soColumns()" [data]="salesOrders()"
         [rowClass]="soRowClass" emptyIcon="receipt_long" [emptyMessage]="'salesOrders.noOrdersFound' | translate"
         [clickableRows]="true"
         (rowClick)="openSalesOrderDetail($any($event))">
@@ -35,13 +35,16 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
-          <app-currency-display [value]="row.total" [currency]="null" />
+          <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="requestedDeliveryDate" let-row>
           <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'MM/dd/yyyy':'UTC') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.total" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>

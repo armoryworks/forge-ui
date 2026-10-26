@@ -31,7 +31,7 @@
   }
 }
 
-// Application row: bill # | due date | balance | amount [| fx rate]
+// Application row: bill # | due date | balance | amount
 .app-line {
   display: grid;
   grid-template-columns: 110px 100px 110px 1fr;
@@ -39,18 +39,12 @@
   align-items: center;
   padding: $sp-xs 0;
 
-  &--fx {
-    grid-template-columns: 110px 100px 110px 1fr 130px;
-  }
-
   &--header {
     @include uppercase-label($font-size-xxs, 0.5px, 700);
     color: var(--text-muted);
     border-bottom: $border-width-thin solid var(--border);
     padding-bottom: $sp-sm;
     grid-template-columns: 110px 100px 110px 1fr;
-
-    &.app-line--fx { grid-template-columns: 110px 100px 110px 1fr 130px; }
   }
 
   &__right { text-align: right; }

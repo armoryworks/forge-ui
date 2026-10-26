@@ -59,4 +59,6 @@ export interface PurchaseOrderDetail {
   rowVersion?: number;
   receivingFallbackBinId?: number | null;
   receivingFallbackBinPath?: string | null;
+  currencyId?: number | null;
+  currencyCode?: string | null;
 }

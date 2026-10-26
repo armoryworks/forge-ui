@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { computed, ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -10,6 +10,9 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
@@ -40,6 +43,8 @@ export class PaymentsComponent implements OnInit {
   private readonly paymentService = inject(PaymentService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly detailDialog = inject(DetailDialogService);
   private readonly draftResume = inject(DraftResumeService);
 
@@ -66,7 +71,7 @@ export class PaymentsComponent implements OnInit {
     { value: 'Other', label: this.translate.instant('payments.methodOther') },
   ];
 
-  protected readonly paymentColumns: ColumnDef[] = [
+  private readonly paymentColumnsBase: ColumnDef[] = [
     { field: 'paymentNumber', header: this.translate.instant('payments.paymentNumber'), sortable: true, width: '120px' },
     { field: 'customerName', header: this.translate.instant('payments.customer'), sortable: true },
     { field: 'method', header: this.translate.instant('payments.method'), sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
@@ -84,6 +89,9 @@ export class PaymentsComponent implements OnInit {
     { field: 'referenceNumber', header: this.translate.instant('payments.referenceNumber'), sortable: true, width: '120px' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
+  protected readonly paymentColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.paymentColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.paymentColumnsBase);
 
   // Phase 3 F7-broad / WU-22 — search + method filter are now server-driven.
   // The data-table consumes `payments()` directly.

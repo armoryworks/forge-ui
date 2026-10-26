@@ -32,4 +32,6 @@ export interface CustomerSummary {
   rowVersion?: number;
   defaultCreditTerms?: string | null;
   isOnCreditHold?: boolean;
+  currencyId?: number | null;
+  currencyLocked?: boolean;
 }

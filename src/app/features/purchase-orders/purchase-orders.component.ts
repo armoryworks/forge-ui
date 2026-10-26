@@ -23,6 +23,10 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
@@ -44,7 +48,7 @@ import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive
     ScrollCueDirective,
     ReactiveFormsModule, DatePipe, DateOnlyPipe, TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent,
-    DataTableComponent, ColumnCellDirective,
+    DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent,
     PoDialogComponent, LoadingBlockDirective, EntityLinkComponent,
     AutoPoPanelComponent, AutoPoSettingsPanelComponent,
   ],
@@ -57,6 +61,8 @@ export class PurchaseOrdersComponent implements OnInit {
   private readonly vendorService = inject(VendorService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  protected readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
@@ -114,7 +120,7 @@ export class PurchaseOrdersComponent implements OnInit {
     { value: 'Edi', label: this.translate.instant('purchaseOrders.originEdi') },
   ];
 
-  protected readonly poColumns: ColumnDef[] = [
+  private readonly poColumnsBase: ColumnDef[] = [
     { field: 'poNumber', header: this.translate.instant('purchaseOrders.poNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('purchaseOrders.vendor'), sortable: true },
     { field: 'jobNumber', phoneHidden: true, header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
@@ -125,6 +131,11 @@ export class PurchaseOrdersComponent implements OnInit {
     { field: 'expectedDeliveryDate', phoneHidden: true, header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
     { field: 'createdAt', phoneHidden: true, header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
+  protected readonly poColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(
+      [...this.poColumnsBase, { field: 'currencyCode', header: this.translate.instant('accounting.currency.currency'), width: '90px' }],
+      this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.poColumnsBase);
 
   constructor() {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed()).subscribe({

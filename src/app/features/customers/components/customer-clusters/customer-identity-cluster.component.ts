@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -29,7 +30,7 @@ import { CustomerSummary } from '../../models/customer-summary.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, ToggleComponent, ValidationButtonComponent, CurrencyInputComponent, CurrencyDisplayComponent,
+    InputComponent, SelectComponent, ToggleComponent, ValidationButtonComponent, CurrencyInputComponent, CurrencyDisplayComponent, DocumentCurrencyComponent,
   ],
   templateUrl: './customer-identity-cluster.component.html',
   styleUrl: './customer-clusters.shared.scss',
@@ -47,6 +48,8 @@ export class CustomerIdentityClusterComponent {
 
   readonly save = output<Partial<CustomerSummary>>();
   readonly cancelled = output<void>();
+  protected readonly currencyId = computed(() => this.customer().currencyId ?? null);
+  protected readonly currencyLocked = computed(() => this.customer().currencyLocked ?? false);
 
   /** Gated by the `customers.allow_manual_numbers` system setting. */
   protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
@@ -63,6 +66,7 @@ export class CustomerIdentityClusterComponent {
     isTaxExempt: new FormControl<boolean>(false, { nonNullable: true }),
     taxExemptionId: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(50)] }),
     defaultCreditTerms: new FormControl<string | null>(null),
+    currencyId: new FormControl<number | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -93,6 +97,7 @@ export class CustomerIdentityClusterComponent {
         isTaxExempt: c.isTaxExempt ?? false,
         taxExemptionId: c.taxExemptionId ?? '',
         defaultCreditTerms: c.defaultCreditTerms ?? null,
+        currencyId: c.currencyId ?? null,
       });
       if (this.editing()) {
         this.form.enable();
@@ -118,6 +123,9 @@ export class CustomerIdentityClusterComponent {
       patch.taxExemptionId = v.isTaxExempt ? v.taxExemptionId.trim() : '';
       if (this.creditLimitsEnabled()) patch.creditLimit = v.creditLimit;
       patch.defaultCreditTerms = v.defaultCreditTerms;
+    }
+    if (!this.customer().currencyLocked && this.form.controls.currencyId.dirty && v.currencyId !== (this.customer().currencyId ?? null)) {
+      patch.currencyId = v.currencyId;
     }
     this.save.emit(patch);
   }

@@ -26,4 +26,7 @@ export interface SalesOrderDetail {
   returns: SalesOrderReturn[];
   createdAt: Date;
   updatedAt: Date;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
 }

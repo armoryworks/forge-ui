@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { map } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -11,6 +12,8 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ViewModeToggleComponent } from '../../../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { CurrencyCatalogService } from '../../../../shared/services/currency-catalog.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
 import {
   ACCOUNTING_VIEW_PREF_KEY,
@@ -29,7 +32,9 @@ import { StatementPeriod, bookIdFromParams, periodFromParams, samePeriod } from 
 interface AgingTableRow {
   partyName: string;
   openBalance: number;
-  [bucketKey: string]: string | number;
+  currencyCode: string | null;
+  openTxnBalance: number | null;
+  [bucketKey: string]: string | number | null;
 }
 
 @Component({
@@ -44,6 +49,8 @@ interface AgingTableRow {
     ViewModeToggleComponent,
     ArAgingVisualComponent,
     StatementPeriodComponent,
+    SelectComponent,
+    ReactiveFormsModule,
   ],
   templateUrl: './ar-aging.component.html',
   styleUrl: './ar-aging.component.scss',
@@ -56,6 +63,7 @@ export class ArAgingComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly preferences = inject(UserPreferencesService);
+  protected readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
 
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -75,6 +83,16 @@ export class ArAgingComponent {
   /** As-of date, mirrored to `?to=`; empty is today. */
   protected readonly period = computed(() => periodFromParams(this.params()), { equal: samePeriod });
   private readonly bookId = computed(() => bookIdFromParams(this.params()));
+  /** Currency filter, mirrored to `?currency=`; empty is every currency. */
+  protected readonly currencyId = computed(() => {
+    const raw = Number(this.params().get('currency'));
+    return Number.isInteger(raw) && raw > 0 ? raw : null;
+  });
+  protected readonly currencyFilter = new FormControl<number | null>(null);
+  protected readonly currencyOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('accounting.currency.allCurrencies') },
+    ...this.currencyCatalog.currencies().map(c => ({ value: c.id, label: c.code })),
+  ]);
 
   protected setPeriod(period: StatementPeriod): void {
     this.router.navigate([], {
@@ -108,6 +126,9 @@ export class ArAgingComponent {
       { field: 'partyName', header: this.translate.instant('accounting.arAging.customer'), sortable: true },
       ...buckets,
       { field: 'openBalance', header: this.translate.instant('accounting.common.open'), sortable: true, type: 'number', align: 'right', width: '130px' },
+      ...(this.currencyCatalog.isMultiCurrency()
+        ? [{ field: 'openTxnBalance', header: this.translate.instant('accounting.currency.openInDocumentCurrency'), sortable: true, type: 'number' as const, align: 'right' as const, width: '150px' }]
+        : []),
     ];
   });
 
@@ -115,7 +136,7 @@ export class ArAgingComponent {
     const r = this.report();
     if (!r) return [];
     return r.customers.map((c) => {
-      const row: AgingTableRow = { partyName: c.customerName ?? '—', openBalance: c.openBalance };
+      const row: AgingTableRow = { partyName: c.customerName ?? '—', openBalance: c.openBalance, currencyCode: c.currencyCode ?? null, openTxnBalance: c.openTxnBalance ?? null };
       c.buckets.forEach((b, i) => (row[`b${i}`] = b.amount));
       return row;
     });
@@ -126,7 +147,12 @@ export class ArAgingComponent {
     effect(() => {
       this.period();
       this.bookId();
+      this.currencyId();
       this.load();
+    });
+    effect(() => this.currencyFilter.setValue(this.currencyId(), { emitEvent: false }));
+    this.currencyFilter.valueChanges.pipe(takeUntilDestroyed()).subscribe(currency => {
+      this.router.navigate([], { relativeTo: this.route, queryParams: { currency }, queryParamsHandling: 'merge' });
     });
   }
 
@@ -134,7 +160,7 @@ export class ArAgingComponent {
     this.loading.set(true);
     this.error.set(null);
     this.gl
-      .getArAging(this.bookId(), this.period().to)
+      .getArAging(this.bookId(), this.period().to, this.currencyId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {

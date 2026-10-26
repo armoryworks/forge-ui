@@ -21,4 +21,7 @@ export interface QuoteDetail {
   lines: QuoteLine[];
   createdAt: Date;
   updatedAt: Date;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
 }

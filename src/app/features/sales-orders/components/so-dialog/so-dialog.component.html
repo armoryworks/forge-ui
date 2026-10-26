@@ -26,7 +26,7 @@
                   <!-- Phase 3 / WU-10 — fractional qty + 4-decimal price. Trim trailing zeros. -->
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.quantity * line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.quantity * line.unitPrice" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
@@ -84,6 +84,8 @@
         <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
         <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-credit-terms" />
         <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-delivery-date" />
+        <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
+          [documentDate]="null" [defaultCurrencyId]="customerCurrencyId()" testIdPrefix="so" />
         <div class="tax-field">
           <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" [required]="true" suffix="%"
             [matTooltip]="taxLocked() ? ('quotes.taxLockedTooltip' | translate) : ''" data-testid="so-tax-rate" />
@@ -104,15 +106,15 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="null" />
+          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() }}%)</span>
-          <app-currency-display [value]="taxAmount()" [currency]="null" />
+          <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">
           <span>{{ 'common.total' | translate }}</span>
-          <app-currency-display [value]="grandTotal()" [currency]="null" />
+          <app-currency-display [value]="grandTotal()" [currency]="documentCurrencyCode()" />
         </div>
       </div>
     </div>

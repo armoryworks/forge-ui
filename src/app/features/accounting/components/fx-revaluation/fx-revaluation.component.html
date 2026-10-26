@@ -1,0 +1,61 @@
+<section class="fx-revaluation" data-testid="fx-revaluation">
+  <header class="fx-revaluation__head">
+    <h2 class="fx-revaluation__title">{{ 'accounting.fxRevaluation.title' | translate }}</h2>
+    <span class="fx-revaluation__hint">{{ 'accounting.fxRevaluation.hint' | translate }}</span>
+  </header>
+
+  <div class="fx-revaluation__bar">
+    <app-datepicker [label]="'accounting.period.asOf' | translate" [formControl]="asOfControl" [required]="true" data-testid="fx-revaluation-as-of" />
+    <button type="button" class="action-btn action-btn--sm" (click)="preview()" [disabled]="busy() || asOfControl.invalid" data-testid="fx-revaluation-preview">
+      <span class="material-icons-outlined" aria-hidden="true">preview</span>
+      {{ 'accounting.fxRevaluation.preview' | translate }}
+    </button>
+    @if (previewed() && rows().length > 0) {
+      <button type="button" class="action-btn action-btn--primary action-btn--sm" (click)="confirmRun()" [disabled]="busy()" data-testid="fx-revaluation-run">
+        <span class="material-icons-outlined" aria-hidden="true">currency_exchange</span>
+        {{ 'accounting.fxRevaluation.run' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (previewed()) {
+    @if (rows().length === 0) {
+      <p class="acct-muted" data-testid="fx-revaluation-nothing">{{ 'accounting.fxRevaluation.nothingToRevalue' | translate }}</p>
+    } @else {
+      <div class="acct-table-block">
+        <app-data-table tableId="acct-fx-revaluation-preview" [columns]="previewColumns" [data]="previewRows()">
+          <ng-template appColumnCell="netForeignPosition" let-row>
+            <app-currency-display [value]="row.netForeignPosition" [currency]="row.currencyCode" [showCodeWhenBase]="true" />
+          </ng-template>
+          <ng-template appColumnCell="carryingFunctional" let-row>
+            <app-currency-display [value]="row.carryingFunctional" />
+          </ng-template>
+          <ng-template appColumnCell="rate" let-row>
+            <app-input [label]="'accounting.currency.fxRate' | translate" type="number" [formControl]="row.rateControl"
+              step="0.00000001" min="0.00000001" data-testid="fx-revaluation-rate" />
+          </ng-template>
+          <ng-template appColumnCell="adjustment" let-row>
+            <app-currency-display [value]="row.adjustment" />
+          </ng-template>
+        </app-data-table>
+      </div>
+      <p class="fx-revaluation__total">
+        {{ 'accounting.fxRevaluation.totalAdjustment' | translate }} <app-currency-display [value]="totalAdjustment()" />
+      </p>
+    }
+  }
+
+  <h3 class="fx-revaluation__subtitle">{{ 'accounting.fxRevaluation.pastRuns' | translate }}</h3>
+  <div class="acct-table-block">
+    <app-data-table tableId="acct-fx-revaluation-runs" [columns]="runColumns" [data]="runs()"
+      emptyIcon="currency_exchange" [emptyMessage]="'accounting.fxRevaluation.noRuns' | translate">
+      <ng-template appColumnCell="asOf" let-row>{{ row.asOf | dateOnly }}</ng-template>
+      <ng-template appColumnCell="adjustment" let-row>
+        <app-currency-display [value]="row.adjustment" />
+      </ng-template>
+      <ng-template appColumnCell="reversed" let-row>
+        {{ (row.reversed ? 'common.yes' : 'common.no') | translate }}
+      </ng-template>
+    </app-data-table>
+  </div>
+</section>

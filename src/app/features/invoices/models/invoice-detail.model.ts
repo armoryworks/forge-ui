@@ -25,4 +25,6 @@ export interface InvoiceDetail {
   updatedAt: Date;
   rowVersion?: number;
   currencyCode?: string | null;
+  currencyId?: number | null;
+  fxRate?: number;
 }

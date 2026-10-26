@@ -300,6 +300,7 @@ export class CustomerDetailComponent {
       email: patch.email ?? c.email,
       phone: patch.phone ?? c.phone,
       isActive: patch.isActive ?? c.isActive,
+      ...(patch.currencyId !== undefined && patch.currencyId !== null ? { currencyId: patch.currencyId } : {}),
       ...this.commercialTermsChanges(patch),
     }).subscribe({
       next: () => {

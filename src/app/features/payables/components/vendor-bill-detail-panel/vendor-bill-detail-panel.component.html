@@ -63,6 +63,12 @@
           <span class="info-label">{{ 'common.dueDate' | translate }}</span>
           <span class="info-value">{{ bill.dueDate | dateOnly }}</span>
         </div>
+        @if ((bill.fxRate ?? 1) !== 1) {
+          <div class="info-item" data-testid="bill-detail-fx-rate">
+            <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
+            <span class="info-value">{{ bill.fxRate | number:'1.2-8' }}</span>
+          </div>
+        }
       </div>
 
       @if (bill.notes) {
@@ -102,8 +108,8 @@
                     <td data-testid="bill-line-account">{{ line.glAccountName ?? getAccountKeyLabel(line.accountDeterminationKey) }}</td>
                   }
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="bill.currencyCode ?? null" [maximumFractionDigits]="4" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="bill.currencyCode ?? null" /></td>
                 </tr>
               }
             </tbody>
@@ -115,23 +121,23 @@
       <div class="totals-section">
         <div class="totals-row">
           <span class="totals-label">{{ 'payables.subtotal' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="bill.subtotal" [currency]="null" /></span>
+          <span class="totals-value"><app-currency-display [value]="bill.subtotal" [currency]="bill.currencyCode ?? null" /></span>
         </div>
         <div class="totals-row">
           <span class="totals-label">{{ 'payables.tax' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="bill.taxAmount" [currency]="null" /></span>
+          <span class="totals-value"><app-currency-display [value]="bill.taxAmount" [currency]="bill.currencyCode ?? null" /></span>
         </div>
         <div class="totals-row totals-row--total">
           <span class="totals-label">{{ 'common.total' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="bill.total" [currency]="null" /></span>
+          <span class="totals-value"><app-currency-display [value]="bill.total" [currency]="bill.currencyCode ?? null" /></span>
         </div>
         <div class="totals-row">
           <span class="totals-label">{{ 'payables.paid' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="bill.amountPaid" [currency]="null" /></span>
+          <span class="totals-value"><app-currency-display [value]="bill.amountPaid" [currency]="bill.currencyCode ?? null" /></span>
         </div>
         <div class="totals-row totals-row--balance">
           <span class="totals-label">{{ 'payables.balanceDue' | translate }}</span>
-          <span class="totals-value"><app-currency-display [value]="bill.balanceDue" [currency]="null" /></span>
+          <span class="totals-value"><app-currency-display [value]="bill.balanceDue" [currency]="bill.currencyCode ?? null" /></span>
         </div>
       </div>
 

@@ -13,4 +13,6 @@ export interface CreateSalesOrderRequest {
   notes?: string;
   taxRate: number;
   lines: CreateSalesOrderLineRequest[];
+  currencyId?: number;
+  fxRate?: number | null;
 }

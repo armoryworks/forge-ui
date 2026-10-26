@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -23,8 +23,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
-import { ActiveCurrency } from '../../../../shared/models/active-currency.model';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { MONEY_DECIMALS, roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
@@ -79,7 +78,7 @@ interface DraftPoLine {
   imports: [
     ReactiveFormsModule, DecimalPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ToggleComponent, CurrencyInputComponent, CurrencyDisplayComponent, EntityPickerComponent,
+    ToggleComponent, CurrencyInputComponent, CurrencyDisplayComponent, EntityPickerComponent, DocumentCurrencyComponent,
     ValidationButtonComponent, MatTooltipModule,
   ],
   templateUrl: './vendor-bill-dialog.component.html',
@@ -88,10 +87,12 @@ interface DraftPoLine {
 })
 export class VendorBillDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
+  private readonly vendorCurrencies = signal<Map<number, number | null>>(new Map());
+  private readonly poCurrencyId = signal<number | null>(null);
   private readonly billService = inject(VendorBillService);
   private readonly vendorService = inject(VendorService);
   private readonly purchaseOrderService = inject(PurchaseOrderService);
-  private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -118,16 +119,6 @@ export class VendorBillDialogComponent {
   /** True once a PO was loaded and none of its lines have unbilled receipts. */
   protected readonly poHasNoBillableLines = signal(false);
 
-  // ── Multi-currency (additive) — same conditional pattern as InvoiceDialog ──
-  protected readonly currencies = signal<ActiveCurrency[]>([]);
-  protected readonly baseCurrencyId = computed<number | null>(
-    () => this.currencies().find(c => c.isBaseCurrency)?.id ?? this.currencies()[0]?.id ?? null,
-  );
-  protected readonly showCurrencySelector = computed(() => this.currencies().length > 1);
-  protected readonly currencyOptions = computed<SelectOption[]>(() =>
-    this.currencies().map(c => ({ value: c.id, label: `${c.code} — ${c.name}` })),
-  );
-
   private readonly quantityDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.qty'), this.translate);
   private readonly unitPriceDecimals = maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('payables.unitPrice'), this.translate);
 
@@ -145,7 +136,7 @@ export class VendorBillDialogComponent {
       maxDecimalsValidator(MONEY_DECIMALS, this.translate.instant('payables.tax'), this.translate),
     ]),
     currencyId: new FormControl<number | null>(null),
-    fxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
+    fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
     notes: new FormControl(''),
     lines: this.standaloneLines,
     poLines: this.poLines,
@@ -158,18 +149,19 @@ export class VendorBillDialogComponent {
     { initialValue: this.fromPoControl.value },
   );
 
-  private readonly selectedCurrencyId = toSignal(
-    this.billForm.controls.currencyId.valueChanges.pipe(
-      startWith(this.billForm.controls.currencyId.value),
-    ),
-    { initialValue: this.billForm.controls.currencyId.value },
+  private readonly selectedVendorId = toSignal(
+    this.billForm.controls.vendorId.valueChanges.pipe(startWith(this.billForm.controls.vendorId.value)),
+    { initialValue: this.billForm.controls.vendorId.value },
   );
-  /** FX rate is only relevant (and shown) when a non-base currency is chosen. */
-  protected readonly showFxRate = computed(() => {
-    const base = this.baseCurrencyId();
-    const selected = this.selectedCurrencyId();
-    return base !== null && selected !== null && selected !== base;
+  protected readonly billDateValue = toSignal(
+    this.billForm.controls.billDate.valueChanges.pipe(startWith(this.billForm.controls.billDate.value)),
+    { initialValue: this.billForm.controls.billDate.value },
+  );
+  protected readonly defaultCurrencyId = computed<number | null>(() => {
+    const vendorId = this.selectedVendorId();
+    return this.poCurrencyId() ?? (vendorId == null ? null : this.vendorCurrencies().get(vendorId) ?? null);
   });
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
 
   /** Reactivity tick for the computed totals — fires on any nested line edit. */
   private readonly formValue = toSignal(this.billForm.valueChanges, { initialValue: null });
@@ -257,36 +249,18 @@ export class VendorBillDialogComponent {
     });
 
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.vendorOptions.set([
-        { value: null, label: this.translate.instant('payables.selectVendor') },
-        ...list.filter(vendor => vendor.isActive).map(vendor => ({ value: vendor.id, label: vendor.companyName })),
-      ]),
-    });
-
-    // Load active currencies; default the form to the base currency. The
-    // selector only renders when >1 active currency exists.
-    this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
-        this.currencies.set(list);
-        const base = this.baseCurrencyId();
-        if (base !== null && this.billForm.controls.currencyId.value === null) {
-          this.billForm.controls.currencyId.setValue(base);
-        }
+        this.vendorCurrencies.set(new Map(list.map(vendor => [vendor.id, vendor.currencyId ?? null])));
+        this.vendorOptions.set([
+          { value: null, label: this.translate.instant('payables.selectVendor') },
+          ...list.filter(vendor => vendor.isActive).map(vendor => ({ value: vendor.id, label: vendor.companyName })),
+        ]);
       },
     });
 
     this.billForm.controls.billDate.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.billForm.controls.dueDate.updateValueAndValidity());
-
-    // Returning to the base currency resets the booking rate to 1.
-    this.billForm.controls.currencyId.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => {
-        if (id === this.baseCurrencyId()) {
-          this.billForm.controls.fxRate.setValue(1);
-        }
-      });
 
     // Switching mode clears the OTHER mode's lines (the create invariant is
     // all-or-nothing on purchaseOrderLineId).
@@ -319,6 +293,7 @@ export class VendorBillDialogComponent {
         this.poLines.clear();
         this.poLineMeta.set([]);
         this.poHasNoBillableLines.set(false);
+        this.poCurrencyId.set(null);
         if (poId) {
           this.loadPoLines(poId);
         }
@@ -364,6 +339,7 @@ export class VendorBillDialogComponent {
     this.loadingPoLines.set(true);
     this.purchaseOrderService.getPurchaseOrderById(poId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (po) => {
+        this.poCurrencyId.set(po.currencyId ?? null);
         const billable = po.lines.filter(l => l.unbilledReceivedQuantity > 0);
         this.poLineMeta.set(billable.map(l => ({
           purchaseOrderLineId: l.id,
@@ -499,7 +475,7 @@ export class VendorBillDialogComponent {
       dueDate: this.reviveDate(data['dueDate']),
       taxAmount: (data['taxAmount'] as number | null) ?? 0,
       currencyId: (data['currencyId'] as number | null) ?? this.billForm.controls.currencyId.value,
-      fxRate: (data['fxRate'] as number | null) ?? 1,
+      fxRate: (data['fxRate'] as number | null) ?? null,
       notes: (data['notes'] as string | null) ?? '',
     });
 
@@ -579,11 +555,9 @@ export class VendorBillDialogComponent {
       });
     }
 
-    // Only attach currency when the install is multi-currency; otherwise the
-    // server resolves the functional currency. FX rate is 1 for base currency.
-    const isBase = f.currencyId === this.baseCurrencyId();
-    const currencyId = this.showCurrencySelector() ? (f.currencyId ?? undefined) : undefined;
-    const fxRate = isBase ? 1 : (f.fxRate ?? 1);
+    const currencyField = this.documentCurrency();
+    const currencyId = currencyField?.visible() ? (f.currencyId ?? undefined) : undefined;
+    const fxRate = currencyField?.visible() && currencyField.isForeign() ? f.fxRate : undefined;
 
     this.billService.createVendorBill({
       vendorId: f.vendorId!,

@@ -12,4 +12,5 @@ export interface UpdatePurchaseOrderRequest {
   quoteCurrency?: string;
   fxRate?: number;
   fxRateSource?: string;
+  currencyId?: number;
 }

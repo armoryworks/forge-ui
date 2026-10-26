@@ -17,4 +17,7 @@ export interface PaymentDetail {
   updatedAt: Date;
   rowVersion?: number | string | null;
   canVoid?: boolean;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
 }

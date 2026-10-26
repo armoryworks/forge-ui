@@ -41,7 +41,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="inv-list-content">
-      <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
+      <app-data-table tableId="invoices" [columns]="invoiceColumns()" [data]="invoices()"
         emptyIcon="receipt_long" [emptyMessage]="'invoices.noInvoicesFound' | translate"
         [clickableRows]="true"
         [serverPaging]="serverPaging()" (serverPageChange)="onServerPageChange($event)"
@@ -77,6 +77,9 @@
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.total" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>

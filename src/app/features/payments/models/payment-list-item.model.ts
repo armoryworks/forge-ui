@@ -10,4 +10,8 @@ export interface PaymentListItem {
   paymentDate: Date;
   referenceNumber: string | null;
   createdAt: Date;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

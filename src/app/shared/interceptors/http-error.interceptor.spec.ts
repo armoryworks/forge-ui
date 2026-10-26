@@ -136,6 +136,41 @@ describe('httpErrorInterceptor', () => {
     expect(snackbar.error).not.toHaveBeenCalled();
   });
 
+  it('words a missing exchange rate with the pair and the date', () => {
+    catalog['apiErrors.codes.fxRateMissing'] = 'No rate {{from}} to {{to}} on {{date}}';
+    http.post('/api/v1/invoices', {}).subscribe({ error: () => {} });
+
+    httpMock.expectOne('/api/v1/invoices').flush(
+      { code: 'fx-rate-missing', fromCurrency: 'CAD', toCurrency: 'USD', date: '2026-10-26' },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+
+    expect(snackbar.error).toHaveBeenCalledWith('No rate CAD to USD on 10/26/2026');
+  });
+
+  it('stays quiet on other 422 problems', () => {
+    http.post('/api/v1/parts/1/routing/graph', {}).subscribe({ error: () => {} });
+
+    httpMock.expectOne('/api/v1/parts/1/routing/graph').flush(
+      { code: 'routing-graph-invalid' },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+
+    expect(snackbar.error).not.toHaveBeenCalled();
+  });
+
+  it('words a currency lock conflict', () => {
+    catalog['apiErrors.codes.partyCurrencyLocked'] = 'Currency locked';
+    http.put('/api/v1/customers/1', {}).subscribe({ error: () => {} });
+
+    httpMock.expectOne('/api/v1/customers/1').flush(
+      { code: 'party-currency-locked', detail: 'server text' },
+      { status: 409, statusText: 'Conflict' },
+    );
+
+    expect(toast.show).toHaveBeenCalledWith(expect.objectContaining({ message: 'Currency locked' }));
+  });
+
   it('falls back to access-denied snackbar on plain 403 (no capability envelope, no header)', () => {
     let captured: unknown;
     http.get('/api/v1/admin/secret').subscribe({

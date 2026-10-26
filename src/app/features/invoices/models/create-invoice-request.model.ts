@@ -17,6 +17,6 @@ export interface CreateInvoiceRequest {
    */
   currencyId?: number;
   /** Booking FX rate (txn → functional). Defaults to 1 for the base currency. */
-  fxRate?: number;
+  fxRate?: number | null;
   lines: CreateInvoiceLineRequest[];
 }

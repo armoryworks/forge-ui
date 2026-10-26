@@ -114,6 +114,12 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/period-close/period-close.component').then((m) => m.PeriodCloseComponent),
   },
   {
+    path: 'exchange-rates',
+    data: { titleKey: 'nav.exchangeRates', ratesOnly: true },
+    loadComponent: () =>
+      import('../admin/currencies/currencies.component').then((m) => m.CurrenciesComponent),
+  },
+  {
     path: 'bank-rec',
     data: { titleKey: 'nav.bankRec' },
     loadComponent: () =>

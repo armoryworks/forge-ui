@@ -15,4 +15,8 @@ export interface VendorPaymentListItem {
   transmissionStatus: string | null;
   transmissionAttempts: number;
   transmissionId: number | null;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

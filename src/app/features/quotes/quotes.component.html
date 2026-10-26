@@ -14,7 +14,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="qt-list-content">
-      <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="filteredQuotes()"
+      <app-data-table tableId="quotes" [columns]="quoteColumns()" [data]="filteredQuotes()"
         emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
         [clickableRows]="true"
         (rowClick)="openQuoteDetail($any($event))">
@@ -25,7 +25,7 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
-          <app-currency-display [value]="row.total" [currency]="null" />
+          <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
           <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | dateOnly) : '—' }}</span>
@@ -41,6 +41,9 @@
               <span class="material-icons-outlined">send</span>
             </button>
           }
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.total" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>

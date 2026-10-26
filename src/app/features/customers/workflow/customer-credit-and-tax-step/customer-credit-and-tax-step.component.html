@@ -14,7 +14,7 @@
     <app-select
       [label]="'customers.workflow.creditAndTax.defaultCurrencyLabel' | translate"
       formControlName="defaultCurrency"
-      [options]="currencyOptions"
+      [options]="currencyOptions()"
       data-testid="customer-default-currency" />
     @if (canSetCommercialTerms) {
       <app-toggle

@@ -39,4 +39,6 @@ export interface CustomerDetail {
   rowVersion?: number;
   exemptionExpiryDate?: string | null;
   defaultCreditTerms?: string | null;
+  currencyId?: number | null;
+  currencyLocked?: boolean;
 }

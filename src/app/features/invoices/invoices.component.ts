@@ -12,6 +12,9 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ServerPageRequest, ServerPageState } from '../../shared/models/server-page-state.model';
 import { TablePreferences } from '../../shared/models/table-preferences.model';
@@ -53,6 +56,8 @@ export class InvoicesComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly userPreferences = inject(UserPreferencesService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
@@ -94,7 +99,7 @@ export class InvoicesComponent implements OnInit {
     { value: 'Voided', label: this.translate.instant('invoices.statusVoided') },
   ];
 
-  protected readonly invoiceColumns: ColumnDef[] = [
+  private readonly invoiceColumnsBase: ColumnDef[] = [
     { field: 'invoiceNumber', header: this.translate.instant('invoices.invoiceNumber'), sortable: true, width: '120px' },
     { field: 'customerName', header: this.translate.instant('invoices.customer'), sortable: true },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: [
@@ -112,6 +117,9 @@ export class InvoicesComponent implements OnInit {
     { field: 'balanceDue', header: this.translate.instant('invoices.balance'), width: '100px', align: 'right' },
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
+  protected readonly invoiceColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.invoiceColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.invoiceColumnsBase);
 
   constructor() {
     this.loadInvoices();

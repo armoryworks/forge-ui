@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -34,6 +36,7 @@ import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../customer-roles';
 })
 export class CustomerCreditAndTaxStepComponent {
   private readonly customerService = inject(CustomerService);
+  private readonly activeCurrencies = inject(ActiveCurrencyService);
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -52,13 +55,14 @@ export class CustomerCreditAndTaxStepComponent {
   // Same shape the legacy guided dialog offered. Currency options live in
   // the leads.convertStepper i18n bucket (legacy) — re-used here rather
   // than duplicating keys for the same five ISO 4217 codes.
-  protected readonly currencyOptions: SelectOption[] = [
+  private readonly fallbackCurrencyOptions: SelectOption[] = [
     { value: 'USD', label: this.translate.instant('leads.convertStepper.currencyUSD') },
     { value: 'EUR', label: this.translate.instant('leads.convertStepper.currencyEUR') },
     { value: 'GBP', label: this.translate.instant('leads.convertStepper.currencyGBP') },
     { value: 'CAD', label: this.translate.instant('leads.convertStepper.currencyCAD') },
     { value: 'MXN', label: this.translate.instant('leads.convertStepper.currencyMXN') },
   ];
+  protected readonly currencyOptions = signal<SelectOption[]>(this.fallbackCurrencyOptions);
 
   protected readonly form = new FormGroup({
     creditLimit: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -68,6 +72,9 @@ export class CustomerCreditAndTaxStepComponent {
   });
 
   constructor() {
+    this.activeCurrencies.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
+      if (list.length > 0) this.currencyOptions.set(list.map(c => ({ value: c.code, label: `${c.code} — ${c.name}` })));
+    });
     effect(() => {
       const customer = this.entity() as CustomerDetail | null;
       if (!customer) return;

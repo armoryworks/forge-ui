@@ -24,4 +24,8 @@ export interface PurchaseOrderListItem {
   originUserName: string | null;
   originReference: string | null;
   linesFullyReceived: number;
+  currencyId?: number | null;
+  currencyCode?: string | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

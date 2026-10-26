@@ -42,8 +42,8 @@
                   <!-- Phase 3 / WU-10 — quantity may be fractional. Display up to 4 decimals;
                        trailing zeros collapse via Angular's number pipe. -->
                   <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.orderedQuantity * line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="documentCurrencyCode()" [maximumFractionDigits]="4" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.orderedQuantity * line.unitPrice" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
@@ -55,7 +55,7 @@
             <tfoot>
               <tr>
                 <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
-                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="null" /></td>
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" /></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -169,7 +169,11 @@
         <span class="dlg-sidebar-section__title">{{ 'purchaseOrders.shippingAndCurrency' | translate }}</span>
         <app-select data-testid="po-incoterm" [label]="'purchaseOrders.incoterm' | translate" formControlName="incoterm" [options]="incotermOptions" />
         <app-currency-input data-testid="po-estimated-freight" [label]="'purchaseOrders.estimatedFreight' | translate" formControlName="estimatedFreight" [min]="0" />
-        <app-select data-testid="po-quote-currency" [label]="'purchaseOrders.quoteCurrency' | translate" formControlName="quoteCurrency" [options]="quoteCurrencyOptions()" />
+        @if (!documentCurrencyVisible()) {
+          <app-select data-testid="po-quote-currency" [label]="'purchaseOrders.quoteCurrency' | translate" formControlName="quoteCurrency" [options]="quoteCurrencyOptions()" />
+        }
+        <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
+          [documentDate]="null" [defaultCurrencyId]="vendorCurrencyId()" testIdPrefix="po" />
       </div>
 
       <div class="dlg-sidebar-section">
@@ -181,16 +185,16 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="null" />
+          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
         </div>
         @if (form.controls.estimatedFreight.value) {
           <div class="dlg-total-row">
             <span>{{ 'purchaseOrders.estimatedFreight' | translate }}</span>
-            <app-currency-display [value]="form.controls.estimatedFreight.value" [currency]="null" />
+            <app-currency-display [value]="form.controls.estimatedFreight.value" [currency]="documentCurrencyCode()" />
           </div>
           <div class="dlg-total-row dlg-total-row--grand">
             <span>{{ 'common.total' | translate }}</span>
-            <app-currency-display [value]="lineTotal() + form.controls.estimatedFreight.value" [currency]="null" />
+            <app-currency-display [value]="lineTotal() + form.controls.estimatedFreight.value" [currency]="documentCurrencyCode()" />
           </div>
         }
       </div>

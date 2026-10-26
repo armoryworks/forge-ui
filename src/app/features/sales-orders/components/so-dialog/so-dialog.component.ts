@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -17,6 +17,7 @@ import { AdminService } from '../../../admin/services/admin.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateSalesOrderLineRequest } from '../../models/create-sales-order-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -48,7 +49,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule, DocumentCurrencyComponent,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -56,6 +57,9 @@ interface LineEntry {
 })
 export class SoDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
+  protected readonly customerCurrencyId = signal<number | null>(null);
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
   @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
@@ -112,6 +116,8 @@ export class SoDialogComponent {
     requestedDeliveryDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     notes: new FormControl(''),
+    currencyId: new FormControl<number | null>(null),
+    fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
   });
 
   private readonly formViolations = FormValidationService.getViolations(this.form, {
@@ -305,6 +311,8 @@ export class SoDialogComponent {
   }
 
   protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    const currencyId = customer?.['currencyId'];
+    this.customerCurrencyId.set(typeof currencyId === 'number' ? currencyId : null);
     this.customerName.set(customer ? String(customer['name'] ?? '') : '');
   }
 
@@ -375,6 +383,8 @@ export class SoDialogComponent {
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
       taxRate: (f.taxRate ?? 0) / 100,
+      currencyId: this.documentCurrency()?.visible() ? (f.currencyId ?? undefined) : undefined,
+      fxRate: this.documentCurrency()?.visible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,
       lines: lineRequests,
     }).subscribe({
       next: () => {

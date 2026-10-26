@@ -144,6 +144,8 @@ export class SalesOrderService {
     customerPO?: string;
     notes?: string;
     taxRate?: number;
+    currencyId?: number;
+    fxRate?: number | null;
   }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
   }

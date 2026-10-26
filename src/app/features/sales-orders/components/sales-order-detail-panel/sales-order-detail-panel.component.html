@@ -280,15 +280,15 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
-              <span class="info-value"><app-currency-display [value]="so.subtotal" [currency]="null" /></span>
+              <span class="info-value"><app-currency-display [value]="so.subtotal" [currency]="so.currencyCode ?? null" /></span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ taxPercent() | number:'1.0-4' }}%)</span>
-              <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="null" /></span>
+              <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="so.currencyCode ?? null" /></span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ 'common.total' | translate }}</span>
-              <span class="info-value info-value--bold"><app-currency-display [value]="so.total" [currency]="null" /></span>
+              <span class="info-value info-value--bold"><app-currency-display [value]="so.total" [currency]="so.currencyCode ?? null" /></span>
             </div>
           </div>
 
@@ -426,8 +426,8 @@
                       </span>
                       / {{ line.remainingQuantity | number:'1.0-4' }}
                     </td>
-                    <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
-                    <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                    <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="so.currencyCode ?? null" [maximumFractionDigits]="4" /></td>
+                    <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="so.currencyCode ?? null" /></td>
                     @if (canEditLines(so.status)) {
                       <td class="lines-table__right lines-table__actions">
                         <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="editLine(line)">
@@ -887,7 +887,7 @@
                 <div class="so-detail__invoice-details">
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.amount' | translate }}</span>
-                    <span class="so-detail__invoice-value"><app-currency-display [value]="invoice.totalAmount" [currency]="null" /></span>
+                    <span class="so-detail__invoice-value"><app-currency-display [value]="invoice.totalAmount" [currency]="so.currencyCode ?? null" /></span>
                   </div>
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.dueDate' | translate }}</span>
@@ -911,11 +911,11 @@
             <div class="so-detail__invoice-summary">
               <div class="so-detail__invoice-row">
                 <span class="so-detail__invoice-label">{{ 'salesOrders.totalInvoiced' | translate }}</span>
-                <span class="so-detail__invoice-value so-detail__invoice-value--bold"><app-currency-display [value]="totalInvoiced()" [currency]="null" /></span>
+                <span class="so-detail__invoice-value so-detail__invoice-value--bold"><app-currency-display [value]="totalInvoiced()" [currency]="so.currencyCode ?? null" /></span>
               </div>
               <div class="so-detail__invoice-row">
                 <span class="so-detail__invoice-label">{{ 'salesOrders.orderTotal' | translate }}</span>
-                <span class="so-detail__invoice-value"><app-currency-display [value]="so.total" [currency]="null" /></span>
+                <span class="so-detail__invoice-value"><app-currency-display [value]="so.total" [currency]="so.currencyCode ?? null" /></span>
               </div>
             </div>
           }
@@ -952,16 +952,16 @@
                     <tr>
                       <td>{{ line.partNumber ? line.partNumber + ' — ' : '' }}{{ line.description }}</td>
                       <td class="so-cpo__num">{{ line.quantity | number:'1.0-4' }}</td>
-                      <td class="so-cpo__num"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
-                      <td class="so-cpo__num"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                      <td class="so-cpo__num"><app-currency-display [value]="line.unitPrice" [currency]="so.currencyCode ?? null" /></td>
+                      <td class="so-cpo__num"><app-currency-display [value]="line.lineTotal" [currency]="so.currencyCode ?? null" /></td>
                     </tr>
                   }
                 </tbody>
               </table>
               <div class="so-cpo__totals">
-                <div class="so-cpo__total-row"><span>{{ 'salesOrders.subtotal' | translate }}</span><app-currency-display [value]="cpo.subtotal" [currency]="null" /></div>
-                <div class="so-cpo__total-row"><span>{{ 'salesOrders.tax' | translate }}</span><app-currency-display [value]="cpo.taxAmount" [currency]="null" /></div>
-                <div class="so-cpo__total-row so-cpo__total-row--grand"><span>{{ 'common.total' | translate }}</span><app-currency-display [value]="cpo.total" [currency]="null" /></div>
+                <div class="so-cpo__total-row"><span>{{ 'salesOrders.subtotal' | translate }}</span><app-currency-display [value]="cpo.subtotal" [currency]="so.currencyCode ?? null" /></div>
+                <div class="so-cpo__total-row"><span>{{ 'salesOrders.tax' | translate }}</span><app-currency-display [value]="cpo.taxAmount" [currency]="so.currencyCode ?? null" /></div>
+                <div class="so-cpo__total-row so-cpo__total-row--grand"><span>{{ 'common.total' | translate }}</span><app-currency-display [value]="cpo.total" [currency]="so.currencyCode ?? null" /></div>
               </div>
             </div>
           } @else {

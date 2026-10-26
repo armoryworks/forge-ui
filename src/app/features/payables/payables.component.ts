@@ -22,6 +22,9 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { withFunctionalTotal } from '../../shared/utils/functional-total-column';
+import { CurrencyCatalogService } from '../../shared/services/currency-catalog.service';
+import { CurrencyService } from '../../shared/services/currency.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
@@ -74,6 +77,8 @@ export class PayablesComponent {
   private readonly vendorService = inject(VendorService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly bankingService = inject(BankingService);
@@ -138,7 +143,7 @@ export class PayablesComponent {
     { value: 'Void', label: this.translate.instant('payables.statusVoid') },
   ];
 
-  protected readonly billColumns: ColumnDef[] = [
+  private readonly billColumnsBase: ColumnDef[] = [
     { field: 'billNumber', header: this.translate.instant('payables.billNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('payables.vendor'), sortable: true },
     { field: 'vendorInvoiceNumber', header: this.translate.instant('payables.vendorInvoiceNumber'), sortable: true, width: '130px' },
@@ -155,8 +160,11 @@ export class PayablesComponent {
     { field: 'amountPaid', header: this.translate.instant('payables.paid'), sortable: true, width: '100px', align: 'right' },
     { field: 'balanceDue', header: this.translate.instant('payables.balance'), sortable: true, width: '100px', align: 'right' },
   ];
+  protected readonly billColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.billColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.billColumnsBase);
 
-  protected readonly paymentColumns: ColumnDef[] = [
+  private readonly paymentColumnsBase: ColumnDef[] = [
     { field: 'paymentNumber', header: this.translate.instant('payables.paymentNumber'), sortable: true, width: '120px' },
     { field: 'vendorName', header: this.translate.instant('payables.vendor'), sortable: true },
     { field: 'method', header: this.translate.instant('payables.method'), sortable: true, filterable: true, type: 'enum', width: '110px', filterOptions: [
@@ -181,6 +189,9 @@ export class PayablesComponent {
       { value: 'Cancelled', label: this.translate.instant('payables.transmission.statusCancelled') },
     ]},
   ];
+  protected readonly paymentColumns = computed<ColumnDef[]>(() => this.currencyCatalog.isMultiCurrency()
+    ? withFunctionalTotal(this.paymentColumnsBase, this.translate.instant('accounting.currency.totalFunctional', { code: this.baseCurrency() }))
+    : this.paymentColumnsBase);
 
   protected readonly batchColumns: ColumnDef[] = [
     { field: 'batchNumber', header: this.translate.instant('payables.batches.number'), sortable: true, width: '120px' },

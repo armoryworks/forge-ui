@@ -11,4 +11,7 @@ export interface InvoiceListItem {
   balanceDue: number;
   createdAt: Date;
   currencyCode?: string | null;
+  currencyId?: number | null;
+  fxRate?: number;
+  totalFunctional?: number | null;
 }

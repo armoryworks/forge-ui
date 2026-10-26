@@ -10,4 +10,6 @@ export interface CreateVendorPaymentRequest {
   referenceNumber?: string;
   notes?: string;
   applications?: CreateVendorPaymentApplicationRequest[];
+  currencyId?: number;
+  fxRate?: number | null;
 }

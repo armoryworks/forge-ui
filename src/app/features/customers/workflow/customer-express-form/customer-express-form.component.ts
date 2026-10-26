@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, map, of, switchMap, tap } from 'rxjs';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
+import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
@@ -41,6 +43,7 @@ import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../customer-roles';
 })
 export class CustomerExpressFormComponent {
   private readonly customerService = inject(CustomerService);
+  private readonly activeCurrencies = inject(ActiveCurrencyService);
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -62,13 +65,14 @@ export class CustomerExpressFormComponent {
    *  a blank value lets the server auto-generate the number. */
   protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
 
-  protected readonly currencyOptions: SelectOption[] = [
+  private readonly fallbackCurrencyOptions: SelectOption[] = [
     { value: 'USD', label: this.translate.instant('leads.convertStepper.currencyUSD') },
     { value: 'EUR', label: this.translate.instant('leads.convertStepper.currencyEUR') },
     { value: 'GBP', label: this.translate.instant('leads.convertStepper.currencyGBP') },
     { value: 'CAD', label: this.translate.instant('leads.convertStepper.currencyCAD') },
     { value: 'MXN', label: this.translate.instant('leads.convertStepper.currencyMXN') },
   ];
+  protected readonly currencyOptions = signal<SelectOption[]>(this.fallbackCurrencyOptions);
 
   protected readonly form = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
@@ -96,6 +100,9 @@ export class CustomerExpressFormComponent {
   protected readonly violations = FormValidationService.getViolations(this.form, this.violationLabels);
 
   constructor() {
+    this.activeCurrencies.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
+      if (list.length > 0) this.currencyOptions.set(list.map(c => ({ value: c.code, label: `${c.code} — ${c.name}` })));
+    });
     effect(() => {
       const customer = this.entity() as CustomerDetail | null;
       if (!customer) return;

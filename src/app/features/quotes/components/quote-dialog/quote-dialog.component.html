@@ -24,8 +24,8 @@
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" [maximumFractionDigits]="4" /></td>
-                  <td class="lines-table__right"><app-currency-display [value]="lineAmount(line)" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="documentCurrencyCode()" [maximumFractionDigits]="4" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="lineAmount(line)" [currency]="documentCurrencyCode()" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
@@ -77,6 +77,8 @@
           </div>
         }
         <app-datepicker data-testid="quote-expiry" [label]="'quotes.expirationDate' | translate" formControlName="expirationDate" />
+        <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
+          [documentDate]="null" [defaultCurrencyId]="customerCurrencyId()" testIdPrefix="quote" />
         <div class="tax-field">
           <app-input data-testid="quote-tax-rate" [label]="'quotes.taxRate' | translate" type="number" formControlName="taxRate" [required]="true"
             suffix="%" [matTooltip]="taxLocked() ? ('quotes.taxLockedTooltip' | translate) : (taxAutoFilled() ? ('quotes.taxAutoFilledTooltip' | translate) : '')" />
@@ -107,15 +109,15 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <app-currency-display [value]="lineTotal()" [currency]="null" />
+          <app-currency-display [value]="lineTotal()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() | number:'1.0-4' }}%)</span>
-          <app-currency-display [value]="taxAmount()" [currency]="null" />
+          <app-currency-display [value]="taxAmount()" [currency]="documentCurrencyCode()" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">
           <span>{{ 'common.total' | translate }}</span>
-          <app-currency-display [value]="grandTotal()" [currency]="null" />
+          <app-currency-display [value]="grandTotal()" [currency]="documentCurrencyCode()" />
         </div>
       </div>
     </div>

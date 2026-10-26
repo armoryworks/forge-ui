@@ -14,6 +14,7 @@ import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-
 import { CapDirective } from '../../../../shared/directives/cap.directive';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { JobCostCloseComponent } from '../job-cost-close/job-cost-close.component';
+import { FxRevaluationComponent } from '../fx-revaluation/fx-revaluation.component';
 import {
   CloseChecklistItem,
   CloseChecklistResult,
@@ -41,7 +42,7 @@ interface ShownChecklist {
 @Component({
   selector: 'app-period-close',
   standalone: true,
-  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent],
+  imports: [TranslatePipe, DateOnlyPipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective, CapDirective, JobCostCloseComponent, FxRevaluationComponent],
   templateUrl: './period-close.component.html',
   styleUrl: './period-close.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

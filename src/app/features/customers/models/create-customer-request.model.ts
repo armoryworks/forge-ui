@@ -20,6 +20,7 @@ export interface CreateCustomerRequest {
   shippingAddress?: AddressInput;
   isTaxExempt?: boolean;
   taxExemptionId?: string;
+  currencyId?: number;
 }
 
 export interface AddressInput {

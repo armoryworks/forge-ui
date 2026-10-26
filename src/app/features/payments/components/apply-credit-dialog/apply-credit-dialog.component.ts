@@ -14,7 +14,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
+import { CurrencyService } from '../../../../shared/services/currency.service';
 
 interface CreditApplication {
   invoiceId: number;
@@ -39,7 +39,7 @@ const round2 = (value: number): number => Math.round(value * 100) / 100;
 export class ApplyCreditDialogComponent implements OnInit {
   private readonly paymentService = inject(PaymentService);
   private readonly invoiceService = inject(InvoiceService);
-  private readonly currencyService = inject(ActiveCurrencyService);
+  private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -51,8 +51,11 @@ export class ApplyCreditDialogComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly openInvoices = signal<InvoiceListItem[]>([]);
   protected readonly applications = signal<CreditApplication[]>([]);
-  protected readonly activeCurrencyCount = signal(0);
-  protected readonly showSettlementFxRate = computed(() => this.activeCurrencyCount() > 1);
+  protected readonly paymentCurrencyCode = computed(() => this.payment().currencyCode ?? null);
+  protected readonly showSettlementFxRate = computed(() => {
+    const code = this.paymentCurrencyCode();
+    return code !== null && code !== this.baseCurrency();
+  });
 
   protected readonly totalApplied = computed(() =>
     round2(this.applications().reduce((sum, a) => sum + a.amount, 0)));
@@ -61,8 +64,10 @@ export class ApplyCreditDialogComponent implements OnInit {
 
   protected readonly invoiceOptions = computed<AutocompleteOption[]>(() => {
     const used = new Set(this.applications().map(a => a.invoiceId));
+    const currencyId = this.payment().currencyId ?? null;
     return this.openInvoices()
       .filter(inv => !used.has(inv.id))
+      .filter(inv => currencyId === null || inv.currencyId == null || inv.currencyId === currencyId)
       .map(inv => ({ value: inv.id, label: `${inv.invoiceNumber} — ${inv.balanceDue.toFixed(2)}` }));
   });
 
@@ -87,9 +92,7 @@ export class ApplyCreditDialogComponent implements OnInit {
       }
     });
 
-    this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: list => this.activeCurrencyCount.set(list.length),
-    });
+    this.appForm.controls.settlementFxRate.setValue(this.payment().fxRate ?? 1);
   }
 
   protected canAdd(): boolean {
@@ -108,7 +111,7 @@ export class ApplyCreditDialogComponent implements OnInit {
       amount: round2(f.amount!),
       settlementFxRate: f.settlementFxRate ?? 1,
     }]);
-    this.appForm.reset({ invoiceId: null, amount: null, settlementFxRate: 1 });
+    this.appForm.reset({ invoiceId: null, amount: null, settlementFxRate: this.payment().fxRate ?? 1 });
   }
 
   protected removeApplication(index: number): void {

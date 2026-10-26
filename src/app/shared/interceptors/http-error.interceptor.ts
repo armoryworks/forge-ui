@@ -12,6 +12,7 @@ import { ToastService } from '../services/toast.service';
 import { localizeServerError } from '../utils/server-error-localizer';
 import { ServerValidationError, parseServerValidationEnvelope } from '../utils/server-validation.utils';
 import { markHttpErrorShown } from '../utils/shown-http-errors';
+import { formatDate, parseDateOnly } from '../utils/date.utils';
 import { SILENT_HTTP_ERRORS } from './silent-http-errors.token';
 
 export const SUPPRESS_VALIDATION_SNACKBAR = new HttpContextToken<boolean>(() => false);
@@ -109,16 +110,22 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           toast.show({
             severity: 'warning',
             title: translate.instant(isBusinessRule(error) ? 'errors.ruleViolation' : 'errors.conflict'),
-            message: extractMessage(error) ?? translate.instant('errors.resourceModified'),
+            message: currencyLockMessage(error, translate) ?? extractMessage(error) ?? translate.instant('errors.resourceModified'),
           });
           markHttpErrorShown(error);
           break;
 
-        case 422:
+        case 422: {
           // Validation error — typically handled by the calling service.
           // The same envelope shape (Phase 3 / WU-02) may also appear here
           // when controllers explicitly emit 422 — leave to the caller.
+          const missingRate = fxRateMissingMessage(error, translate);
+          if (missingRate) {
+            snackbar.error(missingRate);
+            markHttpErrorShown(error);
+          }
           break;
+        }
 
         case 0:
           if (document.visibilityState === 'hidden' || !navigator.onLine) break;
@@ -252,4 +259,30 @@ function parseCapabilityDisabled(
   }
 
   return null;
+}
+
+const CURRENCY_LOCK_KEYS: Record<string, string> = {
+  'party-currency-locked': 'apiErrors.codes.partyCurrencyLocked',
+  'document-currency-locked': 'apiErrors.codes.documentCurrencyLocked',
+  'base-currency-locked': 'apiErrors.codes.baseCurrencyLocked',
+};
+
+/** The worded message for a currency-lock conflict (409 with a currency lock code), else null. */
+function currencyLockMessage(error: HttpErrorResponse, translate: TranslateService): string | null {
+  const body = error.error;
+  const code = body && typeof body === 'object' && typeof body.code === 'string' ? body.code : null;
+  const key = code ? CURRENCY_LOCK_KEYS[code] : undefined;
+  return key ? translate.instant(key) : null;
+}
+
+/** The worded message for 422 `fx-rate-missing`, naming the pair and date, else null. */
+function fxRateMissingMessage(error: HttpErrorResponse, translate: TranslateService): string | null {
+  const body = error.error;
+  if (!body || typeof body !== 'object' || body.code !== 'fx-rate-missing') return null;
+  const day = typeof body.date === 'string' ? parseDateOnly(body.date) : null;
+  return translate.instant('apiErrors.codes.fxRateMissing', {
+    from: body.fromCurrency ?? '',
+    to: body.toCurrency ?? '',
+    date: day ? formatDate(day) : (body.date ?? ''),
+  });
 }

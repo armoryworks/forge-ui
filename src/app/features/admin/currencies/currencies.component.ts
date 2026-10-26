@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -17,6 +19,8 @@ import { ColumnDef } from '../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
+import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
+import { ActiveCurrencyService } from '../../../shared/services/active-currency.service';
 
 /**
  * Multi-currency admin — Currency catalog on top, exchange rate history
@@ -37,7 +41,7 @@ import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
     DatePipe, DateTimePipe, DecimalPipe, TranslatePipe,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,
     DataTableComponent, ColumnCellDirective,
-    LoadingBlockDirective,
+    LoadingBlockDirective, SelectComponent, ReactiveFormsModule,
   ],
   templateUrl: './currencies.component.html',
   styleUrl: './currencies.component.scss',
@@ -49,6 +53,12 @@ export class CurrenciesComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly activeCurrencies = inject(ActiveCurrencyService);
+
+  /** The accounting copy of this page (`/accounting/exchange-rates`, Controller) maintains rates only. */
+  protected readonly ratesOnly = inject(ActivatedRoute).snapshot.data['ratesOnly'] === true;
+  protected readonly pairFilter = new FormControl<string | null>(null);
+  private readonly selectedPair = toSignal(this.pairFilter.valueChanges, { initialValue: null });
 
   protected readonly currencies = signal<Currency[]>([]);
   protected readonly rates = signal<ExchangeRate[]>([]);
@@ -65,6 +75,17 @@ export class CurrenciesComponent {
     { field: 'sortOrder', header: this.translate.instant('admin.currencies.colSort'), sortable: true, type: 'number', align: 'right', width: '90px' },
   ];
 
+  protected readonly pairOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('admin.currencies.allPairs') },
+    ...[...new Set(this.rates().map(r => `${r.fromCurrencyCode} → ${r.toCurrencyCode}`))]
+      .sort()
+      .map(pair => ({ value: pair, label: pair })),
+  ]);
+  protected readonly visibleRates = computed(() => {
+    const pair = this.selectedPair();
+    return pair ? this.rates().filter(r => `${r.fromCurrencyCode} → ${r.toCurrencyCode}` === pair) : this.rates();
+  });
+
   protected readonly rateColumns: ColumnDef[] = [
     { field: 'effectiveDate', header: this.translate.instant('admin.currencies.colEffective'), sortable: true, type: 'date', width: '120px' },
     { field: 'pair', header: this.translate.instant('admin.currencies.colPair'), sortable: true, width: '140px' },
@@ -80,6 +101,13 @@ export class CurrenciesComponent {
 
   protected loadCurrencies(): void {
     this.loadingCurrencies.set(true);
+    if (this.ratesOnly) {
+      this.activeCurrencies.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(rows => {
+        this.currencies.set(rows.map((c, i) => ({ ...c, decimalPlaces: 2, isActive: true, sortOrder: i })));
+        this.loadingCurrencies.set(false);
+      });
+      return;
+    }
     this.service.listCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (rows) => { this.currencies.set(rows); this.loadingCurrencies.set(false); },
       error: () => this.loadingCurrencies.set(false),

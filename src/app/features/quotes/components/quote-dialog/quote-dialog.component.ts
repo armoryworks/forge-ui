@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,6 +15,7 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
@@ -47,7 +48,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, DatepickerComponent, TextareaComponent,
-    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule, DocumentCurrencyComponent,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',
@@ -55,6 +56,9 @@ interface LineEntry {
 })
 export class QuoteDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  private readonly documentCurrency = viewChild(DocumentCurrencyComponent);
+  protected readonly customerCurrencyId = signal<number | null>(null);
+  protected readonly documentCurrencyCode = computed(() => this.documentCurrency()?.selectedCode() ?? null);
   @ViewChild('customerPicker') private customerPicker?: EntityPickerComponent;
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
@@ -111,6 +115,8 @@ export class QuoteDialogComponent {
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
     customerPO: new FormControl('', [Validators.maxLength(50)]),
     notes: new FormControl(''),
+    currencyId: new FormControl<number | null>(null),
+    fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
   });
 
   private readonly formViolations = FormValidationService.getViolations(this.form, {
@@ -235,6 +241,8 @@ export class QuoteDialogComponent {
   }
 
   protected onCustomerSelected(customer: Record<string, unknown> | null): void {
+    const currencyId = customer?.['currencyId'];
+    this.customerCurrencyId.set(typeof currencyId === 'number' ? currencyId : null);
     this.customerName.set(customer ? String(customer['name'] ?? '') : '');
   }
 
@@ -297,6 +305,8 @@ export class QuoteDialogComponent {
       taxRate: taxRateDecimal,
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
+      currencyId: this.documentCurrency()?.visible() ? (f.currencyId ?? undefined) : undefined,
+      fxRate: this.documentCurrency()?.visible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,
       lines: lineRequests,
     }).subscribe({
       next: () => {

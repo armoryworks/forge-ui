@@ -38,6 +38,8 @@ import {
   CloseChecklistResult,
 } from '../models/accounting.models';
 import { JobCostCloseCandidate, JobProductionCostCloseResult } from '../models/job-cost-close.model';
+import { FxRevaluationResult } from '../models/fx-revaluation-result.model';
+import { FxRevaluationRun } from '../models/fx-revaluation-run.model';
 
 /**
  * Read/operate seam for the dark GL accounting suite (`/api/v1/accounting/*`). Every call is gated server-side
@@ -110,15 +112,17 @@ export class GeneralLedgerService {
   }
 
   // ── Sub-ledger aging + GRNI ──
-  getArAging(bookId: number, asOfDate?: string | null): Observable<ArAging> {
+  getArAging(bookId: number, asOfDate?: string | null, currencyId?: number | null): Observable<ArAging> {
     let params = new HttpParams().set('bookId', bookId);
     if (asOfDate) params = params.set('asOfDate', asOfDate);
+    if (currencyId != null) params = params.set('currencyId', currencyId);
     return this.http.get<ArAging>(`${this.base}/ar-aging`, { params });
   }
 
-  getApAging(bookId: number, asOfDate?: string | null): Observable<ApAging> {
+  getApAging(bookId: number, asOfDate?: string | null, currencyId?: number | null): Observable<ApAging> {
     let params = new HttpParams().set('bookId', bookId);
     if (asOfDate) params = params.set('asOfDate', asOfDate);
+    if (currencyId != null) params = params.set('currencyId', currencyId);
     return this.http.get<ApAging>(`${this.base}/ap-aging`, { params });
   }
 
@@ -263,6 +267,20 @@ export class GeneralLedgerService {
   }
 
   /** Jobs whose GL WIP still carries a balance and whose production cost has not been closed. */
+  /** Revalues every foreign currency with an open position at the rates on file; `preview` posts nothing. */
+  revalueAllFx(bookId: number, asOf: string, preview: boolean): Observable<FxRevaluationResult[]> {
+    return this.http.post<FxRevaluationResult[]>(`${this.base}/fx-revaluation/all`, { bookId, asOf, preview });
+  }
+
+  /** Revalues one currency; a null `newRate` takes the rate on file for `asOf`. */
+  revalueFx(bookId: number, currencyId: number, newRate: number | null, asOf: string, preview = false): Observable<FxRevaluationResult> {
+    return this.http.post<FxRevaluationResult>(`${this.base}/fx-revaluation`, { bookId, currencyId, newRate, asOf, preview });
+  }
+
+  getFxRevaluations(bookId: number): Observable<FxRevaluationRun[]> {
+    return this.http.get<FxRevaluationRun[]>(`${this.base}/fx-revaluations`, { params: new HttpParams().set('bookId', bookId) });
+  }
+
   getJobCostCloseCandidates(): Observable<JobCostCloseCandidate[]> {
     return this.http.get<JobCostCloseCandidate[]>(`${this.base}/jobs/production-cost-close-candidates`);
   }

@@ -22,7 +22,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="pmt-list-content">
-      <app-data-table tableId="payments" [columns]="paymentColumns" [data]="payments()"
+      <app-data-table tableId="payments" [columns]="paymentColumns()" [data]="payments()"
         emptyIcon="payments" [emptyMessage]="'payments.noPaymentsFound' | translate"
         [clickableRows]="true" (rowClick)="openPaymentDetail($any($event))">
         <ng-template appColumnCell="paymentNumber" let-row>
@@ -32,13 +32,13 @@
           <span>{{ getMethodLabel(row.method) }}</span>
         </ng-template>
         <ng-template appColumnCell="amount" let-row>
-          <app-currency-display [value]="row.amount" [currency]="null" />
+          <app-currency-display [value]="row.amount" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="appliedAmount" let-row>
-          <app-currency-display [value]="row.appliedAmount" [currency]="null" />
+          <app-currency-display [value]="row.appliedAmount" [currency]="row.currencyCode ?? null" />
         </ng-template>
         <ng-template appColumnCell="unappliedAmount" let-row>
-          <span [class.text-warning]="row.unappliedAmount > 0"><app-currency-display [value]="row.unappliedAmount" [currency]="null" /></span>
+          <span [class.text-warning]="row.unappliedAmount > 0"><app-currency-display [value]="row.unappliedAmount" [currency]="row.currencyCode ?? null" /></span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
           <span class="text-muted">{{ row.paymentDate | dateOnly }}</span>
@@ -48,6 +48,9 @@
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="totalFunctional" let-row>
+          <app-currency-display [value]="row.totalFunctional ?? row.amount" [currency]="null" />
         </ng-template>
       </app-data-table>
     </div>

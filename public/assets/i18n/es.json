@@ -86,7 +86,8 @@
     "openingJournal": "Asiento de apertura",
     "journalApprovals": "Aprobación de asientos",
     "maintenancePredictions": "Predicciones",
-    "accountingTraining": "Capacitación contable"
+    "accountingTraining": "Capacitación contable",
+    "exchangeRates": "Tipos de cambio"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -4090,7 +4091,8 @@
       "colPair": "Par",
       "colRate": "Tipo",
       "colSource": "Fuente",
-      "colFetched": "Obtenido"
+      "colFetched": "Obtenido",
+      "allPairs": "Todos los pares"
     },
     "tariffs": {
       "title": "Tarifas Arancelarias",
@@ -11307,7 +11309,15 @@
       "currency": "Moneda",
       "fxRate": "Tipo de cambio",
       "fxRatePlaceholder": "1,000000",
-      "settlementFxRate": "Tipo de cambio de liquidación"
+      "settlementFxRate": "Tipo de cambio de liquidación",
+      "fxRateAuto": "Tasa registrada",
+      "rateAsOf": "Tasa al {{date}}",
+      "rateNotOnFile": "No hay tipo de cambio registrado para esta fecha. Ingrese uno o agréguelo en Administración > Monedas.",
+      "lockedHint": "Fija una vez emitidos los documentos",
+      "totalFunctional": "Total ({{code}})",
+      "allCurrencies": "Todas las monedas",
+      "openInDocumentCurrency": "Pendiente (moneda del documento)",
+      "mixedCurrencies": "Monedas mixtas"
     },
     "errors": {
       "trialBalanceLoadFailed": "No se pudo cargar el balance de comprobación.",
@@ -11961,6 +11971,27 @@
     },
     "aging": {
       "current": "Al corriente"
+    },
+    "fxRevaluation": {
+      "title": "Revaluar moneda extranjera",
+      "hint": "Vuelve a medir las cuentas por cobrar, por pagar y el efectivo en moneda extranjera al tipo de cierre del período. El asiento se revierte el primer día del período siguiente.",
+      "preview": "Vista previa",
+      "run": "Contabilizar revaluación",
+      "nothingToRevalue": "No hay saldos abiertos en moneda extranjera en esta fecha.",
+      "openPosition": "Posición abierta",
+      "carryingValue": "Valor en libros",
+      "periodEndRate": "Tipo de cierre",
+      "adjustment": "Ajuste",
+      "totalAdjustment": "Ajuste total",
+      "pastRuns": "Revaluaciones anteriores",
+      "noRuns": "Aún no se han contabilizado revaluaciones.",
+      "entry": "Asiento",
+      "reversed": "Revertido",
+      "confirmTitle": "¿Contabilizar la revaluación?",
+      "confirmMessage": "Se contabiliza un asiento por moneda a los tipos mostrados. Cada uno se revierte automáticamente en el período siguiente.",
+      "posted": "Revaluación contabilizada ({{count}} asientos).",
+      "previewFailed": "No se pudo obtener la vista previa de la revaluación.",
+      "runFailed": "No se pudo contabilizar la revaluación."
     }
   },
   "subcontractUi": {
@@ -14134,7 +14165,17 @@
       "invalidIdentifier": "{{field}} no es un identificador válido.",
       "invalidOption": "{{field}} no es uno de los valores permitidos.",
       "bodyRequired": "La solicitud está vacía.",
-      "invalidValue": "{{field}} tiene un valor no válido."
+      "invalidValue": "{{field}} tiene un valor no válido.",
+      "currencyInactive": "Esa moneda está inactiva. Elija una moneda activa.",
+      "paymentCurrencyMismatch": "Un pago solo puede aplicarse a documentos en su propia moneda.",
+      "billPoCurrencyMismatch": "Una factura de proveedor de una orden de compra debe estar en la moneda de la orden.",
+      "invoiceSoCurrencyMismatch": "Una factura de un pedido de venta debe estar en la moneda del pedido.",
+      "fxRateInvalid": "El tipo de cambio debe ser mayor que cero.",
+      "fxRateSameCurrency": "Elija dos monedas diferentes.",
+      "fxRateMissing": "No hay tipo de cambio de {{from}} a {{to}} en o antes del {{date}}. Agréguelo en Administración > Monedas.",
+      "partyCurrencyLocked": "Este tercero ya tiene documentos emitidos o pagos, por lo que su moneda no puede cambiar.",
+      "documentCurrencyLocked": "La moneda y el tipo de cambio solo pueden cambiar mientras el documento es un borrador.",
+      "baseCurrencyLocked": "La moneda base no puede cambiar una vez que existen asientos, pagos o facturas emitidas."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",

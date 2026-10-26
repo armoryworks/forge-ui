@@ -71,6 +71,12 @@
           <span class="info-label">{{ 'invoices.dueDate' | translate }}</span>
           <span class="info-value">{{ inv.dueDate | dateOnly }}</span>
         </div>
+        @if ((inv.fxRate ?? 1) !== 1) {
+          <div class="info-item" data-testid="invoice-detail-fx-rate">
+            <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
+            <span class="info-value">{{ inv.fxRate | number:'1.2-8' }}</span>
+          </div>
+        }
         @if (inv.creditTerms) {
           <div class="info-item">
             <span class="info-label">{{ 'invoices.creditTerms' | translate }}</span>

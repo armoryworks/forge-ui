@@ -135,6 +135,8 @@ export interface AgingPartyRow {
   vendorId?: number;
   vendorName?: string;
   openBalance: number;
+  currencyCode?: string | null;
+  openTxnBalance?: number | null;
   buckets: AgingBucket[];
 }
 

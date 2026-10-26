@@ -7,4 +7,5 @@ export interface VendorResponse {
    * a selected vendor has since been deactivated.
    */
   isActive: boolean;
+  currencyId?: number | null;
 }

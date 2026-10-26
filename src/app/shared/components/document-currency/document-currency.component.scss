@@ -1,0 +1,37 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: contents;
+}
+
+.document-currency {
+  display: contents;
+}
+
+.document-currency__locked {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+  padding: $sp-sm 0;
+  font-size: $font-size-sm;
+}
+
+.document-currency__label {
+  color: var(--text-secondary);
+}
+
+.document-currency__lock {
+  font-size: $icon-size-sm;
+  color: var(--text-secondary);
+}
+
+.document-currency__hint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  &--warn {
+    color: var(--warning);
+  }
+}
