@@ -65,10 +65,12 @@ export class DocumentCurrencyComponent {
     return this.currencies().find(c => c.id === id)?.code ?? null;
   });
   protected readonly lockedLabel = computed(() => {
-    const id = this.selectedId();
+    const id = this.selectedId() ?? this.defaultCurrencyId() ?? this.baseCurrencyId();
     const c = this.currencies().find(x => x.id === id);
     return c ? `${c.code} — ${c.name}` : '';
   });
+
+  private appliedDefault: number | null = null;
 
   private readonly selectedId = toSignal(
     toObservable(this.currencyControl).pipe(
@@ -90,7 +92,9 @@ export class DocumentCurrencyComponent {
       const fallback = this.defaultCurrencyId() ?? this.baseCurrencyId();
       if (fallback === null || this.locked() || this.readonly()) return;
       untracked(() => {
-        if (!control.dirty && control.value !== fallback) control.setValue(fallback);
+        const followsDefault = control.value === null || control.value === this.appliedDefault;
+        this.appliedDefault = fallback;
+        if (!control.dirty && followsDefault && control.value !== fallback) control.setValue(fallback);
       });
     });
 
