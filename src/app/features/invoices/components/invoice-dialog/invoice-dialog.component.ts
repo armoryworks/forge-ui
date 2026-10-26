@@ -429,16 +429,19 @@ export class InvoiceDialogComponent {
       this.prefilledLines = null;
       return;
     }
-    const entries: LineEntry[] = shipment.lines.map(l => ({
-      partId: l.partId,
-      partNumber: l.partNumber ?? '',
-      description: l.description,
-      quantity: l.quantity,
-      unitPrice: l.unitPrice,
-      taxable: l.lineType === 'Freight' && l.salesOrderLineId == null ? this.freightStartsTaxable() : (l.taxable ?? true),
-      salesOrderLineId: l.salesOrderLineId ?? null,
-      lineType: l.lineType ?? 'Item',
-    }));
+    const entries: LineEntry[] = shipment.lines.map(l => {
+      const shipmentCharge = l.lineType === 'Freight' && l.salesOrderLineId == null;
+      return {
+        partId: l.partId,
+        partNumber: l.partNumber ?? '',
+        description: shipmentCharge ? this.translate.instant('freight.defaultDescription') : l.description,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        taxable: shipmentCharge ? this.freightStartsTaxable() : (l.taxable ?? true),
+        salesOrderLineId: l.salesOrderLineId ?? null,
+        lineType: l.lineType ?? 'Item',
+      };
+    });
     this.prefilledLines = entries;
     this.lines.set(entries);
   }

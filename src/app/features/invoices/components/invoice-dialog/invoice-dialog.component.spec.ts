@@ -510,6 +510,15 @@ describe('InvoiceDialogComponent — freight', () => {
     expect(internals.taxAmount()).toBeCloseTo(723.91, 2);
   });
 
+  it('describes the shipment freight charge in the user\'s language', () => {
+    const { internals } = selectWithJurisdiction(false);
+
+    internals.invoiceForm.controls.shipmentId.setValue(9);
+
+    expect(internals.lines()[1].description).toBe('freight.defaultDescription');
+    expect(internals.lines()[0].description).toBe('Bracket');
+  });
+
   it('adds a freight line below the items with no part, and an item line above it', () => {
     const { internals } = selectWithJurisdiction(false);
     const line = internals.lineForm.controls;
