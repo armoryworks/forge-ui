@@ -32,6 +32,7 @@ interface PanelView {
   openStatusAction(action: 'close' | 'reopen'): void;
   confirmStatusAction(): void;
   activityRefresh: Signal<number>;
+  closeBlockedByReturn: Signal<boolean>;
 }
 
 const makeNcr = (status: NcrStatus, extra: Partial<NonConformance> = {}): NonConformance => ({
@@ -189,5 +190,15 @@ describe('NcrDetailPanelComponent', () => {
   it('reserves close and reopen for Admin and Manager', () => {
     roles = ['Engineer'];
     expect(create(makeNcr('Closed')).canCloseOrReopen).toBe(false);
+  });
+
+  it('keeps a Return To Vendor NCR from closing until its return has shipped', () => {
+    const open = create(makeNcr('Dispositioned', { dispositionCode: 'ReturnToVendor', vendorReturnId: 3, vendorReturnNumber: 'RTV-000003', vendorReturnStatus: 'Open' }));
+    expect(open.closeBlockedByReturn()).toBe(true);
+
+    const shipped = create(makeNcr('Dispositioned', { dispositionCode: 'ReturnToVendor', vendorReturnId: 3, vendorReturnNumber: 'RTV-000003', vendorReturnStatus: 'Shipped' }));
+    expect(shipped.closeBlockedByReturn()).toBe(false);
+
+    expect(create(makeNcr('Dispositioned')).closeBlockedByReturn()).toBe(false);
   });
 });

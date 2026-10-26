@@ -1,0 +1,52 @@
+<div class="run-dialog" [appLoadingBlock]="loading()">
+  <div class="run-dialog__header">
+    @if (run(); as r) {
+      <div>
+        <div class="run-dialog__title" data-testid="payment-run-number">{{ r.runNumber }}</div>
+        <div class="run-dialog__meta">{{ r.paymentDate | dateOnly }} · {{ ('payables.method' + r.method) | translate }}</div>
+      </div>
+      <span [class]="statusClass(r.status)" data-testid="payment-run-status">{{ ('paymentRuns.status.' + r.status) | translate }}</span>
+    }
+    <button class="icon-btn" type="button" data-testid="payment-run-close-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above"
+      [attr.aria-label]="'common.close' | translate" (click)="close()">
+      <span class="material-icons-outlined" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  @if (run(); as r) {
+    @if (r.lastError) {
+      <div class="run-dialog__error" role="alert" data-testid="payment-run-error">{{ r.lastError }}</div>
+    }
+    <ul class="run-rows" [attr.aria-label]="'paymentRuns.items' | translate">
+      @for (item of r.items; track item.id) {
+        <li class="run-rows__row">
+          <span class="run-rows__main">
+            <span class="doc-number">{{ item.billNumber }}</span>
+            <span>{{ item.vendorName }}</span>
+            @if (item.paymentNumber) {
+              <span class="run-rows__meta">{{ 'paymentRuns.paidBy' | translate: { number: item.paymentNumber } }}</span>
+            }
+            @if (item.errorMessage) {
+              <span class="run-rows__error">{{ item.errorMessage }}</span>
+            }
+          </span>
+          <span class="run-rows__amount">
+            <app-currency-display [value]="item.cashAmount" [currency]="item.currencyCode" />
+            @if (item.creditAmount > 0) {
+              <span class="run-rows__meta">{{ 'paymentRuns.lessCredit' | translate }} <app-currency-display [value]="item.creditAmount" [currency]="item.currencyCode" /></span>
+            }
+          </span>
+          <span [class]="statusClass(item.status)">{{ ('paymentRuns.itemStatus.' + item.status) | translate }}</span>
+        </li>
+      }
+    </ul>
+    @if (canManage && (r.status === 'Interrupted' || r.status === 'Pending')) {
+      <div class="run-dialog__actions">
+        <button class="action-btn action-btn--primary" type="button" data-testid="payment-run-resume-btn" [disabled]="busy()" (click)="resume()">
+          <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+          {{ 'paymentRuns.resume' | translate }}
+        </button>
+      </div>
+    }
+  }
+</div>

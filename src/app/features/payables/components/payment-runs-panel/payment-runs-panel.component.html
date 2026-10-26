@@ -1,0 +1,46 @@
+<div class="payment-runs" [appLoadingBlock]="loading()">
+  <app-data-table tableId="payables-payment-runs" [columns]="columns" [data]="runs()"
+    emptyIcon="playlist_play" [emptyMessage]="'paymentRuns.noneFound' | translate" [emptyHelpText]="'paymentRuns.noneHelp' | translate"
+    [clickableRows]="true" (rowClick)="openDetail($any($event))">
+    <ng-template appColumnCell="runNumber" let-row>
+      <span class="doc-number">{{ row.runNumber }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="statusClass(row.status)" [attr.data-testid]="'payment-run-status-' + row.id">{{ ('paymentRuns.status.' + row.status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="paymentDate" let-row>
+      <span class="text-muted">{{ row.paymentDate | dateOnly }}</span>
+    </ng-template>
+    <ng-template appColumnCell="method" let-row>
+      <span>{{ ('payables.method' + row.method) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="progress" let-row>
+      <span>{{ 'paymentRuns.progressValue' | translate: { paid: row.paidCount, total: row.itemCount } }}</span>
+      @if (row.failedCount > 0) {
+        <span class="chip chip--error">{{ 'paymentRuns.failedCount' | translate: { count: row.failedCount } }}</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="cashTotal" let-row>
+      <app-currency-display [value]="row.cashTotal" [currency]="null" />
+    </ng-template>
+    <ng-template appColumnCell="creditTotal" let-row>
+      <app-currency-display [value]="row.creditTotal" [currency]="null" />
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if (canManage && (row.status === 'Interrupted' || row.status === 'Pending')) {
+        <div class="action-cell">
+          <button class="icon-btn icon-btn--success" type="button" [attr.data-testid]="'payment-run-resume-' + row.id"
+            [matTooltip]="'paymentRuns.resume' | translate" matTooltipPosition="above" [attr.aria-label]="'paymentRuns.resume' | translate"
+            [disabled]="busy()" (click)="resume(row); $event.stopPropagation()">
+            <span class="material-icons-outlined" aria-hidden="true">play_arrow</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" type="button" [attr.data-testid]="'payment-run-cancel-' + row.id"
+            [matTooltip]="'paymentRuns.cancelRun' | translate" matTooltipPosition="above" [attr.aria-label]="'paymentRuns.cancelRun' | translate"
+            (click)="cancel(row); $event.stopPropagation()">
+            <span class="material-icons-outlined" aria-hidden="true">block</span>
+          </button>
+        </div>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

@@ -68,6 +68,26 @@
         {{ 'payables.tabPayments' | translate }}
       </button>
     }
+    @if (canSeeRuns()) {
+      <button class="tab" [appTab]="activeTab() === 'runs'" (click)="switchTab('runs')" data-testid="payables-tab-runs">
+        <span class="material-icons-outlined">playlist_play</span>
+        {{ 'payables.tabRuns' | translate }}
+      </button>
+    }
+    <button class="tab" [appTab]="activeTab() === 'credits'" (click)="switchTab('credits')" data-testid="payables-tab-credits">
+      <span class="material-icons-outlined">request_quote</span>
+      {{ 'payables.tabCredits' | translate }}
+    </button>
+    @if (canSeeReturns()) {
+      <button class="tab" [appTab]="activeTab() === 'returns'" (click)="switchTab('returns')" data-testid="payables-tab-returns">
+        <span class="material-icons-outlined">assignment_return</span>
+        {{ 'payables.tabReturns' | translate }}
+      </button>
+    }
+    <button class="tab" [appTab]="activeTab() === 'statement'" (click)="switchTab('statement')" data-testid="payables-tab-statement">
+      <span class="material-icons-outlined">summarize</span>
+      {{ 'payables.tabStatement' | translate }}
+    </button>
     @if (nachaEnabled()) {
       <button class="tab" [appTab]="activeTab() === 'batches'" (click)="switchTab('batches')">
         <span class="material-icons-outlined">account_balance</span>
@@ -136,6 +156,30 @@
   @if (activeTab() === 'pay-bills') {
     <div class="tab-content">
       <app-pay-bills-panel [vendorOptions]="vendorOptions()" (paid)="onBillsPaid()" />
+    </div>
+  }
+
+  @if (activeTab() === 'runs') {
+    <div class="tab-content">
+      <app-payment-runs-panel />
+    </div>
+  }
+
+  @if (activeTab() === 'credits') {
+    <div class="tab-content">
+      <app-vendor-credits-panel [vendorOptions]="vendorOptions()" />
+    </div>
+  }
+
+  @if (activeTab() === 'returns') {
+    <div class="tab-content">
+      <app-vendor-returns-panel [vendorOptions]="vendorOptions()" />
+    </div>
+  }
+
+  @if (activeTab() === 'statement') {
+    <div class="tab-content">
+      <app-vendor-statement-panel [vendorOptions]="vendorOptions()" />
     </div>
   }
 

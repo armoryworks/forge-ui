@@ -1,0 +1,41 @@
+<div class="vendor-statement">
+  <div class="vendor-statement__bar">
+    <app-select [label]="'payables.vendor' | translate" [formControl]="vendorControl" [options]="vendorOptions()" data-testid="vendor-statement-vendor" />
+    @if (statement(); as s) {
+      <div class="vendor-statement__totals" data-testid="vendor-statement-totals">
+        @for (total of s.totals; track total.currencyId) {
+          <span>{{ 'vendorStatement.balance' | translate }} <app-currency-display [value]="total.openBalance" [currency]="total.currencyCode" /></span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="vendor-statement__table" [appLoadingBlock]="loading()">
+    <app-data-table tableId="payables-vendor-statement" [columns]="columns" [data]="statement()?.lines ?? []"
+      emptyIcon="summarize" [emptyMessage]="(vendorControl.value ? 'vendorStatement.noOpenItems' : 'vendorStatement.pickVendor') | translate">
+      <ng-template appColumnCell="documentType" let-row>
+        <span>{{ ('vendorStatement.type.' + row.documentType) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="documentNumber" let-row>
+        <span class="doc-number">{{ row.documentNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="vendorReference" let-row>
+        <span class="doc-number">{{ row.vendorReference || '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="documentDate" let-row>
+        <span class="text-muted">{{ row.documentDate | dateOnly }}</span>
+      </ng-template>
+      <ng-template appColumnCell="dueDate" let-row>
+        <span class="text-muted">{{ row.dueDate ? (row.dueDate | dateOnly) : '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="originalAmount" let-row>
+        <app-currency-display [value]="row.originalAmount" [currency]="row.currencyCode ?? null" />
+      </ng-template>
+      <ng-template appColumnCell="openAmount" let-row>
+        <span [class.text-success]="row.openAmount < 0">
+          <app-currency-display [value]="row.openAmount" [currency]="row.currencyCode ?? null" />
+        </span>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

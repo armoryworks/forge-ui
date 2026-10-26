@@ -1,0 +1,12 @@
+@use 'styles/variables' as *;
+
+.vendor-returns {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  height: 100%;
+
+  &__bar { display: flex; align-items: flex-end; justify-content: space-between; gap: $sp-md; flex-wrap: wrap; }
+  &__filters { display: flex; gap: $sp-md; flex-wrap: wrap; }
+  &__table { flex: 1; min-height: 0; }
+}

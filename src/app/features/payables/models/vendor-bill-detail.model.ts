@@ -35,4 +35,6 @@ export interface VendorBillDetail {
   discountDeadline?: string | null;
   discountsTaken?: number;
   discountAvailable?: number;
+  /** Vendor credit memo amounts applied to the bill. */
+  creditsApplied?: number;
 }

@@ -25,6 +25,9 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/vendor-bills')).toBe('CAP-P2P-BILL');
       expect(resolveCapabilityForUrl('/api/v1/vendor-bills/3/approve')).toBe('CAP-P2P-BILL');
       expect(resolveCapabilityForUrl('/api/v1/vendor-payments')).toBe('CAP-P2P-PAY');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-credit-memos/4/issue')).toBe('CAP-P2P-BILL');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-returns/2/ship')).toBe('CAP-P2P-PO');
+      expect(resolveCapabilityForUrl('/api/v1/payment-runs/3/resume')).toBe('CAP-P2P-PAY');
       expect(resolveCapabilityForUrl('/api/v1/payment-transmissions')).toBe('CAP-P2P-PAY');
       expect(resolveCapabilityForUrl('/api/v1/payment-transmissions/7/retry')).toBe('CAP-P2P-PAY');
       // PO endpoints themselves keep the baseline purchasing capability.

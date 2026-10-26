@@ -1,0 +1,221 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (memo(); as m) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon" aria-hidden="true">request_quote</span>
+        <div>
+          <div class="detail-name" data-testid="vendor-memo-number">{{ m.memoNumber }}</div>
+          <div class="detail-customer"><app-entity-link type="vendor" [entityId]="m.vendorId">{{ m.vendorName }}</app-entity-link></div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" type="button" data-testid="vendor-memo-close-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'common.close' | translate" (click)="closed.emit()">
+          <span class="material-icons-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value"><span [class]="statusClass(m.status)" data-testid="vendor-memo-status">{{ ('vendorCredits.status.' + m.status) | translate }}</span></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'vendorCredits.kindLabel' | translate }}</span>
+          <span class="info-value">{{ ('vendorCredits.kind.' + m.kind) | translate }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'vendorCredits.memoDate' | translate }}</span>
+          <span class="info-value">{{ m.memoDate | dateOnly }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'vendorCredits.sourceLabel' | translate }}</span>
+          <span class="info-value">{{ ('vendorCredits.source.' + m.sourceType) | translate }}</span>
+        </div>
+        @if (m.vendorReference) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorCredits.vendorReference' | translate }}</span>
+            <span class="info-value">{{ m.vendorReference }}</span>
+          </div>
+        }
+        @if (m.vendorBillId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorCredits.bill' | translate }}</span>
+            <span class="info-value"><app-entity-link type="vendor-bill" [entityId]="m.vendorBillId">{{ m.vendorBillNumber }}</app-entity-link></span>
+          </div>
+        }
+        @if (m.vendorReturnNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorCredits.vendorReturn' | translate }}</span>
+            <span class="info-value">{{ m.vendorReturnNumber }}</span>
+          </div>
+        }
+        @if (m.fxRate !== 1) {
+          <div class="info-item">
+            <span class="info-label">{{ 'accounting.currency.fxRate' | translate }}</span>
+            <span class="info-value">{{ m.fxRate | number:'1.2-8' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="info-section">
+        <span class="info-label">{{ 'vendorCredits.reasonLabel' | translate }}</span>
+        <div class="info-notes">{{ m.reason }}</div>
+      </div>
+      @if (m.voidReason) {
+        <div class="info-section">
+          <span class="info-label">{{ 'vendorCredits.voidReason' | translate }}</span>
+          <div class="info-notes">{{ m.voidReason }}</div>
+        </div>
+      }
+
+      <div class="cm-section">
+        <span class="info-label">{{ 'vendorCredits.lines' | translate }} ({{ m.lines.length }})</span>
+        <ul class="cm-rows" [attr.aria-label]="'vendorCredits.lines' | translate">
+          @for (line of m.lines; track line.id) {
+            <li class="cm-rows__row">
+              <span class="cm-rows__main">
+                {{ line.description }}
+                @if (line.partNumber) {
+                  <span class="cm-rows__meta">{{ line.partNumber }}</span>
+                }
+              </span>
+              <span class="cm-rows__qty">{{ line.quantity | number:'1.0-4' }} × <app-currency-display [value]="line.unitPrice" [currency]="m.currencyCode" [maximumFractionDigits]="4" /></span>
+              <span class="cm-rows__amount"><app-currency-display [value]="line.lineTotal" [currency]="m.currencyCode" /></span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="totals-label">{{ 'vendorCredits.subtotal' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.subtotal" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'vendorCredits.taxAmount' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.taxAmount" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row totals-row--total">
+          <span class="totals-label">{{ 'vendorCredits.totalCredit' | translate }}</span>
+          <span class="totals-value" data-testid="vendor-memo-total"><app-currency-display [value]="m.total" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'vendorCredits.applied' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="m.amountApplied" [currency]="m.currencyCode" /></span>
+        </div>
+        <div class="totals-row totals-row--balance">
+          <span class="totals-label">{{ 'vendorCredits.open' | translate }}</span>
+          <span class="totals-value" data-testid="vendor-memo-open"><app-currency-display [value]="m.openAmount" [currency]="m.currencyCode" /></span>
+        </div>
+      </div>
+
+      @if (m.applications.length > 0) {
+        <div class="cm-section">
+          <span class="info-label">{{ 'vendorCredits.applications' | translate }}</span>
+          <ul class="cm-rows" [attr.aria-label]="'vendorCredits.applications' | translate">
+            @for (app of m.applications; track app.id) {
+              <li class="cm-rows__row" [class.cm-rows__row--reversed]="!!app.reversedAt">
+                <span class="cm-rows__main">
+                  <app-entity-link type="vendor-bill" [entityId]="app.vendorBillId">{{ app.billNumber }}</app-entity-link>
+                  <span class="cm-rows__meta">{{ app.appliedAt | dateOnly }}</span>
+                  @if (app.vendorPaymentId) {
+                    <span class="chip chip--info">{{ 'vendorCredits.deductedFromPayment' | translate }}</span>
+                  }
+                  @if (app.reversedAt) {
+                    <span class="chip chip--muted">{{ 'vendorCredits.unappliedChip' | translate }}</span>
+                  }
+                </span>
+                <span class="cm-rows__amount"><app-currency-display [value]="app.amount" [currency]="m.currencyCode" /></span>
+                @if (!app.reversedAt && canUnapply()) {
+                  <button class="icon-btn icon-btn--danger" type="button" [attr.data-testid]="'vendor-memo-unapply-' + app.id"
+                    [matTooltip]="'vendorCredits.unapply' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'vendorCredits.unapply' | translate" [disabled]="busy()" (click)="unapply(app.id, app.billNumber)">
+                    <span class="material-icons-outlined" aria-hidden="true">link_off</span>
+                  </button>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      @if (m.issueJournalEntryId && isController()) {
+        <div class="info-section" data-testid="vendor-memo-journal">
+          <span class="info-label">{{ 'vendorCredits.journal' | translate }}</span>
+          <a class="cm-journal-link" routerLink="/accounting/ledger">{{ 'vendorCredits.journalEntry' | translate: { id: m.issueJournalEntryId } }}</a>
+        </div>
+      }
+
+      <div class="detail-actions">
+        @if (canEdit()) {
+          <button class="action-btn action-btn--danger" type="button" data-testid="vendor-memo-delete-btn" [disabled]="busy()" (click)="deleteDraft()">
+            <span class="material-icons-outlined" aria-hidden="true">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+        @if (canVoid()) {
+          <button class="action-btn action-btn--danger" type="button" data-testid="vendor-memo-void-btn" [disabled]="busy()" (click)="openVoid()">
+            <span class="material-icons-outlined" aria-hidden="true">block</span>
+            {{ 'vendorCredits.void' | translate }}
+          </button>
+        }
+        <button class="action-btn" type="button" data-testid="vendor-memo-pdf-btn" [disabled]="downloadingPdf()" (click)="downloadPdf()">
+          <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
+          {{ 'vendorCredits.downloadPdf' | translate }}
+        </button>
+        @if (canEdit()) {
+          <button class="action-btn" type="button" data-testid="vendor-memo-edit-btn" [disabled]="busy()" (click)="showEdit.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">edit</span>
+            {{ 'common.edit' | translate }}
+          </button>
+        }
+        @if (canApply()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="vendor-memo-apply-btn" [disabled]="busy()" (click)="showApply.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">playlist_add_check</span>
+            {{ 'vendorCredits.apply' | translate }}
+          </button>
+        }
+        @if (canEdit()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="vendor-memo-issue-btn" [disabled]="busy()" (click)="issue()">
+            <span class="material-icons-outlined" aria-hidden="true">send</span>
+            {{ 'vendorCredits.issue' | translate }}
+          </button>
+        }
+      </div>
+
+      <app-entity-activity-section entityType="VendorCreditMemo" [entityId]="m.id" [refreshKey]="m" />
+    </div>
+
+    @if (showApply()) {
+      <app-apply-vendor-credit-dialog [memo]="m" (closed)="showApply.set(false)" (applied)="onApplied($event)" />
+    }
+
+    @if (showEdit()) {
+      <app-vendor-credit-memo-dialog [memo]="m" (closed)="showEdit.set(false)" (saved)="onEdited()" />
+    }
+
+    @if (showVoid()) {
+      <app-dialog [title]="'vendorCredits.voidTitle' | translate" width="480px" (closed)="showVoid.set(false)">
+        <div [formGroup]="voidForm">
+          <p class="cm-void-message">{{ 'vendorCredits.voidMessage' | translate: { number: m.memoNumber } }}</p>
+          <app-textarea [label]="'vendorCredits.voidReason' | translate" formControlName="reason" [required]="true" data-testid="vendor-memo-void-reason" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" type="button" data-testid="vendor-memo-void-cancel-btn" (click)="showVoid.set(false)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="voidViolations" [loading]="busy()">
+            <button class="action-btn action-btn--destructive" type="button" data-testid="vendor-memo-void-confirm-btn"
+              [disabled]="voidForm.invalid || busy()" (click)="confirmVoid()">
+              <span class="material-icons-outlined" aria-hidden="true">block</span>
+              {{ 'vendorCredits.void' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
+  }
+</div>

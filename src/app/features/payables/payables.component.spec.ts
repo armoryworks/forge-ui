@@ -158,3 +158,60 @@ describe('PayablesComponent · detail deep link', () => {
     expect(detailDialog.open).not.toHaveBeenCalled();
   });
 });
+
+describe('PayablesComponent · vendor credit, return and run tabs', () => {
+  interface TabInternals {
+    activeTab(): string;
+    canSeeRuns(): boolean;
+    canSeeReturns(): boolean;
+  }
+
+  function setup(roles: string[], tab: string, enabled: (code: string) => boolean = () => true): TabInternals {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ tab })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: VendorBillService, useValue: { getVendorBills: vi.fn(() => of([])) } },
+        { provide: VendorPaymentService, useValue: { getVendorPayments: vi.fn(() => of([])) } },
+        { provide: PaymentTransmissionService, useValue: { getPaymentTransmissions: vi.fn(() => of([])) } },
+        { provide: BankingService, useValue: { getBatches: vi.fn(() => of([])), getBankAccounts: vi.fn(() => of([])) } },
+        { provide: VendorService, useValue: { getVendorDropdown: () => of([]) } },
+        { provide: DetailDialogService, useValue: { getDetailFromUrl: () => null, open: vi.fn() } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabled(code), capabilities: () => [] } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: AccountingHubService, useValue: { subscribe: () => () => undefined } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new PayablesComponent()) as unknown as TabInternals;
+    TestBed.flushEffects();
+    return component;
+  }
+
+  it('lets Procurement open vendor returns and credits but not payment runs', () => {
+    const payables = setup(['Procurement'], 'returns');
+
+    expect(payables.canSeeReturns()).toBe(true);
+    expect(payables.canSeeRuns()).toBe(false);
+    expect(payables.activeTab()).toBe('returns');
+    expect(setup(['Procurement'], 'credits').activeTab()).toBe('credits');
+    expect(setup(['Procurement'], 'runs').activeTab()).toBe('bills');
+  });
+
+  it('lets the Controller review payment runs but not returns to vendor', () => {
+    const payables = setup(['Controller'], 'runs');
+
+    expect(payables.canSeeRuns()).toBe(true);
+    expect(payables.canSeeReturns()).toBe(false);
+    expect(payables.activeTab()).toBe('runs');
+  });
+
+  it('hides vendor returns while NCRs or purchase orders are off, and payment runs while vendor payments are off', () => {
+    expect(setup(['OfficeManager'], 'returns', code => code !== 'CAP-QC-NCR').canSeeReturns()).toBe(false);
+    expect(setup(['OfficeManager'], 'returns', code => code !== 'CAP-P2P-PO').activeTab()).toBe('bills');
+    expect(setup(['OfficeManager'], 'runs', code => code !== 'CAP-P2P-PAY').canSeeRuns()).toBe(false);
+  });
+});

@@ -63,6 +63,9 @@ export class NcrDetailPanelComponent {
     const n = this.ncr();
     return !!n && DISPOSITIONABLE.includes(n.status);
   });
+  /** A Return To Vendor disposition keeps the NCR open until its return has shipped. */
+  protected readonly closeBlockedByReturn = computed(() => this.ncr()?.vendorReturnStatus === 'Open');
+
   protected readonly costsEditable = computed(() => {
     const n = this.ncr();
     return !!n && n.status !== 'Closed';
