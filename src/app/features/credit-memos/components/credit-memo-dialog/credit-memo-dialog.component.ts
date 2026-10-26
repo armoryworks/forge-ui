@@ -114,7 +114,7 @@ export class CreditMemoDialogComponent implements OnInit {
 
   protected readonly invoiceLineOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('creditMemos.freeLine') },
-    ...(this.invoice()?.lines ?? []).map(l => ({
+    ...(this.invoice()?.lines ?? []).filter(l => l.lineType !== 'Deposit').map(l => ({
       value: l.id,
       label: this.translate.instant('creditMemos.invoiceLineOption', { line: l.lineNumber, description: l.description, quantity: l.quantity }),
     })),

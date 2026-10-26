@@ -122,6 +122,8 @@
                     {{ line.description }}
                     @if (line.lineType === 'Freight') {
                       <span class="chip chip--primary">{{ 'freight.lineTypeFreight' | translate }}</span>
+                    } @else if (line.lineType === 'Deposit') {
+                      <span class="chip chip--primary" data-testid="invoice-line-deposit">{{ 'invoices.depositLine' | translate }}</span>
                     }
                   </td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>

@@ -6244,7 +6244,8 @@
       "sent": "Factura enviada por correo a {{email}}."
     },
     "taxExemptNote": "Exento de impuestos (certificado {{id}}). No se factura impuesto sobre las ventas.",
-    "dueDateTermsMismatch": "La fecha de vencimiento debe ser {{date}} para las condiciones {{terms}}. Cambie la fecha de vencimiento o las condiciones de crédito."
+    "dueDateTermsMismatch": "La fecha de vencimiento debe ser {{date}} para las condiciones {{terms}}. Cambie la fecha de vencimiento o las condiciones de crédito.",
+    "depositLine": "Anticipo"
   },
   "payments": {
     "paymentNumberLabel": "Número de pago",
@@ -14401,7 +14402,10 @@
       "returnQuantityExceeds": "Eso es más de lo que se devolvió.",
       "returnAlreadyDisposed": "Esta devolución ya tiene una disposición.",
       "returnNoPart": "Esta devolución no tiene pieza que reponer en existencias. Elija desechar, reprocesar o sin devolución.",
-      "returnCreditAmountRequired": "Esta devolución no está vinculada a una línea de factura; indique el importe del crédito."
+      "returnCreditAmountRequired": "Esta devolución no está vinculada a una línea de factura; indique el importe del crédito.",
+      "creditedDepositLine": "No se puede acreditar una línea de anticipo. Acredite la factura de anticipo.",
+      "depositLineManual": "Las líneas de anticipo se agregan a partir de las facturas de anticipo de la orden de venta.",
+      "depositInvoiceInUse": "No se puede anular esta factura de anticipo: otras facturas posteriores de la orden ya usaron su anticipo. Anule primero esas facturas."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",

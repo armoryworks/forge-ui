@@ -31,6 +31,8 @@ describe('serverErrorKey', () => {
     expect(serverErrorKey('invoice-has-credits')).toBe('apiErrors.codes.invoiceHasCredits');
     expect(serverErrorKey('credit-memo-write-off-reserved')).toBe('apiErrors.codes.creditMemoWriteOffReserved');
     expect(serverErrorKey('return-lot-required')).toBe('apiErrors.codes.returnLotRequired');
+    expect(serverErrorKey('credited-deposit-line')).toBe('apiErrors.codes.creditedDepositLine');
+    expect(serverErrorKey('deposit-invoice-in-use')).toBe('apiErrors.codes.depositInvoiceInUse');
   });
 
   it('leaves predicate rules and missing codes unmapped', () => {
