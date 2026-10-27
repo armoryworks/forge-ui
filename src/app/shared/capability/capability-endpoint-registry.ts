@@ -172,6 +172,9 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'vendor-bills/payment-suggestions', capability: 'CAP-P2P-PAY' },
   { prefix: 'vendor-bills', capability: 'CAP-P2P-BILL' },
   { prefix: 'vendor-payments', capability: 'CAP-P2P-PAY' },
+  { prefix: 'vendor-credit-memos', capability: 'CAP-P2P-BILL' },
+  { prefix: 'vendor-returns', capability: 'CAP-P2P-PO' },
+  { prefix: 'payment-runs', capability: 'CAP-P2P-PAY' },
   { prefix: 'vendors', capability: 'CAP-MD-VENDORS' },
   { prefix: 'work-centers', capability: 'CAP-MD-WORKCENTERS' },
 ];

@@ -1,0 +1,34 @@
+<div class="vendor-returns" [formGroup]="filters">
+  <div class="vendor-returns__filters">
+    <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" data-testid="vendor-returns-vendor" />
+    <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions" data-testid="vendor-returns-status" />
+  </div>
+
+  <div class="vendor-returns__table" [appLoadingBlock]="loading()">
+    <app-data-table tableId="payables-vendor-returns" [columns]="columns" [data]="returns()"
+      emptyIcon="assignment_return" [emptyMessage]="'vendorReturns.noneFound' | translate" [emptyHelpText]="'vendorReturns.noneHelp' | translate"
+      [clickableRows]="true" (rowClick)="openDetail($any($event).id)">
+      <ng-template appColumnCell="returnNumber" let-row>
+        <span class="doc-number">{{ row.returnNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="ncrNumber" let-row>
+        <span class="doc-number">{{ row.ncrNumber || '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="purchaseOrderNumber" let-row>
+        <span class="doc-number">{{ row.purchaseOrderNumber || '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="statusClass(row.status)">{{ ('vendorReturns.status.' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="expectedCredit" let-row>
+        <app-currency-display [value]="row.expectedCredit" [currency]="row.currencyCode ?? null" />
+      </ng-template>
+      <ng-template appColumnCell="shipDate" let-row>
+        <span class="text-muted">{{ row.shipDate ? (row.shipDate | dateOnly) : '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="vendorCreditMemoNumber" let-row>
+        <span class="doc-number">{{ row.vendorCreditMemoNumber || '—' }}</span>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

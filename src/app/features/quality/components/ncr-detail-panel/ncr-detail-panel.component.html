@@ -125,6 +125,18 @@
           </span>
         }
       }
+      @if (n.vendorReturnNumber) {
+        <div class="detail-item" data-testid="ncr-detail-vendor-return">
+          <span class="detail-label">{{ 'ncrDetail.vendorReturn' | translate }}</span>
+          <span class="detail-value">
+            {{ n.vendorReturnNumber }}
+            <span class="chip chip--info" data-testid="ncr-detail-vendor-return-status">{{ ('vendorReturns.status.' + n.vendorReturnStatus) | translate }}</span>
+          </span>
+          @if (closeBlockedByReturn()) {
+            <span class="detail-sub">{{ 'ncrDetail.closeAfterReturnShips' | translate }}</span>
+          }
+        </div>
+      }
       <div class="ncr-detail__actions">
         @if (canDisposition()) {
           <button class="action-btn action-btn--primary" data-testid="ncr-detail-disposition-btn" (click)="requestDisposition()">
@@ -133,7 +145,7 @@
           </button>
         }
         @if (canCloseOrReopen && n.status === 'Dispositioned') {
-          <button class="action-btn" data-testid="ncr-detail-close-btn" (click)="openStatusAction('close')">
+          <button class="action-btn" data-testid="ncr-detail-close-btn" [disabled]="closeBlockedByReturn()" (click)="openStatusAction('close')">
             <span class="material-icons-outlined">lock</span>
             {{ 'ncrDetail.close' | translate }}
           </button>

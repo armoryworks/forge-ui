@@ -1,0 +1,48 @@
+<div class="vendor-credits" [formGroup]="filters">
+  <div class="vendor-credits__bar">
+    <div class="vendor-credits__filters">
+      <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" data-testid="vendor-credits-vendor" />
+      <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions" data-testid="vendor-credits-status" />
+    </div>
+    @if (canManage) {
+      <button class="action-btn action-btn--create" type="button" data-testid="new-vendor-credit-btn" (click)="showCreate.set(true)">
+        <span class="material-icons-outlined" aria-hidden="true">add</span>
+        {{ 'vendorCredits.newMemo' | translate }}
+      </button>
+    }
+  </div>
+
+  <div class="vendor-credits__table" [appLoadingBlock]="loading()">
+    <app-data-table tableId="payables-vendor-credits" [columns]="columns" [data]="memos()"
+      emptyIcon="request_quote" [emptyMessage]="'vendorCredits.noneFound' | translate" [emptyHelpText]="'vendorCredits.noneHelp' | translate"
+      [clickableRows]="true" (rowClick)="openDetail($any($event).id)">
+      <ng-template appColumnCell="memoNumber" let-row>
+        <span class="doc-number">{{ row.memoNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="kind" let-row>
+        <span>{{ ('vendorCredits.kind.' + row.kind) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="vendorBillNumber" let-row>
+        <span class="doc-number">{{ row.vendorBillNumber || row.vendorReturnNumber || '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="statusClass(row.status)">{{ ('vendorCredits.status.' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="memoDate" let-row>
+        <span class="text-muted">{{ row.memoDate | dateOnly }}</span>
+      </ng-template>
+      <ng-template appColumnCell="total" let-row>
+        <app-currency-display [value]="row.total" [currency]="row.currencyCode ?? null" />
+      </ng-template>
+      <ng-template appColumnCell="openAmount" let-row>
+        <span [class.text-warning]="row.openAmount > 0">
+          <app-currency-display [value]="row.openAmount" [currency]="row.currencyCode ?? null" />
+        </span>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+@if (showCreate()) {
+  <app-vendor-credit-memo-dialog (closed)="showCreate.set(false)" (saved)="onCreated($event)" />
+}

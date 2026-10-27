@@ -4,7 +4,18 @@
     <app-datepicker [label]="'paymentTerms.dueThrough' | translate" formControlName="dueThrough" data-testid="pay-bills-due-through" />
     <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" data-testid="pay-bills-vendor" />
     <app-select [label]="'payables.method' | translate" formControlName="method" [options]="methodOptions" [required]="true" data-testid="pay-bills-method" />
+    <app-toggle [label]="'paymentRuns.deductCredits' | translate" formControlName="applyVendorCredits" data-testid="pay-bills-deduct-credits" />
   </div>
+
+  @if (interruptedRun(); as run) {
+    <div class="pay-bills__interrupted" role="alert" data-testid="pay-bills-interrupted">
+      <span class="material-icons-outlined" aria-hidden="true">error</span>
+      <span>{{ 'paymentRuns.interruptedBanner' | translate: { number: run.runNumber, error: run.lastError ?? '' } }}</span>
+      <button class="action-btn action-btn--sm" type="button" data-testid="pay-bills-resume" [disabled]="paying()" (click)="resume()">
+        {{ 'paymentRuns.resume' | translate }}
+      </button>
+    </div>
+  }
 
   <div class="pay-bills__table" [appLoadingBlock]="loading()">
     <app-data-table tableId="payables-pay-bills" [columns]="columns" [data]="suggestions()" [selectable]="true" trackByField="vendorBillId"
@@ -37,6 +48,13 @@
       <ng-template appColumnCell="suggestedPayAmount" let-row>
         <app-currency-display [value]="row.suggestedPayAmount" [currency]="row.currencyCode ?? null" />
       </ng-template>
+      <ng-template appColumnCell="vendorOpenCredit" let-row>
+        @if ((row.vendorOpenCredit ?? 0) > 0) {
+          <app-currency-display [value]="row.vendorOpenCredit" [currency]="row.currencyCode ?? null" />
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
     </app-data-table>
   </div>
 
@@ -45,6 +63,9 @@
       <span>{{ 'paymentTerms.selectedCount' | translate: { count: selected().length } }}</span>
       <span>{{ 'paymentTerms.cashTotal' | translate }} <app-currency-display [value]="cashTotal()" [currency]="totalsCurrency()" /></span>
       <span class="pay-bills__saving">{{ 'paymentTerms.savingsTotal' | translate }} <app-currency-display [value]="savingsTotal()" [currency]="totalsCurrency()" /></span>
+      @if (filters.controls.applyVendorCredits.value && creditTotal() > 0) {
+        <span data-testid="pay-bills-credit-total">{{ 'paymentRuns.lessCredit' | translate }} <app-currency-display [value]="creditTotal()" [currency]="totalsCurrency()" /></span>
+      }
     </div>
     <button class="action-btn action-btn--primary" data-testid="pay-bills-create"
       [disabled]="selected().length === 0 || filters.invalid || paying()" (click)="pay()">

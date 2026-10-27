@@ -43,14 +43,18 @@ import { VendorBillDetailDialogComponent, VendorBillDetailDialogData } from './c
 import { PaymentBatchCreateDialogComponent } from './components/payment-batch-create-dialog/payment-batch-create-dialog.component';
 import { VendorBankAccountDialogComponent } from './components/vendor-bank-account-dialog/vendor-bank-account-dialog.component';
 import { VendorPaymentDetailDialogComponent, VendorPaymentDetailDialogData } from './components/vendor-payment-detail-dialog/vendor-payment-detail-dialog.component';
-import { PAYABLES_MANAGE_ROLES, VENDOR_PAYMENT_READ_ROLES } from './payables-roles';
+import { PAYABLES_MANAGE_ROLES, VENDOR_PAYMENT_READ_ROLES, VENDOR_RETURN_ROLES } from './payables-roles';
+import { VendorCreditsPanelComponent } from './components/vendor-credits-panel/vendor-credits-panel.component';
+import { VendorReturnsPanelComponent } from './components/vendor-returns-panel/vendor-returns-panel.component';
+import { PaymentRunsPanelComponent } from './components/payment-runs-panel/payment-runs-panel.component';
+import { VendorStatementPanelComponent } from './components/vendor-statement-panel/vendor-statement-panel.component';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 
-type PayablesTab = 'bills' | 'pay-bills' | 'payments' | 'batches' | 'accounts';
+type PayablesTab = 'bills' | 'pay-bills' | 'payments' | 'runs' | 'credits' | 'returns' | 'statement' | 'batches' | 'accounts';
 
-const VALID_TABS: PayablesTab[] = ['bills', 'pay-bills', 'payments', 'batches', 'accounts'];
+const VALID_TABS: PayablesTab[] = ['bills', 'pay-bills', 'payments', 'runs', 'credits', 'returns', 'statement', 'batches', 'accounts'];
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of the Invoices + Payments pages.
 @Component({
@@ -66,6 +70,7 @@ const VALID_TABS: PayablesTab[] = ['bills', 'pay-bills', 'payments', 'batches', 
     CurrencyDisplayComponent,
     VendorBillDialogComponent, VendorPaymentDialogComponent,
     PaymentBatchCreateDialogComponent, VendorBankAccountDialogComponent, PayBillsPanelComponent, DiscountChipComponent,
+    VendorCreditsPanelComponent, VendorReturnsPanelComponent, PaymentRunsPanelComponent, VendorStatementPanelComponent,
     MatTooltipModule,
   ],
   templateUrl: './payables.component.html',
@@ -96,6 +101,20 @@ export class PayablesComponent {
   protected readonly canPayBills = computed(() => {
     this.capabilities.capabilities();
     return this.canManage && this.capabilities.isEnabled('CAP-P2P-PAY', true);
+  });
+
+  /** Payment runs show to the roles that read vendor payments, while vendor payments are on. */
+  protected readonly canSeeRuns = computed(() => {
+    this.capabilities.capabilities();
+    return this.canReadPayments && this.capabilities.isEnabled('CAP-P2P-PAY', true);
+  });
+
+  /** Returns to vendor need purchase orders and NCRs on, and the receiving roles. */
+  protected readonly canSeeReturns = computed(() => {
+    this.capabilities.capabilities();
+    return this.auth.hasAnyRole(VENDOR_RETURN_ROLES)
+      && this.capabilities.isEnabled('CAP-P2P-PO', true)
+      && this.capabilities.isEnabled('CAP-QC-NCR', true);
   });
 
   /** BANK-002 Phase A tabs (batches + bank accounts) show only when NACHA is enabled, and only to the roles that manage payables. */
@@ -241,7 +260,7 @@ export class PayablesComponent {
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'bills') this.loadBills();
-      else if (tab === 'pay-bills') return;
+      else if (tab === 'pay-bills' || tab === 'runs' || tab === 'credits' || tab === 'returns' || tab === 'statement') return;
       else if (tab === 'payments') this.loadPayments();
       else if (tab === 'batches') this.loadBatches();
       else this.loadAccounts();
@@ -279,6 +298,8 @@ export class PayablesComponent {
   private tabAllowed(tab: PayablesTab): boolean {
     if (tab === 'payments') return this.canReadPayments;
     if (tab === 'pay-bills') return this.canPayBills();
+    if (tab === 'runs') return this.canSeeRuns();
+    if (tab === 'returns') return this.canSeeReturns();
     if (tab === 'batches' || tab === 'accounts') return this.canManage;
     return true;
   }

@@ -1,0 +1,12 @@
+@use 'styles/variables' as *;
+
+.vendor-statement {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  height: 100%;
+
+  &__bar { display: flex; align-items: flex-end; justify-content: space-between; gap: $sp-md; flex-wrap: wrap; }
+  &__totals { display: flex; gap: $sp-lg; font-weight: 600; }
+  &__table { flex: 1; min-height: 0; }
+}

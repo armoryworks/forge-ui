@@ -15,4 +15,6 @@ export interface VendorPaymentSuggestion {
   discountDeadline: string | null;
   daysLeft: number | null;
   paymentTermsName: string | null;
+  /** What the vendor's open credit memos in the bill's currency could deduct. */
+  vendorOpenCredit?: number;
 }

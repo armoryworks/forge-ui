@@ -1,0 +1,166 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (rtv(); as r) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon" aria-hidden="true">assignment_return</span>
+        <div>
+          <div class="detail-name" data-testid="vendor-return-number">{{ r.returnNumber }}</div>
+          <div class="detail-customer"><app-entity-link type="vendor" [entityId]="r.vendorId">{{ r.vendorName }}</app-entity-link></div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" type="button" data-testid="vendor-return-close-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above"
+          [attr.aria-label]="'common.close' | translate" (click)="closed.emit()">
+          <span class="material-icons-outlined" aria-hidden="true">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value"><span [class]="statusClass(r.status)" data-testid="vendor-return-status">{{ ('vendorReturns.status.' + r.status) | translate }}</span></span>
+        </div>
+        @if (r.ncrNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.ncr' | translate }}</span>
+            <span class="info-value">{{ r.ncrNumber }}</span>
+          </div>
+        }
+        @if (r.purchaseOrderId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.purchaseOrder' | translate }}</span>
+            <span class="info-value"><app-entity-link type="purchase-order" [entityId]="r.purchaseOrderId">{{ r.purchaseOrderNumber }}</app-entity-link></span>
+          </div>
+        }
+        @if (r.shipDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.shipDate' | translate }}</span>
+            <span class="info-value">{{ r.shipDate | dateOnly }}</span>
+          </div>
+        }
+        @if (r.carrier) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.carrier' | translate }}</span>
+            <span class="info-value">{{ r.carrier }}</span>
+          </div>
+        }
+        @if (r.trackingNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.trackingNumber' | translate }}</span>
+            <span class="info-value">{{ r.trackingNumber }}</span>
+          </div>
+        }
+        @if (r.rmaNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.rmaNumber' | translate }}</span>
+            <span class="info-value">{{ r.rmaNumber }}</span>
+          </div>
+        }
+        @if (r.vendorCreditMemoNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'vendorReturns.vendorCredit' | translate }}</span>
+            <span class="info-value" data-testid="vendor-return-credit">{{ r.vendorCreditMemoNumber }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="rtv-section">
+        <span class="info-label">{{ 'vendorReturns.lines' | translate }} ({{ r.lines.length }})</span>
+        <ul class="rtv-rows" [attr.aria-label]="'vendorReturns.lines' | translate">
+          @for (line of r.lines; track line.id) {
+            <li class="rtv-rows__row">
+              <span class="rtv-rows__main">
+                {{ line.partNumber }}
+                @if (line.lotNumber) {
+                  <span class="rtv-rows__meta">{{ 'vendorReturns.lot' | translate: { lot: line.lotNumber } }}</span>
+                }
+                @if (line.locationName) {
+                  <span class="rtv-rows__meta">{{ line.locationName }}</span>
+                }
+              </span>
+              <span class="rtv-rows__qty">{{ line.quantity | number:'1.0-4' }} × <app-currency-display [value]="line.unitPrice" [currency]="r.currencyCode" [maximumFractionDigits]="4" /></span>
+            </li>
+          }
+        </ul>
+        <div class="rtv-expected">
+          <span>{{ 'vendorReturns.expectedCredit' | translate }}</span>
+          <app-currency-display [value]="r.expectedCredit" [currency]="r.currencyCode" />
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="action-btn" type="button" data-testid="vendor-return-pdf-btn" [disabled]="downloadingPdf()" (click)="downloadPdf()">
+          <span class="material-icons-outlined" aria-hidden="true">picture_as_pdf</span>
+          {{ 'vendorReturns.packingDocument' | translate }}
+        </button>
+        @if (canCredit()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="vendor-return-credit-btn" [disabled]="busy()" (click)="openCredit()">
+            <span class="material-icons-outlined" aria-hidden="true">request_quote</span>
+            {{ 'vendorReturns.recordCredit' | translate }}
+          </button>
+        }
+        @if (canShip()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="vendor-return-ship-btn" [disabled]="busy()" (click)="openShip()">
+            <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+            {{ 'vendorReturns.ship' | translate }}
+          </button>
+        }
+      </div>
+
+      <app-entity-activity-section entityType="VendorReturn" [entityId]="r.id" [refreshKey]="r" />
+    </div>
+
+    @if (showShip()) {
+      <app-dialog [title]="'vendorReturns.shipTitle' | translate: { number: r.returnNumber }" width="520px" (closed)="showShip.set(false)">
+        <div class="rtv-form" [formGroup]="shipForm">
+          <p class="rtv-form__hint">{{ 'vendorReturns.shipHint' | translate }}</p>
+          <app-datepicker [label]="'vendorReturns.shipDate' | translate" formControlName="shipDate" [required]="true" data-testid="vendor-return-ship-date" />
+          <app-input [label]="'vendorReturns.carrier' | translate" formControlName="carrier" data-testid="vendor-return-carrier" />
+          <app-input [label]="'vendorReturns.trackingNumber' | translate" formControlName="trackingNumber" data-testid="vendor-return-tracking" />
+          <app-input [label]="'vendorReturns.rmaNumber' | translate" formControlName="rmaNumber" data-testid="vendor-return-rma" />
+          <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" data-testid="vendor-return-notes" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" type="button" data-testid="vendor-return-ship-cancel" (click)="showShip.set(false)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="shipViolations" [loading]="busy()">
+            <button class="action-btn action-btn--primary" type="button" data-testid="vendor-return-ship-confirm"
+              [disabled]="shipForm.invalid || busy()" (click)="ship()">
+              <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+              {{ 'vendorReturns.ship' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
+
+    @if (showCredit()) {
+      <app-dialog [title]="'vendorReturns.creditTitle' | translate: { number: r.returnNumber }" width="560px" (closed)="showCredit.set(false)">
+        <div class="rtv-form" [formGroup]="creditForm">
+          <p class="rtv-form__hint">{{ 'vendorReturns.creditHint' | translate }}</p>
+          <app-input [label]="'vendorCredits.vendorReference' | translate" formControlName="vendorReference" data-testid="vendor-return-credit-reference" />
+          <app-datepicker [label]="'vendorCredits.memoDate' | translate" formControlName="memoDate" [required]="true" data-testid="vendor-return-credit-date" />
+          <div formArrayName="prices" class="rtv-form__prices">
+            @for (line of r.lines; track line.id; let i = $index) {
+              <app-input [label]="'vendorReturns.creditedPrice' | translate: { part: line.partNumber ?? '', quantity: line.quantity }"
+                type="number" [formControlName]="i" step="0.0001" min="0" [attr.data-testid]="'vendor-return-credit-price-' + i" />
+            }
+          </div>
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" type="button" data-testid="vendor-return-credit-cancel" (click)="showCredit.set(false)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="creditViolations" [loading]="busy()">
+            <button class="action-btn action-btn--primary" type="button" data-testid="vendor-return-credit-confirm"
+              [disabled]="creditForm.invalid || busy()" (click)="recordCredit()">
+              <span class="material-icons-outlined" aria-hidden="true">request_quote</span>
+              {{ 'vendorReturns.recordCredit' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
+  } @else if (loadError()) {
+    <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
+  }
+</div>

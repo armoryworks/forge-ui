@@ -46,4 +46,8 @@ export interface NonConformance {
   vendorName: string | null;
   createdAt: string;
   rowVersion?: number;
+  /** The return to vendor a Return To Vendor disposition opened, when there is one. */
+  vendorReturnId?: number | null;
+  vendorReturnNumber?: string | null;
+  vendorReturnStatus?: string | null;
 }

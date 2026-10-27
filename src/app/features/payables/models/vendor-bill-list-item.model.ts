@@ -29,4 +29,6 @@ export interface VendorBillListItem {
   discountsTaken?: number;
   /** The discount still available, ignoring the date. */
   discountAvailable?: number;
+  /** Vendor credit memo amounts applied to the bill. */
+  creditsApplied?: number;
 }

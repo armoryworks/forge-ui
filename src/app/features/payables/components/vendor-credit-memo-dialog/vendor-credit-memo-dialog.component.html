@@ -1,0 +1,90 @@
+<app-dialog [title]="(isEdit() ? 'vendorCredits.editTitle' : 'vendorCredits.newTitle') | translate" width="1000px" [splitLayout]="true" (closed)="closed.emit()">
+  <div class="dlg-body">
+    <div class="dlg-main">
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'vendorCredits.lines' | translate }}</span>
+        @if (lines().length > 0) {
+          <ul class="memo-lines" [attr.aria-label]="'vendorCredits.lines' | translate">
+            @for (line of lines(); track $index) {
+              <li class="memo-lines__row">
+                <span class="memo-lines__main">
+                  {{ line.description }}
+                  @if (line.vendorBillLineId) {
+                    <span class="chip chip--primary">{{ 'vendorCredits.billLineChip' | translate }}</span>
+                  }
+                  @if ((line.maxQuantity !== null && line.quantity > line.maxQuantity) || (line.maxUnitPrice !== null && line.unitPrice > line.maxUnitPrice)) {
+                    <span class="chip chip--error" [attr.data-testid]="'vendor-memo-line-over-cap-' + $index">
+                      {{ 'vendorCredits.overCap' | translate: { quantity: line.maxQuantity ?? 0, price: line.maxUnitPrice ?? 0 } }}
+                    </span>
+                  }
+                </span>
+                <span class="memo-lines__qty">{{ line.quantity | number:'1.0-4' }} × <app-currency-display [value]="line.unitPrice" [currency]="currencyCode()" [maximumFractionDigits]="4" /></span>
+                <span class="memo-lines__amount"><app-currency-display [value]="lineAmounts()[$index]" [currency]="currencyCode()" /></span>
+                <button class="icon-btn icon-btn--danger" type="button" [matTooltip]="'common.remove' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'common.remove' | translate" [attr.data-testid]="'vendor-memo-line-remove-' + $index" (click)="removeLine($index)">
+                  <span class="material-icons-outlined" aria-hidden="true">close</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="lines-empty">{{ 'vendorCredits.noLinesYet' | translate }}</div>
+        }
+
+        <div class="memo-add-line" [formGroup]="lineForm">
+          @if (bill()) {
+            <app-select [label]="'vendorCredits.billLine' | translate" formControlName="vendorBillLineId" [options]="billLineOptions()" data-testid="vendor-memo-line-bill-line" />
+          }
+          <app-input [label]="'common.description' | translate" formControlName="description" data-testid="vendor-memo-line-desc" />
+          <app-input [label]="'vendorCredits.quantity' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="vendor-memo-line-qty" />
+          <app-input [label]="'vendorCredits.unitPrice' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="vendor-memo-line-price" />
+          <button class="action-btn action-btn--sm" type="button" data-testid="vendor-memo-add-line-btn" [disabled]="lineForm.invalid" (click)="addLine()">
+            <span class="material-icons-outlined" aria-hidden="true">add</span>
+            {{ 'common.add' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dlg-sidebar" [formGroup]="form">
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'vendorCredits.details' | translate }}</span>
+        <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" data-testid="vendor-memo-vendor" />
+        @if (bill(); as b) {
+          <div class="memo-bill" data-testid="vendor-memo-bill">{{ 'vendorCredits.creditsBill' | translate: { number: b.billNumber } }}</div>
+        }
+        <app-select [label]="'vendorCredits.kindLabel' | translate" formControlName="kind" [options]="kindOptions" data-testid="vendor-memo-kind" />
+        <app-select [label]="'vendorCredits.sourceLabel' | translate" formControlName="sourceType" [options]="sourceOptions" data-testid="vendor-memo-source" />
+        <app-textarea [label]="'vendorCredits.reasonLabel' | translate" formControlName="reason" [rows]="2" [required]="true" data-testid="vendor-memo-reason" />
+        <app-input [label]="'vendorCredits.vendorReference' | translate" formControlName="vendorReference" data-testid="vendor-memo-reference" />
+        <app-datepicker [label]="'vendorCredits.memoDate' | translate" formControlName="memoDate" [required]="true" data-testid="vendor-memo-date" />
+        <app-input [label]="'vendorCredits.taxAmount' | translate" type="number" formControlName="taxAmount" step="0.01" min="0" data-testid="vendor-memo-tax" />
+        @if (!bill() && !isEdit()) {
+          <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"
+            [documentDate]="documentDate()" testIdPrefix="vendor-memo" />
+        }
+      </div>
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
+        <app-textarea formControlName="notes" [rows]="3" data-testid="vendor-memo-notes" />
+      </div>
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
+        <div class="dlg-total-row">
+          <span>{{ 'vendorCredits.subtotal' | translate }}</span>
+          <app-currency-display [value]="subtotal()" [currency]="currencyCode()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="vendor-memo-cancel-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="vendor-memo-save-btn" [disabled]="!canSave()" (click)="save()">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'vendorCredits.saveDraft' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

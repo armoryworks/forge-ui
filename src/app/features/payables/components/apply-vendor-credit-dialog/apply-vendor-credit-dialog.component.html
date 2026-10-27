@@ -1,0 +1,26 @@
+<app-dialog [title]="'vendorCredits.applyTitle' | translate: { number: memo().memoNumber }" width="520px" (closed)="closed.emit()">
+  <div class="apply-form" [formGroup]="form">
+    <div class="apply-form__available">
+      <span>{{ 'vendorCredits.open' | translate }}</span>
+      <app-currency-display [value]="memo().openAmount" [currency]="memo().currencyCode" />
+    </div>
+    @if (loaded() && bills().length === 0) {
+      <p class="apply-form__empty" data-testid="apply-vendor-credit-empty">{{ 'vendorCredits.noOpenBills' | translate }}</p>
+    } @else {
+      <app-select [label]="'vendorCredits.bill' | translate" formControlName="vendorBillId" [options]="billOptions()" [required]="true"
+        data-testid="apply-vendor-credit-bill" />
+      <app-input [label]="'vendorCredits.applyAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+        [required]="true" data-testid="apply-vendor-credit-amount" />
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="apply-vendor-credit-cancel" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="apply-vendor-credit-save"
+        [disabled]="!canSave() || saving()" (click)="save()">
+        <span class="material-icons-outlined" aria-hidden="true">playlist_add_check</span>
+        {{ 'vendorCredits.apply' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

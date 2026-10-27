@@ -47,4 +47,15 @@
   &__saving {
     color: var(--success);
   }
+
+  &__interrupted {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--error);
+    border-radius: $border-radius;
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
 }

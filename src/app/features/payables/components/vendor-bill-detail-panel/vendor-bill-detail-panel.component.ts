@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { VendorBillService } from '../../services/vendor-bill.service';
 import { VendorBillDetail } from '../../models/vendor-bill-detail.model';
 import { PAYABLES_MANAGE_ROLES } from '../../payables-roles';
+import { VendorCreditMemoDialogComponent } from '../vendor-credit-memo-dialog/vendor-credit-memo-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -27,7 +28,7 @@ import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
     DateOnlyPipe, DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
-    DetailLoadErrorComponent, DiscountChipComponent,
+    DetailLoadErrorComponent, DiscountChipComponent, VendorCreditMemoDialogComponent,
   ],
   templateUrl: './vendor-bill-detail-panel.component.html',
   styleUrl: './vendor-bill-detail-panel.component.scss',
@@ -47,6 +48,7 @@ export class VendorBillDetailPanelComponent {
   protected readonly loading = signal(false);
   protected readonly loadError = signal<unknown>(null);
   protected readonly bill = signal<VendorBillDetail | null>(null);
+  protected readonly showCreditMemo = signal(false);
 
   constructor() {
     effect(() => {
@@ -72,6 +74,18 @@ export class VendorBillDetailPanelComponent {
       && (bill.status === 'Draft' || bill.status === 'Approved')
       && bill.amountPaid === 0
       && bill.sourceExpenseId === null;
+  }
+
+  /** A vendor credit or debit memo can be raised against any approved bill, paid or not. */
+  protected canCreateCreditMemo(bill: VendorBillDetail): boolean {
+    return this.canManage && (bill.status === 'Approved' || bill.status === 'PartiallyPaid' || bill.status === 'Paid');
+  }
+
+  protected onCreditMemoSaved(): void {
+    this.showCreditMemo.set(false);
+    const bill = this.bill();
+    if (bill) this.loadBill(bill.id);
+    this.billChanged.emit();
   }
 
   protected approveBill(): void {
