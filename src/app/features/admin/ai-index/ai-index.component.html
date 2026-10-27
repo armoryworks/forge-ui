@@ -1,0 +1,72 @@
+<app-page-layout [pageTitle]="'aiIndexAdmin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'aiIndexAdmin.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn" (click)="load()" [disabled]="loading()" data-testid="ai-index-refresh-btn">
+        <span class="material-icons-outlined">refresh</span>
+        {{ 'common.refresh' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary" (click)="reindexAll()" [disabled]="busy() || !status()" data-testid="ai-index-all-btn">
+        <span class="material-icons-outlined">manage_search</span>
+        {{ 'aiIndexAdmin.reindexAll' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    @if (status(); as s) {
+      <div class="summary" data-testid="ai-index-summary">
+        <span>{{ 'aiIndexAdmin.totalChunks' | translate: { count: s.totalChunks } }}</span>
+        <span class="muted">
+          {{ 'aiIndexAdmin.lastIndexed' | translate }}: {{ s.lastIndexedAt ? (s.lastIndexedAt | dateTime) : ('aiIndexAdmin.never' | translate) }}
+        </span>
+      </div>
+    }
+
+    @if (progress(); as p) {
+      <div class="progress" role="progressbar" [attr.aria-valuenow]="progressPercent()" aria-valuemin="0" aria-valuemax="100"
+        data-testid="ai-index-progress">
+        <div class="progress__bar" [style.width.%]="progressPercent()"></div>
+        <span class="progress__label">
+          {{ 'aiIndexAdmin.progress' | translate: { done: p.done, total: p.total, type: indexingType() ? typeLabel(indexingType()!) : '' } }}
+        </span>
+      </div>
+    }
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-ai-index"
+        [columns]="columns"
+        [data]="status()?.entityTypes ?? []"
+        emptyIcon="manage_search"
+        [emptyMessage]="'aiIndexAdmin.empty' | translate">
+
+        <ng-template appColumnCell="entityType" let-row>{{ typeLabel(row.entityType) }}</ng-template>
+
+        <ng-template appColumnCell="indexedCount" let-row>
+          @if (row.totalCount !== null) {
+            {{ row.indexedCount | number }} / {{ row.totalCount | number }}
+          } @else {
+            {{ row.indexedCount | number }}
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="chunkCount" let-row>{{ row.chunkCount | number }}</ng-template>
+
+        <ng-template appColumnCell="lastIndexedAt" let-row>
+          {{ row.lastIndexedAt ? (row.lastIndexedAt | dateTime) : ('aiIndexAdmin.never' | translate) }}
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="action-btn action-btn--sm" (click)="indexType($any(row))" [disabled]="busy()" data-testid="ai-index-type-btn">
+            <span class="material-icons-outlined" [class.spin]="indexingType() === row.entityType">
+              {{ indexingType() === row.entityType ? 'sync' : 'refresh' }}
+            </span>
+            {{ 'aiIndexAdmin.indexNow' | translate }}
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

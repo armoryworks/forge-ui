@@ -1,0 +1,69 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar__hint,
+.muted,
+.note {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 0 0 $sp-md;
+}
+
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.mono {
+  font-family: var(--font-mono, $font-family-mono);
+  word-break: break-all;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 $sp-md;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tags-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-top: $sp-md;
+
+  h4 {
+    margin: 0;
+  }
+}
+
+.tag-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) repeat(4, minmax(70px, 0.6fr)) auto;
+  align-items: center;
+  gap: 0 $sp-sm;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid var(--border);
+
+  @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.error-text {
+  font-size: $font-size-sm;
+  color: var(--error);
+}

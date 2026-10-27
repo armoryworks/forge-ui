@@ -6,6 +6,11 @@
         <span class="material-icons-outlined">delete</span>
       </button>
     }
+    @if (editingReport() && canSchedule()) {
+      <button class="action-btn" data-testid="report-schedule-btn" (click)="openSchedules()">
+        <span class="material-icons-outlined">schedule_send</span> {{ 'reportSchedules.scheduleButton' | translate }}
+      </button>
+    }
     <span appSpacer></span>
     <button class="action-btn" data-testid="report-new-btn" (click)="newReport()">
       <span class="material-icons-outlined">add</span> {{ 'reports.newReport' | translate }}

@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+
+.muted {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.schedule {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.schedule__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: $sp-xs;
+  min-width: 0;
+}
+
+.new-schedule {
+  margin-top: $sp-md;
+
+  h4 {
+    margin: 0 0 $sp-sm;
+  }
+}

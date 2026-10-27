@@ -59,6 +59,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
   { prefix: 'admin/accounting-mode', capability: 'CAP-ACCT-EXTERNAL' },
   { prefix: 'admin/bi-api-keys', capability: 'CAP-IDEN-AUTH-API-KEYS' },
+  { prefix: 'admin/cloud-storage', capability: 'CAP-EXT-CLOUD-STORAGE' },
   { prefix: 'admin/currencies', capability: 'CAP-MD-CURRENCIES' },
   { prefix: 'admin/exchange-rates', capability: 'CAP-MD-CURRENCIES' },
   { prefix: 'admin/machine-connections', capability: 'CAP-MFG-MACHINE-CONNECT' },

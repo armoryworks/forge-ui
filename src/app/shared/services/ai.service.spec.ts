@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import {
   AiService,
+  AiStreamError,
   AiGenerateResponse,
   AiSummarizeResponse,
   AiAvailabilityResponse,
@@ -346,5 +347,76 @@ describe('AiService', () => {
       expect(req.request.body.conversationHistory).toEqual(history);
       req.flush('Answer to follow-up');
     });
+  });
+});
+
+describe('AiService index control and stream errors', () => {
+  let service: AiService;
+  let httpMock: HttpTestingController;
+  const baseUrl = `${environment.apiUrl}/ai`;
+
+  function sseResponse(text: string): Response {
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(text));
+        controller.close();
+      },
+    });
+    return { ok: true, status: 200, body } as unknown as Response;
+  }
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    service = TestBed.inject(AiService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('reads the index status and re-indexes one record type', () => {
+    service.indexStatus().subscribe();
+    httpMock.expectOne(`${baseUrl}/index/status`).flush({ entityTypes: [], totalChunks: 0, lastIndexedAt: null });
+
+    service.bulkIndex('Job').subscribe();
+    const req = httpMock.expectOne(`${baseUrl}/bulk-index`);
+    expect(req.request.body).toEqual({ entityType: 'Job' });
+    req.flush({ totalChunksIndexed: 3 });
+  });
+
+  it('keeps the tokens sent before a stall and errors with the stall code', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(sseResponse(
+      'data: Hel\n\ndata: lo\n\nevent: error\ndata: {"code":"ai-stream-stalled"}\n\n',
+    ))));
+    const tokens: string[] = [];
+
+    const error = await new Promise<unknown>((resolve) => {
+      service.streamHelpChat('Where are my jobs?').subscribe({
+        next: (t) => tokens.push(t),
+        error: resolve,
+        complete: () => resolve(null),
+      });
+    });
+
+    expect(tokens).toEqual(['Hel', 'lo']);
+    expect(error).toBeInstanceOf(AiStreamError);
+    expect((error as AiStreamError).code).toBe('ai-stream-stalled');
+  });
+
+  it('still completes on the done marker', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(sseResponse('data: Hi\\nthere\n\ndata: [DONE]\n\n'))));
+    const tokens: string[] = [];
+
+    await new Promise<void>((resolve, reject) => {
+      service.streamHelpChat('hello').subscribe({ next: (t) => tokens.push(t), error: reject, complete: () => resolve() });
+    });
+
+    expect(tokens).toEqual(['Hi\nthere']);
+  });
+
+  it('falls back to a generic failure code when the error payload is unreadable', () => {
+    expect(AiService.streamErrorCode('not json')).toBe('ai-stream-failed');
+    expect(AiService.streamErrorCode('{"code":"ai-stream-stalled"}')).toBe('ai-stream-stalled');
   });
 });

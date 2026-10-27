@@ -1,0 +1,66 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar__hint,
+.note,
+.muted {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 0 0 $sp-md;
+}
+
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.mono {
+  font-family: var(--font-mono, $font-family-mono);
+  word-break: break-all;
+}
+
+.chip + .chip {
+  margin-left: $sp-xs;
+}
+
+.field-error {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--error);
+}
+
+.secret-box {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+.response-body {
+  max-height: 200px;
+  margin: $sp-xs 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  font-size: $font-size-xs;
+}

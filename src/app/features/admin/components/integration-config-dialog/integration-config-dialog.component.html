@@ -27,7 +27,7 @@
 
   <div [formGroup]="form">
     @for (field of fields; track field.key) {
-      <div class="integration-field">
+      <div class="integration-field" [attr.data-testid]="'integration-field-' + field.key">
         @if (field.inputType === 'toggle') {
           <app-toggle [label]="field.label" [formControlName]="controlName(field)" />
         } @else if (field.inputType === 'enum') {
@@ -42,7 +42,13 @@
             [type]="getInputType(field)"
             [formControlName]="controlName(field)"
             [required]="field.isRequired"
-            [placeholder]="field.isSensitive ? ('integrationConfigDialog.enterNewValue' | translate) : ''" />
+            [placeholder]="field.isSensitive ? ((isSecretSet(field) ? 'integrationConfigDialog.keepSecret' : 'integrationConfigDialog.enterNewValue') | translate) : ''" />
+        }
+        @if (field.isSensitive) {
+          <span class="chip" [class.chip--success]="isSecretSet(field)" [class.chip--muted]="!isSecretSet(field)"
+            [attr.data-testid]="'integration-secret-state-' + field.key">
+            {{ (isSecretSet(field) ? 'integrationConfigDialog.secretSet' : 'integrationConfigDialog.secretNotSet') | translate }}
+          </span>
         }
         @if (field.description) {
           <p class="integration-field__hint">{{ field.description }}</p>

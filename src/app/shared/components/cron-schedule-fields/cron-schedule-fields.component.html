@@ -1,0 +1,31 @@
+<div [formGroup]="group()" class="cron-fields">
+  <app-select [label]="'cronSchedule.frequencyLabel' | translate" formControlName="frequency" [options]="frequencyOptions"
+    [required]="true" [attr.data-testid]="testIdPrefix() + '-frequency'" />
+  @switch (current().frequency) {
+    @case ('hourly') {
+      <app-input [label]="'cronSchedule.minuteLabel' | translate" type="number" formControlName="minute" [min]="0" [max]="59"
+        [attr.data-testid]="testIdPrefix() + '-minute'" />
+    }
+    @case ('custom') {
+      <app-input [label]="'cronSchedule.customLabel' | translate" formControlName="custom" [placeholder]="'0 7 * * 1'"
+        [info]="'cronSchedule.customHint' | translate" [attr.data-testid]="testIdPrefix() + '-custom'" />
+    }
+    @default {
+      <app-input [label]="'cronSchedule.timeLabel' | translate" type="time" formControlName="time"
+        [attr.data-testid]="testIdPrefix() + '-time'" />
+      @if (current().frequency === 'weekly') {
+        <app-select [label]="'cronSchedule.dayOfWeekLabel' | translate" formControlName="dayOfWeek" [options]="dayOptions"
+          [attr.data-testid]="testIdPrefix() + '-day-of-week'" />
+      }
+      @if (current().frequency === 'monthly') {
+        <app-input [label]="'cronSchedule.dayOfMonthLabel' | translate" type="number" formControlName="dayOfMonth" [min]="1" [max]="28"
+          [attr.data-testid]="testIdPrefix() + '-day-of-month'" />
+      }
+    }
+  }
+  <p class="cron-fields__preview" [attr.data-testid]="testIdPrefix() + '-preview'">
+    <span class="material-icons-outlined">schedule</span>
+    <span>{{ preview().text }}</span>
+    <code>{{ preview().expression }}</code>
+  </p>
+</div>

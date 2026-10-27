@@ -28,7 +28,17 @@ const smtp: IntegrationStatus = {
   ],
 };
 
-function setup() {
+const docuseal: IntegrationStatus = {
+  ...smtp,
+  provider: 'docuseal',
+  name: 'DocuSeal',
+  fields: [
+    { key: 'docuseal.api-key', label: 'API Key', value: '••••••••', isSensitive: true, isRequired: false, inputType: 'password' },
+    { key: 'docuseal.webhook-secret', label: 'Webhook Secret', value: '', isSensitive: true, isRequired: false, inputType: 'password' },
+  ],
+};
+
+function setup(integration: IntegrationStatus = smtp) {
   const adminService = { updateIntegration: vi.fn().mockReturnValue(of(undefined)), testIntegration: vi.fn() };
   const snackbar = { success: vi.fn(), warn: vi.fn(), errorFrom: vi.fn() };
   const matDialogRef = { close: vi.fn() };
@@ -37,7 +47,7 @@ function setup() {
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
-      { provide: MAT_DIALOG_DATA, useValue: { integration: smtp, showSandboxGuides: false } },
+      { provide: MAT_DIALOG_DATA, useValue: { integration, showSandboxGuides: false } },
       { provide: MatDialogRef, useValue: matDialogRef },
       { provide: AdminService, useValue: adminService },
       { provide: SnackbarService, useValue: snackbar },
@@ -82,5 +92,19 @@ describe('IntegrationConfigDialogComponent', () => {
     component.save();
 
     expect(snackbar.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps secrets write-only: shows set or not set, starts empty and only sends a newly typed secret', () => {
+    const { component, adminService } = setup(docuseal);
+    const [apiKey, webhookSecret] = component.fields;
+
+    expect(component.isSecretSet(apiKey)).toBe(true);
+    expect(component.isSecretSet(webhookSecret)).toBe(false);
+    expect(component.form.controls[component.controlName(apiKey)].value).toBe('');
+
+    component.form.controls[component.controlName(webhookSecret)].setValue('whsec_from_docuseal');
+    component.save();
+
+    expect(adminService.updateIntegration).toHaveBeenCalledWith('docuseal', { 'docuseal.webhook-secret': 'whsec_from_docuseal' });
   });
 });

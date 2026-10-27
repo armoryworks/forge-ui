@@ -1,0 +1,60 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar__hint,
+.muted,
+.note {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 0 0 $sp-md;
+}
+
+.section {
+  margin-bottom: $sp-lg;
+}
+
+.section__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.section__title {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-md;
+}
+
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.error-text {
+  font-size: $font-size-sm;
+  color: var(--error);
+}
+
+.folder-rule {
+  display: grid;
+  grid-template-columns: 160px minmax(200px, 2fr) minmax(160px, 1fr) auto auto;
+  align-items: center;
+  gap: $sp-md;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+code {
+  font-family: var(--font-mono, $font-family-mono);
+}

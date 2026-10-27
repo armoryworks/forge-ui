@@ -1,0 +1,159 @@
+<app-page-layout [pageTitle]="'cloudStorageAdmin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'cloudStorageAdmin.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreate()" [disabled]="providerOptions().length === 0"
+        data-testid="cloud-provider-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'cloudStorageAdmin.newProvider' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <section class="section">
+      <h3 class="section__title">{{ 'cloudStorageAdmin.providersTitle' | translate }}</h3>
+      <div [appLoadingBlock]="loading()">
+        <app-data-table
+          tableId="admin-cloud-storage-providers"
+          [columns]="columns"
+          [data]="providers()"
+          emptyIcon="cloud_off"
+          [emptyMessage]="'cloudStorageAdmin.empty' | translate">
+
+          <ng-template appColumnCell="providerCode" let-row>
+            <div class="cell-stack">
+              <span>{{ providerLabel(row.providerCode) }}</span>
+              @if (row.lastError) {
+                <span class="error-text" data-testid="cloud-provider-last-error">{{ row.lastError }}</span>
+              }
+            </div>
+          </ng-template>
+
+          <ng-template appColumnCell="mode" let-row>
+            {{ (row.mode === 'ServiceAccount' ? 'cloudStorageAdmin.modeServiceAccount' : 'cloudStorageAdmin.modePerUser') | translate }}
+          </ng-template>
+
+          <ng-template appColumnCell="rootFolderId" let-row>{{ row.rootFolderId ?? '—' }}</ng-template>
+
+          <ng-template appColumnCell="credentialsConfigured" let-row>
+            @if (row.mode === 'PerUser') {
+              <span class="chip chip--info">{{ 'cloudStorageAdmin.perUserTokens' | translate }}</span>
+            } @else if (row.credentialsConfigured) {
+              <span class="chip chip--success">{{ 'cloudStorageAdmin.configured' | translate }}</span>
+            } @else {
+              <span class="chip chip--warning">{{ 'cloudStorageAdmin.notConfigured' | translate }}</span>
+            }
+          </ng-template>
+
+          <ng-template appColumnCell="lastConnectedAt" let-row>
+            {{ row.lastConnectedAt ? (row.lastConnectedAt | dateTime) : '—' }}
+          </ng-template>
+
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </ng-template>
+
+          <ng-template appColumnCell="actions" let-row>
+            <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [attr.title]="'common.edit' | translate"
+              (click)="openEdit($any(row))" data-testid="cloud-provider-edit-btn">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn" [attr.aria-label]="'cloudStorageAdmin.test' | translate" [attr.title]="'cloudStorageAdmin.test' | translate"
+              [disabled]="testingId() === row.id" (click)="test($any(row))" data-testid="cloud-provider-test-btn">
+              <span class="material-icons-outlined" [class.spin]="testingId() === row.id">{{ testingId() === row.id ? 'sync' : 'wifi_tethering' }}</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [attr.title]="'common.delete' | translate"
+              [disabled]="row.linkedRecordCount > 0" (click)="confirmDelete($any(row))" data-testid="cloud-provider-delete-btn">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section__header">
+        <h3 class="section__title">{{ 'cloudStorageAdmin.folderMapTitle' | translate }}</h3>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--sm" (click)="addFolderMapRow()"
+          [disabled]="folderMap.length >= entityTypeOptions.length" data-testid="folder-map-add-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'cloudStorageAdmin.addFolderRule' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary action-btn--sm" (click)="saveFolderMap()"
+          [disabled]="folderMap.invalid || duplicateEntityTypes() || savingMap() || folderMap.pristine" data-testid="folder-map-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'cloudStorageAdmin.saveFolderMap' | translate }}
+        </button>
+      </div>
+      <p class="muted">{{ 'cloudStorageAdmin.folderMapHint' | translate }} <code>{{ tokenHint }}</code></p>
+      @if (duplicateEntityTypes()) {
+        <p class="error-text">{{ 'cloudStorageAdmin.duplicateEntityType' | translate }}</p>
+      }
+      @for (row of folderMap.controls; track row; let i = $index) {
+        <div class="folder-rule" [formGroup]="row" data-testid="folder-map-row">
+          <app-select [label]="'cloudStorageAdmin.fieldEntityType' | translate" formControlName="entityType"
+            [options]="entityTypeOptions" [required]="true" data-testid="folder-map-entity" />
+          <app-input [label]="'cloudStorageAdmin.fieldPathTemplate' | translate" formControlName="pathTemplate" [required]="true"
+            [placeholder]="'cloudStorageAdmin.pathPlaceholder' | translate" data-testid="folder-map-path" />
+          <app-input [label]="'cloudStorageAdmin.fieldSubfolders' | translate" formControlName="subfolders"
+            [placeholder]="'cloudStorageAdmin.subfoldersPlaceholder' | translate" data-testid="folder-map-subfolders" />
+          <app-toggle [label]="'cloudStorageAdmin.fieldAutoCreate' | translate" formControlName="autoCreateOnEntityCreate"
+            data-testid="folder-map-auto-create" />
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.remove' | translate" [attr.title]="'common.remove' | translate"
+            (click)="removeFolderMapRow(i)" data-testid="folder-map-remove-btn">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      } @empty {
+        <p class="muted" data-testid="folder-map-empty">{{ 'cloudStorageAdmin.folderMapEmpty' | translate }}</p>
+      }
+    </section>
+  </ng-container>
+</app-page-layout>
+
+@if (showEditor()) {
+  <app-dialog [title]="(editing() ? 'cloudStorageAdmin.editProvider' : 'cloudStorageAdmin.newProvider') | translate"
+    width="520px" (closed)="closeEditor()">
+    <div [formGroup]="form">
+      @if (editing(); as row) {
+        <p class="note">{{ providerLabel(row.providerCode) }}</p>
+      } @else {
+        <app-select [label]="'cloudStorageAdmin.fieldProvider' | translate" formControlName="providerCode" [options]="providerOptions()"
+          [required]="true" data-testid="cloud-provider-code" />
+      }
+      <app-select [label]="'cloudStorageAdmin.fieldMode' | translate" formControlName="mode" [options]="modeOptions" [required]="true"
+        data-testid="cloud-provider-mode" />
+      <p class="note">{{ (form.controls.mode.value === 'ServiceAccount' ? 'cloudStorageAdmin.modeServiceAccountHint' : 'cloudStorageAdmin.modePerUserHint') | translate }}</p>
+      <app-input [label]="'cloudStorageAdmin.fieldRootFolder' | translate" formControlName="rootFolderId" data-testid="cloud-provider-root" />
+      @if (form.controls.mode.value === 'ServiceAccount') {
+        <app-input [label]="'cloudStorageAdmin.fieldServiceAccount' | translate" formControlName="serviceAccountId"
+          data-testid="cloud-provider-service-account" />
+        <app-input [label]="'cloudStorageAdmin.fieldAccessToken' | translate" type="password" formControlName="accessToken"
+          [required]="!editing() && needsTokens()"
+          [placeholder]="(editing()?.credentialsConfigured ? 'cloudStorageAdmin.tokenKeepPlaceholder' : 'cloudStorageAdmin.tokenPlaceholder') | translate"
+          data-testid="cloud-provider-access-token" />
+        <app-input [label]="'cloudStorageAdmin.fieldRefreshToken' | translate" type="password" formControlName="refreshToken"
+          [required]="!editing() && needsTokens()"
+          [placeholder]="(editing()?.credentialsConfigured ? 'cloudStorageAdmin.tokenKeepPlaceholder' : 'cloudStorageAdmin.tokenPlaceholder') | translate"
+          data-testid="cloud-provider-refresh-token" />
+      }
+      <app-toggle [label]="'cloudStorageAdmin.fieldActive' | translate" formControlName="isActive" data-testid="cloud-provider-active" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEditor()" data-testid="cloud-provider-cancel-btn">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="!canSave() || saving()" (click)="save()" data-testid="cloud-provider-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
