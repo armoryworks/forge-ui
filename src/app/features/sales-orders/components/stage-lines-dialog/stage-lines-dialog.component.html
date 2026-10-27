@@ -1,0 +1,27 @@
+<app-dialog [title]="'salesOrderEngines.stages.assignTitle' | translate: { name: stage().name }" width="640px"
+  [dirty]="quantities.dirty" (closed)="close()">
+  <p class="stage-lines__hint">{{ 'salesOrderEngines.stages.assignHint' | translate }}</p>
+  <div class="stage-lines" role="list" [attr.aria-label]="'salesOrderEngines.stages.assignTitle' | translate: { name: stage().name }">
+    @for (row of rows(); track row.salesOrderLineId; let i = $index) {
+      <div class="stage-lines__row" role="listitem">
+        <div class="stage-lines__line">
+          <span class="stage-lines__label">{{ row.lineNumber }}. {{ row.label }}</span>
+          <span class="stage-lines__meta">
+            {{ 'salesOrderEngines.stages.ordered' | translate }}: {{ row.ordered | number:'1.0-4' }} ·
+            {{ 'salesOrderEngines.stages.otherStages' | translate }}: {{ row.elsewhere | number:'1.0-4' }}
+          </span>
+        </div>
+        <app-input class="stage-lines__qty" [attr.data-testid]="'stage-line-qty-' + row.salesOrderLineId" type="number"
+          [label]="'salesOrderEngines.stages.thisStage' | translate" [formControl]="quantities.at(i)"
+          [min]="0" [max]="row.available" [step]="'any'"
+          [info]="'salesOrderEngines.stages.available' | translate: { qty: row.available }" />
+      </div>
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="stage-lines-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="stage-lines-save" [disabled]="quantities.invalid || saving()" (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

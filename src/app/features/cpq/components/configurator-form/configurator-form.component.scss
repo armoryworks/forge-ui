@@ -1,0 +1,80 @@
+@use 'styles/variables' as *;
+
+.cpq-form {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: $sp-lg;
+
+  @media (max-width: $breakpoint-tablet) {
+    grid-template-columns: 1fr;
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__result {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__errors {
+    margin: 0;
+    padding-left: $sp-lg;
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
+
+  &__price {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  &__price-label {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__price-value {
+    font-family: $font-family-mono;
+    font-weight: 600;
+  }
+
+  &__meta {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__breakdown {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: $font-size-xs;
+  }
+
+  &__breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    gap: $sp-sm;
+    padding: $sp-xs 0;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__subhead {
+    margin: $sp-sm 0 0;
+    font-size: $font-size-sm;
+  }
+
+  &__adds {
+    margin: 0;
+    padding-left: $sp-lg;
+    font-size: $font-size-xs;
+  }
+}

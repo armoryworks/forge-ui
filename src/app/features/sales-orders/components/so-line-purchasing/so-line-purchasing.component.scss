@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+
+.so-line-purchasing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm $sp-md;
+  font-size: $font-size-xs;
+
+  &__po {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-xs $sp-sm;
+  }
+
+  &__meta {
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    display: inline-flex;
+    gap: $sp-sm;
+  }
+}

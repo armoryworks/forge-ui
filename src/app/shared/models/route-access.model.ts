@@ -40,6 +40,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'purchase-orders': { roles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
   'sales-orders': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
   'quotes': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+  'cpq': { roles: ['Admin', 'Manager', 'OfficeManager'], capabilities: ['CAP-O2C-CPQ'] },
   'shipments': { roles: ['Admin', 'Manager', 'OfficeManager'] },
   'invoices': { roles: ['Admin', 'Manager', 'OfficeManager'] },
   'payments': { roles: ['Admin', 'Manager', 'OfficeManager'] },

@@ -1,0 +1,85 @@
+<app-dialog [title]="(isEdit() ? 'cpq.editor.editTitle' : 'cpq.editor.newTitle') | translate" width="980px" [dirty]="form.dirty" (closed)="close()">
+  <div class="cpq-editor" [appLoadingBlock]="loading()" [formGroup]="form">
+    <section class="cpq-editor__section">
+      <div class="cpq-editor__grid">
+        <app-input data-testid="cpq-editor-name" [label]="'cpq.editor.name' | translate" formControlName="name" [maxlength]="200" [required]="true" />
+        <app-entity-picker data-testid="cpq-editor-base-part" [label]="'cpq.editor.basePart' | translate" entityType="parts"
+          displayField="partNumber" secondaryDisplayField="name" formControlName="basePartId" [required]="true" [isReadonly]="!canEdit()" />
+        <app-currency-input data-testid="cpq-editor-base-price" [label]="'cpq.editor.basePrice' | translate" formControlName="basePrice" />
+        <app-toggle data-testid="cpq-editor-active" [label]="'cpq.editor.active' | translate" formControlName="isActive" />
+      </div>
+      <app-textarea data-testid="cpq-editor-description" [label]="'common.description' | translate" formControlName="description" [rows]="2" />
+    </section>
+
+    <section class="cpq-editor__section">
+      <div class="cpq-editor__section-head">
+        <h3 class="cpq-editor__title">{{ 'cpq.editor.options' | translate }}</h3>
+        @if (canEdit()) {
+          <button class="action-btn action-btn--sm" data-testid="cpq-editor-add-option" (click)="addOption()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'cpq.editor.addOption' | translate }}
+          </button>
+        }
+      </div>
+      <p class="cpq-editor__hint">{{ 'cpq.editor.optionsHint' | translate }}</p>
+      @for (group of options.controls; track group; let i = $index; let first = $first; let last = $last) {
+        <div class="cpq-editor__option" [formGroup]="group" [attr.data-testid]="'cpq-editor-option-' + i">
+          <div class="cpq-editor__grid">
+            <app-input [attr.data-testid]="'cpq-editor-option-name-' + i" [label]="'cpq.editor.optionName' | translate" formControlName="name" [maxlength]="200" [required]="true" />
+            <app-select [attr.data-testid]="'cpq-editor-option-type-' + i" [label]="'cpq.editor.optionType' | translate" [options]="typeOptions" formControlName="optionType" [isReadonly]="!canEdit()" />
+            <app-input [attr.data-testid]="'cpq-editor-option-default-' + i" [label]="'cpq.editor.defaultValue' | translate" formControlName="defaultValue" [maxlength]="500" />
+            <app-input [attr.data-testid]="'cpq-editor-option-depends-' + i" [label]="'cpq.editor.dependsOn' | translate" formControlName="dependsOnOptionId"
+              [maxlength]="200" [info]="'cpq.editor.dependsOnHint' | translate" />
+          </div>
+          <div class="cpq-editor__grid">
+            <app-textarea [attr.data-testid]="'cpq-editor-option-values-' + i" [label]="'cpq.editor.values' | translate" formControlName="valuesJson" [rows]="2" />
+            <app-textarea [attr.data-testid]="'cpq-editor-option-pricing-' + i" [label]="'cpq.editor.pricingRule' | translate" formControlName="pricingRuleJson" [rows]="2" />
+            <app-textarea [attr.data-testid]="'cpq-editor-option-bom-' + i" [label]="'cpq.editor.bomImpact' | translate" formControlName="bomImpactJson" [rows]="2" />
+            <app-textarea [attr.data-testid]="'cpq-editor-option-routing-' + i" [label]="'cpq.editor.routingImpact' | translate" formControlName="routingImpactJson" [rows]="2" />
+          </div>
+          <div class="cpq-editor__option-foot">
+            <app-input [attr.data-testid]="'cpq-editor-option-help-' + i" [label]="'cpq.editor.helpText' | translate" formControlName="helpText" [maxlength]="500" />
+            <app-toggle [attr.data-testid]="'cpq-editor-option-required-' + i" [label]="'cpq.editor.required' | translate" formControlName="isRequired" />
+            @if (canEdit()) {
+              <button class="icon-btn" [attr.data-testid]="'cpq-editor-option-up-' + i" [disabled]="first" [attr.aria-label]="'cpq.editor.moveUp' | translate" (click)="moveOption(i, -1)">
+                <span class="material-icons-outlined">arrow_upward</span>
+              </button>
+              <button class="icon-btn" [attr.data-testid]="'cpq-editor-option-down-' + i" [disabled]="last" [attr.aria-label]="'cpq.editor.moveDown' | translate" (click)="moveOption(i, 1)">
+                <span class="material-icons-outlined">arrow_downward</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [attr.data-testid]="'cpq-editor-option-remove-' + i" [attr.aria-label]="'cpq.editor.removeOption' | translate" (click)="removeOption(i)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    <section class="cpq-editor__section">
+      <h3 class="cpq-editor__title">{{ 'cpq.editor.rulesAndPricing' | translate }}</h3>
+      <app-textarea data-testid="cpq-editor-rules" [label]="'cpq.editor.validationRules' | translate" formControlName="validationRulesJson" [rows]="4" />
+      <p class="cpq-editor__hint">{{ 'cpq.editor.validationRulesHint' | translate }}</p>
+      <app-input data-testid="cpq-editor-formula" [label]="'cpq.editor.pricingFormula' | translate" formControlName="pricingFormula" [maxlength]="2000" />
+      <p class="cpq-editor__hint">{{ 'cpq.editor.pricingFormulaHint' | translate }}</p>
+    </section>
+
+    @if (detail(); as saved) {
+      <section class="cpq-editor__section" data-testid="cpq-editor-test">
+        <h3 class="cpq-editor__title">{{ 'cpq.editor.test' | translate }}</h3>
+        <p class="cpq-editor__hint">{{ 'cpq.editor.testHint' | translate }}</p>
+        @for (version of [saved]; track version.updatedAt) {
+          <app-configurator-form [configurator]="version" />
+        }
+      </section>
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="cpq-editor-cancel" (click)="close()">{{ (canEdit() ? 'common.cancel' : 'common.close') | translate }}</button>
+    @if (canEdit()) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="cpq-editor-save" [disabled]="form.invalid || saving()" (click)="save()">{{ 'common.save' | translate }}</button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

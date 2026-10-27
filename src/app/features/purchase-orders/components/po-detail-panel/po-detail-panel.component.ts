@@ -51,6 +51,7 @@ import { UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 import { PO_STATUS_CHIP_CLASSES } from '../../models/po-status.const';
+import { PoFulfilmentInfoComponent } from '../po-fulfilment-info/po-fulfilment-info.component';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -66,6 +67,7 @@ import { PO_STATUS_CHIP_CLASSES } from '../../models/po-status.const';
     DataTableComponent, ColumnCellDirective,
     EntityPickerComponent, FileUploadZoneComponent,
     DetailLoadErrorComponent,
+    PoFulfilmentInfoComponent,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -588,6 +590,11 @@ export class PoDetailPanelComponent implements OnInit {
     return status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
   }
   protected canEditLines(status: string): boolean { return status === 'Draft'; }
+
+  protected onFulfilmentChanged(): void {
+    this.loadDetail();
+    this.changed.emit();
+  }
   protected canDeleteLine(po: PurchaseOrderDetail): boolean { return this.canEditLines(po.status) && po.lines.length > 1; }
   protected canEmail(status: string): boolean { return status !== 'Cancelled' && status !== 'Draft' && status !== 'PendingApproval'; }
 

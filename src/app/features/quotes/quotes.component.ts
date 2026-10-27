@@ -27,6 +27,10 @@ import { SendQuoteEmailDialogComponent, SendQuoteEmailDialogData, SendQuoteEmail
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { CapabilityService } from '../../shared/services/capability.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { ConfigureQuoteDialogComponent } from '../cpq/components/configure-quote-dialog/configure-quote-dialog.component';
+import { CPQ_ROLES } from '../cpq/models/cpq-roles.model';
 
 @Component({
   selector: 'app-quotes',
@@ -36,7 +40,7 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule,
-    CurrencyDisplayComponent, QuoteDialogComponent,
+    CurrencyDisplayComponent, QuoteDialogComponent, ConfigureQuoteDialogComponent,
   ],
   templateUrl: './quotes.component.html',
   styleUrl: './quotes.component.scss',
@@ -50,6 +54,12 @@ export class QuotesComponent implements OnInit {
   private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
   private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly draftResume = inject(DraftResumeService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canConfigure = computed(() =>
+    this.capabilities.isEnabled('CAP-O2C-CPQ') && this.auth.hasAnyRole([...CPQ_ROLES]));
+  protected readonly showConfigureDialog = signal(false);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -151,6 +161,12 @@ export class QuotesComponent implements OnInit {
   // --- Create Dialog ---
   protected openCreateDialog(): void { this.showCreateDialog.set(true); }
   protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onConfiguredQuoteCreated(quoteId: number): void {
+    this.showConfigureDialog.set(false);
+    this.loadQuotes();
+    this.openQuoteDetail({ id: quoteId } as QuoteListItem);
+  }
+
   protected onCreateSaved(): void {
     this.closeCreateDialog();
     this.loadQuotes();

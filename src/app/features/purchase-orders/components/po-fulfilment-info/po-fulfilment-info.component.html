@@ -1,0 +1,42 @@
+<section class="po-fulfilment" data-testid="po-fulfilment-info">
+  <div class="po-fulfilment__head">
+    <span class="chip" [class.chip--info]="isDropShip()" [class.chip--muted]="!isDropShip()">
+      {{ (isDropShip() ? 'salesOrderEngines.purchase.dropShip' : 'salesOrderEngines.purchase.backToBack') | translate }}
+    </span>
+    <span class="po-fulfilment__hint">
+      {{ (isDropShip() ? 'salesOrderEngines.po.dropShipHint' : 'salesOrderEngines.po.backToBackHint') | translate }}
+    </span>
+  </div>
+  @if (isDropShip() && po().dropShipAddressText) {
+    <div class="po-fulfilment__address">
+      <span class="info-label">{{ 'salesOrderEngines.po.shipToCustomer' | translate }}</span>
+      <span class="info-value">{{ po().dropShipAddressText }}</span>
+    </div>
+  }
+  @for (line of linkedLines(); track line.id) {
+    <div class="po-fulfilment__line" [attr.data-testid]="'po-fulfilment-line-' + line.id">
+      <span>{{ line.partNumber || line.description }}</span>
+      <span class="po-fulfilment__arrow material-icons-outlined">arrow_forward</span>
+      @if (line.salesOrderId) {
+        <app-entity-link type="sales-order" [entityId]="line.salesOrderId">
+          {{ 'salesOrderEngines.po.forLine' | translate: { so: line.salesOrderNumber, line: line.salesOrderLineNumber } }}
+        </app-entity-link>
+      }
+      <span class="po-fulfilment__qty">
+        {{ 'salesOrderEngines.purchase.receivedOf' | translate: { received: (line.receivedQuantity | number:'1.0-4'), ordered: (line.orderedQuantity | number:'1.0-4') } }}
+      </span>
+      @if (canConfirm() && line.remainingQuantity > 0) {
+        <button class="action-btn action-btn--sm action-btn--primary" [attr.data-testid]="'po-confirm-delivery-' + line.id"
+          (click)="delivering.set(line)">
+          <span class="material-icons-outlined">task_alt</span>
+          {{ 'salesOrderEngines.delivery.confirm' | translate }}
+        </button>
+      }
+    </div>
+  }
+</section>
+
+@if (delivering(); as line) {
+  <app-drop-ship-delivery-dialog [purchaseOrderId]="po().id" [purchaseOrderLineId]="line.id" [poNumber]="po().poNumber"
+    [remainingQuantity]="line.remainingQuantity" (closed)="delivering.set(null)" (confirmed)="onDelivered()" />
+}

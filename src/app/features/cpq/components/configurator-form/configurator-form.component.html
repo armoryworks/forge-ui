@@ -1,0 +1,72 @@
+<div class="cpq-form">
+  <div class="cpq-form__options">
+    <app-input data-testid="cpq-quantity" type="number" [label]="'cpq.configure.quantity' | translate" [formControl]="quantity" [min]="0" [step]="'any'" [required]="true" />
+    @for (field of visibleFields(); track field.option.name) {
+      @switch (field.option.optionType) {
+        @case ('Select') {
+          <app-select [attr.data-testid]="'cpq-option-' + field.option.name" [label]="field.option.name" [options]="field.choices"
+            [formControl]="field.control" [required]="field.option.isRequired" [placeholder]="field.option.helpText ?? ''" />
+        }
+        @case ('MultiSelect') {
+          <app-select [attr.data-testid]="'cpq-option-' + field.option.name" [label]="field.option.name" [options]="field.choices"
+            [multiple]="true" [formControl]="field.control" [required]="field.option.isRequired" [placeholder]="field.option.helpText ?? ''" />
+        }
+        @case ('Checkbox') {
+          <app-toggle [attr.data-testid]="'cpq-option-' + field.option.name" [label]="field.option.name" [formControl]="field.control" />
+        }
+        @case ('Text') {
+          <app-input [attr.data-testid]="'cpq-option-' + field.option.name" [label]="field.option.name" [formControl]="field.control"
+            [maxlength]="500" [required]="field.option.isRequired" [info]="field.option.helpText ?? ''" />
+        }
+        @default {
+          <app-input [attr.data-testid]="'cpq-option-' + field.option.name" type="number" [label]="field.option.name" [formControl]="field.control"
+            [min]="field.min" [max]="field.max" [step]="'any'" [required]="field.option.isRequired" [info]="field.option.helpText ?? ''" />
+        }
+      }
+    }
+  </div>
+
+  <aside class="cpq-form__result" [appLoadingBlock]="pricing()" data-testid="cpq-result">
+    @if (result(); as r) {
+      @if (r.validationErrors.length > 0) {
+        <ul class="cpq-form__errors" data-testid="cpq-errors">
+          @for (error of r.validationErrors; track $index) {
+            <li>{{ error }}</li>
+          }
+        </ul>
+      }
+      <div class="cpq-form__price">
+        <span class="cpq-form__price-label">{{ 'cpq.configure.unitPrice' | translate }}</span>
+        <span class="cpq-form__price-value" data-testid="cpq-unit-price"><app-currency-display [value]="r.computedPrice" [currency]="null" [maximumFractionDigits]="4" /></span>
+      </div>
+      <div class="cpq-form__price">
+        <span class="cpq-form__price-label">{{ 'cpq.configure.extendedPrice' | translate: { qty: (r.quantity | number:'1.0-4') } }}</span>
+        <span class="cpq-form__price-value"><app-currency-display [value]="r.extendedPrice" [currency]="null" /></span>
+      </div>
+      @if (r.leadTimeDays > 0) {
+        <div class="cpq-form__meta">{{ 'cpq.configure.leadTime' | translate: { days: r.leadTimeDays } }}</div>
+      }
+      <ul class="cpq-form__breakdown" [attr.aria-label]="'cpq.configure.breakdown' | translate">
+        @for (line of r.priceBreakdown; track $index) {
+          <li class="cpq-form__breakdown-row">
+            <span>{{ line.optionName }}@if (line.selection) { · {{ line.selection }} }</span>
+            <app-currency-display [value]="line.priceImpact" [currency]="null" [maximumFractionDigits]="4" />
+          </li>
+        }
+      </ul>
+      @if (r.bomPreview.length > 0 || r.routingPreview.length > 0) {
+        <h4 class="cpq-form__subhead">{{ 'cpq.configure.adds' | translate }}</h4>
+        <ul class="cpq-form__adds">
+          @for (bom of r.bomPreview; track $index) {
+            <li>{{ bom.partNumber || ('#' + bom.partId) }} × {{ bom.quantity | number:'1.0-4' }} ({{ bom.source }})</li>
+          }
+          @for (step of r.routingPreview; track $index) {
+            <li>{{ 'cpq.configure.step' | translate: { name: step.operationName, minutes: (step.estimatedMinutes | number:'1.0-1') } }}</li>
+          }
+        </ul>
+      }
+    } @else {
+      <span class="cpq-form__meta">{{ 'cpq.configure.noPrice' | translate }}</span>
+    }
+  </aside>
+</div>

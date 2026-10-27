@@ -1,0 +1,38 @@
+<app-page-layout [pageTitle]="'cpq.list.title' | translate" [pageSubtitle]="'cpq.list.subtitle' | translate">
+  <ng-container toolbar>
+    <span appSpacer></span>
+    <button class="action-btn action-btn--sm" data-testid="cpq-new-configured-quote" (click)="quoting.set(true)">
+      <span class="material-icons-outlined">request_quote</span>
+      {{ 'cpq.configure.newConfiguredQuote' | translate }}
+    </button>
+    @if (canAuthor()) {
+      <button class="action-btn action-btn--sm action-btn--create" data-testid="cpq-new-configurator" (click)="openEditor('new')">
+        <span class="material-icons-outlined">add</span>
+        {{ 'cpq.list.new' | translate }}
+      </button>
+    }
+  </ng-container>
+
+  <ng-container content>
+    <app-data-table tableId="cpq-configurators" [columns]="columns" [data]="configurators()" [loading]="loading()"
+      emptyIcon="tune" [emptyMessage]="'cpq.list.empty' | translate" [clickableRows]="true" (rowClick)="openRow($event)">
+      <ng-template appColumnCell="basePrice" let-row>
+        @if (row.basePrice !== null) {
+          <app-currency-display [value]="row.basePrice" [currency]="null" [maximumFractionDigits]="4" />
+        }
+      </ng-template>
+      <ng-template appColumnCell="isActive" let-row>
+        <span class="chip" [class.chip--success]="row.isActive" [class.chip--muted]="!row.isActive">
+          {{ (row.isActive ? 'cpq.list.active' : 'cpq.list.inactive') | translate }}
+        </span>
+      </ng-template>
+    </app-data-table>
+  </ng-container>
+</app-page-layout>
+
+@if (editorOpen()) {
+  <app-configurator-editor-dialog [configuratorId]="editorId()" [canEdit]="canAuthor()" (closed)="closeEditor()" (saved)="onSaved()" />
+}
+@if (quoting()) {
+  <app-configure-quote-dialog (closed)="quoting.set(false)" (quoteCreated)="onQuoteCreated($event)" (partCreated)="quoting.set(false)" />
+}

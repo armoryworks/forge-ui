@@ -1,0 +1,38 @@
+<app-dialog [title]="'cpq.configure.title' | translate" width="900px" (closed)="close()">
+  <div class="cpq-quote">
+    <div class="cpq-quote__head">
+      <app-select data-testid="cpq-configurator" [label]="'cpq.configure.configurator' | translate" [options]="configuratorOptions()"
+        [formControl]="configuratorControl" [required]="true" />
+      @if (allowQuote()) {
+        <app-entity-picker data-testid="cpq-customer" [label]="'cpq.configure.customer' | translate" entityType="customers"
+          displayField="name" [formControl]="customerControl" [required]="true" />
+      }
+    </div>
+    <div [appLoadingBlock]="loading()">
+      @if (configurator(); as detail) {
+        @if (detail.description) {
+          <p class="cpq-quote__description">{{ detail.description }}</p>
+        }
+        <app-configurator-form [configurator]="detail" (selectionChange)="onSelection($event)" (resultChange)="onResult($event)" />
+      }
+    </div>
+  </div>
+  <div dialog-footer>
+    @if (allowQuote()) {
+      <app-toggle data-testid="cpq-create-part" [label]="'cpq.configure.alsoCreatePart' | translate" [formControl]="createPartControl" />
+    }
+    <button class="action-btn" data-testid="cpq-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="partViolations" [loading]="saving()">
+      <button class="action-btn" data-testid="cpq-generate-part" [disabled]="partViolations().length > 0 || saving()" (click)="generatePart()">
+        {{ 'cpq.configure.generatePart' | translate }}
+      </button>
+    </app-validation-button>
+    @if (allowQuote()) {
+      <app-validation-button [violations]="quoteViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="cpq-generate-quote" [disabled]="quoteViolations().length > 0 || saving()" (click)="generateQuote()">
+          {{ 'cpq.configure.generateQuote' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

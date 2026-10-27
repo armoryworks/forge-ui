@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+.stage-lines__hint {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.stage-lines {
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-xs 0;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__line {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+  }
+
+  &__meta {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__qty {
+    width: 160px;
+  }
+}

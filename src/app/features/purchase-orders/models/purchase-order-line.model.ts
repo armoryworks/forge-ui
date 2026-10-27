@@ -24,4 +24,9 @@ export interface PurchaseOrderLine {
   lotTracked?: boolean;
   unitSymbol?: string | null;
   quantityDecimalPlaces?: number | null;
+  /** The sales order line a drop-ship or back-to-back line buys for. */
+  salesOrderLineId?: number | null;
+  salesOrderId?: number | null;
+  salesOrderNumber?: string | null;
+  salesOrderLineNumber?: number | null;
 }

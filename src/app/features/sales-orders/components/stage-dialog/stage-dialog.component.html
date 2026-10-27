@@ -1,0 +1,16 @@
+<app-dialog [title]="(isEdit() ? 'salesOrderEngines.stages.editTitle' : 'salesOrderEngines.stages.addTitle') | translate" width="460px"
+  [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input data-testid="stage-name" [label]="'salesOrderEngines.stages.name' | translate" formControlName="name" [maxlength]="100" [required]="true" />
+    <app-input data-testid="stage-sequence" type="number" [label]="'salesOrderEngines.stages.sequence' | translate" formControlName="sequence" [min]="1" [step]="1" />
+    <app-datepicker data-testid="stage-planned-complete" [label]="'salesOrderEngines.stages.plannedComplete' | translate" formControlName="plannedProductionComplete" />
+    <app-datepicker data-testid="stage-planned-ship" [label]="'salesOrderEngines.stages.plannedShip' | translate" formControlName="plannedShipDate" />
+    <app-textarea data-testid="stage-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="stage-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="stage-save" [disabled]="form.invalid || saving()" (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

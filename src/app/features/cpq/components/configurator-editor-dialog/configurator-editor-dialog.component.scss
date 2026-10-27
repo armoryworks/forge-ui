@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+
+.cpq-editor {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $sp-sm $sp-md;
+  }
+
+  &__option {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__option-foot {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+
+    app-input { flex: 1; }
+  }
+}

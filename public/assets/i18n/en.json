@@ -90,7 +90,8 @@
     "exchangeRates": "Exchange Rates",
     "openingStock": "Opening Stock",
     "inventoryValuation": "Inventory Valuation",
-    "creditMemos": "Credit Memos"
+    "creditMemos": "Credit Memos",
+    "configurators": "Configurators"
   },
   "navGroups": {
     "operations": "Operations",
@@ -14653,6 +14654,138 @@
       "BankTransfer": "Bank transfer",
       "Wire": "Wire",
       "Other": "Other"
+    }
+  },
+  "cpq": {
+    "configure": {
+      "title": "New configured quote",
+      "newConfiguredQuote": "New configured quote",
+      "configurator": "Configurator",
+      "customer": "Customer",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "extendedPrice": "Total for {{qty}}",
+      "leadTime": "Adds {{days}} day(s) of lead time",
+      "breakdown": "Price breakdown",
+      "adds": "The options add",
+      "step": "Step {{name}} ({{minutes}} min)",
+      "noPrice": "Fill the options to see the price.",
+      "notPriced": "The configuration has not been priced yet.",
+      "pickConfigurator": "Choose a configurator.",
+      "pickCustomer": "Choose a customer for the quote.",
+      "alsoCreatePart": "Also create the configured part",
+      "generatePart": "Create part only",
+      "generateQuote": "Create quote",
+      "quoteCreated": "Draft quote created from the configuration.",
+      "partCreated": "Configured part created."
+    },
+    "editor": {
+      "newTitle": "New configurator",
+      "editTitle": "Configurator",
+      "name": "Name",
+      "basePart": "Base part",
+      "basePrice": "Base price",
+      "active": "Active",
+      "options": "Options",
+      "addOption": "Add option",
+      "optionsHint": "Values: [\"Red\", \"Blue\"] or {\"min\": 10, \"max\": 48}. Pricing rule: {\"adders\": [{\"when\": \"Red\", \"type\": \"Fixed | PerUnit | Percent | PerValue\", \"amount\": 25}]}. BOM impact: [{\"when\": \"Red\", \"partNumber\": \"P-1\", \"quantity\": 2}]. Routing impact: [{\"title\": \"Paint\", \"setupMinutes\": 15}].",
+      "optionName": "Option name",
+      "optionType": "Type",
+      "defaultValue": "Default",
+      "dependsOn": "Applies when",
+      "dependsOnHint": "Another option's name, or Name=Value",
+      "values": "Allowed values (JSON)",
+      "pricingRule": "Price adders (JSON)",
+      "bomImpact": "BOM impact (JSON)",
+      "routingImpact": "Routing impact (JSON)",
+      "helpText": "Help text",
+      "required": "Required",
+      "moveUp": "Move option up",
+      "moveDown": "Move option down",
+      "removeOption": "Remove option",
+      "rulesAndPricing": "Rules and pricing",
+      "validationRules": "Validation rules (JSON)",
+      "validationRulesHint": "[{\"type\": \"requires\" | \"excludes\", \"if\": {\"option\": \"Color\", \"equals\": \"Gold\"}, \"then\": {\"option\": \"Coating\", \"selected\": true}, \"message\": \"...\"}]. A condition can use equals, in, selected, min or max.",
+      "pricingFormula": "Pricing formula",
+      "pricingFormulaHint": "Added per unit. Use option names (in [brackets] when they contain spaces), quantity and basePrice with + - * / %, comparisons, min, max, round, ceil, floor, abs and if(condition, then, else).",
+      "test": "Test",
+      "testHint": "Prices the saved configurator. Save to test your changes.",
+      "saved": "Configurator {{name}} saved."
+    },
+    "list": {
+      "title": "Configurators",
+      "subtitle": "Configure-to-order products: options, rules and pricing",
+      "new": "New configurator",
+      "options": "Options",
+      "active": "Active",
+      "inactive": "Inactive",
+      "empty": "No configurators yet"
+    },
+    "optionTypes": {
+      "Select": "Choice",
+      "MultiSelect": "Multiple choice",
+      "Checkbox": "Yes / no",
+      "Quantity": "Whole number",
+      "Numeric": "Number",
+      "Text": "Text"
+    }
+  },
+  "salesOrderEngines": {
+    "purchase": {
+      "dropShip": "Drop-ship",
+      "backToBack": "Back-to-back",
+      "dropShipAction": "Drop-ship…",
+      "backToBackAction": "Back-to-back PO…",
+      "dropShipTitle": "Drop-ship line {{line}}",
+      "backToBackTitle": "Back-to-back PO for line {{line}}",
+      "dropShipHint": "Raises a purchase order telling the vendor to ship straight to the customer's ship-to address. Nothing passes through stock.",
+      "backToBackHint": "Raises a purchase order to our warehouse for this line. What is received is reserved to the line.",
+      "vendorPlaceholder": "Empty uses the part's preferred vendor",
+      "quantity": "Quantity",
+      "openQuantity": "The line still needs {{qty}}",
+      "unitCost": "Unit cost",
+      "expectedDate": "Expected delivery",
+      "create": "Create purchase order",
+      "created": "Purchase order created.",
+      "receivedOf": "{{received}} of {{ordered}} received",
+      "readyToShip": "Ready to ship"
+    },
+    "delivery": {
+      "title": "Confirm drop-ship delivery on {{po}}",
+      "quantity": "Delivered quantity",
+      "remaining": "{{qty}} still to be delivered",
+      "tracking": "Tracking number",
+      "confirm": "Confirm delivery",
+      "confirmed": "Delivery confirmed. The sales order line is shipped and ready to invoice."
+    },
+    "po": {
+      "dropShipHint": "The vendor ships straight to the customer. Confirm the delivery instead of receiving it.",
+      "backToBackHint": "Bought for a sales order line. Receipts are reserved to it.",
+      "shipToCustomer": "Ship to customer",
+      "forLine": "{{so}} line {{line}}"
+    },
+    "stages": {
+      "add": "Add stage",
+      "addTitle": "Add stage",
+      "editTitle": "Edit stage",
+      "name": "Name",
+      "sequence": "Sequence",
+      "plannedComplete": "Planned production complete",
+      "plannedShip": "Planned ship",
+      "saved": "Stage {{name}} saved.",
+      "deleteTitle": "Delete this stage?",
+      "deleteMessage": "Stage {{name}} and its line allocations will be removed.",
+      "deleted": "Stage {{name}} deleted.",
+      "assignLines": "Assign lines",
+      "assignTitle": "Lines in {{name}}",
+      "assignHint": "Split a line across stages by giving each stage part of its quantity. All stages together cannot exceed what the line ordered.",
+      "ordered": "Ordered",
+      "otherStages": "Other stages",
+      "thisStage": "This stage",
+      "available": "Up to {{qty}}",
+      "overAllocated": "Line {{line}}: at most {{available}} can go in this stage.",
+      "linesSaved": "Lines in {{name}} saved.",
+      "noLines": "No lines assigned yet."
     }
   }
 }

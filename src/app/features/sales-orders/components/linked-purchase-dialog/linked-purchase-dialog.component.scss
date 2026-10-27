@@ -1,0 +1,8 @@
+@use 'styles/variables' as *;
+
+.linked-purchase__hint {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
