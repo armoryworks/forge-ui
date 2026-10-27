@@ -157,6 +157,8 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   ]);
   private readonly timerJobId = toSignal(this.timerForm.controls.jobId.valueChanges, { initialValue: null });
   protected readonly timerHasJob = computed(() => this.timerJobId() !== null);
+  private readonly timerOperationId = toSignal(this.timerForm.controls.operationId.valueChanges, { initialValue: null });
+  protected readonly timerHasOperation = computed(() => this.timerHasJob() && this.timerOperationId() !== null);
   protected readonly entryTypeOptions: SelectOption[] = [
     { value: 'Run', label: this.translate.instant('timeTracking.entryTypeRun') },
     { value: 'Setup', label: this.translate.instant('timeTracking.entryTypeSetup') },
@@ -323,7 +325,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   }
 
   private loadTimerOperations(jobId: number | null): void {
-    this.timerForm.controls.operationId.setValue(null, { emitEvent: false });
+    this.timerForm.controls.operationId.setValue(null);
     this.timerOperations.set([]);
     if (!jobId || !this.operationTimersEnabled()) return;
     this.jobOperations.getOperations(jobId).pipe(catchError(() => of(null))).subscribe(result => {

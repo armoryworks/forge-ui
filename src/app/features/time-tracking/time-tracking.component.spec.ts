@@ -38,6 +38,7 @@ interface PageInternals {
   openStartTimer(): void;
   timerForm: { patchValue(value: Record<string, unknown>): void; controls: { jobId: { setValue(v: number | null): void } } };
   timerOperationOptions: () => { value: unknown }[];
+  timerHasOperation: () => boolean;
 }
 
 function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
@@ -256,11 +257,16 @@ describe('TimeTrackingComponent', () => {
 
     expect(jobOperations.getOperations).toHaveBeenCalledWith(42);
     expect(component.timerOperationOptions().map(o => o.value)).toEqual([null, 11]);
+    expect(component.timerHasOperation()).toBe(false);
     component.timerForm.patchValue({ operationId: 11, entryType: 'Setup' });
+    expect(component.timerHasOperation()).toBe(true);
     component.startTimer();
 
     expect(jobOperations.startTimer).toHaveBeenCalledWith(42, 11, 'Setup');
     expect(service.startTimer).not.toHaveBeenCalled();
+
+    component.timerForm.controls.jobId.setValue(43);
+    expect(component.timerHasOperation()).toBe(false);
   });
 
   it('starts a job timer without an operation, and an overhead timer with only a category', () => {
