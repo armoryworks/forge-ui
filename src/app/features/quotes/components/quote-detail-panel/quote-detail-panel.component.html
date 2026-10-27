@@ -53,10 +53,33 @@
           <span class="info-label">{{ 'quotes.customer' | translate }}</span>
           <span class="info-value"><app-entity-link type="customer" [entityId]="quote.customerId">{{ quote.customerName }}</app-entity-link></span>
         </div>
-        @if (quote.expirationDate) {
+        @if (editingValidUntil()) {
+          <div class="info-item info-item--edit" data-testid="quote-valid-until-editor">
+            <app-datepicker [label]="'quotes.validUntil' | translate" [formControl]="validUntilControl"
+              [min]="quote.status === 'Draft' ? null : today" [required]="true" data-testid="quote-valid-until-input" />
+            @if (quote.status === 'Expired') {
+              <span class="info-hint">{{ 'quotes.validUntilReopenHint' | translate }}</span>
+            }
+            <div class="number-edit__actions">
+              <button class="action-btn action-btn--sm" data-testid="quote-valid-until-cancel" (click)="cancelValidUntilEdit()" [disabled]="savingValidUntil()">{{ 'common.cancel' | translate }}</button>
+              <button class="action-btn action-btn--sm action-btn--primary" data-testid="quote-valid-until-save" (click)="saveValidUntil()" [disabled]="validUntilControl.invalid || savingValidUntil()">
+                <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
+              </button>
+            </div>
+          </div>
+        } @else if (quote.expirationDate || canEditValidUntil()) {
           <div class="info-item">
-            <span class="info-label">{{ 'quotes.expiration' | translate }}</span>
-            <span class="info-value">{{ quote.expirationDate | dateOnly }}</span>
+            <span class="info-label">{{ 'quotes.validUntil' | translate }}</span>
+            <span class="info-value" data-testid="quote-valid-until">
+              {{ quote.expirationDate ? (quote.expirationDate | dateOnly) : '—' }}
+              @if (canEditValidUntil()) {
+                <button class="icon-btn" data-testid="quote-valid-until-edit-btn" (click)="startEditValidUntil()"
+                  [matTooltip]="'quotes.editValidUntil' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'quotes.editValidUntil' | translate">
+                  <span class="material-icons-outlined">edit_calendar</span>
+                </button>
+              }
+            </span>
           </div>
         }
         @if (quote.sentDate) {

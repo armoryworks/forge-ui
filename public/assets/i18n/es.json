@@ -334,7 +334,8 @@
       "Shipment": "Envío",
       "Invoice": "Factura",
       "Payment": "Pago",
-      "Lot": "Lote"
+      "Lot": "Lote",
+      "Contact": "Contacto"
     },
     "sourceFields": {
       "Title": "Título",
@@ -358,7 +359,8 @@
       "server": "Servidor"
     },
     "breadcrumb": "Ruta de navegación",
-    "searchFailed": "La búsqueda no está disponible en este momento. Inténtelo de nuevo en un momento."
+    "searchFailed": "La búsqueda no está disponible en este momento. Inténtelo de nuevo en un momento.",
+    "suggestions": "Sugerencias"
   },
   "app": {
     "updateAvailable": "Hay una nueva versión disponible.",
@@ -2670,7 +2672,9 @@
         "firstName": "Nombre",
         "lastName": "Apellido",
         "email": "Correo electrónico"
-      }
+      },
+      "outreachPrefsAriaLabel": "Preferencias de contacto",
+      "outreachIntro": "Los canales excluidos y una fecha de no contactar mantienen a este contacto fuera de las campañas de marketing y de ventas."
     },
     "identityCluster": {
       "nameImmutabilityHint": "Cambiar el nombre actualiza este cliente en todas partes.",
@@ -2891,6 +2895,10 @@
     "creditMessages": {
       "holdPlaced": "Retención de crédito aplicada",
       "holdReleased": "Retención de crédito liberada"
+    },
+    "taxCode": {
+      "label": "Código de impuesto predeterminado",
+      "addressDefault": "Según la dirección de envío"
     }
   },
   "priceListEntry": {
@@ -3159,7 +3167,9 @@
       "markQuoted": "Marcar Cotizado desde muestra",
       "markLost": "Marcar Perdido desde muestra",
       "markStale": "Marcar Inactivo",
-      "transitioned": "Estado de muestra definido como {{ status }}."
+      "transitioned": "Estado de muestra definido como {{ status }}.",
+      "colRecipient": "Prospecto / cliente",
+      "customerRef": "Cliente n.º {{id}}"
     },
     "editLead": "Editar Prospecto",
     "statusUpdated": "Estado definido como {{ status }}.",
@@ -3378,7 +3388,21 @@
     },
     "convertAnyway": "Convertir de todos modos",
     "convertRedFlagsMessage": "Este prospecto todavía tiene asuntos pendientes: {{flags}}. ¿Convertirlo en cliente de todos modos?",
-    "convertRedFlagsTitle": "¿Convertir este prospecto?"
+    "convertRedFlagsTitle": "¿Convertir este prospecto?",
+    "sendSample": {
+      "open": "Enviar muestra",
+      "title": "Enviar una muestra a {{name}}",
+      "description": "Descripción de la muestra",
+      "quantity": "Cantidad",
+      "shipTo": "Dirección de envío",
+      "carrier": "Transportista",
+      "tracking": "Número de rastreo",
+      "trackingHint": "Con un número de rastreo, la muestra se registra como enviada.",
+      "followUp": "Dar seguimiento el",
+      "send": "Enviar muestra",
+      "shipped": "Muestra registrada como enviada",
+      "requested": "Muestra solicitada"
+    }
   },
   "expenses": {
     "title": "Gastos",
@@ -6748,7 +6772,11 @@
       "created": "Plantilla recurrente creada.",
       "deleted": "Plantilla recurrente eliminada.",
       "deleteTitle": "¿Eliminar plantilla recurrente?",
-      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Las órdenes ya generadas se conservan; solo se detienen las generaciones futuras."
+      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Las órdenes ya generadas se conservan; solo se detienen las generaciones futuras.",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "paused": "{{name}} en pausa. No se generarán pedidos hasta que se reanude.",
+      "resumed": "{{name}} reanudado."
     },
     "title": "Órdenes de Venta",
     "subtitle": "Órdenes de clientes, del borrador a la entrega",
@@ -6972,7 +7000,7 @@
       "portalTitle": "Enviar enlace de aceptación por correo",
       "recipientEmail": "Correo del destinatario",
       "verificationKey": "Clave de verificación",
-      "verificationKeyHint": "Clave opcional que el cliente debe ingresar para aceptar.",
+      "verificationKeyHint": "El cliente escribe esta clave (p. ej., su número de orden de compra) para aceptar. Al menos 3 caracteres.",
       "validDays": "Días de validez",
       "generateLink": "Enviar enlace",
       "emailLanguage": "Idioma del correo",
@@ -7174,7 +7202,12 @@
     "convertOnHoldTitle": "Cliente con bloqueo de crédito",
     "taxAutoFilledTooltip": "Completado según el estado del cliente. Edítelo para reemplazarlo.",
     "taxAutoDefault": "Predeterminado {{rate}}%",
-    "creditHoldWarning": "Este cliente tiene un bloqueo de crédito ({{reason}}). Aún puede guardar y enviar esta cotización, pero una orden convertida desde ella no se podrá confirmar ni enviar hasta que se libere el bloqueo."
+    "creditHoldWarning": "Este cliente tiene un bloqueo de crédito ({{reason}}). Aún puede guardar y enviar esta cotización, pero una orden convertida desde ella no se podrá confirmar ni enviar hasta que se libere el bloqueo.",
+    "validUntil": "Válida hasta",
+    "editValidUntil": "Cambiar fecha de validez",
+    "validUntilSaved": "Fecha de validez actualizada",
+    "validUntilReopened": "Cotización extendida y devuelta a Enviada",
+    "validUntilReopenHint": "Esta cotización venció. Una fecha nueva de hoy o posterior la devuelve a Enviada."
   },
   "shipments": {
     "shipmentNumberLabel": "Número de envío",
@@ -8981,7 +9014,19 @@
     "restockedInto": "{{quantity}} en {{location}}",
     "lot": "Lote {{lot}}",
     "scrapped": "Desechado",
-    "creditMemo": "Nota de crédito"
+    "creditMemo": "Nota de crédito",
+    "source": "Origen de la devolución",
+    "sourceDirect": "Directa (RMA contra una orden de trabajo)",
+    "sourceChannel": "Canal de venta (aprobada por el canal)",
+    "channelOrderSearch": "Buscar el pedido del canal (pedido, pedido del canal o comprador)",
+    "channelOrder": "Pedido del canal",
+    "channel": "Canal",
+    "externalOrder": "N.º de pedido del canal",
+    "buyer": "Comprador",
+    "channelLine": "Línea devuelta",
+    "externalRmaId": "ID de devolución del canal",
+    "refundAmount": "Importe del reembolso",
+    "channelCreated": "Devolución del canal registrada"
   },
   "recalls": {
     "title": "Retiradas",
@@ -14654,5 +14699,63 @@
       "Wire": "Giro",
       "Other": "Otro"
     }
+  },
+  "csvImport": {
+    "step1": "1. Elija sus datos",
+    "step2": "2. Revise e importe",
+    "uploadCsv": "Subir CSV",
+    "or": "o",
+    "downloadTemplate": "Descargar plantilla",
+    "pasteLabel": "Pegue filas separadas por comas o tabulaciones (primero la fila de encabezados)",
+    "parse": "Leer filas",
+    "reset": "Empezar de nuevo",
+    "noContent": "No hay nada que leer.",
+    "noDataRows": "No se encontraron filas de datos debajo de los encabezados.",
+    "badNumber": "Fila {{row}}: {{field}} no es un número.",
+    "badDate": "Fila {{row}}: {{field}} no es una fecha (use AAAA-MM-DD o MM/DD/AAAA).",
+    "rowCount": "{{count}} filas",
+    "validCount": "{{count}} listas",
+    "invalidCount": "{{count}} con problemas",
+    "fixAndRetry": "No se importa nada hasta corregir todas las filas. Corrija el archivo y vuelva a leerlo.",
+    "colStatus": "Revisión",
+    "validate": "Revisar filas",
+    "commit": "Importar",
+    "status": {
+      "Pending": "Sin revisar",
+      "Valid": "Lista",
+      "Invalid": "Problema",
+      "Created": "Importada"
+    }
+  },
+  "jobImport": {
+    "open": "Importar órdenes de trabajo",
+    "title": "Importar órdenes de trabajo",
+    "subtitle": "Traiga órdenes de trabajo abiertas y terminadas desde una hoja de cálculo u otro sistema",
+    "columnsHint": "Columnas: Número de orden (en blanco toma el siguiente número), Título, Cliente (número o nombre), Parte (número o nombre), Cantidad, Fecha de inicio, Fecha de entrega, Fecha de terminación, Etapa, Tipo de flujo, Prioridad, OC del cliente, Descripción.",
+    "colNumber": "N.º de orden",
+    "colTitle": "Título",
+    "colCustomer": "Cliente",
+    "colPart": "Parte",
+    "colQuantity": "Cant.",
+    "colStage": "Etapa",
+    "committed": "{{count}} órdenes de trabajo importadas",
+    "viewJobs": "Ver órdenes de trabajo"
+  },
+  "invoiceImport": {
+    "open": "Importar historial",
+    "title": "Importar facturas históricas",
+    "subtitle": "Traiga facturas anteriores, abiertas o pagadas, desde otro sistema",
+    "columnsHint": "Una fila por línea de factura; las filas con el mismo número de factura forman una factura. Columnas: Número de factura, Cliente (número o nombre), Fecha de factura, Fecha de vencimiento, Parte, Descripción, Cantidad, Precio unitario, Impuesto, Total, Importe pagado, Fecha de pago, Estado (Abierta, Pagada o Anulada), OC del cliente.",
+    "noGl": "Las facturas importadas y sus importes pagados son solo historial: no se registran en el libro mayor y no envían correo.",
+    "noGlFullGl": "El libro mayor completo está activo. Las facturas importadas y sus importes pagados no se registran en el libro: el saldo inicial de cuentas por cobrar proviene del asiento de saldos iniciales y sus partidas abiertas, así que registrarlas lo contaría dos veces.",
+    "colNumber": "N.º de factura",
+    "colCustomer": "Cliente",
+    "colDate": "Fecha",
+    "colLine": "Línea",
+    "colTotal": "Total",
+    "colPaid": "Pagado",
+    "invoiceCount": "{{count}} facturas",
+    "committed": "{{count}} facturas importadas",
+    "viewInvoices": "Ver facturas"
   }
 }

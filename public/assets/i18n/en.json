@@ -334,7 +334,8 @@
       "Shipment": "Shipment",
       "Invoice": "Invoice",
       "Payment": "Payment",
-      "Lot": "Lot"
+      "Lot": "Lot",
+      "Contact": "Contact"
     },
     "sourceFields": {
       "Title": "Title",
@@ -358,7 +359,8 @@
       "server": "Server"
     },
     "breadcrumb": "Breadcrumb",
-    "searchFailed": "Search is unavailable right now. Try again in a moment."
+    "searchFailed": "Search is unavailable right now. Try again in a moment.",
+    "suggestions": "Suggestions"
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -2675,7 +2677,9 @@
         "firstName": "First Name",
         "lastName": "Last Name",
         "email": "Email"
-      }
+      },
+      "outreachPrefsAriaLabel": "Outreach preferences",
+      "outreachIntro": "Opted-out channels and a do-not-contact date keep this contact out of marketing and sales outreach."
     },
     "identityCluster": {
       "nameImmutabilityHint": "Renaming updates this customer everywhere.",
@@ -2891,6 +2895,10 @@
     "creditMessages": {
       "holdPlaced": "Credit hold placed",
       "holdReleased": "Credit hold released"
+    },
+    "taxCode": {
+      "label": "Default tax code",
+      "addressDefault": "By ship-to address"
     }
   },
   "priceListEntry": {
@@ -3159,7 +3167,9 @@
       "markQuoted": "Mark Quoted from sample",
       "markLost": "Mark Lost from sample",
       "markStale": "Mark Stale",
-      "transitioned": "Sample status set to {{ status }}."
+      "transitioned": "Sample status set to {{ status }}.",
+      "colRecipient": "Lead / customer",
+      "customerRef": "Customer #{{id}}"
     },
     "editLead": "Edit Lead",
     "statusUpdated": "Status set to {{ status }}.",
@@ -3378,7 +3388,21 @@
     },
     "convertAnyway": "Convert anyway",
     "convertRedFlagsMessage": "This lead still has open concerns: {{flags}}. Convert it to a customer anyway?",
-    "convertRedFlagsTitle": "Convert this lead?"
+    "convertRedFlagsTitle": "Convert this lead?",
+    "sendSample": {
+      "open": "Send sample",
+      "title": "Send a sample to {{name}}",
+      "description": "Sample description",
+      "quantity": "Quantity",
+      "shipTo": "Ship-to address",
+      "carrier": "Carrier",
+      "tracking": "Tracking number",
+      "trackingHint": "With a tracking number the sample is recorded as shipped.",
+      "followUp": "Follow up on",
+      "send": "Send sample",
+      "shipped": "Sample recorded as shipped",
+      "requested": "Sample requested"
+    }
   },
   "expenses": {
     "title": "Expenses",
@@ -6755,7 +6779,11 @@
       "created": "Recurring order template created.",
       "deleted": "Recurring order template deleted.",
       "deleteTitle": "Delete recurring template?",
-      "deleteMessage": "Soft-delete \"{{name}}\"? Already-generated sales orders are kept; only future generations stop."
+      "deleteMessage": "Soft-delete \"{{name}}\"? Already-generated sales orders are kept; only future generations stop.",
+      "pause": "Pause",
+      "resume": "Resume",
+      "paused": "{{name}} paused. No orders will be generated until it is resumed.",
+      "resumed": "{{name}} resumed."
     },
     "title": "Sales Orders",
     "subtitle": "Customer orders from draft to delivery",
@@ -6979,7 +7007,7 @@
       "portalTitle": "E-mail acceptance link",
       "recipientEmail": "Recipient email",
       "verificationKey": "Verification key",
-      "verificationKeyHint": "Optional key the customer must enter to accept.",
+      "verificationKeyHint": "The customer types this key (e.g. their PO number) to accept. At least 3 characters.",
       "validDays": "Valid days",
       "generateLink": "Send link",
       "emailLanguage": "E-mail language",
@@ -7181,7 +7209,12 @@
     "convertOnHoldTitle": "Customer on credit hold",
     "taxAutoFilledTooltip": "Auto-filled from the customer's state. Edit to override.",
     "taxAutoDefault": "Default {{rate}}%",
-    "creditHoldWarning": "This customer is on credit hold ({{reason}}). You can still save and send this quote, but an order converted from it can't be confirmed or shipped until the hold is released."
+    "creditHoldWarning": "This customer is on credit hold ({{reason}}). You can still save and send this quote, but an order converted from it can't be confirmed or shipped until the hold is released.",
+    "validUntil": "Valid until",
+    "editValidUntil": "Change valid-until date",
+    "validUntilSaved": "Valid-until date updated",
+    "validUntilReopened": "Quote extended and returned to Sent",
+    "validUntilReopenHint": "This quote has expired. A new date of today or later returns it to Sent."
   },
   "shipments": {
     "shipmentNumberLabel": "Shipment Number",
@@ -8988,7 +9021,19 @@
     "restockedInto": "{{quantity}} into {{location}}",
     "lot": "Lot {{lot}}",
     "scrapped": "Scrapped",
-    "creditMemo": "Credit memo"
+    "creditMemo": "Credit memo",
+    "source": "Return source",
+    "sourceDirect": "Direct (RMA against a job)",
+    "sourceChannel": "Sales channel (approved by the channel)",
+    "channelOrderSearch": "Find the channel order (order, channel order or buyer)",
+    "channelOrder": "Channel order",
+    "channel": "Channel",
+    "externalOrder": "Channel order #",
+    "buyer": "Buyer",
+    "channelLine": "Line returned",
+    "externalRmaId": "Channel return ID",
+    "refundAmount": "Refund amount",
+    "channelCreated": "Channel return recorded"
   },
   "recalls": {
     "title": "Recalls",
@@ -14654,5 +14699,63 @@
       "Wire": "Wire",
       "Other": "Other"
     }
+  },
+  "csvImport": {
+    "step1": "1. Choose your data",
+    "step2": "2. Check and import",
+    "uploadCsv": "Upload CSV",
+    "or": "or",
+    "downloadTemplate": "Download template",
+    "pasteLabel": "Paste comma- or tab-separated rows (header row first)",
+    "parse": "Read rows",
+    "reset": "Start over",
+    "noContent": "There is nothing to read.",
+    "noDataRows": "No data rows were found under the header row.",
+    "badNumber": "Row {{row}}: {{field}} is not a number.",
+    "badDate": "Row {{row}}: {{field}} is not a date (use YYYY-MM-DD or MM/DD/YYYY).",
+    "rowCount": "{{count}} rows",
+    "validCount": "{{count}} ready",
+    "invalidCount": "{{count}} with problems",
+    "fixAndRetry": "Nothing is imported until every row is fixed. Correct the file and read it again.",
+    "colStatus": "Check",
+    "validate": "Check rows",
+    "commit": "Import",
+    "status": {
+      "Pending": "Not checked",
+      "Valid": "Ready",
+      "Invalid": "Problem",
+      "Created": "Imported"
+    }
+  },
+  "jobImport": {
+    "open": "Import jobs",
+    "title": "Import jobs",
+    "subtitle": "Bring open and finished jobs over from a spreadsheet or another system",
+    "columnsHint": "Columns: Job Number (blank takes the next number), Title, Customer (number or name), Part (number or name), Quantity, Start Date, Due Date, Completed Date, Stage, Track Type, Priority, Customer PO, Description.",
+    "colNumber": "Job #",
+    "colTitle": "Title",
+    "colCustomer": "Customer",
+    "colPart": "Part",
+    "colQuantity": "Qty",
+    "colStage": "Stage",
+    "committed": "{{count}} jobs imported",
+    "viewJobs": "View jobs"
+  },
+  "invoiceImport": {
+    "open": "Import history",
+    "title": "Import historical invoices",
+    "subtitle": "Bring past invoices, open or paid, over from another system",
+    "columnsHint": "One row per invoice line; rows with the same Invoice Number are one invoice. Columns: Invoice Number, Customer (number or name), Invoice Date, Due Date, Part, Description, Quantity, Unit Price, Tax, Total, Paid Amount, Paid Date, Status (Open, Paid or Voided), Customer PO.",
+    "noGl": "Imported invoices and their paid amounts are history only: they are not posted to the general ledger and send no email.",
+    "noGlFullGl": "Full general ledger is on. Imported invoices and their paid amounts are not posted to the ledger: the opening receivables balance comes from the opening-balance journal and its open items, so posting these would count it twice.",
+    "colNumber": "Invoice #",
+    "colCustomer": "Customer",
+    "colDate": "Date",
+    "colLine": "Line",
+    "colTotal": "Total",
+    "colPaid": "Paid",
+    "invoiceCount": "{{count}} invoices",
+    "committed": "{{count}} invoices imported",
+    "viewInvoices": "View invoices"
   }
 }

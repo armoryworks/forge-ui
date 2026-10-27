@@ -35,6 +35,11 @@ interface PanelInternals {
   canMarkSent(status: string): boolean;
   acceptQuote(): void;
   convertToOrder(): void;
+  canEditValidUntil(): boolean;
+  editingValidUntil(): boolean;
+  validUntilControl: { value: Date | null; setValue(value: Date | null): void };
+  startEditValidUntil(): void;
+  saveValidUntil(): void;
 }
 
 describe('QuoteDetailPanelComponent', () => {
@@ -48,6 +53,7 @@ describe('QuoteDetailPanelComponent', () => {
     reviseQuote: ReturnType<typeof vi.fn>;
     acceptQuote: ReturnType<typeof vi.fn>;
     convertToOrder: ReturnType<typeof vi.fn>;
+    updateQuote: ReturnType<typeof vi.fn>;
   };
   let snackbar: { success: ReturnType<typeof vi.fn>; successWithNav: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
@@ -67,6 +73,7 @@ describe('QuoteDetailPanelComponent', () => {
       reviseQuote: vi.fn(() => of({ ...copy, quoteNumber: 'Q-0012-R1' })),
       acceptQuote: vi.fn(() => of(undefined)),
       convertToOrder: vi.fn(() => of({ id: 55, orderNumber: 'SO-0055' })),
+      updateQuote: vi.fn(() => of(undefined)),
     };
     snackbar = { success: vi.fn(), successWithNav: vi.fn() };
     dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
@@ -241,5 +248,38 @@ describe('QuoteDetailPanelComponent', () => {
     const markable = panel.milestoneActionRows().filter(r => r.canMarkPaid).map(r => r.milestone.id);
 
     expect(markable).toEqual([2]);
+  });
+
+  it('lets Draft, Sent and Expired quotes change their valid-until date, but not Accepted ones', () => {
+    for (const status of ['Draft', 'Sent', 'Expired']) {
+      panel.quote.set({ ...quote, status } as QuoteDetail);
+      expect(panel.canEditValidUntil()).toBe(true);
+    }
+    panel.quote.set({ ...quote, status: 'Accepted' } as QuoteDetail);
+    expect(panel.canEditValidUntil()).toBe(false);
+  });
+
+  it('extends an expired quote through the update call and reloads it', () => {
+    panel.quote.set({ ...quote, status: 'Expired', expirationDate: new Date(2026, 9, 1) } as QuoteDetail);
+
+    panel.startEditValidUntil();
+    expect(panel.editingValidUntil()).toBe(true);
+    panel.validUntilControl.setValue(new Date(2026, 11, 15));
+    panel.saveValidUntil();
+
+    expect(quoteService.updateQuote).toHaveBeenCalledWith(12, { expirationDate: '2026-12-15T00:00:00Z' });
+    expect(panel.editingValidUntil()).toBe(false);
+    expect(quoteService.getQuoteById).toHaveBeenCalledWith(12);
+    expect(snackbar.success).toHaveBeenCalledWith('quotes.validUntilReopened');
+  });
+
+  it('does not save an empty valid-until date', () => {
+    panel.quote.set({ ...quote, status: 'Sent' } as QuoteDetail);
+
+    panel.startEditValidUntil();
+    panel.validUntilControl.setValue(null);
+    panel.saveValidUntil();
+
+    expect(quoteService.updateQuote).not.toHaveBeenCalled();
   });
 });
