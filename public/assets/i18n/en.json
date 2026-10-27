@@ -14747,7 +14747,7 @@
     "subtitle": "Bring past invoices, open or paid, over from another system",
     "columnsHint": "One row per invoice line; rows with the same Invoice Number are one invoice. Columns: Invoice Number, Customer (number or name), Invoice Date, Due Date, Part, Description, Quantity, Unit Price, Tax, Total, Paid Amount, Paid Date, Status (Open, Paid or Voided), Customer PO.",
     "noGl": "Imported invoices and their paid amounts are history only: they are not posted to the general ledger and send no email.",
-    "noGlFullGl": "Full general ledger is on. Imported invoices and their paid amounts are not posted to the ledger: the opening receivables balance comes from the opening-balance journal and its open items, so posting these would count it twice.",
+    "noGlFullGl": "Full general ledger is on, so only closed history imports here: paid or voided invoices, not posted to the ledger. Open receivables come in as opening balances in Accounting, where their open items tie to the receivables account.",
     "colNumber": "Invoice #",
     "colCustomer": "Customer",
     "colDate": "Date",

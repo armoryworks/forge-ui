@@ -14747,7 +14747,7 @@
     "subtitle": "Traiga facturas anteriores, abiertas o pagadas, desde otro sistema",
     "columnsHint": "Una fila por línea de factura; las filas con el mismo número de factura forman una factura. Columnas: Número de factura, Cliente (número o nombre), Fecha de factura, Fecha de vencimiento, Parte, Descripción, Cantidad, Precio unitario, Impuesto, Total, Importe pagado, Fecha de pago, Estado (Abierta, Pagada o Anulada), OC del cliente.",
     "noGl": "Las facturas importadas y sus importes pagados son solo historial: no se registran en el libro mayor y no envían correo.",
-    "noGlFullGl": "El libro mayor completo está activo. Las facturas importadas y sus importes pagados no se registran en el libro: el saldo inicial de cuentas por cobrar proviene del asiento de saldos iniciales y sus partidas abiertas, así que registrarlas lo contaría dos veces.",
+    "noGlFullGl": "El libro mayor completo está activo, así que aquí solo se importa el historial cerrado: facturas pagadas o anuladas, sin registrarlas en el libro. Las cuentas por cobrar abiertas se cargan como saldos iniciales en Contabilidad, donde sus partidas abiertas cuadran con la cuenta de cuentas por cobrar.",
     "colNumber": "N.º de factura",
     "colCustomer": "Cliente",
     "colDate": "Fecha",
