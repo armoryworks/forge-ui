@@ -1,0 +1,52 @@
+<div class="deliverables" data-testid="project-deliverables">
+  <div class="deliverables__head">
+    <span class="deliverables__summary">
+      {{ 'deliverables.count' | translate: { count: deliverables().length } }}
+      @if (overdueCount() > 0) {
+        <span class="chip chip--error" data-testid="deliverables-overdue">{{ 'deliverables.overdue' | translate: { count: overdueCount() } }}</span>
+      }
+    </span>
+    <button class="action-btn action-btn--create" type="button" (click)="openCreate()" data-testid="deliverable-new-btn">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'deliverables.new' | translate }}
+    </button>
+  </div>
+  <ul class="deliverables__list">
+    @for (d of deliverables(); track d.id) {
+      <li class="deliverables__row" [attr.data-testid]="'deliverable-' + d.id">
+        <div class="deliverables__main">
+          <span class="deliverables__name">{{ d.name }}</span>
+          <span [class]="statusChip(d.status)" [attr.data-testid]="'deliverable-status-' + d.id">{{ statusKey(d.status) | translate }}</span>
+          <span class="deliverables__muted">{{ typeLabels().get(d.deliverableTypeId) ?? '—' }}</span>
+          @if (d.dueDate) {
+            <span class="deliverables__muted">{{ 'deliverables.due' | translate: { date: (d.dueDate | dateOnly) } }}</span>
+          }
+          @if (d.deliveredAt) {
+            <span class="deliverables__muted">{{ 'deliverables.deliveredOn' | translate: { date: (d.deliveredAt | dateOnly) } }}</span>
+          }
+          @if (d.jobId) {
+            <app-entity-link type="job" [entityId]="d.jobId">{{ 'deliverables.jobLink' | translate }}</app-entity-link>
+          }
+        </div>
+        <div class="deliverables__actions">
+          @for (step of nextSteps[d.status]; track step.status) {
+            <button class="action-btn action-btn--sm" type="button" [disabled]="busy()" (click)="advance(d, step.status)"
+              [attr.data-testid]="'deliverable-step-' + d.id + '-' + step.status">
+              {{ step.labelKey | translate }}
+            </button>
+          }
+          <button class="icon-btn" type="button" (click)="edit(d)" [attr.aria-label]="'common.edit' | translate" [attr.data-testid]="'deliverable-edit-' + d.id">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          @if (canDelete) {
+            <button class="icon-btn icon-btn--danger" type="button" (click)="remove(d)" [attr.aria-label]="'common.delete' | translate" [attr.data-testid]="'deliverable-delete-' + d.id">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          }
+        </div>
+      </li>
+    } @empty {
+      <li class="deliverables__muted" data-testid="deliverables-empty">{{ 'deliverables.empty' | translate }}</li>
+    }
+  </ul>
+</div>

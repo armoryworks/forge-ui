@@ -1,0 +1,147 @@
+@if (project(); as p) {
+  <app-page-header [title]="p.projectNumber + ' — ' + p.name" [subtitle]="p.customerName ?? ''">
+    <a class="action-btn" routerLink="/projects" data-testid="project-back-link">
+      <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+      {{ 'projects.backToList' | translate }}
+    </a>
+    <button class="action-btn" type="button" (click)="recalculate()" data-testid="project-recalculate-btn">
+      <span class="material-icons-outlined" aria-hidden="true">calculate</span>
+      {{ 'projects.recalculate' | translate }}
+    </button>
+    @if (canDelete) {
+      <button class="action-btn action-btn--danger" type="button" (click)="deleteProject()" data-testid="project-delete-btn">
+        {{ 'common.delete' | translate }}
+      </button>
+    }
+  </app-page-header>
+}
+
+<div class="project-detail" [appLoadingBlock]="loading()">
+  @if (project(); as p) {
+    <div class="tab-bar" appTabList [attr.aria-label]="'projects.title' | translate">
+      <button class="tab" type="button" [appTab]="tab() === 'summary'" (click)="tab.set('summary')" data-testid="project-tab-summary">
+        {{ 'projects.tabSummary' | translate }}
+      </button>
+      <button class="tab" type="button" [appTab]="tab() === 'jobs'" (click)="tab.set('jobs')" data-testid="project-tab-jobs">
+        {{ 'projects.tabJobs' | translate: { count: jobs().length } }}
+      </button>
+      @if (deliverablesEnabled()) {
+        <button class="tab" type="button" [appTab]="tab() === 'deliverables'" (click)="tab.set('deliverables')" data-testid="project-tab-deliverables">
+          {{ 'projects.tabDeliverables' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (tab() === 'summary') {
+      <div class="project-detail__kpis">
+        <div class="project-detail__kpi">
+          <span class="project-detail__label">{{ 'common.status' | translate }}</span>
+          <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" (selectionChange)="changeStatus()" data-testid="project-status-select" />
+        </div>
+        @if (summary(); as s) {
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.budget' | translate }}</span>
+            <app-currency-display [value]="s.budgetTotal" [currency]="null" />
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.actual' | translate }}</span>
+            <app-currency-display [value]="s.actualTotal" [currency]="null" />
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.committed' | translate }}</span>
+            <app-currency-display [value]="s.committedTotal" [currency]="null" />
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.eac' | translate }}</span>
+            <app-currency-display [value]="s.estimateAtCompletion" [currency]="null" />
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.vac' | translate }}</span>
+            <span [class.project-detail__negative]="s.varianceAtCompletion < 0" data-testid="project-vac"><app-currency-display [value]="s.varianceAtCompletion" [currency]="null" /></span>
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.percentComplete' | translate }}</span>
+            <span>{{ s.percentComplete | number:'1.0-1' }}%</span>
+          </div>
+        }
+        @if (earnedValue(); as ev) {
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.cpi' | translate }}</span>
+            <span data-testid="project-cpi">{{ ev.costPerformanceIndex | number:'1.2-2' }}</span>
+          </div>
+          <div class="project-detail__kpi">
+            <span class="project-detail__label">{{ 'projects.spi' | translate }}</span>
+            <span data-testid="project-spi">{{ ev.schedulePerformanceIndex | number:'1.2-2' }}</span>
+          </div>
+        }
+        <div class="project-detail__kpi">
+          <span class="project-detail__label">{{ 'projects.plannedDates' | translate }}</span>
+          <span>{{ p.plannedStartDate ? (p.plannedStartDate | dateOnly) : '—' }} – {{ p.plannedEndDate ? (p.plannedEndDate | dateOnly) : '—' }}</span>
+        </div>
+      </div>
+
+      @if (p.description) {
+        <p class="project-detail__description">{{ p.description }}</p>
+      }
+
+      <div class="project-detail__section-head">
+        <h3 class="project-detail__section">{{ 'projects.wbs' | translate }}</h3>
+        <button class="action-btn action-btn--sm" type="button" (click)="addWbsElement()" data-testid="project-add-wbs-btn">
+          <span class="material-icons-outlined" aria-hidden="true">add</span>
+          {{ 'projects.addWbs' | translate }}
+        </button>
+      </div>
+      <app-data-table tableId="project-wbs" [columns]="wbsColumns" [data]="wbsRows()" emptyIcon="account_tree"
+        [emptyMessage]="'projects.noWbs' | translate" data-testid="project-wbs-table">
+        <ng-template appColumnCell="code" let-row>
+          <span [style.padding-left.px]="row.depth * 16" [attr.data-testid]="'project-wbs-' + row.id">{{ row.code }}</span>
+        </ng-template>
+        <ng-template appColumnCell="type" let-row>{{ ('projects.wbsType' + row.type) | translate }}</ng-template>
+        <ng-template appColumnCell="budgetTotal" let-row><app-currency-display [value]="row.budgetTotal" [currency]="null" /></ng-template>
+        <ng-template appColumnCell="actualTotal" let-row><app-currency-display [value]="row.actualTotal" [currency]="null" /></ng-template>
+        <ng-template appColumnCell="variance" let-row>
+          <span [class.project-detail__negative]="row.variance < 0"><app-currency-display [value]="row.variance" [currency]="null" /></span>
+        </ng-template>
+      </app-data-table>
+    }
+
+    @if (tab() === 'jobs') {
+      <div class="project-detail__section-head">
+        <h3 class="project-detail__section">{{ 'projects.linkedJobs' | translate }}</h3>
+        <button class="action-btn action-btn--sm" type="button" [disabled]="flatElements().length === 0" (click)="linkJob()" data-testid="project-link-job-btn">
+          <span class="material-icons-outlined" aria-hidden="true">link</span>
+          {{ 'projects.linkJob' | translate }}
+        </button>
+      </div>
+      @if (flatElements().length === 0) {
+        <p class="project-detail__muted" data-testid="project-jobs-need-wbs">{{ 'projects.linkNeedsWbs' | translate }}</p>
+      }
+      <ul class="project-detail__jobs" data-testid="project-jobs">
+        @for (job of jobs(); track job.jobId + '-' + job.wbsElementId) {
+          <li [attr.data-testid]="'project-job-' + job.jobId">
+            <app-entity-link type="job" [entityId]="job.jobId">{{ job.jobNumber }}</app-entity-link>
+            <span>{{ job.title }}</span>
+            <span class="chip chip--muted">{{ job.wbsCode }} — {{ job.wbsName }}</span>
+            @if (job.completedDate) {
+              <span class="chip chip--success">{{ 'projects.jobComplete' | translate }}</span>
+            } @else if (job.stageName) {
+              <span class="project-detail__muted">{{ job.stageName }}</span>
+            }
+            @if (job.dueDate) {
+              <span class="project-detail__muted">{{ 'projects.due' | translate: { date: (job.dueDate | dateOnly) } }}</span>
+            }
+            <button class="icon-btn icon-btn--danger" type="button" (click)="unlinkJob(job)" [attr.aria-label]="'projects.unlinkJob' | translate" [attr.data-testid]="'project-unlink-' + job.jobId">
+              <span class="material-icons-outlined">link_off</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="project-detail__muted">{{ 'projects.noJobs' | translate }}</li>
+        }
+      </ul>
+    }
+
+    @if (tab() === 'deliverables' && deliverablesEnabled()) {
+      <app-project-deliverables [projectId]="p.id" [customerId]="p.customerId" />
+    }
+  }
+</div>

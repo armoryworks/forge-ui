@@ -1,0 +1,71 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.fmea-editor {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: 0 $sp-lg $sp-lg;
+  flex: 1;
+  min-height: 0;
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $sp-md;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__kpi {
+    font-size: var(--font-size-kpi);
+    font-weight: 600;
+
+    &--high {
+      color: var(--warning-text);
+    }
+  }
+
+  &__high {
+    color: var(--warning-text);
+    font-weight: 600;
+  }
+
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__muted {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  &__link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--primary);
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+  }
+}

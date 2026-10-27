@@ -1,0 +1,25 @@
+<app-page-header [title]="'projects.title' | translate" [subtitle]="'projects.subtitle' | translate">
+  <button class="action-btn action-btn--create" type="button" (click)="openCreate()" data-testid="project-new-btn">
+    <span class="material-icons-outlined" aria-hidden="true">add</span>
+    {{ 'projects.new' | translate }}
+  </button>
+</app-page-header>
+
+<div class="project-list">
+  <div class="project-list__filters">
+    <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" data-testid="project-status-filter" />
+  </div>
+  <div [appLoadingBlock]="loading()">
+    <app-data-table tableId="projects" [columns]="columns" [data]="projects()" [clickableRows]="true" (rowClick)="open($event)"
+      emptyIcon="folder_special" [emptyMessage]="'projects.empty' | translate" data-testid="project-table">
+      <ng-template appColumnCell="customerName" let-row>{{ row.customerName ?? '—' }}</ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="statusChip(row.status)">{{ ('projects.status' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="budgetTotal" let-row><app-currency-display [value]="row.budgetTotal" [currency]="null" /></ng-template>
+      <ng-template appColumnCell="actualTotal" let-row><app-currency-display [value]="row.actualTotal" [currency]="null" /></ng-template>
+      <ng-template appColumnCell="percentComplete" let-row>{{ row.percentComplete !== null && row.percentComplete !== undefined ? row.percentComplete + '%' : '—' }}</ng-template>
+      <ng-template appColumnCell="plannedEndDate" let-row>{{ row.plannedEndDate ? (row.plannedEndDate | dateOnly) : '—' }}</ng-template>
+    </app-data-table>
+  </div>
+</div>

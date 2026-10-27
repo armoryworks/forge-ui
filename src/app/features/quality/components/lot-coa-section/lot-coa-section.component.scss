@@ -1,0 +1,27 @@
+@use 'styles/variables' as *;
+
+.lot-coa {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  margin-top: $sp-lg;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--font-size-title);
+    font-weight: 600;
+  }
+
+  &__empty {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+}

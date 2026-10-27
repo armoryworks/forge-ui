@@ -152,6 +152,12 @@
           <p class="eco-detail__empty">{{ 'quality.noAffectedItemsAddedYet' | translate }}</p>
         }
       </div>
+
+      @if (eco.affectedItems.length > 0) {
+        <div class="eco-detail__section">
+          <app-eco-impact [ecoId]="eco.id" />
+        </div>
+      }
     </div>
 
     <div dialog-footer>

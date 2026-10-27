@@ -1,0 +1,25 @@
+@if (visible()) {
+  <div class="shipment-coa" data-testid="shipment-coa-section">
+    <div class="shipment-coa__head">
+      <span class="shipment-coa__title">{{ 'coa.title' | translate }}</span>
+      <button class="action-btn action-btn--sm" type="button" [disabled]="attaching()" (click)="attach()" data-testid="shipment-coa-attach-btn">
+        <span class="material-icons-outlined">verified</span>
+        {{ 'coa.attachForShipment' | translate }}
+      </button>
+    </div>
+    @if (!shipped()) {
+      <p class="shipment-coa__hint" data-testid="shipment-coa-pending-hint">{{ 'coa.pendingShipmentHint' | translate }}</p>
+    }
+    @for (w of warnings(); track w.lotId) {
+      <div class="shipment-coa__warning" [attr.data-testid]="'shipment-coa-warning-' + w.lotId">
+        <span class="material-icons-outlined">warning</span>
+        <span>{{ warningKey(w) | translate: { lot: w.lotNumber, part: w.partNumber, characteristics: w.failedCharacteristics.join(', ') } }}</span>
+      </div>
+    }
+    @if (certificates().length > 0) {
+      <app-coa-list [certificates]="certificates()" [showLot]="true" />
+    } @else {
+      <p class="shipment-coa__hint" data-testid="shipment-coa-empty">{{ 'coa.noneForShipment' | translate }}</p>
+    }
+  </div>
+}

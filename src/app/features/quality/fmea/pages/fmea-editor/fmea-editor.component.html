@@ -1,0 +1,104 @@
+@if (fmea(); as f) {
+  <app-page-header [title]="f.fmeaNumber + ' — ' + f.name" [subtitle]="('fmea.type' + f.type) | translate">
+    <a class="action-btn" routerLink="/quality/fmea" data-testid="fmea-back-link">
+      <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+      {{ 'fmea.backToList' | translate }}
+    </a>
+    @if (canEdit) {
+      <button class="action-btn action-btn--create" type="button" (click)="addItem()" data-testid="fmea-add-item-btn">
+        <span class="material-icons-outlined" aria-hidden="true">add</span>
+        {{ 'fmea.addItem' | translate }}
+      </button>
+    }
+  </app-page-header>
+}
+
+<div class="fmea-editor" [appLoadingBlock]="loading()">
+  @if (fmea(); as f) {
+    <div class="fmea-editor__summary">
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'common.status' | translate }}</span>
+        @if (canEdit) {
+          <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" (selectionChange)="changeStatus()" data-testid="fmea-status-select" />
+        } @else {
+          <span [class]="statusChip(f.status)">{{ ('fmea.status' + f.status) | translate }}</span>
+        }
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'common.part' | translate }}</span>
+        <span>{{ f.partNumber ?? '—' }}@if (f.operationName) { · {{ f.operationName }} }</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.preparedBy' | translate }}</span>
+        <span>{{ f.preparedBy ?? '—' }}</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.responsibility' | translate }}</span>
+        <span>{{ f.responsibility ?? '—' }}</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.colMaxRpn' | translate }}</span>
+        <span class="fmea-editor__kpi" [class.fmea-editor__kpi--high]="f.maxRpn >= threshold" data-testid="fmea-max-rpn">{{ f.maxRpn }}</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.colHighRpn' | translate }}</span>
+        <span class="fmea-editor__kpi" data-testid="fmea-high-count">{{ f.highRpnCount }}</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.openActions' | translate }}</span>
+        <span class="fmea-editor__kpi" data-testid="fmea-open-actions">{{ openActions() }}</span>
+      </div>
+      <div class="fmea-editor__field">
+        <span class="fmea-editor__label">{{ 'fmea.revision' | translate }}</span>
+        <span>{{ f.revisionNumber }}@if (f.revisionDate) { · {{ f.revisionDate | dateOnly }} }</span>
+      </div>
+    </div>
+
+    <app-data-table tableId="fmea-items" [columns]="columns()" [data]="items()" emptyIcon="rule"
+      [emptyMessage]="'fmea.noItems' | translate" data-testid="fmea-items-table">
+      <ng-template appColumnCell="processStep" let-row>{{ row.processStep ?? '—' }}</ng-template>
+      <ng-template appColumnCell="function" let-row>{{ row.function ?? '—' }}</ng-template>
+      <ng-template appColumnCell="potentialCause" let-row>{{ row.potentialCause ?? '—' }}</ng-template>
+      <ng-template appColumnCell="controls" let-row>
+        <div class="fmea-editor__controls">
+          @if (row.currentPreventionControls) { <span>{{ 'fmea.preventionShort' | translate }}: {{ row.currentPreventionControls }}</span> }
+          @if (row.currentDetectionControls) { <span>{{ 'fmea.detectionShort' | translate }}: {{ row.currentDetectionControls }}</span> }
+          @if (!row.currentPreventionControls && !row.currentDetectionControls) { — }
+        </div>
+      </ng-template>
+      <ng-template appColumnCell="rpn" let-row>
+        <span [class.fmea-editor__high]="row.rpn >= threshold" [attr.data-testid]="'fmea-item-rpn-' + row.id">{{ row.rpn }}</span>
+      </ng-template>
+      <ng-template appColumnCell="recommendedAction" let-row>
+        <div class="fmea-editor__controls">
+          <span>{{ row.recommendedAction ?? '—' }}</span>
+          @if (row.actionTaken) { <span class="fmea-editor__muted">{{ 'fmea.actionTaken' | translate }}: {{ row.actionTaken }}</span> }
+          @if (row.capaId) {
+            <button class="fmea-editor__link" type="button" (click)="openCapas()" [attr.data-testid]="'fmea-item-capa-' + row.id">{{ row.capaCorrNum ?? ('fmea.capa' | translate) }}</button>
+          }
+        </div>
+      </ng-template>
+      <ng-template appColumnCell="revised" let-row>
+        @if (row.revisedRpn !== null && row.revisedRpn !== undefined) {
+          <span>{{ row.revisedSeverity ?? row.severity }}·{{ row.revisedOccurrence ?? row.occurrence }}·{{ row.revisedDetection ?? row.detection }} = {{ row.revisedRpn }}</span>
+        } @else { — }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn" type="button" (click)="editItem(row)" [attr.aria-label]="'common.edit' | translate" [attr.data-testid]="'fmea-item-edit-' + row.id">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn" type="button" (click)="recordAction(row)" [attr.aria-label]="'fmea.recordAction' | translate" [attr.data-testid]="'fmea-item-action-' + row.id">
+          <span class="material-icons-outlined">task_alt</span>
+        </button>
+        @if (canLinkCapa()) {
+          <button class="icon-btn" type="button" (click)="linkCapa(row)" [attr.aria-label]="'fmea.linkCapa' | translate" [attr.data-testid]="'fmea-item-link-capa-' + row.id">
+            <span class="material-icons-outlined">link</span>
+          </button>
+        }
+        <button class="icon-btn icon-btn--danger" type="button" (click)="deleteItem(row)" [attr.aria-label]="'common.delete' | translate" [attr.data-testid]="'fmea-item-delete-' + row.id">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</div>

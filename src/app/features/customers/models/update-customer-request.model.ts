@@ -16,6 +16,7 @@ export interface UpdateCustomerRequest {
   isAutomotive?: boolean;
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
+  requiresCoa?: boolean;
   referenceNotes?: string;
   isTaxExempt?: boolean;
   taxExemptionId?: string;

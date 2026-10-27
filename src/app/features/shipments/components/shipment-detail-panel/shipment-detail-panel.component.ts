@@ -21,6 +21,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
+import { ShipmentCoaSectionComponent } from '../../../quality/components/shipment-coa-section/shipment-coa-section.component';
 
 @Component({
   selector: 'app-shipment-detail-panel',
@@ -30,7 +31,7 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
     MatTooltipModule,
     TrackingTimelineComponent, ShippingRatesDialogComponent, EditShipmentDialogComponent, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
-    DetailLoadErrorComponent,
+    DetailLoadErrorComponent, ShipmentCoaSectionComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
   styleUrl: './shipment-detail-panel.component.scss',

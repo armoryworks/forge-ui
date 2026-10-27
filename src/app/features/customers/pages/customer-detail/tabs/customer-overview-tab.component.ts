@@ -20,7 +20,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customer-roles';
 
 interface ComplianceFlagDef {
-  key: 'isFdaRegulated' | 'isAerospace' | 'isAutomotive' | 'isItarControlled';
+  key: 'isFdaRegulated' | 'isAerospace' | 'isAutomotive' | 'isItarControlled' | 'requiresCoa';
   labelKey: string;
   helpKey: string;
 }
@@ -64,6 +64,8 @@ export class CustomerOverviewTabComponent {
     { key: 'isAutomotive', labelKey: 'customers.compliance.automotive', helpKey: 'customers.compliance.automotiveHelp' },
     { key: 'isItarControlled', labelKey: 'customers.compliance.itarControlled', helpKey: 'customers.compliance.itarControlledHelp' },
   ];
+
+  protected readonly coaEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-COA'));
 
   protected readonly hasComplianceFlag = computed(() => {
     const c = this.customer();

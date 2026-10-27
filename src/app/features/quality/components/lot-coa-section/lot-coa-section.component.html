@@ -1,0 +1,18 @@
+@if (visible()) {
+  <div class="lot-coa" data-testid="lot-coa-section">
+    <div class="lot-coa__head">
+      <h4 class="lot-coa__title">{{ 'coa.title' | translate }}</h4>
+      @if (canGenerate()) {
+        <button class="action-btn action-btn--sm" type="button" (click)="openGenerate()" data-testid="lot-coa-generate-btn">
+          <span class="material-icons-outlined">verified</span>
+          {{ 'coa.generate' | translate }}
+        </button>
+      }
+    </div>
+    @if (certificates().length > 0) {
+      <app-coa-list [certificates]="certificates()" [canVoid]="canGenerate()" (voidRequested)="confirmVoid($event)" />
+    } @else if (!loading()) {
+      <p class="lot-coa__empty" data-testid="lot-coa-empty">{{ 'coa.noneForLot' | translate }}</p>
+    }
+  </div>
+}

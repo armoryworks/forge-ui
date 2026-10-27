@@ -1,0 +1,94 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.ppap-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: 0 $sp-lg $sp-lg;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $sp-md;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__muted,
+  &__hint {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  &__notes p {
+    margin: $sp-xs 0 0;
+  }
+}
+
+.ppap-elements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    border-bottom: $border-width-thin solid var(--border);
+    padding: $sp-md 0;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    width: 24px;
+  }
+
+  &__name {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  &__status {
+    width: 180px;
+  }
+
+  &__notes {
+    margin: $sp-sm 0 0 32px;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  &__body {
+    margin-left: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+}

@@ -1,0 +1,26 @@
+<app-page-header [title]="'ppap.title' | translate" [subtitle]="'ppap.subtitle' | translate">
+  @if (canAuthor) {
+    <button class="action-btn action-btn--create" type="button" (click)="openCreate()" data-testid="ppap-new-btn">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'ppap.new' | translate }}
+    </button>
+  }
+</app-page-header>
+
+<div class="ppap-list">
+  <div class="ppap-list__filters">
+    <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" data-testid="ppap-status-filter" />
+  </div>
+  <div [appLoadingBlock]="loading()">
+    <app-data-table tableId="ppap-submissions" [columns]="columns" [data]="submissions()" [clickableRows]="true" (rowClick)="open($event)"
+      emptyIcon="assignment" [emptyMessage]="'ppap.empty' | translate" data-testid="ppap-table">
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="statusChip(row.status)">{{ ('ppap.status' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="progress" let-row>
+        {{ 'ppap.progress' | translate: { done: row.completedElements, required: row.requiredElements } }}
+      </ng-template>
+      <ng-template appColumnCell="dueDate" let-row>{{ row.dueDate ? (row.dueDate | dateOnly) : '—' }}</ng-template>
+    </app-data-table>
+  </div>
+</div>

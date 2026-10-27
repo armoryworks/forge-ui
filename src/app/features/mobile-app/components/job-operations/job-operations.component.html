@@ -64,6 +64,9 @@
                 [class.ops__chip--done]="view.done"
               >{{ 'mobileApp.operations.status.' + view.row.status | translate }}</span>
             </div>
+            @if (!view.done && view.row.operationId !== null) {
+              <app-work-instructions [operationId]="view.row.operationId" />
+            }
             <div class="ops__meta">
               <span class="ops__count" [attr.data-testid]="'job-operation-count-' + view.row.stepNumber">
                 {{ view.row.completedQuantity }} / {{ data()?.jobQuantity }}

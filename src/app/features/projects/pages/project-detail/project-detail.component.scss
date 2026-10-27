@@ -1,0 +1,78 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.project-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: 0 $sp-lg $sp-lg;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: $sp-md;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+  }
+
+  &__kpi {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__description {
+    margin: 0;
+  }
+
+  &__section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+  }
+
+  &__section {
+    margin: 0;
+    font-size: var(--font-size-title);
+    font-weight: 600;
+  }
+
+  &__negative {
+    color: var(--error-text);
+  }
+
+  &__muted {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+
+  &__jobs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: $sp-md;
+      padding: $sp-sm 0;
+      border-bottom: $border-width-thin solid var(--border);
+    }
+  }
+}

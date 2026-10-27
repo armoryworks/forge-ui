@@ -1,0 +1,44 @@
+<app-dialog [title]="(data.item ? 'fmea.editItemTitle' : 'fmea.addItemTitle') | translate" width="760px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'fmea.processStep' | translate" formControlName="processStep" [maxlength]="200" data-testid="fmea-item-process-step" />
+      <app-input [label]="'fmea.function' | translate" formControlName="function" [maxlength]="500" data-testid="fmea-item-function" />
+    </div>
+    <app-textarea [label]="'fmea.failureMode' | translate" formControlName="failureMode" [rows]="2" [maxlength]="1000" data-testid="fmea-item-failure-mode" />
+    <div class="dialog-row">
+      <app-textarea [label]="'fmea.effect' | translate" formControlName="potentialEffect" [rows]="2" [maxlength]="1000" data-testid="fmea-item-effect" />
+      <app-select [label]="'fmea.severity' | translate" formControlName="severity" [options]="ratingOptions" data-testid="fmea-item-severity" />
+    </div>
+    <div class="dialog-row">
+      <app-textarea [label]="'fmea.cause' | translate" formControlName="potentialCause" [rows]="2" [maxlength]="1000" data-testid="fmea-item-cause" />
+      <app-select [label]="'fmea.occurrence' | translate" formControlName="occurrence" [options]="ratingOptions" data-testid="fmea-item-occurrence" />
+    </div>
+    <div class="dialog-row">
+      <app-textarea [label]="'fmea.preventionControls' | translate" formControlName="currentPreventionControls" [rows]="2" [maxlength]="1000" data-testid="fmea-item-prevention" />
+      <app-textarea [label]="'fmea.detectionControls' | translate" formControlName="currentDetectionControls" [rows]="2" [maxlength]="1000" data-testid="fmea-item-detection-controls" />
+    </div>
+    <div class="dialog-row">
+      <app-select [label]="'fmea.detection' | translate" formControlName="detection" [options]="ratingOptions" data-testid="fmea-item-detection" />
+      <app-input [label]="'fmea.classification' | translate" formControlName="classification" [maxlength]="50" data-testid="fmea-item-classification" />
+    </div>
+    <div class="fmea-rpn" [class.fmea-rpn--high]="needsAction()" data-testid="fmea-item-rpn">
+      <span class="fmea-rpn__label">{{ 'fmea.rpn' | translate }}</span>
+      <span class="fmea-rpn__value">{{ rpn() }}</span>
+      @if (needsAction()) {
+        <span class="fmea-rpn__hint">{{ 'fmea.actionRecommended' | translate }}</span>
+      }
+    </div>
+    <div class="dialog-row">
+      <app-textarea [label]="'fmea.recommendedAction' | translate" formControlName="recommendedAction" [rows]="2" [maxlength]="1000" data-testid="fmea-item-recommended-action" />
+      <app-datepicker [label]="'fmea.targetDate' | translate" formControlName="targetCompletionDate" data-testid="fmea-item-target-date" />
+    </div>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="fmea-item-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="fmea-item-save-btn">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

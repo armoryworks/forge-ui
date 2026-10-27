@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+.work-instructions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+  margin: $sp-sm 0;
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    min-height: $tap-target-min;
+    padding: 0 $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+  }
+}

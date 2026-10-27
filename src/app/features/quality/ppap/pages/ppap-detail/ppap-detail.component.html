@@ -1,0 +1,126 @@
+@if (submission(); as s) {
+  <app-page-header [title]="s.submissionNumber + ' — ' + s.partNumber" [subtitle]="s.customerName">
+    <a class="action-btn" routerLink="/quality/ppap" data-testid="ppap-back-link">
+      <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+      {{ 'ppap.backToList' | translate }}
+    </a>
+    @if (editable()) {
+      <button class="action-btn action-btn--primary" type="button" [disabled]="!canSubmit() || busy()" (click)="submit()" data-testid="ppap-submit-btn">
+        <span class="material-icons-outlined" aria-hidden="true">send</span>
+        {{ 'ppap.submit' | translate }}
+      </button>
+    }
+    @if (canRespond()) {
+      <button class="action-btn action-btn--primary" type="button" (click)="recordResponse()" data-testid="ppap-response-btn">
+        <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
+        {{ 'ppap.recordResponse' | translate }}
+      </button>
+    }
+    @if (canSign()) {
+      <button class="action-btn" type="button" (click)="signPsw()" data-testid="ppap-sign-psw-btn">
+        <span class="material-icons-outlined" aria-hidden="true">draw</span>
+        {{ 'ppap.signPsw' | translate }}
+      </button>
+    }
+  </app-page-header>
+}
+
+<div class="ppap-detail" [appLoadingBlock]="loading()">
+  @if (submission(); as s) {
+    <div class="ppap-detail__summary">
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'common.status' | translate }}</span>
+        <span [class]="statusChip(s.status)" data-testid="ppap-status">{{ ('ppap.status' + s.status) | translate }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'ppap.level' | translate }}</span>
+        <span>{{ s.ppapLevel }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'ppap.reason' | translate }}</span>
+        <span>{{ ('ppap.reason' + s.reason) | translate }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'ppap.partRevision' | translate }}</span>
+        <span>{{ s.partRevision ?? '—' }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'common.dueDate' | translate }}</span>
+        <span>{{ s.dueDate ? (s.dueDate | dateOnly) : '—' }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'ppap.colProgress' | translate }}</span>
+        <span data-testid="ppap-progress">{{ 'ppap.progress' | translate: { done: s.completedElements, required: s.requiredElements } }}</span>
+      </div>
+      <div class="ppap-detail__field">
+        <span class="ppap-detail__label">{{ 'ppap.psw' | translate }}</span>
+        @if (s.pswSignedAt) {
+          <span data-testid="ppap-psw-signed">{{ 'ppap.pswSignedBy' | translate: { name: s.pswSignedByName ?? '—', date: (s.pswSignedAt | date:'MM/dd/yyyy') } }}</span>
+        } @else {
+          <span class="ppap-detail__muted">{{ 'ppap.pswNotSigned' | translate }}</span>
+        }
+      </div>
+      @if (s.submittedAt) {
+        <div class="ppap-detail__field">
+          <span class="ppap-detail__label">{{ 'ppap.submittedAt' | translate }}</span>
+          <span>{{ s.submittedAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      }
+    </div>
+
+    @if (s.customerResponseNotes) {
+      <div class="ppap-detail__notes">
+        <span class="ppap-detail__label">{{ 'ppap.customerResponse' | translate }}</span>
+        <p>{{ s.customerResponseNotes }}</p>
+      </div>
+    }
+
+    @if (editable() && incompleteRequired().length > 0) {
+      <p class="ppap-detail__hint" data-testid="ppap-incomplete-hint">{{ 'ppap.incompleteHint' | translate: { count: incompleteRequired().length } }}</p>
+    }
+
+    <ul class="ppap-elements" data-testid="ppap-elements">
+      @for (e of s.elements; track e.id) {
+        <li class="ppap-elements__row" [attr.data-testid]="'ppap-element-' + e.elementNumber">
+          <div class="ppap-elements__head">
+            <span class="ppap-elements__number">{{ e.elementNumber }}</span>
+            <span class="ppap-elements__name">{{ e.elementName }}</span>
+            @if (e.isRequired) {
+              <span class="chip chip--info">{{ 'ppap.required' | translate }}</span>
+            }
+            @if (editable()) {
+              <div class="ppap-elements__status">
+                <app-select [label]="'common.status' | translate" [formControl]="statusControls.get(e.elementNumber)!" [options]="elementStatusOptions"
+                  (selectionChange)="changeElementStatus(e)" [attr.data-testid]="'ppap-element-status-' + e.elementNumber" />
+              </div>
+            } @else {
+              <span [class]="elementChip(e.status)">{{ ('ppap.element' + e.status) | translate }}</span>
+            }
+            <button class="action-btn action-btn--sm" type="button" (click)="toggle(e)" [attr.aria-expanded]="expanded() === e.elementNumber"
+              [attr.data-testid]="'ppap-element-toggle-' + e.elementNumber">
+              <span class="material-icons-outlined">attach_file</span>
+              {{ 'ppap.evidenceCount' | translate: { count: e.attachmentCount } }}
+            </button>
+          </div>
+          @if (e.notes && expanded() !== e.elementNumber) {
+            <p class="ppap-elements__notes">{{ e.notes }}</p>
+          }
+          @if (expanded() === e.elementNumber) {
+            <div class="ppap-elements__body">
+              @if (editable()) {
+                <app-textarea [label]="'common.notes' | translate" [formControl]="notesControls.get(e.elementNumber)!" [rows]="2" [maxlength]="2000"
+                  [attr.data-testid]="'ppap-element-notes-' + e.elementNumber" />
+                <button class="action-btn action-btn--sm" type="button" (click)="saveNotes(e)" [attr.data-testid]="'ppap-element-save-notes-' + e.elementNumber">
+                  {{ 'ppap.saveNotes' | translate }}
+                </button>
+              } @else if (e.notes) {
+                <p class="ppap-elements__notes">{{ e.notes }}</p>
+              }
+              <app-ppap-element-files [elementId]="e.id" [canUpload]="editable()" (changed)="onEvidenceChanged(e, $event)" />
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

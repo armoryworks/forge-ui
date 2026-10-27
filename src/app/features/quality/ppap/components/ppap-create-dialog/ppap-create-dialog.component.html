@@ -1,0 +1,28 @@
+<app-dialog [title]="'ppap.newTitle' | translate" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+        formControlName="partId" [required]="true" data-testid="ppap-create-part" />
+      <app-entity-picker [label]="'common.customer' | translate" entityType="customers" displayField="name"
+        formControlName="customerId" [required]="true" data-testid="ppap-create-customer" />
+    </div>
+    <div class="dialog-row">
+      <app-select [label]="'ppap.level' | translate" formControlName="ppapLevel" [options]="levelOptions" data-testid="ppap-create-level" />
+      <app-select [label]="'ppap.reason' | translate" formControlName="reason" [options]="reasonOptions" data-testid="ppap-create-reason" />
+    </div>
+    <div class="dialog-row">
+      <app-input [label]="'ppap.partRevision' | translate" formControlName="partRevision" [maxlength]="20" data-testid="ppap-create-revision" />
+      <app-datepicker [label]="'common.dueDate' | translate" formControlName="dueDate" data-testid="ppap-create-due" />
+    </div>
+    <app-input [label]="'ppap.customerContact' | translate" formControlName="customerContactName" [maxlength]="200" data-testid="ppap-create-contact" />
+    <app-textarea [label]="'ppap.internalNotes' | translate" formControlName="internalNotes" [rows]="2" [maxlength]="2000" data-testid="ppap-create-notes" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="ppap-create-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="ppap-create-save-btn">
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

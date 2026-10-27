@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+
+.ppap-files {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md 0;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__name {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--primary);
+    cursor: pointer;
+    font: inherit;
+  }
+
+  &__meta {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+}

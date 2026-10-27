@@ -1,0 +1,30 @@
+export interface FmeaItem {
+  id: number;
+  itemNumber: number;
+  processStep: string | null;
+  function: string | null;
+  failureMode: string;
+  potentialEffect: string;
+  severity: number;
+  classification: string | null;
+  potentialCause: string | null;
+  occurrence: number;
+  currentPreventionControls: string | null;
+  currentDetectionControls: string | null;
+  detection: number;
+  rpn: number;
+  recommendedAction: string | null;
+  responsibleUserName: string | null;
+  targetCompletionDate: string | null;
+  actionTaken: string | null;
+  actionCompletedAt: string | null;
+  revisedSeverity: number | null;
+  revisedOccurrence: number | null;
+  revisedDetection: number | null;
+  revisedRpn: number | null;
+  capaId: number | null;
+  capaCorrNum: string | null;
+  fmeaId?: number | null;
+  fmeaNumber?: string | null;
+  fmeaName?: string | null;
+}

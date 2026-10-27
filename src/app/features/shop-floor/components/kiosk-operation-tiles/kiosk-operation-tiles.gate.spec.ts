@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
@@ -49,7 +51,11 @@ describe('KioskOperationTilesComponent step gate hints', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [KioskOperationTilesComponent],
-      providers: [provideTranslateService({ loader: { provide: TranslateLoader, useClass: GateLoader }, fallbackLang: 'en', lang: 'en' })],
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: GateLoader }, fallbackLang: 'en', lang: 'en' }),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
   });
 

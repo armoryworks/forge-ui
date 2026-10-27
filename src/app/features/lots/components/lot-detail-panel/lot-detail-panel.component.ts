@@ -31,6 +31,7 @@ import { FileUploadZoneComponent } from '../../../../shared/components/file-uplo
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { LotCoaSectionComponent } from '../../../quality/components/lot-coa-section/lot-coa-section.component';
 
 const STATUS_KEYS: Record<string, Record<string, string>> = {
   QcInspection: {
@@ -67,7 +68,7 @@ const NCR_STATUS_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent, FileUploadZoneComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent, FileUploadZoneComponent, LotCoaSectionComponent],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

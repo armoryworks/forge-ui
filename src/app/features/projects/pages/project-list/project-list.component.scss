@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: 0 $sp-lg $sp-lg;
+  flex: 1;
+  min-height: 0;
+
+  &__filters {
+    max-width: 260px;
+  }
+}

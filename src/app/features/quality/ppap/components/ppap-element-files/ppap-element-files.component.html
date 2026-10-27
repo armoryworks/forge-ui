@@ -1,0 +1,14 @@
+<div class="ppap-files" [attr.data-testid]="'ppap-element-files-' + elementId()">
+  @for (file of files(); track file.id) {
+    <div class="ppap-files__row">
+      <span class="material-icons-outlined">attach_file</span>
+      <button class="ppap-files__name" type="button" (click)="download(file)" [attr.data-testid]="'ppap-file-' + file.id">{{ file.fileName }}</button>
+      <span class="ppap-files__meta">{{ file.createdAt | date:'MM/dd/yyyy' }}</span>
+    </div>
+  } @empty {
+    <span class="ppap-files__meta">{{ 'ppap.noEvidence' | translate }}</span>
+  }
+  @if (canUpload()) {
+    <app-file-upload-zone entityType="ppap-elements" [entityId]="elementId()" [maxSizeMb]="50" (uploaded)="onUploaded()" />
+  }
+</div>

@@ -7,6 +7,7 @@ import { Recall } from '../models/recall.model';
 import { RecallDetail } from '../models/recall-detail.model';
 import { RecallStatus } from '../models/recall-status.model';
 import { InitiateRecallRequest } from '../models/initiate-recall-request.model';
+import { RecallImpactPreview } from '../models/recall-impact-preview.model';
 
 @Injectable({ providedIn: 'root' })
 export class RecallService {
@@ -21,6 +22,10 @@ export class RecallService {
 
   getRecall(id: number): Observable<RecallDetail> {
     return this.http.get<RecallDetail>(`${this.base}/${id}`);
+  }
+
+  previewRecall(recalledLotId: number): Observable<RecallImpactPreview> {
+    return this.http.post<RecallImpactPreview>(`${this.base}/preview`, { recalledLotId });
   }
 
   initiateRecall(request: InitiateRecallRequest): Observable<RecallDetail> {

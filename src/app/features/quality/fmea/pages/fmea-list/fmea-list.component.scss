@@ -1,0 +1,29 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.fmea-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: 0 $sp-lg $sp-lg;
+  flex: 1;
+  min-height: 0;
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    max-width: 520px;
+  }
+
+  &__high {
+    color: var(--warning-text);
+    font-weight: 600;
+  }
+}

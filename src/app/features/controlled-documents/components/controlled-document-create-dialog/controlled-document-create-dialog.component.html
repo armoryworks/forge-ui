@@ -1,0 +1,26 @@
+<app-dialog [title]="'controlledDocuments.newTitle' | translate" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'common.title' | translate" formControlName="title" [maxlength]="300" [required]="true" data-testid="doc-create-title" />
+    <div class="dialog-row">
+      <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" data-testid="doc-create-category" />
+      <app-input [label]="'controlledDocuments.reviewIntervalDays' | translate" type="number" formControlName="reviewIntervalDays" data-testid="doc-create-review-days" />
+    </div>
+    <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="2" [maxlength]="2000" data-testid="doc-create-description" />
+    <div class="dialog-row">
+      <app-entity-picker [label]="'controlledDocuments.partOptional' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+        formControlName="partId" data-testid="doc-create-part" />
+      @if (form.controls.partId.value) {
+        <app-select [label]="'controlledDocuments.operation' | translate" formControlName="operationId" [options]="operationOptions()" data-testid="doc-create-operation" />
+      }
+    </div>
+    <p class="text-muted">{{ 'controlledDocuments.linkHint' | translate }}</p>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="doc-create-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="doc-create-save-btn">
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

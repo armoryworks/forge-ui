@@ -99,6 +99,14 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl(`/api/v1/${prefix}/7`)).toBe(capability);
     });
 
+    it('gates the quality-engineering endpoints on their own capabilities', () => {
+      expect(resolveCapabilityForUrl('/api/v1/certificates-of-analysis?lotId=4')).toBe('CAP-QC-COA');
+      expect(resolveCapabilityForUrl('/api/v1/recalls/preview')).toBe('CAP-QC-RECALL');
+      expect(resolveCapabilityForUrl('/api/v1/deliverables?projectId=2')).toBe('CAP-O2C-DELIVERABLE');
+      expect(resolveCapabilityForUrl('/api/v1/ppap/level-requirements/3')).toBe('CAP-QC-PPAP');
+      expect(resolveCapabilityForUrl('/api/v1/documents/controlled/work-instructions?operationId=5')).toBe('CAP-CROSS-DOCS');
+    });
+
     it('gates ECOs and gages on their own capabilities, not inspection', () => {
       expect(resolveCapabilityForUrl('/api/v1/quality/ecos/5/approve')).toBe('CAP-MD-ECO');
       expect(resolveCapabilityForUrl('/api/v1/quality/gages/due')).toBe('CAP-QC-GAGE');

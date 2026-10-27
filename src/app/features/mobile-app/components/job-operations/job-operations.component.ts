@@ -24,6 +24,7 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
 import { OperationRowView } from '../../models/operation-row-view.model';
 import { OperationQuantitySheetComponent } from '../operation-quantity-sheet/operation-quantity-sheet.component';
 import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail';
+import { WorkInstructionsComponent } from '../../../controlled-documents/components/work-instructions/work-instructions.component';
 
 /**
  * A job's routing operations on the phone, shown only while operation
@@ -38,7 +39,7 @@ import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail'
 @Component({
   selector: 'app-job-operations',
   standalone: true,
-  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent],
+  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent, WorkInstructionsComponent],
   templateUrl: './job-operations.component.html',
   styleUrl: './job-operations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

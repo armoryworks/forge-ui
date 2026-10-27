@@ -1,0 +1,23 @@
+<app-dialog [title]="'fmea.recordActionTitle' | translate: { number: data.item.itemNumber }" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p class="text-muted">{{ data.item.failureMode }} — {{ 'fmea.rpnValue' | translate: { rpn: data.item.rpn } }}</p>
+    @if (data.item.recommendedAction) {
+      <p class="text-muted">{{ 'fmea.recommendedAction' | translate }}: {{ data.item.recommendedAction }}</p>
+    }
+    <app-textarea [label]="'fmea.actionTaken' | translate" formControlName="actionTaken" [rows]="3" [maxlength]="2000" data-testid="fmea-action-taken" />
+    <div class="dialog-row">
+      <app-select [label]="'fmea.revisedSeverity' | translate" formControlName="revisedSeverity" [options]="ratingOptions" data-testid="fmea-action-severity" />
+      <app-select [label]="'fmea.revisedOccurrence' | translate" formControlName="revisedOccurrence" [options]="ratingOptions" data-testid="fmea-action-occurrence" />
+      <app-select [label]="'fmea.revisedDetection' | translate" formControlName="revisedDetection" [options]="ratingOptions" data-testid="fmea-action-detection" />
+    </div>
+    <p data-testid="fmea-action-revised-rpn">{{ 'fmea.revisedRpnValue' | translate: { rpn: revisedRpn() } }}</p>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="fmea-action-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="fmea-action-save-btn">
+        {{ 'fmea.recordAction' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
