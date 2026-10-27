@@ -140,14 +140,16 @@
           {{ 'adminOverview.scheduledTasks.noUpcoming' | translate }}
         </p>
       }
-      <footer class="admin-overview-card__footer">
-        <button class="action-btn action-btn--sm"
-          data-testid="overview-card-scheduled-tasks-go"
-          (click)="goTo('/admin/scheduled-tasks')">
-          {{ 'adminOverview.scheduledTasks.cta' | translate }}
-          <span class="material-icons-outlined">chevron_right</span>
-        </button>
-      </footer>
+      @if (isAdmin) {
+        <footer class="admin-overview-card__footer">
+          <button class="action-btn action-btn--sm"
+            data-testid="overview-card-scheduled-tasks-go"
+            (click)="goTo('/admin/scheduled-tasks')">
+            {{ 'adminOverview.scheduledTasks.cta' | translate }}
+            <span class="material-icons-outlined">chevron_right</span>
+          </button>
+        </footer>
+      }
     </section>
 
     <!-- Storage (info-only — no admin page exists today) -->
