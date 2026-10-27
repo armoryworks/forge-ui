@@ -111,3 +111,15 @@
     justify-content: flex-end;
   }
 }
+
+.spc-entry__result {
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  border-left: $border-width-accent solid var(--success);
+  font-weight: 600;
+
+  &--ooc {
+    border-left-color: var(--error);
+    color: var(--error);
+  }
+}

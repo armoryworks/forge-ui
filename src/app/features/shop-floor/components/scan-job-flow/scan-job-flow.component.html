@@ -102,6 +102,8 @@
             [suggestedOperationId]="suggestedOperationId()"
             [focusOperationId]="focusOperationId()"
             [gating]="ops.stepGating ?? 'Off'"
+            [spcCharacteristics]="spcCharacteristics()"
+            (recordSpc)="openSpc($event)"
             (start)="startOperation($event)"
             (startSetup)="startOperation($event, 'Setup')"
             (startRework)="startOperation($event, 'Rework')"

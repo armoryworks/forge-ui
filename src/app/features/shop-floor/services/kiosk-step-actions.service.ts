@@ -6,10 +6,12 @@ import { forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { OperationQuantityDialogComponent } from '../../../shared/components/operation-quantity-dialog/operation-quantity-dialog.component';
 import { OperationQuantityDialogData } from '../../../shared/models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../../shared/models/operation-quantity-dialog-result.model';
+import { AuthService } from '../../../shared/services/auth.service';
 import { StepGateService } from '../../../shared/services/step-gate.service';
 import { ShopFloorService } from './shop-floor.service';
 import { JobOperationRow } from '../models/job-operation-row.model';
 import { JobOperationProgressResult } from '../models/job-operation-progress-result.model';
+import { JobOperationTimerResult } from '../models/job-operation-timer-result.model';
 import { JobOperationTimerStopResult } from '../models/job-operation-timer-stop-result.model';
 import { KioskStepContext } from '../models/kiosk-step-context.model';
 import { StopOperationTimerRequest } from '../models/stop-operation-timer-request.model';
@@ -20,6 +22,7 @@ export class KioskStepActionsService {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly stepGate = inject(StepGateService);
+  private readonly auth = inject(AuthService);
 
   loadStep(jobId: number, operationId: number): Observable<{ row: JobOperationRow; context: KioskStepContext } | null> {
     return forkJoin([this.shopFloor.getOperations(jobId), this.shopFloor.getConfig()]).pipe(
@@ -63,9 +66,22 @@ export class KioskStepActionsService {
           ...(result.reworkQuantity > 0 ? { reworkQuantity: result.reworkQuantity } : {}),
           ...(result.reasonCode ? { reasonCode: result.reasonCode } : {}),
           ...gateAcknowledgement(result),
-        })
+        }).pipe(switchMap(progress => result.bookReworkTime && progress.operation.status !== 'Complete'
+          ? this.switchToRework(jobId, operationId).pipe(map(() => progress))
+          : of(progress)))
         : of(null)),
     );
+  }
+
+  switchToRework(jobId: number, operationId: number): Observable<JobOperationTimerResult> {
+    return this.shopFloor.stopOperationTimer(jobId, operationId).pipe(
+      switchMap(() => this.shopFloor.startOperationTimer(jobId, operationId, 'Rework')),
+    );
+  }
+
+  runTimerOpen(row: JobOperationRow): boolean {
+    const me = this.auth.user()?.id ?? null;
+    return row.openTimers.some(t => t.userId === me && t.entryType === 'Run');
   }
 
   private openDialog(
@@ -87,6 +103,7 @@ export class KioskStepActionsService {
           plannedQuantity: row.plannedQuantity ?? null,
           gate: this.stepGate.gateFor(row, context.gating),
           initialQuantity,
+          runTimerOpen: mode === 'record' && this.runTimerOpen(row),
         },
       }).afterClosed();
   }

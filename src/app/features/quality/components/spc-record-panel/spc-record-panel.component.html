@@ -1,0 +1,29 @@
+<section class="spc-record" data-testid="spc-record-panel" [attr.aria-label]="'spc.record.title' | translate">
+  @if (characteristics().length > 1) {
+    <p class="spc-record__prompt">{{ 'spc.record.pick' | translate }}</p>
+    <div class="spc-record__choices" role="group" [attr.aria-label]="'spc.record.pick' | translate">
+      @for (c of characteristics(); track c.id) {
+        <button type="button" class="action-btn spc-record__choice"
+                [class.action-btn--primary]="chosen()[0]?.id === c.id"
+                [attr.aria-pressed]="chosen()[0]?.id === c.id"
+                (click)="choose(c)" [attr.data-testid]="'spc-record-choose-' + c.id">
+          <span class="spc-record__name">{{ c.name }}</span>
+          <span class="spc-record__spec">
+            {{ 'spc.record.spec' | translate: {
+              lower: (c.lowerSpecLimit | number:'1.0-6'),
+              upper: (c.upperSpecLimit | number:'1.0-6'),
+              unit: c.unitOfMeasure ?? '' } }}
+          </span>
+        </button>
+      }
+    </div>
+  }
+  @for (c of chosen(); track c.id) {
+    <app-spc-data-entry [characteristic]="c" [jobId]="jobId()" />
+  }
+  <div class="spc-record__footer">
+    <button type="button" class="action-btn" (click)="closed.emit()" data-testid="spc-record-close">
+      {{ 'common.close' | translate }}
+    </button>
+  </div>
+</section>

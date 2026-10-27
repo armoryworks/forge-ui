@@ -8,13 +8,15 @@
   </div>
 
   <div class="spc-entry__context">
-    <app-entity-picker data-testid="spc-entry-job"
-      [label]="'spc.dataEntry.workOrder' | translate"
-      entityType="jobs"
-      displayField="jobNumber"
-      secondaryDisplayField="title"
-      [formControl]="jobIdControl"
-      [placeholder]="'common.optional' | translate" />
+    @if (jobId() === null) {
+      <app-entity-picker data-testid="spc-entry-job"
+        [label]="'spc.dataEntry.workOrder' | translate"
+        entityType="jobs"
+        displayField="jobNumber"
+        secondaryDisplayField="title"
+        [formControl]="jobIdControl"
+        [placeholder]="'common.optional' | translate" />
+    }
     <app-input [label]="'spc.dataEntry.lotNumber' | translate" [formControl]="lotNumberControl"
       [placeholder]="'common.optional' | translate" data-testid="spc-entry-lot" />
   </div>
@@ -48,6 +50,20 @@
       <span class="spc-entry__stat-value">{{ computedRange() !== null ? formatValue(computedRange()) : '—' }}</span>
     </div>
   </div>
+
+  @if (lastResult(); as result) {
+    <p class="spc-entry__result" [class.spc-entry__result--ooc]="result.isOutOfControl || result.isOutOfSpec"
+       role="status" data-testid="spc-entry-result">
+      @if (result.isOutOfControl) {
+        {{ 'spc.dataEntry.resultOoc' | translate: { number: result.subgroupNumber, rule: result.oocRuleViolated } }}
+      } @else {
+        {{ 'spc.dataEntry.resultInControl' | translate: { number: result.subgroupNumber } }}
+      }
+      @if (result.isOutOfSpec) {
+        {{ 'spc.dataEntry.resultOutOfSpec' | translate }}
+      }
+    </p>
+  }
 
   <app-textarea [label]="'common.notes' | translate" [formControl]="notes" [rows]="2" data-testid="spc-entry-notes" />
 

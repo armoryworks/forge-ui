@@ -7,6 +7,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { StepGatingMode } from '../../../../shared/models/step-gating-mode.type';
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { JobOperationRow } from '../../models/job-operation-row.model';
+import { SpcCharacteristic } from '../../../quality/models/spc.model';
+import { spcForOperation } from '../../../quality/utils/spc-for-operation';
 
 interface OperationTile {
   row: JobOperationRow;
@@ -20,6 +22,7 @@ interface OperationTile {
   mineEntryType: string | null;
   available: number | null;
   waitingOn: string | null;
+  hasSpc: boolean;
 }
 
 @Component({
@@ -43,6 +46,7 @@ export class KioskOperationTilesComponent {
   readonly suggestedOperationId = input<number | null>(null);
   readonly focusOperationId = input<number | null>(null);
   readonly gating = input<StepGatingMode>('Off');
+  readonly spcCharacteristics = input<SpcCharacteristic[]>([]);
 
   readonly start = output<JobOperationRow>();
   readonly startSetup = output<JobOperationRow>();
@@ -50,6 +54,7 @@ export class KioskOperationTilesComponent {
   readonly stop = output<JobOperationRow>();
   readonly done = output<JobOperationRow>();
   readonly addQuantity = output<JobOperationRow>();
+  readonly recordSpc = output<JobOperationRow>();
 
   protected readonly showDone = signal(false);
   protected readonly blocking = computed(() => this.gating() === 'Block');
@@ -60,6 +65,7 @@ export class KioskOperationTilesComponent {
     const suggested = this.suggestedOperationId();
     const focused = this.focusOperationId();
     const gated = this.gating() !== 'Off';
+    const spc = this.spcCharacteristics();
     return this.operations()
       .filter(row => row.isRoutingStep && row.operationId != null)
       .map(row => {
@@ -78,6 +84,7 @@ export class KioskOperationTilesComponent {
           mineEntryType: mine?.entryType ?? null,
           available: gated ? row.available ?? null : null,
           waitingOn: gated && (row.waitingOnSteps?.length ?? 0) > 0 ? row.waitingOnSteps!.join(', ') : null,
+          hasSpc: spcForOperation(spc, row.operationId).length > 0,
         };
       });
   });

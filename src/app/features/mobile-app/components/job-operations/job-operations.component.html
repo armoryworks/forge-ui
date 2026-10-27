@@ -6,6 +6,8 @@
 >
   @if (identifying()) {
     <app-identity-prompt (identified)="onIdentified()" (cancelled)="onIdentityCancelled()" />
+  } @else if (spcRow(); as spcStep) {
+    <app-spc-record-panel [characteristics]="spcFor(spcStep)" [jobId]="jobId()" (closed)="closeSpc()" />
   } @else if (editing(); as edit) {
     <app-operation-quantity-sheet
       [label]="edit.row.stepNumber + ' ' + edit.row.title"
@@ -15,6 +17,7 @@
       [reasons]="reasons()"
       [finishing]="edit.finishing"
       [busy]="busy()"
+      [runTimerOpen]="runTimerOpen(edit.row)"
       (recorded)="record($event)"
       (cancelled)="closeQuantity()"
     />
@@ -135,6 +138,18 @@
                   <span class="material-icons-outlined" aria-hidden="true">pin</span>
                   {{ 'mobileApp.operations.addQuantity' | translate }}
                 </button>
+                @if (spcOperationIds().has(view.row.operationId)) {
+                  <button
+                    type="button"
+                    class="ops__btn"
+                    [disabled]="busy()"
+                    [attr.data-testid]="'job-operation-spc-' + view.row.stepNumber"
+                    (click)="openSpc(view)"
+                  >
+                    <span class="material-icons-outlined" aria-hidden="true">straighten</span>
+                    {{ 'mobileApp.operations.recordSpc' | translate }}
+                  </button>
+                }
                 <button
                   type="button"
                   class="ops__btn"

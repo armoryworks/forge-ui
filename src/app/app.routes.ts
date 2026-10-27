@@ -447,6 +447,13 @@ export const routes: Routes = [
           import('./features/mrp/mrp.routes').then((m) => m.MRP_ROUTES),
       },
       {
+        path: 'andon',
+        data: { titleKey: 'nav.andon' },
+        canActivate: routeAccessGuards('andon'),
+        loadChildren: () =>
+          import('./features/andon/andon.routes').then((m) => m.ANDON_ROUTES),
+      },
+      {
         path: 'oee',
         data: { titleKey: 'nav.oee' },
         canActivate: routeAccessGuards('oee'),

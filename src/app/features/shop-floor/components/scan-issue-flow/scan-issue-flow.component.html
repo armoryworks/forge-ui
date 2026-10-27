@@ -36,6 +36,65 @@
     </div>
   }
 
+  @if (step() === 'source') {
+    <div class="scan-flow__body" data-testid="issue-source-step">
+      <p class="scan-flow__prompt">{{ 'kioskFlows.issue.sourcePrompt' | translate }}</p>
+
+      @if (sourcesLoading()) {
+        <p class="scan-flow__prompt" role="status">{{ 'common.loading' | translate }}</p>
+      } @else {
+        @for (source of sources(); track source.binContentId; let first = $first) {
+          <button type="button" class="scan-flow__job-btn"
+                  [class.scan-flow__job-btn--selected]="selectedSource()?.binContentId === source.binContentId"
+                  [attr.aria-pressed]="selectedSource()?.binContentId === source.binContentId"
+                  (click)="chooseSource(source)"
+                  [attr.data-testid]="'issue-source-' + source.binContentId">
+            <div class="scan-flow__job-header">
+              <span class="material-icons-outlined">inventory_2</span>
+              <span class="scan-flow__job-number">{{ source.lotNumber ?? ('kioskFlows.issue.noLot' | translate) }}</span>
+              @if (first) {
+                <span class="scan-flow__source-tag" data-testid="issue-source-fefo">{{ 'kioskFlows.issue.fefoFirst' | translate }}</span>
+              }
+            </div>
+            <div class="scan-flow__job-title">{{ source.locationPath }}</div>
+            <div class="scan-flow__job-detail">
+              <span>{{ 'kioskFlows.issue.sourceAvailable' | translate: { count: source.availableQuantity } }}</span>
+              @if (source.expirationDate) {
+                <span>{{ 'kioskFlows.issue.expires' | translate: { date: (source.expirationDate | dateOnly) } }}</span>
+              }
+            </div>
+          </button>
+        } @empty {
+          <p class="scan-flow__prompt" role="alert" data-testid="issue-source-none">{{ 'kioskFlows.issue.noSources' | translate }}</p>
+        }
+      }
+
+      <div class="scan-flow__partial-input">
+        <app-input [label]="'kioskFlows.issue.scanSource' | translate" [formControl]="sourceCode"
+                   (keydown.enter)="useTypedCode()" data-testid="issue-source-code" />
+        <button type="button" class="action-btn" (click)="useTypedCode()" data-testid="issue-source-code-use">
+          <span class="material-icons-outlined">qr_code_scanner</span>
+          {{ 'kioskFlows.issue.useCode' | translate }}
+        </button>
+      </div>
+      @if (sourceNotice(); as notice) {
+        <p class="scan-flow__notice" role="alert" data-testid="issue-source-notice">{{ notice }}</p>
+      }
+
+      <div class="scan-flow__action-row">
+        <button class="action-btn" (click)="back()" [attr.aria-label]="'kioskFlows.common.goBackAria' | translate">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary" [disabled]="!selectedSource()"
+                (click)="continueToQuantity()" data-testid="issue-source-next">
+          <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'common.next' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
   <!-- Step 2: Quantity -->
   @if (step() === 'quantity') {
     <div class="scan-flow__body">
@@ -49,10 +108,10 @@
       </div>
       <div class="scan-flow__info-row">
         <span class="scan-flow__info-label">{{ 'kioskFlows.common.available' | translate }}</span>
-        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ (context().currentStock + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
+        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ ((selectedSource()?.availableQuantity ?? 0) + (context().stockUomCode ? ' ' + context().stockUomCode : '')) }}</span>
       </div>
 
-      <p class="scan-flow__prompt">{{ 'kioskFlows.issue.issueAllPrompt' | translate: { count: selectedJob()?.remainingQuantity } }}</p>
+      <p class="scan-flow__prompt">{{ 'kioskFlows.issue.issueAllPrompt' | translate: { count: maxQuantity() } }}</p>
 
       <div class="scan-flow__choice-row">
         <button class="scan-flow__choice-btn scan-flow__choice-btn--primary"
@@ -72,7 +131,7 @@
         <div class="scan-flow__partial-input">
           <app-input [label]="'common.quantity' | translate" type="number" [formControl]="partialQty" data-testid="issue-partial-qty" />
           <button class="action-btn action-btn--primary"
-                  [disabled]="(partialQty.value ?? 0) <= 0 || (partialQty.value ?? 0) > (selectedJob()?.remainingQuantity ?? 0)"
+                  [disabled]="(partialQty.value ?? 0) <= 0 || (partialQty.value ?? 0) > maxQuantity()"
                   (click)="confirmPartial()" [attr.aria-label]="'kioskFlows.common.confirmPartialAria' | translate">
             <span class="material-icons-outlined">check</span>
             {{ 'common.next' | translate }}
@@ -107,7 +166,11 @@
         </div>
         <div class="scan-flow__summary-row">
           <span class="scan-flow__summary-label">{{ 'kioskFlows.common.from' | translate }}</span>
-          <span class="scan-flow__summary-value">{{ context().currentLocationName ?? ('kioskFlows.common.notApplicable' | translate) }}</span>
+          <span class="scan-flow__summary-value">{{ selectedSource()?.locationPath ?? ('kioskFlows.common.notApplicable' | translate) }}</span>
+        </div>
+        <div class="scan-flow__summary-row">
+          <span class="scan-flow__summary-label">{{ 'kioskFlows.issue.lot' | translate }}</span>
+          <span class="scan-flow__summary-value">{{ selectedSource()?.lotNumber ?? ('kioskFlows.issue.noLot' | translate) }}</span>
         </div>
       </div>
 

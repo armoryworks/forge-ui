@@ -98,7 +98,8 @@
     "openingOpenItems": "Saldos iniciales por cobrar y por pagar",
     "pickWaves": "Olas de surtido",
     "physicalInventory": "Inventario físico",
-    "consignment": "Consignación"
+    "consignment": "Consignación",
+    "andon": "Andon"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -7912,11 +7913,19 @@
       "clear": "Limpiar",
       "record": "Registrar subgrupo",
       "recorded": "Subgrupo n.º {{number}} registrado.",
-      "recordedOoc": "Subgrupo n.º {{number}} registrado. Fuera de control: {{rule}}"
+      "recordedOoc": "Subgrupo n.º {{number}} registrado. Fuera de control: {{rule}}",
+      "resultInControl": "El subgrupo n.º {{number}} está bajo control.",
+      "resultOoc": "El subgrupo n.º {{number}} está FUERA DE CONTROL ({{rule}}). Se generó un evento de fuera de control.",
+      "resultOutOfSpec": "Una lectura está fuera de los límites de especificación."
     },
     "ooc": {
       "capaCreatedNumber": "Se creó {{number}} a partir del evento fuera de control",
       "capaCreated": "Se creó la CAPA a partir del evento fuera de control"
+    },
+    "record": {
+      "title": "Registrar SPC",
+      "pick": "¿Qué característica está midiendo?",
+      "spec": "Especificación {{lower}}–{{upper}} {{unit}}"
     }
   },
   "quality": {
@@ -8424,7 +8433,18 @@
       "submitting": "Emitiendo...",
       "confirm": "Confirmar emisión",
       "success": "Se emitieron {{quantity}} x {{part}} a {{workOrder}}",
-      "failed": "La emisión falló. Inténtelo de nuevo."
+      "failed": "La emisión falló. Inténtelo de nuevo.",
+      "sourcePrompt": "Elija el lote o la ubicación de donde emitir; se preselecciona el que vence primero. Al escanear la etiqueta de un lote o ubicación, queda seleccionado.",
+      "sourcesFailed": "No se pudieron cargar las ubicaciones y lotes de esta pieza.",
+      "sourceNotEligible": "{{code}} no es un lote ni una ubicación disponible para emitir esta pieza (puede estar retenido, vencido o vacío).",
+      "noLot": "Sin lote",
+      "lot": "Lote",
+      "fefoFirst": "Vence primero",
+      "sourceAvailable": "Disponible: {{count}}",
+      "expires": "Vence el {{date}}",
+      "noSources": "No hay existencias disponibles para emitir esta pieza. Los lotes retenidos o vencidos no se pueden emitir.",
+      "scanSource": "Escanee o escriba la etiqueta de un lote o ubicación",
+      "useCode": "Usar"
     },
     "move": {
       "title": "Mover inventario",
@@ -8757,7 +8777,9 @@
       "receivingLoadFailed": "No se pudieron cargar las órdenes de compra por recibir. Vuelva e inténtelo de nuevo.",
       "shippingLoadFailed": "No se pudieron cargar los envíos. Vuelva e inténtelo de nuevo.",
       "piecesRecorded": "Piezas registradas en {{jobNumber}}",
-      "piecesRecordFailed": "No se pudieron registrar las piezas: {{reason}}"
+      "piecesRecordFailed": "No se pudieron registrar las piezas: {{reason}}",
+      "andonBoard": "Tablero andon",
+      "andonOpen": "Tablero andon: {{count}} abiertas"
     },
     "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
     "trainingModeEnabled": "Modo de entrenamiento activado",
@@ -8877,7 +8899,10 @@
       "gateBlocked": "Bloqueado por el control de pasos",
       "cycleCountdown": "Tiempo restante del ciclo",
       "recordCycles": "+{{count}}",
-      "recordCyclesAria": "Registrar {{count}} piezas de los ciclos terminados en {{jobNumber}}"
+      "recordCyclesAria": "Registrar {{count}} piezas de los ciclos terminados en {{jobNumber}}",
+      "reworkBooked": "Se detuvo el temporizador de producción y se inició el de retrabajo en {{step}} {{title}}.",
+      "recordSpc": "Registrar SPC",
+      "spcTitle": "SPC · {{step}} {{title}}"
     },
     "returnFlow": {
       "title": "Devolver Artículos",
@@ -13720,7 +13745,9 @@
       "typeCount": "Escribir un número",
       "typedCount": "Piezas buenas",
       "recordedWithScrap": "Registradas {{count}} buenas y {{scrap}} de desecho en {{name}}",
-      "completedWithScrap": "{{name}} terminada · {{scrap}} de desecho"
+      "completedWithScrap": "{{name}} terminada · {{scrap}} de desecho",
+      "reworkBooked": "Temporizador de retrabajo iniciado en {{name}}.",
+      "recordSpc": "SPC"
     },
     "pinPad": {
       "backspace": "Borrar"
@@ -14255,7 +14282,10 @@
       "stop": "Detener",
       "stopAndRecord": "Detener y registrar {{count}}",
       "stopAndDone": "Detener y marcar terminado ({{count}})",
-      "overPlanned": "{{total}} es más que las {{planned}} planificadas para este paso. Revise el conteo antes de continuar."
+      "overPlanned": "{{total}} es más que las {{planned}} planificadas para este paso. Revise el conteo antes de continuar.",
+      "reworkTimeQuestion": "Tiene un temporizador de producción abierto en este paso. ¿Registrar ahora el tiempo de retrabajo?",
+      "reworkTimeBook": "Registrar tiempo de retrabajo ahora",
+      "reworkTimeAlready": "Ya estoy en un temporizador de retrabajo"
     },
     "messages": {
       "completed": "{{operation}} marcada como terminada",
@@ -15793,5 +15823,34 @@
     "lasted": "{{hours}} h",
     "ended": "{{asset}} de nuevo en marcha",
     "machineDown": "Máquina parada"
+  },
+  "andon": {
+    "title": "Tablero andon",
+    "subtitle": "Llamadas de ayuda abiertas del piso, las más antiguas primero",
+    "loadFailed": "No se pudieron cargar las alertas andon.",
+    "signInToAct": "Inicie sesión en este quiosco para atender o resolver una alerta.",
+    "none": "No hay alertas andon abiertas.",
+    "types": {
+      "Help": "Ayuda",
+      "Quality": "Calidad",
+      "Material": "Material",
+      "Maintenance": "Mantenimiento",
+      "Safety": "Seguridad",
+      "Stoppage": "Paro"
+    },
+    "status": {
+      "Active": "En espera",
+      "Acknowledged": "Atendida",
+      "Resolved": "Resuelta"
+    },
+    "raisedBy": "Enviada por {{name}}",
+    "job": "Orden de trabajo {{number}}",
+    "acknowledgedBy": "Atendida por {{name}}",
+    "acknowledge": "Atender",
+    "resolve": "Resolver",
+    "resolveNote": "Qué se hizo (opcional)",
+    "acknowledged": "Alerta en {{workCenter}} atendida.",
+    "resolved": "Alerta en {{workCenter}} resuelta.",
+    "actionFailed": "No se pudo actualizar la alerta. Es posible que ya se haya atendido."
   }
 }

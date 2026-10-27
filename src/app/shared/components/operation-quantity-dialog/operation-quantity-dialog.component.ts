@@ -80,6 +80,8 @@ export class OperationQuantityDialogComponent {
     if (!gate || !gate.canOverride || !this.gateAckOn()) return false;
     return gate.mode === 'Warn' || !!this.value().gateReason?.trim();
   });
+  protected readonly offerReworkTime = computed(() => !this.stopMode && this.data.runTimerOpen === true && this.addedRework() > 0);
+  protected readonly bookRework = signal(true);
   protected readonly askReason = computed(() => this.reasonOptions.length > 1 && (this.addedScrap() > 0 || this.addedRework() > 0));
 
   protected readonly violations = computed(() => {
@@ -123,6 +125,10 @@ export class OperationQuantityDialogComponent {
 
   protected toggleScrap(): void {
     this.showScrap.update(v => !v);
+  }
+
+  protected chooseReworkTime(book: boolean): void {
+    this.bookRework.set(book);
   }
 
   protected toggleRework(): void {
@@ -224,6 +230,7 @@ export class OperationQuantityDialogComponent {
       complete,
       addedQuantity: this.added(),
       addedScrap: this.addedScrap(),
+      ...(this.offerReworkTime() && this.bookRework() ? { bookReworkTime: true } : {}),
     };
   }
 }

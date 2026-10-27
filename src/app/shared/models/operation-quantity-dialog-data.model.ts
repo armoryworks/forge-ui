@@ -13,4 +13,5 @@ export interface OperationQuantityDialogData {
   plannedQuantity?: number | null;
   gate?: OperationGate | null;
   initialQuantity?: number | null;
+  runTimerOpen?: boolean;
 }

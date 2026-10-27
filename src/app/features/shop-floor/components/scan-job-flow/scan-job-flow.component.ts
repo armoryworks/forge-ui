@@ -16,6 +16,11 @@ import { StepGateService } from '../../../../shared/services/step-gate.service';
 import { KioskStepActionsService } from '../../services/kiosk-step-actions.service';
 import { ShopFloorService } from '../../services/shop-floor.service';
 import { KanbanService } from '../../../kanban/services/kanban.service';
+import { SpcCharacteristic } from '../../../quality/models/spc.model';
+import { SpcService } from '../../../quality/services/spc.service';
+import { spcForOperation } from '../../../quality/utils/spc-for-operation';
+import { SpcRecordDialogComponent } from '../spc-record-dialog/spc-record-dialog.component';
+import { SpcRecordDialogData } from '../../models/spc-record-dialog-data.model';
 import { BILLING_STAGE_ROLES } from '../../../../shared/models/billing-stage-roles.const';
 import { JobStatus } from '../../../../shared/models/mobile-api.model';
 import { OperationQuantityDialogData } from '../../../../shared/models/operation-quantity-dialog-data.model';
@@ -55,6 +60,7 @@ export class ScanJobFlowComponent implements OnInit {
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly stepActions = inject(KioskStepActionsService);
   private readonly kanbanService = inject(KanbanService);
+  private readonly spcService = inject(SpcService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
   private readonly capabilities = inject(CapabilityService);
@@ -96,6 +102,7 @@ export class ScanJobFlowComponent implements OnInit {
   protected readonly problemNoteControl = new FormControl('');
   protected readonly problemRaisedAt = signal<string | null>(null);
 
+  protected readonly spcCharacteristics = signal<SpcCharacteristic[]>([]);
   protected readonly tracking = signal(false);
   protected readonly jobOperations = signal<JobOperations | null>(null);
   protected readonly runningTimers = signal<RunningTimer[]>([]);
@@ -129,9 +136,32 @@ export class ScanJobFlowComponent implements OnInit {
       if (!config.operationTracking) return;
       this.tracking.set(true);
       this.reasons.set(config.reasons ?? []);
+      this.loadSpcCharacteristics();
       this.loadOperations();
       this.loadRunningTimers();
       this.startTicking();
+    });
+  }
+
+  private loadSpcCharacteristics(): void {
+    if (!this.capabilities.isEnabled('CAP-QC-SPC')) return;
+    this.spcService.getJobCharacteristics(this.jobId()).subscribe({
+      next: characteristics => this.spcCharacteristics.set(characteristics),
+      error: () => this.spcCharacteristics.set([]),
+    });
+  }
+
+  protected openSpc(row: JobOperationRow): void {
+    const characteristics = spcForOperation(this.spcCharacteristics(), row.operationId);
+    if (characteristics.length === 0) return;
+    this.dialog.open<SpcRecordDialogComponent, SpcRecordDialogData>(SpcRecordDialogComponent, {
+      width: '640px',
+      maxWidth: '95vw',
+      data: {
+        title: this.translate.instant('shopFloor.operations.spcTitle', { step: row.stepNumber, title: row.title }),
+        jobId: this.jobId(),
+        characteristics,
+      },
     });
   }
 
@@ -318,6 +348,7 @@ export class ScanJobFlowComponent implements OnInit {
           decimalPlaces: this.jobOperations()?.quantityDecimalPlaces ?? null,
           plannedQuantity: row.plannedQuantity ?? null,
           gate: this.stepGate.gateFor(row, this.jobOperations()?.stepGating),
+          runTimerOpen: this.stepActions.runTimerOpen(row),
         },
       }).afterClosed().subscribe(result => {
       if (result) this.submitQuantity(row, result);
@@ -339,6 +370,10 @@ export class ScanJobFlowComponent implements OnInit {
       next: (progress) => {
         this.operationBusy.set(false);
         this.replaceOperation(progress.operation, progress.allOperationsComplete, progress.estimatedRemainingMinutes);
+        if (result.bookReworkTime && progress.operation.status !== 'Complete') {
+          this.bookReworkTime(row);
+          return;
+        }
         this.loadRunningTimers();
         if (progress.allOperationsComplete && this.canAdvance()) {
           this.step.set('confirm-advance');
@@ -347,6 +382,19 @@ export class ScanJobFlowComponent implements OnInit {
         this.operationNotice.set(this.translate.instant('shopFloor.operations.recorded', {
           step: row.stepNumber, count: progress.operation.completedQuantity, total: this.jobOperations()?.jobQuantity ?? 0,
         }));
+      },
+      error: (err: HttpErrorResponse) => this.operationFailed(err),
+    });
+  }
+
+  private bookReworkTime(row: JobOperationRow): void {
+    if (row.operationId == null || !this.beginOperationCall()) return;
+    this.stepActions.switchToRework(this.jobId(), row.operationId).subscribe({
+      next: (timer) => {
+        this.operationBusy.set(false);
+        this.replaceOperation(timer.operation);
+        this.operationNotice.set(this.translate.instant('shopFloor.operations.reworkBooked', { step: row.stepNumber, title: row.title }));
+        this.loadRunningTimers();
       },
       error: (err: HttpErrorResponse) => this.operationFailed(err),
     });

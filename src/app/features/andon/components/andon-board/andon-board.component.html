@@ -1,0 +1,78 @@
+<section class="andon-board" [class.andon-board--kiosk]="kiosk()" [attr.aria-label]="'andon.title' | translate"
+         data-testid="andon-board">
+  @if (loading()) {
+    <p class="andon-board__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (failed()) {
+    <p class="andon-board__hint" role="alert" data-testid="andon-board-failed">{{ 'andon.loadFailed' | translate }}</p>
+  } @else {
+    @if (!canAct() && rows().length > 0) {
+      <p class="andon-board__hint" data-testid="andon-board-sign-in">{{ 'andon.signInToAct' | translate }}</p>
+    }
+    <ul class="andon-board__list">
+      @for (row of rows(); track row.alert.id) {
+        <li class="andon-board__alert"
+            [class.andon-board__alert--active]="row.alert.status === 'Active'"
+            [class.andon-board__alert--acknowledged]="row.alert.status === 'Acknowledged'"
+            [attr.data-testid]="'andon-alert-' + row.alert.id">
+          <div class="andon-board__head">
+            <span class="andon-board__type">{{ ('andon.types.' + row.alert.type) | translate }}</span>
+            <span class="andon-board__work-center">{{ row.alert.workCenterName }}</span>
+            <span class="andon-board__age" [attr.data-testid]="'andon-alert-age-' + row.alert.id">
+              <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+              {{ row.ageMs | durationMs: 'approx' }}
+            </span>
+          </div>
+          <div class="andon-board__meta">
+            <span class="andon-board__status">{{ ('andon.status.' + row.alert.status) | translate }}</span>
+            <span>{{ 'andon.raisedBy' | translate: { name: row.alert.requestedByName } }}</span>
+            @if (row.alert.jobNumber) {
+              <span>{{ 'andon.job' | translate: { number: row.alert.jobNumber } }}</span>
+            }
+            @if (row.alert.acknowledgedByName) {
+              <span>{{ 'andon.acknowledgedBy' | translate: { name: row.alert.acknowledgedByName } }}</span>
+            }
+          </div>
+          @if (row.alert.notes) {
+            <p class="andon-board__notes">{{ row.alert.notes }}</p>
+          }
+          @if (canAct()) {
+            @if (resolvingId() === row.alert.id) {
+              <div class="andon-board__resolve">
+                <app-textarea [label]="'andon.resolveNote' | translate" [formControl]="resolveNote" [rows]="2"
+                              [attr.data-testid]="'andon-resolve-note-' + row.alert.id" />
+                <div class="andon-board__actions">
+                  <button type="button" class="action-btn" (click)="cancelResolve()"
+                          [attr.data-testid]="'andon-resolve-cancel-' + row.alert.id">
+                    {{ 'common.cancel' | translate }}
+                  </button>
+                  <button type="button" class="action-btn action-btn--primary" [disabled]="busyId() !== null"
+                          (click)="confirmResolve(row.alert)" [attr.data-testid]="'andon-resolve-confirm-' + row.alert.id">
+                    <span class="material-icons-outlined" aria-hidden="true">task_alt</span>
+                    {{ 'andon.resolve' | translate }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="andon-board__actions">
+                @if (row.alert.status === 'Active') {
+                  <button type="button" class="action-btn" [disabled]="busyId() !== null"
+                          (click)="acknowledge(row.alert)" [attr.data-testid]="'andon-acknowledge-' + row.alert.id">
+                    <span class="material-icons-outlined" aria-hidden="true">front_hand</span>
+                    {{ 'andon.acknowledge' | translate }}
+                  </button>
+                }
+                <button type="button" class="action-btn action-btn--primary" [disabled]="busyId() !== null"
+                        (click)="startResolve(row.alert)" [attr.data-testid]="'andon-resolve-' + row.alert.id">
+                  <span class="material-icons-outlined" aria-hidden="true">task_alt</span>
+                  {{ 'andon.resolve' | translate }}
+                </button>
+              </div>
+            }
+          }
+        </li>
+      } @empty {
+        <li class="andon-board__hint" data-testid="andon-board-empty">{{ 'andon.none' | translate }}</li>
+      }
+    </ul>
+  }
+</section>

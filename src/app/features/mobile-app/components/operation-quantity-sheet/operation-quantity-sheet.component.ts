@@ -18,7 +18,8 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
  * the recorded count otherwise; scrap and rework stay folded away until asked
  * for, and a reason is offered as chips once either is non-zero. Counts are
  * absolute except rework, which is this entry's pieces sent back. Going over
- * the job quantity is flagged here because the server refuses it.
+ * the job quantity is flagged here because the server refuses it. Rework
+ * entered while the user's Run timer is open offers to book rework time now.
  */
 @Component({
   selector: 'app-operation-quantity-sheet',
@@ -36,6 +37,7 @@ export class OperationQuantitySheetComponent {
   readonly reasons = input<OperationReason[]>([]);
   readonly finishing = input<boolean>(false);
   readonly busy = input<boolean>(false);
+  readonly runTimerOpen = input<boolean>(false);
   readonly recorded = output<OperationQuantityEntry>();
   readonly cancelled = output<void>();
 
@@ -51,6 +53,8 @@ export class OperationQuantitySheetComponent {
   protected readonly over = computed(() => this.goodCount() + this.scrapCount() > this.jobQuantity());
   protected readonly askReason = computed(() =>
     this.reasons().length > 0 && (this.scrapCount() > this.scrap() || this.reworkCount() > 0));
+  protected readonly offerReworkTime = computed(() => this.runTimerOpen() && this.reworkCount() > 0);
+  protected readonly bookRework = signal(true);
   protected readonly typing = signal(false);
   protected readonly typedGood = new FormControl<number | null>(null);
 
@@ -101,6 +105,7 @@ export class OperationQuantitySheetComponent {
       rework: this.reworkCount(),
       reason: this.askReason() ? this.reason() : null,
       complete,
+      ...(this.offerReworkTime() && this.bookRework() ? { bookReworkTime: true } : {}),
     });
   }
 }

@@ -12,6 +12,7 @@ import { isQueued } from '../../../../shared/models/mobile-api.model';
 import { OperationReason } from '../../../../shared/models/operation-reason.model';
 import { UpdateJobOperationProgressRequest } from '../../../../shared/models/update-job-operation-progress-request.model';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { InstanceService } from '../../../../shared/services/instance.service';
 import { MobileApiService } from '../../../../shared/services/mobile-api.service';
 import { MobileTimerService } from '../../../../shared/services/mobile-timer.service';
@@ -24,6 +25,10 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
 import { OperationRowView } from '../../models/operation-row-view.model';
 import { OperationQuantitySheetComponent } from '../operation-quantity-sheet/operation-quantity-sheet.component';
 import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail';
+import { SpcRecordPanelComponent } from '../../../quality/components/spc-record-panel/spc-record-panel.component';
+import { SpcCharacteristic } from '../../../quality/models/spc.model';
+import { SpcService } from '../../../quality/services/spc.service';
+import { spcForOperation } from '../../../quality/utils/spc-for-operation';
 
 /**
  * A job's routing operations on the phone, shown only while operation
@@ -38,7 +43,7 @@ import { httpProblemDetail } from '../../../../shared/utils/http-problem-detail'
 @Component({
   selector: 'app-job-operations',
   standalone: true,
-  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent],
+  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent, SpcRecordPanelComponent],
   templateUrl: './job-operations.component.html',
   styleUrl: './job-operations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +61,8 @@ export class JobOperationsComponent {
   private readonly identity = inject(SharedIdentityService);
   private readonly instances = inject(InstanceService);
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly spc = inject(SpcService);
 
   protected readonly data = signal<JobOperations | null>(null);
   protected readonly loading = signal(true);
@@ -66,6 +73,14 @@ export class JobOperationsComponent {
   protected readonly reasons = signal<OperationReason[]>([]);
   protected readonly identifying = signal(false);
   protected readonly moveOffered = signal(false);
+  protected readonly spcCharacteristics = signal<SpcCharacteristic[]>([]);
+  protected readonly spcRow = signal<JobOperationRow | null>(null);
+  protected readonly spcOperationIds = computed(() => {
+    const characteristics = this.spcCharacteristics();
+    return new Set((this.data()?.operations ?? [])
+      .filter((row) => spcForOperation(characteristics, row.operationId).length > 0)
+      .map((row) => row.operationId));
+  });
 
   private readonly now = signal(Date.now());
   private serverOffset = 0;
@@ -104,7 +119,9 @@ export class JobOperationsComponent {
       untracked(() => {
         this.data.set(null);
         this.moveOffered.set(false);
+        this.spcRow.set(null);
         this.load(id);
+        this.loadSpc(id);
       });
     });
 
@@ -129,6 +146,22 @@ export class JobOperationsComponent {
     this.editing.set({ row: view.row, finishing });
   }
 
+  protected openSpc(view: OperationRowView): void {
+    this.guard(async () => {
+      this.notice.set(null);
+      this.spcRow.set(view.row);
+      return false;
+    });
+  }
+
+  protected closeSpc(): void {
+    this.spcRow.set(null);
+  }
+
+  protected spcFor(row: JobOperationRow): SpcCharacteristic[] {
+    return spcForOperation(this.spcCharacteristics(), row.operationId);
+  }
+
   protected closeQuantity(): void {
     this.editing.set(null);
   }
@@ -136,6 +169,11 @@ export class JobOperationsComponent {
   protected record(entry: OperationQuantityEntry): void {
     const edit = this.editing();
     if (edit) this.guard(() => this.doRecord(edit.row, entry));
+  }
+
+  protected runTimerOpen(row: JobOperationRow): boolean {
+    const me = this.auth.user()?.id ?? null;
+    return row.openTimers.some((t) => t.userId === me && t.entryType === 'Run');
   }
 
   protected requestMove(): void {
@@ -242,6 +280,7 @@ export class JobOperationsComponent {
     const result = await firstValueFrom(this.api.updateOperationProgress(jobId, operationId, request));
     this.editing.set(null);
     if (isQueued(result)) return this.offerQueuedUndo(result.entryId, token);
+    if (entry.bookReworkTime && result.operation.status !== 'Complete') await this.switchToRework(jobId, operationId, row);
     this.changed();
     if (result.allOperationsComplete) this.moveOffered.set(true);
 
@@ -261,6 +300,12 @@ export class JobOperationsComponent {
       this.endIdentity(token),
     );
     return !!token;
+  }
+
+  private async switchToRework(jobId: number, operationId: number, row: JobOperationRow): Promise<void> {
+    await firstValueFrom(this.api.stopOperationTimer(jobId, operationId));
+    await firstValueFrom(this.api.startOperationTimer(jobId, operationId, 'Rework'));
+    this.notice.set(this.translate.instant('mobileApp.operations.reworkBooked', { name: this.labelOf(row) }));
   }
 
   private recordedMessage(entry: OperationQuantityEntry, row: JobOperationRow): string {
@@ -302,6 +347,17 @@ export class JobOperationsComponent {
         if (!this.data()) this.failed.set(true);
         this.loading.set(false);
       },
+    });
+  }
+
+  private loadSpc(jobId: number): void {
+    this.spcCharacteristics.set([]);
+    if (!this.capabilities.isEnabled('CAP-QC-SPC')) return;
+    this.spc.getJobCharacteristics(jobId).subscribe({
+      next: (characteristics) => {
+        if (jobId === this.jobId()) this.spcCharacteristics.set(characteristics);
+      },
+      error: () => this.spcCharacteristics.set([]),
     });
   }
 

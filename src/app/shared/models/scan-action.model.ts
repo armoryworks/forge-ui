@@ -42,6 +42,7 @@ export interface ScanIssueRequest {
   jobId: number;
   quantity: number;
   fromLocationId: number;
+  binContentId?: number;
 }
 
 export interface ScanReceiveContextLine {

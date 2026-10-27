@@ -116,6 +116,7 @@ export class NavTreeService {
         { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager', 'Production Planner'] },
         { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', capability: 'CAP-PLAN-MRP', allowedRoles: ['Admin', 'Manager', 'Production Planner'] },
         { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', capability: 'CAP-INV-LOTS', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'campaign', label: 'Andon', i18nKey: 'nav.andon', route: '/andon', capability: 'CAP-EXT-ANDON' },
         {
           icon: 'account_tree', label: 'Sequences', i18nKey: 'nav.sequences',
           capability: 'CAP-CROSS-SEQUENCES', allowedRoles: ['Admin', 'Manager'],

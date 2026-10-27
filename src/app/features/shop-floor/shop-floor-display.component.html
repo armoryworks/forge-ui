@@ -97,6 +97,19 @@
           <span class="material-icons-outlined">undo</span>
         </button>
       }
+      @if (andonEnabled()) {
+        <button class="sf-header__control-btn sf-header__control-btn--andon" (click)="toggleAndonBoard()"
+                [class.sf-header__control-btn--active]="showAndonBoard()"
+                [class.sf-header__control-btn--alert]="openAndonCount() > 0"
+                [attr.aria-label]="'shopFloor.display.andonOpen' | translate: { count: openAndonCount() }"
+                [title]="'shopFloor.display.andonBoard' | translate"
+                data-testid="sf-andon-toggle">
+          <span class="material-icons-outlined">campaign</span>
+          @if (openAndonCount() > 0) {
+            <span class="sf-header__badge" data-testid="sf-andon-count">{{ openAndonCount() }}</span>
+          }
+        </button>
+      }
       <button class="sf-header__control-btn" (click)="toggleTheme()"
               [attr.aria-label]="'header.toggleTheme' | translate">
         <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
@@ -878,6 +891,23 @@
            cdkTrapFocus cdkTrapFocusAutoCapture
            (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="closeDailyLog()">
         <app-scan-daily-log (closed)="closeDailyLog()" />
+      </div>
+    </div>
+  }
+
+  @if (showAndonBoard()) {
+    <div class="sf-overlay" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="closeAndonBoard()" (keydown.escape)="closeAndonBoard()">
+      <div class="sf-panel-container sf-andon-panel" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="sf-andon-title"
+           cdkTrapFocus cdkTrapFocusAutoCapture data-testid="sf-andon-panel"
+           (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keydown.escape)="closeAndonBoard()">
+        <div class="sf-andon-panel__head">
+          <h2 id="sf-andon-title" class="sf-andon-panel__title">{{ 'shopFloor.display.andonBoard' | translate }}</h2>
+          <button type="button" class="sf-header__control-btn" (click)="closeAndonBoard()"
+                  [attr.aria-label]="'common.close' | translate" data-testid="sf-andon-close">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <app-andon-board [kiosk]="true" [canAct]="andonCanAct()" />
       </div>
     </div>
   }

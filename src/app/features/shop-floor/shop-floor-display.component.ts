@@ -67,6 +67,9 @@ import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 import { LanguageService } from '../../shared/services/language.service';
+import { CapabilityService } from '../../shared/services/capability.service';
+import { AndonBoardComponent } from '../andon/components/andon-board/andon-board.component';
+import { AndonService } from '../andon/services/andon.service';
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28] as const;
 
@@ -90,7 +93,7 @@ const SIGNED_IN_PHASES: ReadonlySet<DisplayPhase> = new Set<DisplayPhase>(['acti
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, KioskRunningTimersComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent],
+  imports: [EnumLabelPipe, DatePipe, DateOnlyPipe, DateTimePipe, NgTemplateOutlet, A11yModule, TranslatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, KioskRunningTimersComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent, LanguageToggleComponent, AndonBoardComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -134,6 +137,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   protected readonly kioskSession = inject(KioskSessionService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly andonService = inject(AndonService);
 
   // Training PREVIEW mode. Sourced ONLY from static route data (the training
   // walkthrough navigates to the `preview` child route, which sets
@@ -326,6 +331,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Undo panel
   protected readonly undoPanelOpen = signal(false);
+
+  protected readonly andonEnabled = computed(() => !this.previewMode && this.capabilities.isEnabled('CAP-EXT-ANDON'));
+  protected readonly openAndonCount = signal(0);
+  protected readonly showAndonBoard = signal(false);
+  protected readonly andonCanAct = computed(() => SIGNED_IN_PHASES.has(this.phase()) && this.authService.isAuthenticated());
 
   // Daily log panel
   protected readonly showDailyLog = signal(false);
@@ -1397,6 +1407,17 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.keepSignedInSessionAlive();
   }
 
+  protected toggleAndonBoard(): void {
+    this.showAndonBoard.update(v => !v);
+    this.keepSignedInSessionAlive();
+  }
+
+  protected closeAndonBoard(): void {
+    this.showAndonBoard.set(false);
+    this.keepSignedInSessionAlive();
+    this.focusSearchArea();
+  }
+
   private keepSignedInSessionAlive(): void {
     if (this.autoLogoutTimer) this.resetAutoLogoutTimer();
   }
@@ -1690,9 +1711,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       everyone: signedInOffTeam ? this.shopFloorService.getClockStatus().pipe(catchError(() => of(null))) : of(null),
       events: this.eventsService.getUpcomingEvents().pipe(catchError(() => of([]))),
       jobs: this.shopFloorService.getAvailableJobs(teamId, '', JOB_PAGE_SIZE).pipe(catchError(() => of([]))),
+      andon: this.andonEnabled() ? this.andonService.getOpenAlerts(true).pipe(catchError(() => of([]))) : of([]),
     }).subscribe({
-      next: ({ overview, workers, everyone, events, jobs }) => {
+      next: ({ overview, workers, everyone, events, jobs, andon }) => {
         this.overview.set(overview);
+        this.openAndonCount.set(andon.length);
         this.boardJobs.set(jobs);
         this.workers.set(workers);
         this.upcomingEvents.set(events);
