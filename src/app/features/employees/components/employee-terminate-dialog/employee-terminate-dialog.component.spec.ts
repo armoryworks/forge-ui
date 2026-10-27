@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateService, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -48,6 +48,29 @@ describe('EmployeeTerminateDialogComponent', () => {
     expect(view.form.invalid).toBe(true);
     view.form.patchValue({ reasonCode: 'layoff' });
     expect(view.form.invalid).toBe(false);
+  });
+
+  it('shows the shipped reasons in the user\'s language and keeps a custom reason\'s stored label', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService(),
+        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: MAT_DIALOG_DATA, useValue: { employee: { id: 12, firstName: 'Ann', lastName: 'Lee', hasLogin: true }, kind: 'user' } },
+        { provide: ReferenceDataService, useValue: { getAsOptions: vi.fn(() => of([{ value: 'layoff', label: 'Layoff' }, { value: 'seasonal', label: 'Seasonal' }])) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+      ],
+    });
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('es', { employees: { termination: { reasons: { layoff: 'Despido por reducción de personal' } } } });
+    translate.use('es');
+    const view = TestBed.runInInjectionContext(() => new EmployeeTerminateDialogComponent()) as unknown as DialogView;
+    expect(view.reasonOptions()).toEqual([
+      { value: 'layoff', label: 'Despido por reducción de personal' },
+      { value: 'seasonal', label: 'Seasonal' },
+    ]);
   });
 
   it('lists what termination does for a user with a login, and only the profile for one without', () => {

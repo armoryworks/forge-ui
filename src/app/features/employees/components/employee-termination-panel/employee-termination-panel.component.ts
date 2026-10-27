@@ -13,6 +13,7 @@ import { EmployeeService } from '../../services/employee.service';
 import { EmployeeDetail } from '../../models/employee.model';
 import { EmployeeKind } from '../../models/employee-kind.model';
 import { FinalPaySummary } from '../../models/final-pay-summary.model';
+import { terminationReasonLabel } from '../../models/termination-reason-label.util';
 import { EmployeeRehireDialogComponent } from '../employee-rehire-dialog/employee-rehire-dialog.component';
 import { EmployeeTerminateDialogData } from '../employee-terminate-dialog/employee-terminate-dialog-data.model';
 import { TERMINATION_REASON_GROUP } from '../employee-terminate-dialog/employee-terminate-dialog.component';
@@ -44,7 +45,7 @@ export class EmployeeTerminationPanelComponent {
   protected readonly applied = computed(() => !!this.termination()?.appliedAt);
   protected readonly reasonLabel = computed(() => {
     const code = this.termination()?.reasonCode ?? '';
-    return this.reasonLabels()[code] ?? code;
+    return terminationReasonLabel(this.translate, code, this.reasonLabels()[code] ?? code);
   });
   protected readonly canMarkProcessed = computed(() => {
     const t = this.termination();

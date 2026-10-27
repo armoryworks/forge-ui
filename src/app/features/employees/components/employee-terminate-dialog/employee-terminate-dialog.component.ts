@@ -19,6 +19,7 @@ import { todayStart, toIsoDate } from '../../../../shared/utils/date.utils';
 
 import { EmployeeService } from '../../services/employee.service';
 import { TerminationResult } from '../../models/termination-result.model';
+import { terminationReasonLabel } from '../../models/termination-reason-label.util';
 import { EmployeeTerminateDialogData } from './employee-terminate-dialog-data.model';
 
 export const TERMINATION_REASON_GROUP = 'termination_reason';
@@ -89,7 +90,10 @@ export class EmployeeTerminateDialogComponent {
 
   constructor() {
     this.referenceData.getAsOptions(TERMINATION_REASON_GROUP).subscribe({
-      next: options => this.reasonOptions.set(options),
+      next: options => this.reasonOptions.set(options.map(o => ({
+        ...o,
+        label: terminationReasonLabel(this.translate, String(o.value), o.label),
+      }))),
       error: () => this.reasonOptions.set([]),
     });
   }

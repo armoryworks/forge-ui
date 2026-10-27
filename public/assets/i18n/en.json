@@ -10295,7 +10295,15 @@
       },
       "hours": "{{hours}} h",
       "hoursWithAmount": "{{hours}} h ({{amount}})",
-      "leaveLine": "{{policy}}: {{hours}} h"
+      "leaveLine": "{{policy}}: {{hours}} h",
+      "reasons": {
+        "resignation": "Resignation",
+        "dismissal": "Dismissal",
+        "layoff": "Layoff",
+        "retirement": "Retirement",
+        "end_of_contract": "End of contract",
+        "other": "Other"
+      }
     }
   },
   "trainingPage": {

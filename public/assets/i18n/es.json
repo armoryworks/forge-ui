@@ -10288,7 +10288,15 @@
       },
       "hours": "{{hours}} h",
       "hoursWithAmount": "{{hours}} h ({{amount}})",
-      "leaveLine": "{{policy}}: {{hours}} h"
+      "leaveLine": "{{policy}}: {{hours}} h",
+      "reasons": {
+        "resignation": "Renuncia",
+        "dismissal": "Despido",
+        "layoff": "Despido por reducción de personal",
+        "retirement": "Jubilación",
+        "end_of_contract": "Fin de contrato",
+        "other": "Otro"
+      }
     }
   },
   "trainingPage": {
