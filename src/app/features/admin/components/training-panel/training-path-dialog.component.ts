@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -9,14 +10,12 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
-import { TrainingPathRow } from './training-panel.component';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-interface TrainingPathDetail extends TrainingPathRow {
-  slug?: string;
-  description?: string;
-}
+import { TrainingPathDialogData } from './training-path-dialog-data.model';
+import { TrainingPathDialogModuleOption } from './training-path-dialog-module-option.model';
 
 @Component({
   selector: 'app-training-path-dialog',
@@ -27,6 +26,7 @@ interface TrainingPathDetail extends TrainingPathRow {
     InputComponent,
     TextareaComponent,
     ToggleComponent,
+    SelectComponent,
     ValidationButtonComponent,
     TranslatePipe,
   ],
@@ -38,8 +38,12 @@ export class TrainingPathDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly matDialogRef = inject(MatDialogRef<TrainingPathDialogComponent>);
-  private readonly data = inject<TrainingPathDetail | null>(MAT_DIALOG_DATA);
+  private readonly dialogData = inject<TrainingPathDialogData | null>(MAT_DIALOG_DATA);
+  private readonly data = this.dialogData?.path ?? null;
   private readonly http = inject(HttpClient);
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly moduleCatalog: readonly TrainingPathDialogModuleOption[] = this.dialogData?.availableModules ?? [];
 
   protected readonly saving = signal(false);
   protected readonly isEditing = !!this.data;
@@ -54,8 +58,19 @@ export class TrainingPathDialogComponent implements OnInit {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    title: 'Title',
+    title: this.translate.instant('common.title'),
   });
+
+  protected readonly moduleIds = signal<number[]>(this.data?.moduleIds ?? []);
+  protected readonly selectedModules = computed(() => {
+    const byId = new Map(this.moduleCatalog.map(m => [m.id, m]));
+    return this.moduleIds().map(id => byId.get(id) ?? { id, title: `#${id}` });
+  });
+  protected readonly addOptions = computed<SelectOption[]>(() => {
+    const chosen = new Set(this.moduleIds());
+    return this.moduleCatalog.filter(m => !chosen.has(m.id)).map(m => ({ value: m.id, label: m.title }));
+  });
+  protected readonly addModuleControl = new FormControl<number | null>(null);
 
   protected readonly draftConfig: DraftConfig = {
     entityType: 'training-path',
@@ -63,7 +78,32 @@ export class TrainingPathDialogComponent implements OnInit {
     route: '/admin?tab=training',
   };
 
+  protected addModule(): void {
+    const id = this.addModuleControl.value;
+    if (id === null) return;
+    this.moduleIds.update(ids => (ids.includes(id) ? ids : [...ids, id]));
+    this.addModuleControl.setValue(null, { emitEvent: false });
+    this.form.markAsDirty();
+  }
+
+  protected moveModule(index: number, delta: number): void {
+    this.moduleIds.update(ids => {
+      const target = index + delta;
+      if (target < 0 || target >= ids.length) return ids;
+      const next = [...ids];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+    this.form.markAsDirty();
+  }
+
+  protected removeModule(index: number): void {
+    this.moduleIds.update(ids => ids.filter((_, i) => i !== index));
+    this.form.markAsDirty();
+  }
+
   ngOnInit(): void {
+    this.addModuleControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.addModule());
     this.form.controls.title.valueChanges.subscribe(title => {
       if (!this.isEditing || !this.form.controls.slug.value) {
         this.form.controls.slug.setValue(this.generateSlug(title ?? ''), { emitEvent: false });
@@ -95,6 +135,7 @@ export class TrainingPathDialogComponent implements OnInit {
       icon: v.icon || 'school',
       isAutoAssigned: v.isAutoAssigned!,
       isActive: v.isActive!,
+      moduleIds: this.moduleIds(),
     };
 
     const request$ = this.isEditing

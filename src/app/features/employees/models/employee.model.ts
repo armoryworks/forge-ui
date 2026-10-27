@@ -1,3 +1,5 @@
+import { EmployeeTermination } from './employee-termination.model';
+
 export interface EmployeeListItem {
   id: number;
   firstName: string;
@@ -15,6 +17,8 @@ export interface EmployeeListItem {
   startDate?: string;
   createdAt: string;
   hasLogin?: boolean;
+  terminationDate?: string | null;
+  isTerminated?: boolean;
 }
 
 export interface EmployeeDetail {
@@ -51,6 +55,8 @@ export interface EmployeeDetail {
   complianceTotalItems: number;
   hasLogin?: boolean;
   complianceChecklist?: EmployeeComplianceCheck[];
+  employeeProfileId?: number | null;
+  termination?: EmployeeTermination | null;
 }
 
 export interface EmployeeComplianceCheck {

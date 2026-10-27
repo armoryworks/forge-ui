@@ -13,6 +13,9 @@ import {
 import { EmployeeKind } from '../models/employee-kind.model';
 import { CreateEmployeeRequest } from '../models/create-employee-request.model';
 import { CreatedEmployee } from '../models/created-employee.model';
+import { TerminateEmployeeRequest } from '../models/terminate-employee-request.model';
+import { TerminationResult } from '../models/termination-result.model';
+import { FinalPaySummary } from '../models/final-pay-summary.model';
 
 /** Phase 3 F7-broad / WU-22 — paged employee list query parameters. */
 export interface EmployeeListPagedQuery extends PagedQuery {
@@ -20,6 +23,7 @@ export interface EmployeeListPagedQuery extends PagedQuery {
   teamId?: number | null;
   role?: string;
   department?: string;
+  terminated?: boolean | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -61,6 +65,7 @@ export class EmployeeService {
     if (query.teamId != null) params = params.set('teamId', String(query.teamId));
     if (query.role) params = params.set('role', query.role);
     if (query.department) params = params.set('department', query.department);
+    if (query.terminated !== undefined && query.terminated !== null) params = params.set('terminated', String(query.terminated));
     if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
     if (query.dateTo) params = params.set('dateTo', query.dateTo);
     return this.http.get<PagedResponse<EmployeeListItem>>(this.baseUrl, { params });
@@ -107,5 +112,21 @@ export class EmployeeService {
 
   getActivity(id: number): Observable<unknown[]> {
     return this.http.get<unknown[]>(`${this.baseUrl}/${id}/activity`);
+  }
+
+  terminate(id: number, kind: EmployeeKind, request: TerminateEmployeeRequest): Observable<TerminationResult> {
+    return this.http.post<TerminationResult>(`${this.baseUrl}/${id}/terminate`, request, { params: { kind } });
+  }
+
+  rehire(id: number, kind: EmployeeKind, rehireDate: string | null): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/rehire`, { rehireDate }, { params: { kind } });
+  }
+
+  getFinalPaySummary(id: number, kind: EmployeeKind): Observable<FinalPaySummary> {
+    return this.http.get<FinalPaySummary>(`${this.baseUrl}/${id}/final-pay-summary`, { params: { kind } });
+  }
+
+  markFinalPayProcessed(id: number, kind: EmployeeKind): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${id}/final-pay-processed`, {}, { params: { kind } });
   }
 }

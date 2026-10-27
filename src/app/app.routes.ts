@@ -259,6 +259,13 @@ export const routes: Routes = [
           import('./features/time-tracking/time-tracking.routes').then((m) => m.TIME_TRACKING_ROUTES),
       },
       {
+        path: 'reviews',
+        data: { titleKey: 'nav.reviews' },
+        canActivate: routeAccessGuards('reviews'),
+        loadChildren: () =>
+          import('./features/reviews/reviews.routes').then((m) => m.REVIEWS_ROUTES),
+      },
+      {
         path: 'piece-rates',
         data: { titleKey: 'nav.pieceRates' },
         canActivate: routeAccessGuards('piece-rates'),

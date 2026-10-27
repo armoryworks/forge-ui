@@ -90,7 +90,8 @@
     "exchangeRates": "Tipos de cambio",
     "openingStock": "Existencias iniciales",
     "inventoryValuation": "Valoración de inventario",
-    "creditMemos": "Notas de crédito"
+    "creditMemos": "Notas de crédito",
+    "reviews": "Evaluaciones"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -4433,7 +4434,17 @@
     "trainingPathDialog": {
       "autoAssignToNewUsers": "Asignar automáticamente a los usuarios nuevos",
       "icon": "Icono",
-      "slug": "Identificador (slug)"
+      "slug": "Identificador (slug)",
+      "editTitle": "Editar ruta de capacitación",
+      "newTitle": "Nueva ruta de capacitación",
+      "modules": "Módulos, en orden",
+      "noModules": "Todavía no hay módulos",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "removeModule": "Quitar módulo",
+      "addModule": "Agregar un módulo",
+      "saveChanges": "Guardar cambios",
+      "create": "Crear ruta"
     },
     "walkthroughPreviewDialog": {
       "addStep": "Agregar paso",
@@ -10117,7 +10128,8 @@
       "all": "-- Todos --",
       "active": "Activo",
       "inactive": "Inactivo",
-      "allRoles": "-- Todos los roles --"
+      "allRoles": "-- Todos los roles --",
+      "terminated": "Dado de baja"
     },
     "detail": {
       "backToEmployees": "Empleados",
@@ -10224,6 +10236,59 @@
     },
     "employeeTrainingTab": {
       "noTrainingRecordsFound": "No se encontraron registros de capacitación"
+    },
+    "termination": {
+      "title": "Dar de baja a {{name}}",
+      "date": "Último día (fecha de baja)",
+      "reason": "Motivo",
+      "notes": "Notas",
+      "rehireEligible": "Elegible para recontratación",
+      "finalPayRequired": "Requiere cheque de pago final",
+      "schedule": "Programar baja",
+      "confirm": "Dar de baja ahora",
+      "done": "{{name}} fue dado de baja",
+      "scheduledDone": "La baja de {{name}} está programada",
+      "failed": "No se pudo registrar la baja",
+      "terminate": "Dar de baja",
+      "terminated": "Dado de baja",
+      "scheduledChip": "Se va el {{date}}",
+      "panelTitle": "Dado de baja",
+      "panelTitleScheduled": "Baja programada",
+      "rehire": "Recontratar",
+      "cancelScheduled": "Cancelar baja",
+      "finalPay": "Pago final",
+      "hoursSince": "Horas trabajadas {{start}} – {{end}}",
+      "ptoPayout": "Permiso pagado por liquidar",
+      "finalPayStatus": "Pago final",
+      "processedOn": "Procesado el {{date}}",
+      "finalPayPending": "Aún no procesado",
+      "finalPayNotRequired": "No se requiere",
+      "markProcessed": "Marcar pago final como procesado",
+      "finalPayMarked": "Pago final marcado como procesado",
+      "finalPayFailed": "No se pudo marcar el pago final como procesado",
+      "rehireTitle": "Recontratar a {{name}}",
+      "cancelTitle": "Cancelar la baja de {{name}}",
+      "rehireHint": "La cuenta se reactiva. Los métodos de acceso que se retiraron (PIN, credencial, llaves de acceso, claves de API) deben configurarse de nuevo. El permiso vuelve a acumularse desde el próximo período de pago.",
+      "cancelHint": "La baja programada se retira y nada cambia para este empleado.",
+      "rehireDate": "Fecha de recontratación (nueva fecha de inicio)",
+      "rehired": "{{name}} fue recontratado",
+      "cancelled": "Baja de {{name}} cancelada",
+      "rehireFailed": "No se pudo revertir la baja",
+      "checklist": {
+        "titleNow": "Qué sucede ahora",
+        "titleScheduled": "Qué sucede en la fecha de baja",
+        "deactivate": "Se desactiva la cuenta de usuario",
+        "signOut": "Se cierran todas las sesiones, teléfonos y dispositivos",
+        "credentials": "El PIN del quiosco, la credencial, las tarjetas, las llaves de acceso y las claves de API dejan de funcionar",
+        "timers": "Se detienen los temporizadores activos y se registra la salida",
+        "jobs": "Los trabajos abiertos quedan sin asignar y se avisa al gerente del equipo",
+        "leave": "El permiso deja de acumularse y se cancelan las solicitudes de permiso abiertas",
+        "profileOnly": "El registro del empleado se marca como dado de baja",
+        "audit": "La baja queda registrada en la auditoría"
+      },
+      "hours": "{{hours}} h",
+      "hoursWithAmount": "{{hours}} h ({{amount}})",
+      "leaveLine": "{{policy}}: {{hours}} h"
     }
   },
   "trainingPage": {
@@ -10756,13 +10821,37 @@
         "walkthroughFailed": "Falló al generar los pasos del tutorial",
         "moduleRestored": "Módulo restaurado",
         "deleteFailed": "No se pudo eliminar el módulo",
-        "restoreFailed": "No se pudo restaurar el módulo"
+        "restoreFailed": "No se pudo restaurar el módulo",
+        "pathUpdated": "Ruta de capacitación actualizada"
       },
       "deleteConfirm": {
         "title": "¿Eliminar el módulo de capacitación?",
         "message": "¿Eliminar \"{{title}}\"? Desaparece de la biblioteca y de las rutas de los usuarios. Puede deshacerlo justo después de eliminarlo."
       },
-      "undo": "Deshacer"
+      "undo": "Deshacer",
+      "enrollments": {
+        "open": "Inscripciones",
+        "title": "Inscripciones: {{path}}",
+        "people": "Personas",
+        "roles": "Roles",
+        "dueDate": "Fecha límite",
+        "enroll": "Inscribir",
+        "empty": "Nadie está inscrito en esta ruta",
+        "overdue": "Vencida",
+        "complete": "Completa",
+        "applyDueDate": "Asignar a esta inscripción la fecha límite de arriba",
+        "remove": "Quitar inscripción",
+        "enrolled": "{{count}} inscrito(s), {{already}} ya inscrito(s)",
+        "enrollFailed": "No se pudo inscribir",
+        "updateFailed": "No se pudo actualizar la inscripción",
+        "removed": "{{name}} se quitó de la ruta",
+        "cols": {
+          "user": "Persona",
+          "enrolled": "Inscrito",
+          "due": "Vence",
+          "progress": "Avance"
+        }
+      }
     },
     "trainingDetail": {
       "title": "Detalle de Capacitación",
@@ -14653,6 +14742,112 @@
       "BankTransfer": "Transferencia bancaria",
       "Wire": "Giro",
       "Other": "Otro"
+    }
+  },
+  "reviews": {
+    "title": "Evaluaciones de desempeño",
+    "tabs": {
+      "mine": "Mis evaluaciones",
+      "team": "Evaluaciones del equipo",
+      "cycles": "Ciclos de evaluación"
+    },
+    "emptyMine": "Todavía no tiene evaluaciones de desempeño",
+    "emptyTeam": "No está evaluando a nadie en este momento",
+    "cols": {
+      "cycle": "Ciclo",
+      "employee": "Empleado",
+      "reviewer": "Evaluador",
+      "status": "Etapa",
+      "rating": "Calificación"
+    },
+    "stage": {
+      "notStarted": "Autoevaluación pendiente",
+      "selfSubmitted": "Evaluación del gerente pendiente",
+      "managerSubmitted": "En espera de confirmación",
+      "acknowledged": "Confirmada",
+      "closed": "Cerrada"
+    },
+    "cycles": {
+      "new": "Nuevo ciclo de evaluación",
+      "empty": "Todavía no hay ciclos de evaluación",
+      "cols": {
+        "name": "Ciclo",
+        "period": "Período",
+        "status": "Estado",
+        "progress": "Avance"
+      },
+      "status": {
+        "Draft": "Borrador",
+        "Active": "Abierto",
+        "Completed": "Cerrado"
+      },
+      "progressText": "{{done}} de {{total}} terminadas · {{self}} con el gerente · {{manager}} por confirmar",
+      "launch": "Iniciar",
+      "relaunch": "Agregar empleados nuevos",
+      "close": "Cerrar ciclo",
+      "launchConfirmTitle": "Iniciar ciclo de evaluación",
+      "launchConfirm": "¿Crear una evaluación para cada persona dentro del alcance de {{name}} y pedirles su autoevaluación?",
+      "launched": "{{count}} evaluación(es) creada(s)",
+      "launchFailed": "No se pudo iniciar el ciclo de evaluación",
+      "closeConfirmTitle": "Cerrar ciclo de evaluación",
+      "closeConfirm": "¿Cerrar {{name}}? Cada evaluación que siga abierta se cierra en la etapa en que esté.",
+      "closed": "Ciclo de evaluación cerrado",
+      "closeFailed": "No se pudo cerrar el ciclo de evaluación",
+      "reviewsIn": "Evaluaciones de {{name}}",
+      "noReviews": "Este ciclo aún no tiene evaluaciones. Inícielo para crearlas.",
+      "editTitle": "Editar ciclo de evaluación",
+      "newTitle": "Nuevo ciclo de evaluación",
+      "saved": "Ciclo de evaluación {{name}} guardado",
+      "saveFailed": "No se pudo guardar el ciclo de evaluación",
+      "scope": {
+        "all": "Todos los empleados activos",
+        "department": "Un departamento",
+        "list": "Empleados seleccionados"
+      },
+      "form": {
+        "name": "Nombre",
+        "startDate": "Inicio del período",
+        "endDate": "Fin del período",
+        "description": "Descripción",
+        "scale": "Escala de calificación",
+        "scope": "Quiénes se evalúan",
+        "department": "Departamento",
+        "employees": "Empleados",
+        "competencies": "Competencias",
+        "competenciesHint": "Una por línea, por ejemplo Calidad o Seguridad",
+        "lockedHint": "El ciclo ya inició, así que su alcance, escala y competencias ya no pueden cambiar.",
+        "departmentRequired": "Escriba el departamento que se evaluará",
+        "employeesRequired": "Elija al menos un empleado"
+      }
+    },
+    "detail": {
+      "back": "Volver a evaluaciones",
+      "reviewer": "Evaluador: {{name}}",
+      "selfTitle": "Autoevaluación",
+      "selfAssessment": "Su evaluación del período",
+      "submitSelf": "Enviar autoevaluación",
+      "notYet": "Aún no se envía",
+      "managerTitle": "Evaluación del gerente",
+      "overall": "Calificación general",
+      "goals": "Metas para el próximo período",
+      "goalsHint": "Una meta por línea",
+      "strengths": "Fortalezas",
+      "improvements": "Áreas de mejora",
+      "submitManager": "Enviar evaluación del gerente",
+      "overallValue": "General: {{rating}} de {{max}}",
+      "ackTitle": "Confirmación",
+      "ackHint": "Confirmar indica que leyó la evaluación. No significa que esté de acuerdo con ella.",
+      "ackComments": "Sus comentarios (opcional)",
+      "acknowledge": "Confirmar evaluación",
+      "acknowledgedOn": "Confirmada el {{date}}",
+      "close": "Cerrar evaluación",
+      "history": "Historial",
+      "system": "Sistema",
+      "selfSubmitted": "Autoevaluación enviada",
+      "managerSubmitted": "Evaluación del gerente enviada",
+      "acknowledged": "Evaluación confirmada",
+      "closed": "Evaluación cerrada",
+      "actionFailed": "No se pudo actualizar la evaluación"
     }
   }
 }

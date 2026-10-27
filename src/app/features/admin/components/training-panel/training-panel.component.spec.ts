@@ -13,6 +13,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { TrainingService } from '../../../training/services/training.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -25,6 +26,7 @@ interface PanelInternals {
   paths: { (): TrainingPathRow[] };
   moduleSearchControl: FormControl<string | null>;
   deleteModule(module: TrainingModuleRow): void;
+  isAdmin(): boolean;
 }
 
 const base = `${environment.apiUrl}/training`;
@@ -38,6 +40,7 @@ describe('TrainingPanelComponent', () => {
   let component: PanelInternals;
   let dialogResult: Subject<boolean>;
   let undo: Subject<void>;
+  let roles: string[] = ['Admin'];
   let snackbar: { success: ReturnType<typeof vi.fn>; successWithAction: ReturnType<typeof vi.fn>; errorFrom: ReturnType<typeof vi.fn> };
 
   function modulesRequest(page: number): TestRequest {
@@ -64,6 +67,7 @@ describe('TrainingPanelComponent', () => {
         { provide: DetailDialogService, useValue: { getDetailFromUrl: () => null } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
         { provide: TrainingService, useValue: {} },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
@@ -130,5 +134,22 @@ describe('TrainingPanelComponent', () => {
 
     expect(component.modules().map(m => m.id)).toEqual([4]);
     expect(snackbar.success).toHaveBeenCalled();
+  });
+
+  it('keeps each path\'s modules in their position order for the edit dialog', () => {
+    component.ngOnInit();
+    flushSideLoads([{ id: 7, title: 'Onboarding', icon: 'school', isAutoAssigned: false, isActive: true,
+      modules: [{ moduleId: 30, position: 2 }, { moduleId: 10, position: 1 }] }]);
+    modulesRequest(1).flush({ data: [], totalCount: 0, totalPages: 0 });
+
+    expect(component.paths()[0].moduleIds).toEqual([10, 30]);
+  });
+
+  it('treats only an Admin as able to change paths', () => {
+    expect(component.isAdmin()).toBe(true);
+    roles = ['Manager'];
+    const managerView = TestBed.runInInjectionContext(() => new TrainingPanelComponent()) as unknown as PanelInternals;
+    expect(managerView.isAdmin()).toBe(false);
+    roles = ['Admin'];
   });
 });

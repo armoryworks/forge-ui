@@ -1,0 +1,42 @@
+<app-dialog [title]="(isEdit ? 'reviews.cycles.editTitle' : 'reviews.cycles.newTitle') | translate" width="640px"
+  [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="cycle-form">
+    <app-input data-testid="review-cycle-name" [label]="'reviews.cycles.form.name' | translate"
+      formControlName="name" [maxlength]="200" [required]="true" />
+    <div class="cycle-form__row">
+      <app-datepicker data-testid="review-cycle-start" [label]="'reviews.cycles.form.startDate' | translate"
+        formControlName="startDate" [required]="true" />
+      <app-datepicker data-testid="review-cycle-end" [label]="'reviews.cycles.form.endDate' | translate"
+        formControlName="endDate" [required]="true" />
+    </div>
+    <app-textarea data-testid="review-cycle-description" [label]="'reviews.cycles.form.description' | translate"
+      formControlName="description" [rows]="2" [maxlength]="2000" />
+    <div class="cycle-form__row">
+      <app-select data-testid="review-cycle-scale" [label]="'reviews.cycles.form.scale' | translate"
+        formControlName="ratingScaleMax" [options]="scaleOptions" />
+      <app-select data-testid="review-cycle-scope" [label]="'reviews.cycles.form.scope' | translate"
+        formControlName="scopeType" [options]="scopeOptions" />
+    </div>
+    @if (showDepartment()) {
+      <app-input data-testid="review-cycle-department" [label]="'reviews.cycles.form.department' | translate"
+        formControlName="scopeDepartment" [maxlength]="200" [required]="true" />
+    }
+    @if (showEmployees()) {
+      <app-select data-testid="review-cycle-employees" [label]="'reviews.cycles.form.employees' | translate"
+        formControlName="scopeUserIds" [options]="employeeOptions()" [multiple]="true" [required]="true" />
+    }
+    <app-textarea data-testid="review-cycle-competencies" [label]="'reviews.cycles.form.competencies' | translate"
+      [hint]="'reviews.cycles.form.competenciesHint' | translate" formControlName="competencies" [rows]="4" />
+    @if (scopeLocked) {
+      <p class="cycle-form__hint">{{ 'reviews.cycles.form.lockedHint' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="review-cycle-cancel-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="review-cycle-save-btn"
+        [disabled]="form.invalid || saving()" (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

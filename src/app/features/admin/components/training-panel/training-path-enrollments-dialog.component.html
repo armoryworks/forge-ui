@@ -1,0 +1,71 @@
+<app-dialog [title]="'adminPanels.training.enrollments.title' | translate: { path: data.pathTitle }" width="800px" (closed)="close()">
+  <div class="enrollments">
+    @if (data.canEdit) {
+      <div class="enrollments__form" [formGroup]="form" data-testid="enroll-form">
+        <app-select data-testid="enroll-users" [label]="'adminPanels.training.enrollments.people' | translate"
+          formControlName="userIds" [options]="userOptions()" [multiple]="true" />
+        <app-select data-testid="enroll-roles" [label]="'adminPanels.training.enrollments.roles' | translate"
+          formControlName="roles" [options]="roleOptions()" [multiple]="true" />
+        <app-datepicker data-testid="enroll-due-date" [label]="'adminPanels.training.enrollments.dueDate' | translate"
+          formControlName="dueDate" />
+        <button class="action-btn action-btn--primary" data-testid="enroll-submit-btn" [disabled]="saving()" (click)="enroll()">
+          {{ 'adminPanels.training.enrollments.enroll' | translate }}
+        </button>
+      </div>
+    }
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-training-path-enrollments"
+        [columns]="columns"
+        [data]="rows()"
+        emptyIcon="group_add"
+        [emptyMessage]="'adminPanels.training.enrollments.empty' | translate">
+        <ng-template appColumnCell="userName" let-row>
+          <span>{{ row.userName }}</span>
+          @if (!row.userIsActive) {
+            <span class="chip chip--muted">{{ 'adminPanels.training.inactive' | translate }}</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="enrolledAt" let-row>{{ row.enrolledAt | dateOnly }}</ng-template>
+        <ng-template appColumnCell="dueDate" let-row>
+          @if (row.dueDate) {
+            <span [class.enrollments__overdue]="row.isOverdue">{{ row.dueDate | dateOnly }}</span>
+            @if (row.isOverdue) {
+              <span class="chip chip--error" [attr.data-testid]="'enrollment-overdue-' + row.id">{{ 'adminPanels.training.enrollments.overdue' | translate }}</span>
+            }
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="progressPercent" let-row>
+          @if (row.completedAt) {
+            <span class="chip chip--success">{{ 'adminPanels.training.enrollments.complete' | translate }}</span>
+          } @else {
+            {{ row.completedModules }}/{{ row.totalModules }} ({{ row.progressPercent }}%)
+          }
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (data.canEdit) {
+            <div class="enrollments__actions">
+              <button class="icon-btn" [attr.data-testid]="'enrollment-due-' + row.id"
+                [title]="'adminPanels.training.enrollments.applyDueDate' | translate"
+                [attr.aria-label]="'adminPanels.training.enrollments.applyDueDate' | translate" (click)="applyDueDate(row)">
+                <span class="material-icons-outlined">event</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [attr.data-testid]="'enrollment-remove-' + row.id"
+                [title]="'adminPanels.training.enrollments.remove' | translate"
+                [attr.aria-label]="'adminPanels.training.enrollments.remove' | translate" (click)="remove(row)">
+                <span class="material-icons-outlined">person_remove</span>
+              </button>
+            </div>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="enrollments-close-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

@@ -245,6 +245,7 @@ export class NavTreeService {
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
         { icon: 'request_quote', label: 'Piece Rates', i18nKey: 'nav.pieceRates', route: '/piece-rates', capability: 'CAP-HR-PIECE-RATES', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library', routePrefix: '/training' },
+        { icon: 'rate_review', label: 'Reviews', i18nKey: 'nav.reviews', route: '/reviews', routePrefix: '/reviews', capability: 'CAP-HR-REVIEW' },
       ],
     },
 

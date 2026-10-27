@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+.cycle-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.cycle-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cycle-form__hint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}

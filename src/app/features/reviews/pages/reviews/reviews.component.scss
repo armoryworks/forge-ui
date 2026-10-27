@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.reviews-tabs {
+  display: flex;
+  gap: $sp-xs;
+  flex-wrap: wrap;
+}

@@ -31,9 +31,24 @@
           } @else {
             <span class="chip chip--muted" data-testid="employee-detail-no-login-chip">{{ 'employees.noLogin' | translate }}</span>
           }
-          <span class="chip" [class.chip--success]="e.isActive" [class.chip--muted]="!e.isActive">
-            {{ (e.isActive ? 'employees.detail.active' : 'employees.detail.inactive') | translate }}
-          </span>
+          @if (isTerminated()) {
+            <span class="chip chip--error" data-testid="employee-terminated-chip">{{ 'employees.termination.terminated' | translate }}</span>
+          } @else {
+            <span class="chip" [class.chip--success]="e.isActive" [class.chip--muted]="!e.isActive">
+              {{ (e.isActive ? 'employees.detail.active' : 'employees.detail.inactive') | translate }}
+            </span>
+          }
+          @if (terminationScheduled()) {
+            <span class="chip chip--warning" data-testid="employee-termination-scheduled-chip">
+              {{ 'employees.termination.scheduledChip' | translate: { date: (e.termination?.terminationDate | dateOnly) } }}
+            </span>
+          }
+          @if (canTerminate()) {
+            <button class="action-btn action-btn--destructive ed-header__terminate" data-testid="employee-terminate-btn" (click)="openTerminate()">
+              <span class="material-icons-outlined">person_off</span>
+              {{ 'employees.termination.terminate' | translate }}
+            </button>
+          }
         </div>
         <div class="ed-header__meta-row">
           @if (e.jobTitle) {
@@ -108,6 +123,9 @@
     <!-- ── Tab content ── -->
     <div class="ed-content">
       @if (activeTab() === 'overview') {
+        @if (terminationVisible() && e.termination) {
+          <app-employee-termination-panel [employee]="e" [kind]="targetKind()" (changed)="reloadEmployee()" />
+        }
         @if (!hasLogin()) {
           <p class="ed-no-login-hint" data-testid="employee-detail-no-login-hint">{{ 'employees.detail.noLoginHint' | translate }}</p>
         }

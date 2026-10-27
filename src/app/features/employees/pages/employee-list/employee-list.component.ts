@@ -23,6 +23,7 @@ import { AvatarComponent } from '../../../../shared/components/avatar/avatar.com
 import { EmployeeCreateDialogComponent } from '../../components/employee-create-dialog/employee-create-dialog.component';
 import { CreatedEmployee } from '../../models/created-employee.model';
 import { DisplayLabelService } from '../../../../shared/services/display-label.service';
+import { EmployeeStatusFilter } from '../../models/employee-status-filter.model';
 
 const SERVICE_ROLES: ReadonlySet<string> = new Set(['LeadIntake', 'BiApiClient']);
 
@@ -63,7 +64,7 @@ export class EmployeeListComponent {
 
   protected readonly searchControl = new FormControl('');
   protected readonly roleControl = new FormControl<string | null>(null);
-  protected readonly statusControl = new FormControl<boolean | null>(null);
+  protected readonly statusControl = new FormControl<EmployeeStatusFilter | null>(null);
   // Phase 3 F7-broad / WU-22 — department filter (free-text against
   // EmployeeProfile.Department).
   protected readonly departmentControl = new FormControl<string | null>(null);
@@ -72,8 +73,9 @@ export class EmployeeListComponent {
 
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('employees.filters.all') },
-    { value: true, label: this.translate.instant('employees.filters.active') },
-    { value: false, label: this.translate.instant('employees.filters.inactive') },
+    { value: 'active', label: this.translate.instant('employees.filters.active') },
+    { value: 'inactive', label: this.translate.instant('employees.filters.inactive') },
+    { value: 'terminated', label: this.translate.instant('employees.filters.terminated') },
   ];
 
   protected readonly columns = computed<ColumnDef[]>(() => [
@@ -118,7 +120,9 @@ export class EmployeeListComponent {
     this.loading.set(true);
     const search = (this.searchControl.value ?? '').trim() || undefined;
     const role = this.roleControl.value ?? undefined;
-    const isActive = this.statusControl.value ?? undefined;
+    const status = this.statusControl.value;
+    const isActive = status === 'active' ? true : status === 'inactive' ? false : undefined;
+    const terminated = status === 'terminated' ? true : status === 'inactive' ? false : undefined;
     const department = (this.departmentControl.value ?? '').trim() || undefined;
     // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
     // read totalCount for the header counter.
@@ -126,6 +130,7 @@ export class EmployeeListComponent {
       q: search,
       role,
       isActive,
+      terminated,
       department,
       pageSize: 200,
       sort: 'lastName',

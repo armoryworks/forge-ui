@@ -4,6 +4,9 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 
 import { OnboardingWizardComponent } from './onboarding-wizard.component';
 import { OnboardingDraftStatus, OnboardingService, OnboardingStatus, SaveOnboardingDraftRequest } from './onboarding.service';
@@ -101,7 +104,18 @@ describe('OnboardingWizardComponent step gating', () => {
     w4Step3Total(): number;
   }
 
-  function create(step: string, draft: Partial<OnboardingDraftStatus> = {}, progress: Partial<OnboardingStatus> | null = null) {
+  const STEPPER_TEMPLATE = `
+    <mat-stepper [linear]="true">
+      <mat-step [stepControl]="personalForm" [completed]="stepCompleted()[0]"></mat-step>
+      <mat-step [stepControl]="addressForm" [completed]="stepCompleted()[1]"></mat-step>
+      <mat-step [stepControl]="w4Form" [completed]="stepCompleted()[2]"></mat-step>
+      <mat-step [stepControl]="stateForm" [completed]="stepCompleted()[3]"></mat-step>
+      <mat-step [stepControl]="i9Form" [completed]="stepCompleted()[4]"></mat-step>
+      <mat-step [stepControl]="depositForm" [completed]="stepCompleted()[5]"></mat-step>
+      <mat-step [stepControl]="ackForm" [completed]="stepCompleted()[6]"></mat-step>
+    </mat-stepper>`;
+
+  function create(step: string, draft: Partial<OnboardingDraftStatus> = {}, progress: Partial<OnboardingStatus> | null = null, withStepper = false) {
     const navigate = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -124,9 +138,12 @@ describe('OnboardingWizardComponent step gating', () => {
         },
         { provide: AuthService, useValue: { user: () => null } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        provideNoopAnimations(),
       ],
     });
-    TestBed.overrideComponent(OnboardingWizardComponent, { set: { template: '', imports: [] } });
+    TestBed.overrideComponent(OnboardingWizardComponent, {
+      set: withStepper ? { template: STEPPER_TEMPLATE, imports: [MatStepperModule] } : { template: '', imports: [] },
+    });
     const fixture = TestBed.createComponent(OnboardingWizardComponent);
     return { api: fixture.componentInstance as unknown as StepApi, fixture, navigate };
   }
@@ -151,6 +168,34 @@ describe('OnboardingWizardComponent step gating', () => {
 
     expect(api.currentStepIndex()).toBe(5);
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('opens the direct-deposit step of an onboarded worker in the linear stepper, untouched forms and all', () => {
+    vi.useFakeTimers();
+    const { fixture, navigate } = create('5', {}, { allComplete: true, canBeAssigned: true }, true);
+    fixture.detectChanges();
+    vi.runAllTimers();
+    fixture.detectChanges();
+    vi.runAllTimers();
+    fixture.detectChanges();
+    vi.useRealTimers();
+
+    const stepper = fixture.debugElement.query(By.directive(MatStepper)).componentInstance as MatStepper;
+    expect(stepper.selectedIndex).toBe(5);
+    expect(stepper.steps.toArray()[5].editable).toBe(true);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('still holds the linear stepper at the first step a fresh hire has not reached', () => {
+    vi.useFakeTimers();
+    const { fixture } = create('5', {}, null, true);
+    fixture.detectChanges();
+    vi.runAllTimers();
+    fixture.detectChanges();
+    vi.useRealTimers();
+
+    const stepper = fixture.debugElement.query(By.directive(MatStepper)).componentInstance as MatStepper;
+    expect(stepper.selectedIndex).toBe(0);
   });
 
   it('keeps steps the server records as complete reachable while the rest stay gated', () => {
