@@ -6,7 +6,58 @@
   (closed)="close()">
 
   <div [formGroup]="returnForm">
-    @if (!isEditing) {
+    @if (canUseChannel()) {
+      <app-select
+        [label]="'customerReturns.source' | translate"
+        [formControl]="sourceControl"
+        [options]="sourceOptions"
+        data-testid="return-source" />
+    }
+
+    @if (!isEditing && source() === 'Channel') {
+      <app-input
+        [label]="'customerReturns.channelOrderSearch' | translate"
+        [formControl]="channelSearch"
+        data-testid="return-channel-search" />
+      <app-select
+        [label]="'customerReturns.channelOrder' | translate"
+        formControlName="salesOrderId"
+        [options]="channelOrderOptions()"
+        [required]="true"
+        data-testid="return-channel-order" />
+      @if (selectedOrder(); as order) {
+        <div class="channel-order" data-testid="return-channel-order-summary">
+          <span><strong>{{ 'customerReturns.channel' | translate }}:</strong> {{ order.channelName }}</span>
+          <span><strong>{{ 'customerReturns.externalOrder' | translate }}:</strong> {{ order.externalOrderNumber || '—' }}</span>
+          <span><strong>{{ 'customerReturns.buyer' | translate }}:</strong> {{ order.buyerName || '—' }}</span>
+        </div>
+        <app-select
+          [label]="'customerReturns.channelLine' | translate"
+          formControlName="salesOrderLineId"
+          [options]="lineOptions()"
+          data-testid="return-channel-line" />
+      }
+      <div class="dialog-row">
+        <app-input
+          [label]="'customerReturns.externalRmaId' | translate"
+          formControlName="externalRmaId"
+          [maxlength]="200"
+          data-testid="return-external-rma" />
+        <app-input
+          [label]="'customerReturns.fieldQuantity' | translate"
+          type="number"
+          step="0.0001"
+          min="0"
+          formControlName="channelQuantity"
+          data-testid="return-channel-quantity" />
+      </div>
+      <app-currency-input
+        [label]="'customerReturns.refundAmount' | translate"
+        formControlName="refundAmount"
+        data-testid="return-refund-amount" />
+    }
+
+    @if (!isEditing && source() !== 'Channel') {
       <app-entity-picker
         label="Customer"
         entityType="customers"

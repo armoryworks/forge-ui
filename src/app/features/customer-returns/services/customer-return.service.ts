@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { CustomerReturnListItem } from '../models/customer-return-list-item.model';
 import { CustomerReturnDetail } from '../models/customer-return-detail.model';
 import { ResolveCustomerReturnRequest } from '../models/resolve-customer-return-request.model';
+import { ChannelReturnOrder } from '../models/channel-return-order.model';
+import { CreateChannelReturnRequest } from '../models/create-channel-return-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerReturnService {
@@ -33,6 +35,16 @@ export class CustomerReturnService {
     createReworkJob?: boolean;
   }): Observable<CustomerReturnDetail> {
     return this.http.post<CustomerReturnDetail>(this.base, request);
+  }
+
+  getChannelOrders(search?: string): Observable<ChannelReturnOrder[]> {
+    let params = new HttpParams();
+    if (search) params = params.set('q', search);
+    return this.http.get<ChannelReturnOrder[]>(`${this.base}/channel/orders`, { params });
+  }
+
+  createChannel(request: CreateChannelReturnRequest): Observable<CustomerReturnListItem> {
+    return this.http.post<CustomerReturnListItem>(`${this.base}/channel`, request);
   }
 
   update(id: number, request: {

@@ -1,0 +1,12 @@
+@use 'styles/variables' as *;
+
+.channel-order {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-xs $sp-md;
+  padding: $sp-sm;
+  margin-bottom: $sp-sm;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  font-size: var(--font-size-sm);
+}
