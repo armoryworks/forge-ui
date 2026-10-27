@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.jte {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__flags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__lines-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__lines-title {
+    font-weight: 600;
+  }
+
+  &__line {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(160px, 2fr) auto;
+    align-items: center;
+    gap: $sp-sm;
+    padding-bottom: $sp-sm;
+    border-bottom: 1px solid var(--border);
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__key {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__party {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__party-name {
+    font-weight: 600;
+  }
+
+  &__totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+    font-weight: 600;
+  }
+
+  &__open {
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+}

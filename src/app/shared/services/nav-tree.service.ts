@@ -199,6 +199,7 @@ export class NavTreeService {
             { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
             { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
+            { icon: 'content_copy', label: 'Journal Templates', i18nKey: 'nav.journalTemplates', route: '/accounting/journal-templates' },
             { icon: 'menu_book', label: 'Ledger', i18nKey: 'nav.ledger', route: '/accounting/ledger' },
             // Financial statements.
             { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
@@ -211,6 +212,8 @@ export class NavTreeService {
             { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
             { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
             { icon: 'warehouse', label: 'Inventory Valuation', i18nKey: 'nav.inventoryValuation', route: '/accounting/inventory-valuation' },
+            { icon: 'precision_manufacturing', label: 'Fixed Assets', i18nKey: 'nav.fixedAssets', route: '/accounting/fixed-assets', capability: 'CAP-ACCT-DEPRECIATION' },
+            { icon: 'factory', label: 'Overhead Pool', i18nKey: 'nav.overheadPool', route: '/accounting/overhead' },
             { icon: 'percent', label: 'Sales Tax Liability', i18nKey: 'nav.salesTaxLiability', route: '/accounting/sales-tax-liability' },
             { icon: 'badge', label: '1099 Report', i18nKey: 'nav.form1099', route: '/accounting/1099-report' },
             // Bank + period + export.

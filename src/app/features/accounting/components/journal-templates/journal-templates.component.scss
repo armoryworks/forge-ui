@@ -1,0 +1,22 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.jt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__open {
+    display: block;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+  }
+}

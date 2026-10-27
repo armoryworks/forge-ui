@@ -112,3 +112,12 @@
     white-space: nowrap;
   }
 }
+
+.je-template {
+  max-width: 960px;
+  margin: $sp-md 0 0;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-sm;
+  border-left: $border-width-accent solid var(--primary);
+  background: var(--surface);
+}

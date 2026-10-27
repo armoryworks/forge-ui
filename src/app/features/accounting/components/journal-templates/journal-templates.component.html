@@ -1,0 +1,46 @@
+<app-page-layout
+  [pageTitle]="'accounting.journalTemplates.title' | translate"
+  [pageSubtitle]="'accounting.journalTemplates.subtitle' | translate">
+  <ng-container toolbar>
+    <button type="button" class="action-btn action-btn--primary" (click)="create()" data-testid="journal-templates-new">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'accounting.journalTemplates.new' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="jt" [appLoadingBlock]="loading()">
+      <div class="acct-table-block">
+        <app-data-table
+          tableId="acct-journal-templates"
+          [columns]="columns"
+          [data]="rows()"
+          emptyIcon="content_copy"
+          [emptyMessage]="'accounting.journalTemplates.empty' | translate">
+          <ng-template appColumnCell="fixedDebit" let-row>
+            <app-currency-display [value]="row.fixedDebit" />
+            @if (row.openLines > 0) {
+              <span class="jt__open">{{ 'accounting.journalTemplates.openLines' | translate: { count: row.openLines } }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="actions" let-row>
+            <div class="jt__actions">
+              <button type="button" class="action-btn action-btn--sm" (click)="post(row)" [disabled]="!row.isActive"
+                data-testid="journal-template-post">
+                {{ 'accounting.journalTemplates.post' | translate }}
+              </button>
+              <button type="button" class="icon-btn" (click)="edit(row)" [attr.aria-label]="'common.edit' | translate"
+                data-testid="journal-template-edit">
+                <span class="material-icons-outlined" aria-hidden="true">edit</span>
+              </button>
+              <button type="button" class="icon-btn icon-btn--danger" (click)="remove(row)" [attr.aria-label]="'common.delete' | translate"
+                data-testid="journal-template-delete">
+                <span class="material-icons-outlined" aria-hidden="true">delete</span>
+              </button>
+            </div>
+          </ng-template>
+        </app-data-table>
+      </div>
+    </div>
+  </ng-container>
+</app-page-layout>

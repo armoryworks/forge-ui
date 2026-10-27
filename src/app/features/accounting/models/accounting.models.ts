@@ -478,6 +478,8 @@ export interface ManualJournalLineInput {
   description?: string | null;
   jobId?: number | null;
   costCenterId?: number | null;
+  partyType?: 'Customer' | 'Vendor' | null;
+  partyId?: number | null;
 }
 
 export interface ManualJournalEntryInput {
@@ -486,6 +488,7 @@ export interface ManualJournalEntryInput {
   currencyId: number;
   memo?: string | null;
   allowSoftClosedOverride?: boolean;
+  autoReverseNextPeriod?: boolean;
   lines: ManualJournalLineInput[];
 }
 

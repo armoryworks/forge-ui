@@ -1,0 +1,44 @@
+<app-dialog
+  [title]="'accounting.fixedAssets.disposeTitle' | translate: { name: data.detail.asset.name }"
+  width="520px"
+  [dirty]="form.dirty"
+  (closed)="close()">
+  <div [formGroup]="form" class="fa-dispose">
+    <app-datepicker [label]="'accounting.fixedAssets.disposalDate' | translate" formControlName="disposalDate" [required]="true"
+      data-testid="dispose-date" />
+    <div class="dialog-row">
+      <app-currency-input [label]="'accounting.fixedAssets.proceeds' | translate" formControlName="proceeds" data-testid="dispose-proceeds" />
+      <app-select [label]="'accounting.fixedAssets.proceedsAccount' | translate" [options]="proceedsAccountOptions()"
+        formControlName="proceedsGlAccountId" data-testid="dispose-proceeds-account" />
+    </div>
+    <app-select [label]="'accounting.fixedAssets.gainLossAccount' | translate" [options]="gainLossAccountOptions()"
+      formControlName="gainLossGlAccountId" data-testid="dispose-gain-loss-account" />
+    <app-input [label]="'accounting.journalEditor.memo' | translate" formControlName="memo" data-testid="dispose-memo" />
+
+    <div class="totals-strip" data-testid="dispose-outcome">
+      @let bookValue = bookValueAtDisposal();
+      @let result = gainLoss();
+      @if (bookValue !== null && result !== null) {
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.catchUp' | translate }} <app-currency-display [value]="catchUp() ?? 0" /></span>
+        <span class="totals-strip__metric">{{ 'accounting.fixedAssets.bookValueAtDisposal' | translate }} <app-currency-display [value]="bookValue" /></span>
+        <span class="totals-strip__metric" [class.fa-dispose__loss]="result < 0">
+          {{ (result < 0 ? 'accounting.fixedAssets.loss' : 'accounting.fixedAssets.gain') | translate }}
+          <app-currency-display [value]="result < 0 ? -result : result" />
+        </span>
+      } @else {
+        <span class="totals-strip__metric acct-muted">—</span>
+      }
+    </div>
+    <p class="fa-dispose__hint">{{ 'accounting.fixedAssets.disposeHint' | translate }}</p>
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()" data-testid="dispose-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--destructive" [disabled]="form.invalid || saving()" (click)="confirm()"
+        data-testid="dispose-confirm">
+        {{ 'accounting.fixedAssets.dispose' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

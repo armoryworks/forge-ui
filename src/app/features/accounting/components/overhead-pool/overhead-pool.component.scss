@@ -1,0 +1,37 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.oh {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-md $sp-lg;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__record {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  &__under {
+    color: var(--warning);
+  }
+
+  &__result,
+  &__total {
+    margin: 0;
+    font-weight: 600;
+  }
+}

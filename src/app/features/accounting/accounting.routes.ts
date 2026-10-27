@@ -73,6 +73,50 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/budgets/budgets.component').then((m) => m.BudgetsComponent),
   },
   {
+    path: 'fixed-assets',
+    data: { titleKey: 'nav.fixedAssets' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL', 'CAP-ACCT-DEPRECIATION')],
+    loadComponent: () =>
+      import('./components/fixed-assets/fixed-assets.component').then((m) => m.FixedAssetsComponent),
+  },
+  {
+    path: 'fixed-assets/:id',
+    data: { titleKey: 'nav.fixedAssets' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL', 'CAP-ACCT-DEPRECIATION')],
+    loadComponent: () =>
+      import('./components/fixed-asset-detail/fixed-asset-detail.component').then((m) => m.FixedAssetDetailComponent),
+  },
+  {
+    path: 'journal-templates',
+    data: { titleKey: 'nav.journalTemplates' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    loadComponent: () =>
+      import('./components/journal-templates/journal-templates.component').then((m) => m.JournalTemplatesComponent),
+  },
+  {
+    path: 'journal-templates/new',
+    data: { titleKey: 'nav.journalTemplates' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    canDeactivate: [unsavedChangesGuard],
+    loadComponent: () =>
+      import('./components/journal-template-editor/journal-template-editor.component').then((m) => m.JournalTemplateEditorComponent),
+  },
+  {
+    path: 'journal-templates/:id',
+    data: { titleKey: 'nav.journalTemplates' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    canDeactivate: [unsavedChangesGuard],
+    loadComponent: () =>
+      import('./components/journal-template-editor/journal-template-editor.component').then((m) => m.JournalTemplateEditorComponent),
+  },
+  {
+    path: 'overhead',
+    data: { titleKey: 'nav.overheadPool' },
+    canActivate: [capabilityGuard('CAP-ACCT-FULLGL')],
+    loadComponent: () =>
+      import('./components/overhead-pool/overhead-pool.component').then((m) => m.OverheadPoolComponent),
+  },
+  {
     path: 'inventory-valuation',
     data: { titleKey: 'nav.inventoryValuation' },
     loadComponent: () =>

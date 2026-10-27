@@ -1,0 +1,74 @@
+<app-page-layout
+  [pageTitle]="detail()?.asset?.name ?? ('accounting.fixedAssets.title' | translate)"
+  [pageSubtitle]="'accounting.fixedAssets.detailSubtitle' | translate">
+  <ng-container toolbar>
+    @if (detail()?.isEditable) {
+      <button type="button" class="action-btn" (click)="edit()" data-testid="fixed-asset-edit">
+        <span class="material-icons-outlined" aria-hidden="true">edit</span>
+        {{ 'common.edit' | translate }}
+      </button>
+    }
+    @if (canDispose()) {
+      <button type="button" class="action-btn action-btn--destructive" (click)="dispose()" data-testid="fixed-asset-dispose">
+        <span class="material-icons-outlined" aria-hidden="true">delete_sweep</span>
+        {{ 'accounting.fixedAssets.dispose' | translate }}
+      </button>
+    }
+  </ng-container>
+
+  <ng-container content>
+    <div class="fad" [appLoadingBlock]="loading()">
+      @if (notFound()) {
+        <p class="acct-error" role="alert" data-testid="fixed-asset-not-found">{{ 'accounting.fixedAssets.notFound' | translate }}</p>
+      }
+      @if (detail(); as d) {
+        <dl class="fad__summary" data-testid="fixed-asset-summary">
+          <div><dt>{{ 'accounting.fixedAssets.assetTag' | translate }}</dt><dd>{{ d.asset.assetTag ?? '—' }}</dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.methodLabel' | translate }}</dt><dd>{{ ('accounting.fixedAssets.method.' + d.asset.method) | translate }}</dd></div>
+          <div><dt>{{ 'accounting.common.status' | translate }}</dt><dd>{{ ('accounting.fixedAssets.status.' + d.asset.status) | translate }}</dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.inServiceDate' | translate }}</dt><dd>{{ d.asset.inServiceDate | dateOnly }}</dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.cost' | translate }}</dt><dd><app-currency-display [value]="d.asset.cost" /></dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.salvage' | translate }}</dt><dd><app-currency-display [value]="d.asset.salvageValue" /></dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.accumulated' | translate }}</dt><dd><app-currency-display [value]="d.asset.accumulatedDepreciation" /></dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.netBookValue' | translate }}</dt><dd><app-currency-display [value]="d.asset.netBookValue" /></dd></div>
+          <div><dt>{{ 'accounting.fixedAssets.lifeMonths' | translate }}</dt><dd>{{ d.asset.usefulLifeMonths }}</dd></div>
+          @if (d.asset.usefulLifeUnits) {
+            <div><dt>{{ 'accounting.fixedAssets.lifeUnits' | translate }}</dt><dd>{{ d.asset.usefulLifeUnits }}</dd></div>
+          }
+        </dl>
+        @if (!d.isEditable && d.asset.status !== 'Disposed') {
+          <p class="acct-muted">{{ 'accounting.fixedAssets.lockedHint' | translate }}</p>
+        }
+        @if (d.asset.method === 'UnitsOfProduction') {
+          <p class="acct-muted">{{ 'accounting.fixedAssets.unitsScheduleHint' | translate }}</p>
+        }
+
+        <h2 class="acct-subhead">{{ 'accounting.fixedAssets.schedule' | translate }}</h2>
+        <div class="acct-table-block">
+          <app-data-table
+            tableId="acct-fixed-asset-schedule"
+            [columns]="columns"
+            [data]="scheduleRows()"
+            emptyIcon="event_busy"
+            [emptyMessage]="'accounting.fixedAssets.noSchedule' | translate">
+            <ng-template appColumnCell="periodMonth" let-row>{{ row.periodMonth | dateOnly }}</ng-template>
+            <ng-template appColumnCell="amount" let-row><app-currency-display [value]="row.amount" /></ng-template>
+            <ng-template appColumnCell="accumulatedDepreciation" let-row><app-currency-display [value]="row.accumulatedDepreciation" /></ng-template>
+            <ng-template appColumnCell="netBookValue" let-row><app-currency-display [value]="row.netBookValue" /></ng-template>
+            <ng-template appColumnCell="stateLabel" let-row>
+              @if (row.posted) {
+                <a [routerLink]="['/accounting/ledger', d.accumulatedDepreciationGlAccountId]" data-testid="fixed-asset-schedule-journal">{{ row.stateLabel }}</a>
+              } @else {
+                <span class="acct-muted">{{ row.stateLabel }}</span>
+              }
+            </ng-template>
+          </app-data-table>
+        </div>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container actions>
+    <button type="button" class="action-btn" (click)="back()" data-testid="fixed-asset-back">{{ 'common.back' | translate }}</button>
+  </ng-container>
+</app-page-layout>

@@ -13,7 +13,7 @@ interface AccountingTile {
   label: string;
   icon: string;
   description: string;
-  capability?: string;
+  capability?: string | readonly string[];
 }
 
 /**
@@ -42,12 +42,15 @@ export class AccountingComponent {
     { route: 'trial-balance', label: this.translate.instant('accounting.dashboard.trialBalance'), icon: 'balance', description: this.translate.instant('accounting.dashboard.trialBalanceDesc') },
     { route: 'profit-loss', label: this.translate.instant('accounting.dashboard.profitLoss'), icon: 'trending_up', description: this.translate.instant('accounting.dashboard.profitLossDesc') },
     { route: 'balance-sheet', label: this.translate.instant('accounting.dashboard.balanceSheet'), icon: 'account_balance', description: this.translate.instant('accounting.dashboard.balanceSheetDesc') },
+    { route: 'journal-templates', label: this.translate.instant('accounting.dashboard.journalTemplates'), icon: 'content_copy', description: this.translate.instant('accounting.dashboard.journalTemplatesDesc'), capability: 'CAP-ACCT-FULLGL' },
     { route: 'budgets', label: this.translate.instant('accounting.dashboard.budgets'), icon: 'savings', description: this.translate.instant('accounting.dashboard.budgetsDesc') },
     { route: 'cash-flow', label: this.translate.instant('accounting.dashboard.cashFlow'), icon: 'waterfall_chart', description: this.translate.instant('accounting.dashboard.cashFlowDesc') },
     { route: 'ar-aging', label: this.translate.instant('accounting.dashboard.arAging'), icon: 'trending_flat', description: this.translate.instant('accounting.dashboard.arAgingDesc') },
     { route: 'ap-aging', label: this.translate.instant('accounting.dashboard.apAging'), icon: 'schedule', description: this.translate.instant('accounting.dashboard.apAgingDesc') },
     { route: 'grni', label: this.translate.instant('accounting.dashboard.grni'), icon: 'inventory_2', description: this.translate.instant('accounting.dashboard.grniDesc') },
     { route: 'inventory-valuation', label: this.translate.instant('accounting.dashboard.inventoryValuation'), icon: 'warehouse', description: this.translate.instant('accounting.dashboard.inventoryValuationDesc') },
+    { route: 'fixed-assets', label: this.translate.instant('accounting.dashboard.fixedAssets'), icon: 'precision_manufacturing', description: this.translate.instant('accounting.dashboard.fixedAssetsDesc'), capability: ['CAP-ACCT-FULLGL', 'CAP-ACCT-DEPRECIATION'] },
+    { route: 'overhead', label: this.translate.instant('accounting.dashboard.overhead'), icon: 'factory', description: this.translate.instant('accounting.dashboard.overheadDesc'), capability: 'CAP-ACCT-FULLGL' },
     { route: 'sales-tax-liability', label: this.translate.instant('accounting.dashboard.salesTaxLiability'), icon: 'percent', description: this.translate.instant('accounting.dashboard.salesTaxLiabilityDesc') },
     { route: '1099-report', label: this.translate.instant('accounting.dashboard.form1099'), icon: 'badge', description: this.translate.instant('accounting.dashboard.form1099Desc') },
     { route: 'period-close', label: this.translate.instant('accounting.dashboard.periodClose'), icon: 'event_available', description: this.translate.instant('accounting.dashboard.periodCloseDesc') },
@@ -58,6 +61,9 @@ export class AccountingComponent {
 
   protected readonly visibleTiles = computed(() => {
     this.capabilities.capabilities();
-    return this.tiles.filter((t) => !t.capability || this.capabilities.isEnabled(t.capability));
+    return this.tiles.filter((t) => {
+      const required = typeof t.capability === 'string' ? [t.capability] : (t.capability ?? []);
+      return required.every((code) => this.capabilities.isEnabled(code));
+    });
   });
 }

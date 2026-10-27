@@ -1,0 +1,49 @@
+<app-dialog [title]="'accounting.fixedAssets.runTitle' | translate" width="800px" (closed)="close()">
+  <div class="dep-run">
+    <p class="dep-run__hint">{{ 'accounting.fixedAssets.runHint' | translate }}</p>
+    <div class="dep-run__bar">
+      <app-datepicker [label]="'accounting.fixedAssets.periodMonth' | translate" [formControl]="monthControl" [required]="true"
+        data-testid="depreciation-month" />
+      <button type="button" class="action-btn action-btn--sm" (click)="runPreview()" [disabled]="busy() || monthControl.invalid"
+        data-testid="depreciation-preview">
+        <span class="material-icons-outlined" aria-hidden="true">preview</span>
+        {{ 'accounting.fixedAssets.preview' | translate }}
+      </button>
+    </div>
+
+    @if (preview(); as p) {
+      @if (p.lines.length === 0) {
+        <p class="acct-muted" data-testid="depreciation-nothing">{{ 'accounting.fixedAssets.nothingToDepreciate' | translate }}</p>
+      } @else {
+        <div class="acct-table-block">
+          <app-data-table tableId="acct-depreciation-preview" [columns]="columns" [data]="p.lines" trackByField="fixedAssetId">
+            <ng-template appColumnCell="amount" let-row><app-currency-display [value]="row.amount" /></ng-template>
+            <ng-template appColumnCell="netBookValueAfter" let-row><app-currency-display [value]="row.netBookValueAfter" /></ng-template>
+          </app-data-table>
+        </div>
+        <p class="dep-run__total" data-testid="depreciation-preview-total">
+          {{ 'accounting.fixedAssets.previewTotal' | translate: { count: p.lines.length } }} <app-currency-display [value]="p.totalAmount" />
+        </p>
+      }
+    }
+
+    @if (result(); as r) {
+      <p class="dep-run__result" data-testid="depreciation-result">
+        {{ 'accounting.fixedAssets.runResult' | translate: { count: r.assetsDepreciated } }} <app-currency-display [value]="r.totalAmount" />
+      </p>
+      @if (r.assetsDepreciated > 0) {
+        <a class="dep-run__link" routerLink="/accounting/ledger" (click)="close()" data-testid="depreciation-ledger-link">
+          {{ 'accounting.fixedAssets.viewInLedger' | translate }}
+        </a>
+      }
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()" data-testid="depreciation-close">{{ 'common.close' | translate }}</button>
+    <button type="button" class="action-btn action-btn--primary" (click)="post()"
+      [disabled]="!canPost()" data-testid="depreciation-post">
+      {{ 'accounting.fixedAssets.post' | translate }}
+    </button>
+  </div>
+</app-dialog>
