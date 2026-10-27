@@ -1,0 +1,11 @@
+@use 'styles/variables' as *;
+
+.material-specs {
+  &__label--child {
+    padding-left: $sp-lg;
+  }
+
+  &__muted {
+    color: var(--text-muted);
+  }
+}

@@ -5,6 +5,7 @@ import { filter } from 'rxjs';
 
 import { PartDetailPanelComponent } from '../part-detail-panel/part-detail-panel.component';
 import { DialogEscapeHandler } from '../../../../shared/models/dialog-escape.model';
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 
 export interface PartDetailDialogData {
   partId: number;
@@ -22,6 +23,7 @@ const NESTED_ESCAPE_OWNERS = 'input, textarea, select, [contenteditable="true"],
 })
 export class PartDetailDialogComponent implements DialogEscapeHandler {
   private readonly dialogRef = inject(MatDialogRef<PartDetailDialogComponent>);
+  private readonly pendingChanges = inject(PendingChangesService);
   protected readonly data = inject<PartDetailDialogData>(MAT_DIALOG_DATA);
   readonly partCreated = output<void>();
 
@@ -39,11 +41,15 @@ export class PartDetailDialogComponent implements DialogEscapeHandler {
   }
 
   protected close(): void {
-    this.dialogRef.close();
+    this.pendingChanges.confirmDiscard().subscribe(discard => {
+      if (discard) this.dialogRef.close();
+    });
   }
 
   protected onEditRequested(part: unknown): void {
-    this.dialogRef.close({ action: 'edit', part });
+    this.pendingChanges.confirmDiscard().subscribe(discard => {
+      if (discard) this.dialogRef.close({ action: 'edit', part });
+    });
   }
 
   private ownedByNestedControl(event: KeyboardEvent): boolean {

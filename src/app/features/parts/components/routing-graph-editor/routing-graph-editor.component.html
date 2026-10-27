@@ -39,6 +39,7 @@
                 <button class="graph-editor__node"
                         [class.graph-editor__node--selected]="selectedId() === node.step.id"
                         [class.graph-editor__node--source]="connectFromId() === node.step.id"
+                        [class.graph-editor__node--dead-end]="deadEnds().has(node.step.id)"
                         [attr.aria-pressed]="selectedId() === node.step.id"
                         aria-describedby="routing-graph-hint"
                         [attr.data-testid]="'routing-graph-node-' + node.step.stepNumber"
@@ -46,6 +47,10 @@
                         (click)="selectNode(node.step.id)">
                   <span class="graph-editor__node-number">{{ 'parts.operation' | translate }} {{ node.step.stepNumber }}</span>
                   <span class="graph-editor__node-title" [title]="node.step.title">{{ node.step.title }}</span>
+                  @if (deadEnds().has(node.step.id)) {
+                    <span class="graph-editor__node-meta graph-editor__node-meta--warn"
+                          [attr.data-testid]="'routing-graph-dead-end-' + node.step.stepNumber">{{ 'routingGraph.deadEnd' | translate }}</span>
+                  }
                   @if (node.step.workCenterName) {
                     <span class="graph-editor__node-meta">{{ node.step.workCenterName }}</span>
                   }

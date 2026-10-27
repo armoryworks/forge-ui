@@ -1,20 +1,26 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Subject } from 'rxjs';
+import { Subject, of } from 'rxjs';
 
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 import { PartDetailDialogComponent } from './part-detail-dialog.component';
 
 describe('PartDetailDialogComponent', () => {
   let keydown$: Subject<KeyboardEvent>;
   let close: ReturnType<typeof vi.fn>;
+  let discard: boolean;
+  let confirmDiscard: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     keydown$ = new Subject<KeyboardEvent>();
     close = vi.fn();
+    discard = true;
+    confirmDiscard = vi.fn(() => of(discard));
     TestBed.configureTestingModule({
       providers: [
         { provide: MatDialogRef, useValue: { keydownEvents: () => keydown$, close } },
         { provide: MAT_DIALOG_DATA, useValue: { partId: 7 } },
+        { provide: PendingChangesService, useValue: { confirmDiscard } },
       ],
     });
     TestBed.runInInjectionContext(() => new PartDetailDialogComponent());
@@ -52,6 +58,15 @@ describe('PartDetailDialogComponent', () => {
   it('leaves Escape to a control that already handled it', () => {
     escapeFrom(document.body, true);
 
+    expect(close).not.toHaveBeenCalled();
+  });
+
+  it('stays open when an embedded editor has unsaved changes and the user keeps them', () => {
+    discard = false;
+
+    escapeFrom(document.body);
+
+    expect(confirmDiscard).toHaveBeenCalledTimes(1);
     expect(close).not.toHaveBeenCalled();
   });
 });

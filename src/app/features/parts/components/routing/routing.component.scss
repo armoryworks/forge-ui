@@ -148,6 +148,15 @@
       color: var(--warning, #b45309);
       font-weight: 500;
     }
+
+    &--warn {
+      color: var(--warning);
+      font-weight: 500;
+    }
+  }
+
+  &--dead-end {
+    border-color: var(--warning);
   }
 
   &__actions {

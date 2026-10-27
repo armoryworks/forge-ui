@@ -6,4 +6,6 @@ export interface RecalculatedStandardCost {
   overhead: number;
   total: number;
   costCalculationId: number;
+  rateSource?: 'work-center' | 'frozen-period';
+  costingPeriodId?: number | null;
 }

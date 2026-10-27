@@ -6,6 +6,7 @@ export interface BomTreeNode {
   level: number;
   isExpanded: boolean;
   isLoading: boolean;
+  loadFailed: boolean;
   hasChildren: boolean;
   children: BomTreeNode[];
 }

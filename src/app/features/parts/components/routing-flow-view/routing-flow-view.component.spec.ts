@@ -43,4 +43,23 @@ describe('RoutingFlowViewComponent', () => {
     expect(column(2)).toEqual(['routing-flow-op-40']);
     expect(el.querySelector('[data-testid="routing-flow-follows-40"]')?.textContent).toContain('After Op 20, 30');
   });
+
+  it('flags a step that does not lead to a later step', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [RoutingFlowViewComponent],
+      providers: [provideTranslateService({ loader: { provide: TranslateLoader, useClass: FlowLoader }, fallbackLang: 'en', lang: 'en' })],
+    });
+    const after10 = [{ operationId: 1, stepNumber: 10, gate: 'Quantity' as const }];
+    const fixture = TestBed.createComponent(RoutingFlowViewComponent);
+    fixture.componentRef.setInput('operations', [
+      op(1, 10), op(2, 20, after10), op(3, 30, after10), op(4, 40, [{ operationId: 3, stepNumber: 30, gate: 'Quantity' }]),
+    ]);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[data-testid="routing-flow-dead-end-20"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="routing-flow-dead-end-30"]')).toBeNull();
+    expect(el.querySelector('[data-testid="routing-flow-dead-end-40"]')).toBeNull();
+  });
 });

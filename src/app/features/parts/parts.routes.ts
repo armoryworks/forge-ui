@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { pendingChangesGuard } from '../../shared/guards/pending-changes.guard';
+import { roleGuard } from '../../shared/guards/role.guard';
 import { PartsComponent } from './parts.component';
 import { PartWorkflowPageComponent } from './workflow/part-workflow-page/part-workflow-page.component';
 import { providePartWorkflowSteps } from './workflow/register-part-workflow-steps';
@@ -20,7 +22,7 @@ export const PARTS_ROUTES: Routes = [
     path: '',
     providers: [providePartWorkflowSteps()],
     children: [
-      { path: '', component: PartsComponent },
+      { path: '', component: PartsComponent, canDeactivate: [pendingChangesGuard] },
       { path: 'new', component: PartWorkflowPageComponent },
       // Literal paths must precede the catch-all ':id' (which the workflow
       // page treats as a part id).
@@ -30,7 +32,14 @@ export const PARTS_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/import/part-import.component').then(m => m.PartImportPageComponent),
       },
-      { path: ':id', component: PartWorkflowPageComponent },
+      {
+        path: 'material-specs',
+        data: { titleKey: 'parts.materialSpecsPage.title' },
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        loadComponent: () =>
+          import('./pages/material-specs/material-specs.component').then(m => m.MaterialSpecsPageComponent),
+      },
+      { path: ':id', component: PartWorkflowPageComponent, canDeactivate: [pendingChangesGuard] },
     ],
   },
 ];

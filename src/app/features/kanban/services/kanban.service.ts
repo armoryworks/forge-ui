@@ -26,6 +26,7 @@ import { PartSearchResult } from '../models/part-search-result.model';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { CustomFieldValues } from '../models/custom-field-values.model';
 import { DisposeJobRequest } from '../models/dispose-job-request.model';
+import { DispositionExpenseAccount } from '../models/disposition-expense-account.model';
 import { JobDispositionStock } from '../models/job-disposition-stock.model';
 import { ChildJob } from '../models/child-job.model';
 import { BomExplosionResponse } from '../models/bom-explosion-response.model';
@@ -247,6 +248,10 @@ export class KanbanService {
 
   getDispositionStock(jobId: number): Observable<JobDispositionStock> {
     return this.http.get<JobDispositionStock>(`${environment.apiUrl}/jobs/${jobId}/disposition-stock`);
+  }
+
+  getDispositionExpenseAccounts(): Observable<DispositionExpenseAccount[]> {
+    return this.http.get<DispositionExpenseAccount[]>(`${environment.apiUrl}/jobs/disposition-expense-accounts`);
   }
 
   disposeJob(jobId: number, request: DisposeJobRequest): Observable<JobDetail> {

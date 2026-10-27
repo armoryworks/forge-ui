@@ -25,6 +25,7 @@ function line(id: number, childPartId: number, childPartNumber: string, childHas
 interface TreeInternals {
   flattenedNodes(): BomTreeNode[];
   toggleExpand(node: BomTreeNode): void;
+  retryChildren(node: BomTreeNode): void;
 }
 
 describe('BomTreeComponent', () => {
@@ -105,5 +106,22 @@ describe('BomTreeComponent', () => {
     const nested = tree.flattenedNodes()[1];
     expect(nested.level).toBe(1);
     expect(nested.hasChildren).toBe(false);
+  });
+
+  it('flags a sub-assembly whose lines fail to load and loads them again on retry', () => {
+    const tree = create([line(1, 210, 'SA-210', true)]);
+
+    tree.toggleExpand(tree.flattenedNodes()[0]);
+    responses.get(210)!.error(new Error('500'));
+
+    expect(tree.flattenedNodes()[0].loadFailed).toBe(true);
+    expect(tree.flattenedNodes()[0].isLoading).toBe(false);
+
+    tree.retryChildren(tree.flattenedNodes()[0]);
+    expect(getPartById).toHaveBeenCalledTimes(2);
+    expect(tree.flattenedNodes()[0].loadFailed).toBe(false);
+    respond(210, [line(11, 61, 'RM-6061-B12')]);
+
+    expect(rows(tree)).toEqual(['SA-210', '  RM-6061-B12']);
   });
 });

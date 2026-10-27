@@ -21,4 +21,5 @@ export interface UpdateOperationRequest {
   subcontractVendorId?: number | null;
   subcontractTurnTimeDays?: number | null;
   removeConflictingPredecessors?: boolean;
+  routingVersion?: string | null;
 }

@@ -30,6 +30,9 @@
           <span class="cost-roll__label">{{ 'parts.standardCost.total' | translate }}</span>
           <span class="cost-roll__value"><app-currency-display [value]="r.total" /></span>
         </div>
+        @if (r.rateSource === 'frozen-period') {
+          <p class="cost-roll__hint" data-testid="part-standard-cost-rate-source">{{ 'parts.standardCost.frozenRates' | translate }}</p>
+        }
       </div>
     }
   </div>

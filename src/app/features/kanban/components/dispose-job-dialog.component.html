@@ -19,6 +19,14 @@
         <app-select [label]="'kanban.destinationBin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
       }
     }
+    @if (formGroup.controls.disposition.value === 'Other' && writeOffAccountsEnabled) {
+      <app-select [label]="'kanban.dispositionWriteOffAccount' | translate" formControlName="expenseGlAccountId"
+                  [options]="writeOffOptions()" data-testid="dispose-job-write-off-account" />
+      <p class="dispose-job__hint" data-testid="dispose-job-write-off-hint">{{ 'kanban.dispositionWriteOffHint' | translate }}</p>
+    }
+    @if (formGroup.controls.disposition.value === 'ShipToCustomer') {
+      <p class="dispose-job__hint" data-testid="dispose-job-ship-hint">{{ 'kanban.dispositionShipHint' | translate }}</p>
+    }
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" data-testid="dispose-job-notes" />
   </div>
 

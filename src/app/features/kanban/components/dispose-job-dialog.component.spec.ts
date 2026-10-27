@@ -20,6 +20,7 @@ describe('DisposeJobDialogComponent', () => {
   const disposeJob = vi.fn();
   const getBinLocations = vi.fn();
   const getDispositionStock = vi.fn();
+  const getDispositionExpenseAccounts = vi.fn();
   const isEnabled = vi.fn();
   const success = vi.fn();
   const close = vi.fn();
@@ -30,7 +31,7 @@ describe('DisposeJobDialogComponent', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: MAT_DIALOG_DATA, useValue: { jobId: 7, jobNumber: 'JOB-0007', currentDisposition: null, ...data } },
         { provide: MatDialogRef, useValue: { close } },
-        { provide: KanbanService, useValue: { disposeJob, getDispositionStock } },
+        { provide: KanbanService, useValue: { disposeJob, getDispositionStock, getDispositionExpenseAccounts } },
         { provide: InventoryService, useValue: { getBinLocations } },
         { provide: CapabilityService, useValue: { isEnabled } },
         { provide: SnackbarService, useValue: { success } },
@@ -66,6 +67,7 @@ describe('DisposeJobDialogComponent', () => {
       { id: 4, name: 'A-04', locationType: 'Bin', barcode: null, locationPath: 'Main / A-04', isActive: false },
     ]));
     getDispositionStock.mockReturnValue(of(stock()));
+    getDispositionExpenseAccounts.mockReturnValue(of([{ id: 61, accountNumber: '61000', name: 'Scrap and Rework' }]));
     isEnabled.mockReturnValue(true);
   });
 
@@ -84,7 +86,7 @@ describe('DisposeJobDialogComponent', () => {
     expect(optionValues(component)).toContain('Scrap');
   });
 
-  it.each(['Scrap', 'HoldForReview', 'EnteredInError'] as const)('requires a reason for %s', disposition => {
+  it.each(['Scrap', 'HoldForReview', 'EnteredInError', 'Other'] as const)('requires a reason for %s', disposition => {
     const component = create();
     component.formGroup.controls.disposition.setValue(disposition);
 
@@ -221,5 +223,33 @@ describe('DisposeJobDialogComponent', () => {
     expect(instant).toHaveBeenCalledWith('kanban.jobDisposed', { disposition: 'kanban.dispositionScrap' });
     expect(success).toHaveBeenCalled();
     expect(close).toHaveBeenCalledWith({ id: 7 });
+  });
+
+  it('offers the write-off account for Other while the GL is on and sends the chosen account', () => {
+    const component = create();
+    component.formGroup.controls.disposition.setValue('Other');
+
+    expect(getDispositionExpenseAccounts).toHaveBeenCalledTimes(1);
+    expect((component as unknown as { writeOffOptions: () => { value: unknown }[] }).writeOffOptions().map(o => o.value))
+      .toEqual([null, 61]);
+
+    component.formGroup.controls.expenseGlAccountId.setValue(61);
+    component.formGroup.controls.notes.setValue('Customer cancelled the order');
+    component.save();
+
+    expect(disposeJob).toHaveBeenCalledWith(7, expect.objectContaining({ disposition: 'Other', expenseGlAccountId: 61 }));
+  });
+
+  it('does not ask for a write-off account while the GL is off', () => {
+    isEnabled.mockImplementation((code: string) => code !== 'CAP-ACCT-FULLGL');
+    const component = create();
+    component.formGroup.controls.disposition.setValue('Other');
+    component.formGroup.controls.expenseGlAccountId.setValue(61);
+    component.formGroup.controls.notes.setValue('Cancelled');
+
+    component.save();
+
+    expect(getDispositionExpenseAccounts).not.toHaveBeenCalled();
+    expect(disposeJob).toHaveBeenCalledWith(7, expect.objectContaining({ expenseGlAccountId: undefined }));
   });
 });

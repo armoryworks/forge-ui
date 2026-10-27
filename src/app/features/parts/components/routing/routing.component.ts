@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -23,9 +23,11 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 import { STEP_GATING_MODES, StepGatingMode } from '../../../../shared/models/step-gating-mode.type';
 import { describeConflicts, predecessorConflictsOf } from '../../utils/predecessor-conflicts.utils';
-import { effectivePredecessors } from '../../utils/routing-predecessors.utils';
+import { isRoutingGraphStale } from '../../utils/routing-graph-errors.utils';
+import { deadEndStepIds, effectivePredecessors } from '../../utils/routing-predecessors.utils';
 
 type RoutingViewMode = 'list' | 'flow';
 
@@ -44,12 +46,14 @@ export class RoutingComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly draftResume = inject(DraftResumeService);
   private readonly auth = inject(AuthService);
+  private readonly pendingChanges = inject(PendingChangesService);
 
   readonly partId = input.required<number>();
   readonly bomLines = input<BOMLine[]>([]);
   readonly stepGating = input<StepGatingMode | null>(null);
 
   protected readonly operations = signal<Operation[]>([]);
+  protected readonly version = signal<string | null>(null);
   protected readonly loading = signal(false);
   protected readonly routingViewMode = signal<RoutingViewMode>('list');
   protected readonly expandedInstructions = signal<ReadonlySet<number>>(new Set());
@@ -70,8 +74,11 @@ export class RoutingComponent implements OnInit {
     return labels;
   });
 
+  protected readonly deadEnds = computed(() => deadEndStepIds(this.operations()));
+
   protected readonly canEditGating = this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer']);
   protected readonly canEditFlow = this.canEditGating;
+  protected readonly canEditSteps = this.canEditGating;
   protected readonly flowDirty = signal(false);
   protected readonly gatingControl = new FormControl<StepGatingMode | null>({ value: null, disabled: !this.canEditGating });
   protected readonly gatingOptions: SelectOption[] = [
@@ -109,13 +116,12 @@ export class RoutingComponent implements OnInit {
         this.loadOperations(id);
       }
     });
+    effect(() => this.pendingChanges.set(this, this.flowDirty()));
+    inject(DestroyRef).onDestroy(() => this.pendingChanges.set(this, false));
   }
 
   ngOnInit(): void {
-    // Resume a new-Operation draft: when the part detail deep-linked here with
-    // ?resumeDraft=operation:new, reopen the operation create dialog. consume()
-    // returns true once then strips the param so a refresh won't reopen it.
-    if (this.draftResume.consume('operation')) {
+    if (this.canEditSteps && this.draftResume.consume('operation')) {
       this.openAddOperation();
     }
   }
@@ -123,13 +129,32 @@ export class RoutingComponent implements OnInit {
   private loadOperations(partId?: number): void {
     const id = partId ?? this.partId();
     this.loading.set(true);
-    this.partsService.getOperations(id).subscribe({
-      next: (operations) => {
-        this.operations.set(operations);
+    this.partsService.getRoutingGraph(id).subscribe({
+      next: (graph) => {
+        this.operations.set([...graph.operations].sort((a, b) => a.stepNumber - b.stepNumber));
+        this.version.set(graph.version);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  private refreshVersion(): void {
+    this.partsService.getRoutingGraph(this.partId()).subscribe({
+      next: (graph) => this.version.set(graph.version),
+    });
+  }
+
+  private confirmReload(): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('routingGraph.staleTitle'),
+        message: this.translate.instant('routingGraph.staleMessage'),
+        confirmLabel: this.translate.instant('routingGraph.staleConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(() => this.loadOperations());
   }
 
   protected showView(mode: RoutingViewMode): void {
@@ -155,6 +180,7 @@ export class RoutingComponent implements OnInit {
 
   protected onFlowSaved(operations: Operation[]): void {
     this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
+    this.refreshVersion();
   }
 
   protected toggleInstructions(operationId: number): void {
@@ -178,6 +204,7 @@ export class RoutingComponent implements OnInit {
       if (result) {
         this.operations.update(list => [...list, result].sort((a, b) => a.stepNumber - b.stepNumber));
         this.snackbar.success(this.translate.instant('parts.operationAdded'));
+        this.refreshVersion();
       }
     });
   }
@@ -189,6 +216,7 @@ export class RoutingComponent implements OnInit {
     }).afterClosed().subscribe((result: Operation[] | null | undefined) => {
       if (result) {
         this.operations.set([...result].sort((a, b) => a.stepNumber - b.stepNumber));
+        this.refreshVersion();
       }
     });
   }
@@ -201,8 +229,13 @@ export class RoutingComponent implements OnInit {
         operation,
         operations: this.operations(),
         bomLines: this.bomLines(),
+        routingVersion: this.version(),
       } satisfies OperationDialogData,
-    }).afterClosed().subscribe((result: Operation | undefined) => {
+    }).afterClosed().subscribe((result: Operation | 'stale' | undefined) => {
+      if (result === 'stale') {
+        this.loadOperations();
+        return;
+      }
       if (result) {
         this.snackbar.success(this.translate.instant('parts.operationUpdated'));
         this.loadOperations();
@@ -211,7 +244,7 @@ export class RoutingComponent implements OnInit {
   }
 
   protected onReorderOperation(event: CdkDragDrop<Operation[]>): void {
-    if (event.previousIndex === event.currentIndex) return;
+    if (!this.canEditSteps || event.previousIndex === event.currentIndex) return;
 
     const numbers = this.operations().map(op => op.stepNumber).sort((a, b) => a - b);
     const reordered = [...this.operations()];
@@ -221,12 +254,18 @@ export class RoutingComponent implements OnInit {
   }
 
   private saveOrder(operationIds: number[], removeConflictingPredecessors: boolean): void {
-    this.partsService.reorderOperations(this.partId(), { operationIds, removeConflictingPredecessors }).subscribe({
+    const routingVersion = this.version();
+    this.partsService.reorderOperations(this.partId(), { operationIds, removeConflictingPredecessors, routingVersion }).subscribe({
       next: (operations) => {
         this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
         this.snackbar.success(this.translate.instant('parts.operationReordered'));
+        this.refreshVersion();
       },
       error: (err: unknown) => {
+        if (isRoutingGraphStale(err)) {
+          this.confirmReload();
+          return;
+        }
         const conflicts = predecessorConflictsOf(err);
         if (!conflicts) {
           this.snackbar.errorFrom(err, 'parts.operationReorderFailed');

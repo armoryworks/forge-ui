@@ -7,6 +7,7 @@ import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { InventoryService } from '../../../inventory/services/inventory.service';
@@ -25,13 +26,17 @@ type PanelInternals = {
   onRevised(): void;
   bomForm: FormGroup;
   saveBomLine(): void;
+  selectTab(id: string): void;
+  activeTabId(): string;
 };
 
 describe('PartDetailPanelComponent', () => {
   let getPartById: ReturnType<typeof vi.fn>;
   let createBOMLine: ReturnType<typeof vi.fn>;
+  let pending: { hasPending: ReturnType<typeof vi.fn>; confirmDiscard: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
+    pending = { hasPending: vi.fn(() => false), confirmDiscard: vi.fn(() => of(true)) };
     getPartById = vi.fn().mockReturnValue(of({ id: 7, revision: 'A' } as PartDetail));
     createBOMLine = vi.fn(() => new Subject());
     TestBed.resetTestingModule();
@@ -54,6 +59,7 @@ describe('PartDetailPanelComponent', () => {
         { provide: PartDetailLayoutResolverService, useValue: { resolve: () => [] } },
         { provide: VendorPartsService, useValue: {} },
         { provide: InventoryService, useValue: { getUnitsOfMeasure: () => of([]) } },
+        { provide: PendingChangesService, useValue: pending },
       ],
     });
   });
@@ -99,5 +105,24 @@ describe('PartDetailPanelComponent', () => {
     c.saveBomLine();
 
     expect(createBOMLine).toHaveBeenCalledTimes(2);
+  });
+
+  it('asks before switching tabs while the routing editor has unsaved changes, and stays when declined', () => {
+    const component = TestBed.runInInjectionContext(() => new PartDetailPanelComponent());
+    mockSignalInputs(component, { partId: 7 });
+    const c = component as unknown as PanelInternals;
+    c.selectTab('routing');
+    pending.hasPending.mockReturnValue(true);
+    pending.confirmDiscard.mockReturnValue(of(false));
+
+    c.selectTab('bom');
+
+    expect(pending.confirmDiscard).toHaveBeenCalledTimes(1);
+    expect(c.activeTabId()).toBe('routing');
+
+    pending.confirmDiscard.mockReturnValue(of(true));
+    c.selectTab('bom');
+
+    expect(c.activeTabId()).toBe('bom');
   });
 });

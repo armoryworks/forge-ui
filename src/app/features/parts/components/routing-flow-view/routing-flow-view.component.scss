@@ -38,6 +38,10 @@
     }
   }
 
+  &__operation--dead-end {
+    border-color: var(--warning);
+  }
+
   &__operation-number {
     @include uppercase-label(var(--font-size-xxs), 0.05em, 700);
     color: var(--text-muted);
@@ -69,6 +73,10 @@
     .material-icons-outlined {
       font-size: $icon-size-xs;
     }
+  }
+
+  &__operation-meta--warn {
+    color: var(--warning);
   }
 
   &__operation-qc {

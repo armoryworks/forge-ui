@@ -29,9 +29,10 @@ export interface DisposeJobDialogData {
 
 const STOCKING_CAPABILITY = 'CAP-MFG-COMPLETE';
 const MULTI_LOCATION_CAPABILITY = 'CAP-INV-MULTILOC';
+const FULL_GL_CAPABILITY = 'CAP-ACCT-FULLGL';
 const STOCK_LOAD_FAILED_KEY = 'kanban.dispositionStockLoadFailed';
 
-const REASON_REQUIRED: readonly JobDisposition[] = ['Scrap', 'HoldForReview', 'EnteredInError'];
+const REASON_REQUIRED: readonly JobDisposition[] = ['Scrap', 'HoldForReview', 'EnteredInError', 'Other'];
 
 const DISPOSITION_LABEL_KEYS: Record<JobDisposition, string> = {
   ShipToCustomer: 'kanban.dispositionShipToCustomer',
@@ -70,7 +71,10 @@ export class DisposeJobDialogComponent {
   protected readonly stockProblemKey = signal<string | null>(null);
   private readonly stockingEnabled = this.capabilityService.isEnabled(STOCKING_CAPABILITY, true);
   protected readonly locationsEnabled = this.capabilityService.isEnabled(MULTI_LOCATION_CAPABILITY);
+  protected readonly writeOffAccountsEnabled = this.capabilityService.isEnabled(FULL_GL_CAPABILITY);
+  protected readonly writeOffOptions = signal<SelectOption[]>([]);
   private stockRequested = false;
+  private writeOffRequested = false;
 
   private readonly reasonRequired: ValidatorFn = control =>
     (control.value ?? '').trim() ? null : { required: { message: this.translate.instant('kanban.dispositionNotesRequired') } };
@@ -85,6 +89,7 @@ export class DisposeJobDialogComponent {
     disposition: new FormControl<JobDisposition | null>(null, [Validators.required, this.stockReadyForInventory()]),
     goodQuantity: new FormControl<number | null>(null),
     locationId: new FormControl<number | null>(null),
+    expenseGlAccountId: new FormControl<number | null>(null),
     notes: new FormControl('', [Validators.maxLength(2000)]),
   });
 
@@ -92,6 +97,7 @@ export class DisposeJobDialogComponent {
     disposition: this.translate.instant('jobs.disposition'),
     goodQuantity: this.translate.instant('kanban.goodQuantity'),
     locationId: this.translate.instant('kanban.destinationBin'),
+    expenseGlAccountId: this.translate.instant('kanban.dispositionWriteOffAccount'),
     notes: this.translate.instant('common.notes'),
   });
 
@@ -117,6 +123,7 @@ export class DisposeJobDialogComponent {
       notes: raw.notes?.trim() || undefined,
       goodQuantity: stocking ? raw.goodQuantity ?? undefined : undefined,
       locationId: stocking && this.locationsEnabled ? raw.locationId ?? undefined : undefined,
+      expenseGlAccountId: disposition === 'Other' && this.writeOffAccountsEnabled ? raw.expenseGlAccountId ?? undefined : undefined,
     }).subscribe({
       next: (result: JobDetail) => {
         this.saving.set(false);
@@ -151,6 +158,9 @@ export class DisposeJobDialogComponent {
     const stocking = disposition === 'AddToInventory' && this.stockingEnabled;
     if (stocking) {
       this.loadStock();
+    }
+    if (disposition === 'Other' && this.writeOffAccountsEnabled) {
+      this.loadWriteOffAccounts();
     }
     this.applyStockValidators(stocking);
   }
@@ -205,6 +215,20 @@ export class DisposeJobDialogComponent {
         this.stockRequested = false;
         this.stockProblemKey.set(STOCK_LOAD_FAILED_KEY);
         this.formGroup.controls.disposition.updateValueAndValidity({ emitEvent: false });
+      },
+    });
+  }
+
+  private loadWriteOffAccounts(): void {
+    if (this.writeOffRequested) return;
+    this.writeOffRequested = true;
+    this.kanbanService.getDispositionExpenseAccounts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: accounts => this.writeOffOptions.set([
+        { value: null, label: this.translate.instant('kanban.dispositionWriteOffDefault') },
+        ...accounts.map(account => ({ value: account.id, label: `${account.accountNumber} ${account.name}` })),
+      ]),
+      error: () => {
+        this.writeOffRequested = false;
       },
     });
   }

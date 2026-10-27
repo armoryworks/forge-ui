@@ -40,6 +40,7 @@ interface EditorInternals {
   removeAllConflicts(): void;
   discard(): void;
   save(): void;
+  deadEnds(): Set<number>;
   dropAt(drag: Drag, x: number, y: number): void;
   addLinkForm: { setValue(value: { stepId: number | null; predecessorId: number | null }): void };
   addLink(): void;
@@ -252,5 +253,37 @@ describe('RoutingGraphEditorComponent — save', () => {
 
     expect(editor.dirty()).toBe(false);
     expect(follows(editor, 3)).toEqual([]);
+  });
+
+  it('flags a step that leads nowhere and asks before saving it, saving only on confirm', () => {
+    const branched: RoutingGraph = {
+      version: 'v1',
+      operations: [operation(1, 10), operation(2, 20, [1]), operation(3, 30, [1]), operation(4, 40, [3])],
+    };
+    const declined = setup({ getRoutingGraph: vi.fn(() => of(branched)) }, false);
+
+    expect([...declined.editor.deadEnds()]).toEqual([2]);
+    declined.editor.save();
+
+    expect(declined.dialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: expect.objectContaining({ title: 'routingGraph.deadEndTitle' }),
+    }));
+    expect(declined.service.updateRoutingGraph).not.toHaveBeenCalled();
+
+    const confirmed = setup({ getRoutingGraph: vi.fn(() => of(branched)) }, true);
+
+    confirmed.editor.save();
+
+    expect(confirmed.service.updateRoutingGraph).toHaveBeenCalledTimes(1);
+  });
+
+  it('saves a routing with no dead ends without asking', () => {
+    const { editor, dialog, service } = setup();
+    editor.runParallel(3);
+
+    editor.save();
+
+    expect(dialog.open).not.toHaveBeenCalled();
+    expect(service.updateRoutingGraph).toHaveBeenCalledTimes(1);
   });
 });

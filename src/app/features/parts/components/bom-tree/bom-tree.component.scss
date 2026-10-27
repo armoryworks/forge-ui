@@ -19,6 +19,18 @@
 
   &__indent { flex-shrink: 0; }
 
+  &__row--error {
+    color: var(--error);
+  }
+
+  &__error-icon {
+    font-size: $icon-size-sm;
+  }
+
+  &__error-text {
+    flex: 1;
+  }
+
   &__toggle {
     flex-shrink: 0;
     width: $icon-size-md;
