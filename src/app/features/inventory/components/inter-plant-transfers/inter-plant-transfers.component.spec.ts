@@ -137,7 +137,7 @@ describe('InterPlantTransfersComponent', () => {
     c.receiveLines.at(0).controls.receivedQuantity.setValue(38);
     c.receiveLines.at(0).controls.toLocationId.setValue(9);
     c.confirmReceive();
-    expect(service['receive']).toHaveBeenCalledWith(1, [{ partId: 10, receivedQuantity: 38, toLocationId: 9 }]);
+    expect(service['receive']).toHaveBeenCalledWith(1, [{ lineId: 11, partId: 10, receivedQuantity: 38, toLocationId: 9 }]);
   });
 
   it('cancels only after confirmation', () => {

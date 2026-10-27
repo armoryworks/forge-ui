@@ -288,6 +288,7 @@ export class InterPlantTransfersComponent {
     this.receiveLines.clear();
     for (const line of transfer.lines) {
       this.receiveLines.push(new FormGroup({
+        lineId: new FormControl(line.id, { nonNullable: true }),
         partId: new FormControl(line.partId, { nonNullable: true }),
         receivedQuantity: new FormControl<number | null>(line.quantity, [Validators.required, Validators.min(0), Validators.max(line.quantity)]),
         toLocationId: new FormControl<number | null>(null),
@@ -305,7 +306,7 @@ export class InterPlantTransfersComponent {
     if (!transfer || this.receiveLines.invalid || this.saving()) return;
     this.saving.set(true);
     const lines = this.receiveLines.getRawValue().map(l => ({
-      partId: l.partId, receivedQuantity: l.receivedQuantity ?? 0, toLocationId: l.toLocationId,
+      lineId: l.lineId, partId: l.partId, receivedQuantity: l.receivedQuantity ?? 0, toLocationId: l.toLocationId,
     }));
     this.transfersService.receive(transfer.id, lines).subscribe({
       next: () => {
