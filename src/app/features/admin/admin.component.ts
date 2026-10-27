@@ -39,6 +39,9 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
+import { fromIsoDate, toIsoDate } from '../../shared/utils/date.utils';
+import { hireDatePayload } from './utils/hire-date-payload';
+import { PayPeriodSettingsComponent } from './components/pay-period-settings/pay-period-settings.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
@@ -89,7 +92,7 @@ import { timeZoneOptions } from '../../shared/utils/time-zone-options';
   selector: 'app-admin',
   standalone: true,
   imports: [
-    EnumLabelPipe,
+    EnumLabelPipe, PayPeriodSettingsComponent,
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,
@@ -178,10 +181,11 @@ export class AdminComponent implements OnInit {
     roles: new FormControl<string[]>([], [Validators.required]),
     workLocationId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
+    hireDate: new FormControl<Date | null>(null),
   });
   protected readonly userViolations = FormValidationService.getViolations(this.userForm, {
     firstName: 'First Name', lastName: 'Last Name', email: 'Email',
-    initials: 'Initials', roles: 'Roles',
+    initials: 'Initials', roles: 'Roles', hireDate: this.translate.instant('admin.hireDate'),
   });
 
   // Info-icon slideout: suggested role combinations (guidance only).
@@ -514,8 +518,10 @@ export class AdminComponent implements OnInit {
     this.setupTokenExpiresAt.set(null);
     this.userForm.reset({
       firstName: '', lastName: '', email: '',
-      initials: '', roles: [], isActive: true,
+      initials: '', roles: [], isActive: true, hireDate: null,
     });
+    this.userForm.controls.hireDate.setValidators([Validators.required]);
+    this.userForm.controls.hireDate.updateValueAndValidity();
     this.showRoleSuggestions.set(false);
     this.userForm.controls.email.enable();
     this.avatarColor.set('#0d9488');
@@ -534,7 +540,10 @@ export class AdminComponent implements OnInit {
       roles: [...user.roles],
       workLocationId: user.workLocationId ?? null,
       isActive: user.isActive,
+      hireDate: fromIsoDate(user.hireDate ?? null),
     });
+    this.userForm.controls.hireDate.clearValidators();
+    this.userForm.controls.hireDate.updateValueAndValidity();
     this.showRoleSuggestions.set(false);
     // Email is editable in edit mode so admins can correct a typo'd address
     // (it has no other write path — previously only fixable via direct DB edit).
@@ -568,6 +577,7 @@ export class AdminComponent implements OnInit {
         isActive: form.isActive!,
         roles: form.roles ?? [],
         email: form.email !== editing.email ? form.email! : undefined,
+        hireDate: hireDatePayload(form.hireDate, false, this.userForm.controls.hireDate.dirty),
       }).subscribe({
         next: () => {
           // Update work location if changed
@@ -596,6 +606,7 @@ export class AdminComponent implements OnInit {
         initials: form.initials || undefined,
         avatarColor: this.avatarColor(),
         roles: form.roles ?? [],
+        hireDate: hireDatePayload(form.hireDate, true, true),
       }).subscribe({
         next: (result) => {
           this.saving.set(false);
@@ -625,7 +636,11 @@ export class AdminComponent implements OnInit {
             i9Status: null,
             isNonEmployee: false,
             isServiceAccount: false,
+            hireDate: toIsoDate(form.hireDate),
           };
+          this.userForm.controls.hireDate.clearValidators();
+          this.userForm.controls.hireDate.updateValueAndValidity();
+          this.userForm.controls.hireDate.markAsPristine();
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);
           this.setupTokenExpiresAt.set(result.setupTokenExpiresAt);

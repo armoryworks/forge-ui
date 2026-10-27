@@ -13,6 +13,11 @@ import {
   EventStatusDialogResult,
 } from '../event-status-dialog/event-status-dialog.component';
 import { LanguageService } from '../../../../shared/services/language.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { EventAttendee } from '../../../events/models/event.model';
+import { EventsService } from '../../../events/services/events.service';
+import { EventRsvpStatus } from '../../../events/models/event-rsvp-status.type';
 
 /** An event enriched with its layer colour for display in the day-detail dialog. */
 export interface CalendarDayEvent {
@@ -26,6 +31,8 @@ export interface CalendarDayEvent {
   isRequired: boolean;
   isAllDay: boolean;
   color: string;
+  attendees?: EventAttendee[];
+  myStatus?: string | null;
 }
 
 /** Data payload for the calendar day-detail dialog. */
@@ -61,6 +68,10 @@ export class CalendarDayDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<CalendarDayDialogComponent, CalendarDayDialogResult>);
   private readonly dialog = inject(MatDialog);
   private readonly language = inject(LanguageService);
+  private readonly eventsService = inject(EventsService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly myId = inject(AuthService).user()?.id ?? null;
+  protected readonly responding = signal<number | null>(null);
 
   // Events held in a signal so a status change reflects immediately without reopening.
   protected readonly events = signal<CalendarDayEvent[]>(this.data.events);
@@ -99,6 +110,21 @@ export class CalendarDayDialogComponent {
     ).afterClosed().subscribe(result => {
       if (!result) return;
       this.events.update(list => list.map(e => (e.id === evt.id ? { ...e, status: result.status } : e)));
+    });
+  }
+
+  /** Accept or decline an event the current user is invited to; the attendee list reflects the answer at once. */
+  protected respond(evt: CalendarDayEvent, status: EventRsvpStatus): void {
+    if (this.responding() !== null) return;
+    this.responding.set(evt.id);
+    this.eventsService.respondToEvent(evt.id, status).subscribe({
+      next: () => {
+        this.responding.set(null);
+        this.events.update(list => list.map(e => (e.id === evt.id
+          ? { ...e, myStatus: status, attendees: (e.attendees ?? []).map(a => (a.userId === this.myId ? { ...a, status } : a)) }
+          : e)));
+      },
+      error: (err: unknown) => { this.responding.set(null); this.snackbar.errorFrom(err, 'events.rsvp.failed'); },
     });
   }
 

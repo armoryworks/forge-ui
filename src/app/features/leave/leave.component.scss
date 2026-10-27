@@ -1,0 +1,6 @@
+@use 'styles/variables' as *;
+
+.leave-tabs {
+  display: flex;
+  gap: $sp-xs;
+}

@@ -1,0 +1,82 @@
+<div class="leave-balances">
+  <div class="leave-balances__head">
+    <p class="leave-balances__hint">{{ 'leave.balancesHint' | translate }}</p>
+    <span class="leave-balances__spacer"></span>
+    @if (canAdjust()) {
+      <button class="action-btn action-btn--create" data-testid="leave-adjust-btn" (click)="openAdjust()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'leave.recordBalance' | translate }}
+      </button>
+    } @else {
+      <span class="chip chip--info" data-testid="leave-balances-readonly">{{ 'leave.readOnly' | translate }}</span>
+    }
+  </div>
+
+  <app-data-table tableId="leave-balances" [columns]="columns" [data]="balances()" [loading]="loading()"
+    emptyIcon="account_balance_wallet" [emptyMessage]="'leave.noBalancesAll' | translate">
+    <ng-template appColumnCell="balance" let-row>{{ $any(row).balance | number:'1.0-2' }}</ng-template>
+    <ng-template appColumnCell="usedThisYear" let-row>{{ $any(row).usedThisYear | number:'1.0-2' }}</ng-template>
+    <ng-template appColumnCell="accruedThisYear" let-row>{{ $any(row).accruedThisYear | number:'1.0-2' }}</ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <button class="icon-btn" [attr.data-testid]="'leave-history-' + $any(row).id"
+              [attr.aria-label]="'leave.history' | translate" (click)="openHistory($any(row))">
+        <span class="material-icons-outlined">history</span>
+      </button>
+      @if (canAdjust()) {
+        <button class="icon-btn" [attr.data-testid]="'leave-adjust-' + $any(row).id"
+                [attr.aria-label]="'leave.adjust' | translate" (click)="openAdjust($any(row))">
+          <span class="material-icons-outlined">tune</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showAdjustDialog()) {
+  <app-dialog [title]="'leave.recordBalance' | translate" width="520px" (closed)="closeAdjust()">
+    <div [formGroup]="form">
+      <app-select [label]="'leave.fields.employee' | translate" formControlName="userId" [options]="userOptions()"
+                  [required]="true" data-testid="leave-adjust-user" />
+      <div class="dialog-row">
+        <app-select [label]="'leave.fields.type' | translate" formControlName="policyId" [options]="policyOptions()"
+                    [required]="true" data-testid="leave-adjust-policy" />
+        <app-select [label]="'leave.fields.adjustmentType' | translate" formControlName="type" [options]="typeOptions"
+                    [required]="true" data-testid="leave-adjust-type" />
+      </div>
+      <div class="dialog-row">
+        <app-input [label]="'leave.fields.hours' | translate" type="number" formControlName="hours" [required]="true"
+                   data-testid="leave-adjust-hours" />
+        <app-datepicker [label]="'leave.fields.effectiveDate' | translate" formControlName="effectiveDate" [required]="true"
+                        data-testid="leave-adjust-date" />
+      </div>
+      <p class="leave-balances__hint">{{ (isOpening() ? 'leave.openingHint' : 'leave.adjustmentHint') | translate }}</p>
+      <app-textarea [label]="'leave.fields.reason' | translate" formControlName="reason" [rows]="2" [maxlength]="500"
+                    data-testid="leave-adjust-reason" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeAdjust()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="leave-adjust-save"
+                [disabled]="form.invalid || ruleViolations().length > 0 || saving()" (click)="saveAdjustment()">
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (historyFor(); as who) {
+  <app-dialog [title]="'leave.historyTitle' | translate:{ name: who.name }" width="800px" (closed)="closeHistory()">
+    <div>
+      <app-data-table tableId="leave-balance-history" [columns]="historyColumns" [data]="history()"
+        emptyIcon="history" [emptyMessage]="'leave.noHistory' | translate">
+        <ng-template appColumnCell="type" let-row>{{ ('leave.adjustmentType.' + $any(row).type) | translate }}</ng-template>
+        <ng-template appColumnCell="hours" let-row>{{ $any(row).hours | number:'1.0-2' }}</ng-template>
+        <ng-template appColumnCell="balanceAfter" let-row>{{ $any(row).balanceAfter | number:'1.0-2' }}</ng-template>
+      </app-data-table>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeHistory()">{{ 'common.close' | translate }}</button>
+    </div>
+  </app-dialog>
+}

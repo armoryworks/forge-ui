@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.leave-approvals {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__filters {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__summary {
+    margin: 0;
+  }
+}

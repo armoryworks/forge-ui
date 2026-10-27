@@ -13,3 +13,7 @@
     emptyIcon="schedule"
     [emptyMessage]="'employees.employeeTimeTab.noTimeEntriesFound' | translate" />
 </div>
+
+<div class="tab-content">
+  <app-overtime-breakdown [userId]="employeeId()" />
+</div>

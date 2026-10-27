@@ -5,6 +5,7 @@ export interface CreateUserRequest {
   initials?: string;
   avatarColor?: string;
   roles: string[];
+  hireDate?: string;
 }
 
 export interface CreateUserResponse {

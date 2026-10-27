@@ -11,6 +11,9 @@ import { AppNotification } from '../../models/app-notification.model';
 import { NotificationTab } from '../../models/notification-tab.type';
 import { resolveEntityRoute } from '../../utils/notification-route';
 import { DateTimePipe } from '../../pipes/date-time.pipe';
+import { SnackbarService } from '../../services/snackbar.service';
+import { EventsService } from '../../../features/events/services/events.service';
+import { EventRsvpStatus } from '../../../features/events/models/event-rsvp-status.type';
 
 @Component({
   selector: 'app-notification-panel',
@@ -24,6 +27,8 @@ export class NotificationPanelComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly events = inject(EventsService);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly notifications = this.notificationService.filteredNotifications;
   protected readonly filter = this.notificationService.filter;
@@ -55,6 +60,18 @@ export class NotificationPanelComponent {
       const commands = resolveEntityRoute(notification.entityType, notification.entityId);
       if (commands) this.router.navigate(commands.path, { queryParams: commands.query });
     }
+  }
+
+  protected respondToInvite(notification: AppNotification, status: EventRsvpStatus, event: MouseEvent): void {
+    event.stopPropagation();
+    if (!notification.entityId) return;
+    this.events.respondToEvent(notification.entityId, status).subscribe({
+      next: () => {
+        this.notificationService.markAsRead(notification.id);
+        this.snackbar.success(this.translate.instant(status === 'Accepted' ? 'events.rsvp.accepted' : 'events.rsvp.declined'));
+      },
+      error: (err: unknown) => this.snackbar.errorFrom(err, 'events.rsvp.failed'),
+    });
   }
 
   protected togglePin(notification: AppNotification, event: MouseEvent): void {

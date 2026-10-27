@@ -1,3 +1,5 @@
+import { EventAttendee } from '../../events/models/event.model';
+
 /** compliance-calendar A-3: a calendar event (subset of the API EventResponseModel). */
 export interface CalendarEvent {
   id: number;
@@ -14,4 +16,5 @@ export interface CalendarEvent {
   superGroupId: number | null;
   isSystemGenerated?: boolean;
   isAllDay: boolean;
+  attendees?: EventAttendee[];
 }

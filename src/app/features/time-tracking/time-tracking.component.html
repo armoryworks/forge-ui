@@ -107,6 +107,10 @@
         </ng-template>
       </app-data-table>
   }
+
+  @if (canSeeLaborReconciliation()) {
+    <app-overtime-breakdown class="overtime-panel" />
+  }
 </div>
 
 <!-- Manual Entry Dialog -->
@@ -153,8 +157,21 @@
 @if (showTimerDialog()) {
   <app-dialog [title]="'timeTracking.startTimer' | translate" (closed)="closeTimerDialog()">
     <div [formGroup]="timerForm">
-      <app-select data-testid="timer-category" [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
-      <app-textarea data-testid="timer-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-entity-picker data-testid="timer-job" [label]="'timeTracking.jobOptional' | translate" entityType="jobs"
+        displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId" />
+      @if (timerHasJob()) {
+        <div class="dialog-row">
+          @if (operationTimersEnabled() && timerOperations().length > 0) {
+            <app-select data-testid="timer-operation" [label]="'timeTracking.operation' | translate" formControlName="operationId" [options]="timerOperationOptions()" />
+          }
+          <app-select data-testid="timer-entry-type" [label]="'timeTracking.entryType' | translate" formControlName="entryType" [options]="entryTypeOptions" />
+        </div>
+      } @else {
+        <app-select data-testid="timer-category" [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
+      }
+      @if (!timerHasOperation()) {
+        <app-textarea data-testid="timer-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      }
     </div>
 
     <div dialog-footer>

@@ -14,6 +14,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { RunningTimersService } from '../../shared/services/running-timers.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
+import { JobOperationsService } from '../../shared/services/job-operations.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -34,6 +35,10 @@ interface PageInternals {
   saveEntry(): void;
   startTimer(): void;
   canChange(entry: TimeEntry): boolean;
+  openStartTimer(): void;
+  timerForm: { patchValue(value: Record<string, unknown>): void; controls: { jobId: { setValue(v: number | null): void } } };
+  timerOperationOptions: () => { value: unknown }[];
+  timerHasOperation: () => boolean;
 }
 
 function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
@@ -57,7 +62,15 @@ function entry(overrides: Partial<TimeEntry> = {}): TimeEntry {
   };
 }
 
-function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false, roles: string[] = []) {
+const jobOperations = {
+  getOperations: vi.fn(() => of({ jobId: 42, operations: [
+    { operationId: 11, stepNumber: 10, title: 'Mill', status: 'NotStarted' },
+    { operationId: 12, stepNumber: 20, title: 'Deburr', status: 'Complete' },
+  ] })),
+  startTimer: vi.fn(() => of({})),
+};
+
+function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnabled = false, roles: string[] = [], multiOp = true) {
   const service = {
     getTimeEntries: vi.fn().mockReturnValue(of(entries)),
     stopTimer: vi.fn().mockReturnValue(of({})),
@@ -76,7 +89,8 @@ function setup(entries: TimeEntry[], mine: Observable<TimeEntry[]>, billableEnab
       { provide: MatDialog, useValue: { open: vi.fn() } },
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
       { provide: DraftResumeService, useValue: { consume: vi.fn().mockReturnValue(false) } },
-      { provide: CapabilityService, useValue: { isEnabled: (code: string) => billableEnabled && code === 'CAP-PS-TIME-BILLABLE' } },
+      { provide: CapabilityService, useValue: { isEnabled: (code: string) => (code === 'CAP-MFG-MULTIOP' ? multiOp : billableEnabled && code === 'CAP-PS-TIME-BILLABLE') } },
+      { provide: JobOperationsService, useValue: jobOperations },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new TimeTrackingComponent()) as unknown as PageInternals;
@@ -233,5 +247,40 @@ describe('TimeTrackingComponent', () => {
       const { component } = setup([own, coworker], of([]), false, [role]);
       expect(component.canChange(coworker)).toBe(true);
     }
+  });
+
+  it('starts a job-operation timer when a job and one of its open operations are picked', () => {
+    jobOperations.startTimer.mockClear();
+    const { component, service } = setup([], of([]));
+    component.openStartTimer();
+    component.timerForm.controls.jobId.setValue(42);
+
+    expect(jobOperations.getOperations).toHaveBeenCalledWith(42);
+    expect(component.timerOperationOptions().map(o => o.value)).toEqual([null, 11]);
+    expect(component.timerHasOperation()).toBe(false);
+    component.timerForm.patchValue({ operationId: 11, entryType: 'Setup' });
+    expect(component.timerHasOperation()).toBe(true);
+    component.startTimer();
+
+    expect(jobOperations.startTimer).toHaveBeenCalledWith(42, 11, 'Setup');
+    expect(service.startTimer).not.toHaveBeenCalled();
+
+    component.timerForm.controls.jobId.setValue(43);
+    expect(component.timerHasOperation()).toBe(false);
+  });
+
+  it('starts a job timer without an operation, and an overhead timer with only a category', () => {
+    jobOperations.startTimer.mockClear();
+    const { component, service } = setup([], of([]), false, [], false);
+    component.openStartTimer();
+    component.timerForm.patchValue({ jobId: 42, entryType: 'Rework', category: 'Meeting', notes: 'Fix burrs' });
+    component.startTimer();
+    expect(service.startTimer).toHaveBeenLastCalledWith({ jobId: 42, entryType: 'Rework', category: undefined, notes: 'Fix burrs' });
+
+    component.openStartTimer();
+    component.timerForm.patchValue({ category: 'Meeting' });
+    component.startTimer();
+    expect(service.startTimer).toHaveBeenLastCalledWith({ jobId: undefined, entryType: undefined, category: 'Meeting', notes: undefined });
+    expect(jobOperations.startTimer).not.toHaveBeenCalled();
   });
 });

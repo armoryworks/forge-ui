@@ -6,4 +6,5 @@ export interface UpdateUserRequest {
   isActive?: boolean;
   roles?: string[];
   email?: string;
+  hireDate?: string;
 }

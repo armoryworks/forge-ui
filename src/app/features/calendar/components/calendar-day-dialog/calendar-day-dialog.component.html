@@ -41,6 +41,34 @@
             @if (evt.description) {
               <p class="day-dialog__desc">{{ evt.description }}</p>
             }
+            @if (evt.myStatus) {
+              <div class="day-dialog__rsvp" [attr.data-testid]="'event-rsvp-' + evt.id">
+                <span class="chip chip--info">{{ ('events.rsvp.status.' + evt.myStatus) | translate }}</span>
+                <button class="action-btn action-btn--sm" [attr.data-testid]="'event-accept-' + evt.id"
+                        [disabled]="responding() !== null || evt.myStatus === 'Accepted'" (click)="respond(evt, 'Accepted')">
+                  <span class="material-icons-outlined">event_available</span>
+                  {{ 'events.rsvp.accept' | translate }}
+                </button>
+                <button class="action-btn action-btn--sm action-btn--danger" [attr.data-testid]="'event-decline-' + evt.id"
+                        [disabled]="responding() !== null || evt.myStatus === 'Declined'" (click)="respond(evt, 'Declined')">
+                  <span class="material-icons-outlined">event_busy</span>
+                  {{ 'events.rsvp.decline' | translate }}
+                </button>
+              </div>
+            }
+            @if (evt.attendees?.length) {
+              <ul class="day-dialog__attendees" [attr.data-testid]="'event-attendees-' + evt.id">
+                @for (a of evt.attendees; track a.id) {
+                  <li class="day-dialog__attendee">
+                    <span>{{ a.userName }}</span>
+                    <span class="chip day-dialog__badge"
+                          [class.chip--success]="a.status === 'Accepted' || a.status === 'Attended'"
+                          [class.chip--error]="a.status === 'Declined'"
+                          [class.chip--muted]="a.status === 'Invited'">{{ ('events.rsvp.status.' + a.status) | translate }}</span>
+                  </li>
+                }
+              </ul>
+            }
           </div>
         }
       </section>

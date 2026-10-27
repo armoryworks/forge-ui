@@ -404,6 +404,7 @@ export class CalendarComponent implements OnInit {
   private eventsForDay(dateKey: string): CalendarDayEvent[] {
     const selected = new Set(this.selectedLayerIds());
     const colorByGroup = new Map(this.superGroups().map(g => [g.id, g.color ?? 'var(--primary)']));
+    const me = this.auth.user()?.id;
     return this.events()
       .filter(e => this.eventDateKey(e) === dateKey
         && (e.superGroupId == null || selected.has(e.superGroupId)))
@@ -418,6 +419,8 @@ export class CalendarComponent implements OnInit {
         isRequired: e.isRequired,
         isAllDay: e.isAllDay,
         color: e.superGroupId != null ? (colorByGroup.get(e.superGroupId) ?? 'var(--primary)') : 'var(--text-muted)',
+        attendees: e.attendees ?? [],
+        myStatus: e.attendees?.find(a => a.userId === me)?.status ?? null,
       }));
   }
 

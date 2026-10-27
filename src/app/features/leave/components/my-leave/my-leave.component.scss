@@ -1,0 +1,60 @@
+@use 'styles/variables' as *;
+
+.my-leave {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__section {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  &__balances {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}
+
+.balance-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  min-width: 180px;
+  padding: $sp-md;
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  background: var(--surface);
+
+  &__name {
+    font-weight: 600;
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+  }
+
+  &__meta {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}

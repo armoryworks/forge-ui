@@ -311,6 +311,7 @@
                 {{ 'admin.payPeriod' | translate }}
               </h3>
             </div>
+            <app-pay-period-settings />
             <div class="pay-period-lock-row">
               <app-datepicker [label]="'admin.lockEntriesThrough' | translate" [formControl]="lockThroughControl" />
               <button class="action-btn action-btn--sm"
@@ -827,6 +828,13 @@
 
       @if (!editingUser()) {
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" [maxlength]="256" [required]="true" data-testid="user-email" />
+      }
+
+      @if (!editingUser()?.isServiceAccount) {
+        <app-datepicker [label]="'admin.hireDate' | translate" formControlName="hireDate" [required]="!editingUser()" data-testid="user-hire-date" />
+        @if (editingUser() && !editingUser()?.hireDate && !editingUser()?.isNonEmployee) {
+          <p class="user-form__hint" data-testid="user-hire-date-missing">{{ 'admin.hireDateMissing' | translate }}</p>
+        }
       }
 
       <div class="dialog-row">

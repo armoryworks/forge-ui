@@ -1,0 +1,71 @@
+<div class="leave-policies">
+  <div class="leave-policies__head">
+    <p class="leave-policies__hint">{{ 'leave.policy.hint' | translate }}</p>
+    <span class="leave-policies__spacer"></span>
+    @if (canEdit()) {
+      <button class="action-btn action-btn--create" data-testid="leave-policy-add" (click)="openCreate()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'leave.policy.add' | translate }}
+      </button>
+    } @else {
+      <span class="chip chip--info" data-testid="leave-policies-readonly">{{ 'leave.readOnly' | translate }}</span>
+    }
+  </div>
+
+  <app-data-table tableId="leave-policies" [columns]="columns" [data]="policies()" [loading]="loading()"
+    emptyIcon="policy" [emptyMessage]="'leave.policy.none' | translate">
+    <ng-template appColumnCell="accrualRatePerPayPeriod" let-row>{{ $any(row).accrualRatePerPayPeriod | number:'1.0-4' }}</ng-template>
+    <ng-template appColumnCell="maxBalance" let-row>{{ $any(row).maxBalance === null ? '—' : ($any(row).maxBalance | number:'1.0-2') }}</ng-template>
+    <ng-template appColumnCell="carryOverLimit" let-row>{{ $any(row).carryOverLimit === null ? '—' : ($any(row).carryOverLimit | number:'1.0-2') }}</ng-template>
+    <ng-template appColumnCell="waitingPeriodDays" let-row>{{ $any(row).waitingPeriodDays ?? 0 }}</ng-template>
+    <ng-template appColumnCell="isPaidLeave" let-row>{{ ($any(row).isPaidLeave ? 'common.yes' : 'common.no') | translate }}</ng-template>
+    <ng-template appColumnCell="isActive" let-row>
+      <span class="chip" [class.chip--success]="$any(row).isActive" [class.chip--muted]="!$any(row).isActive">
+        {{ ($any(row).isActive ? 'common.active' : 'common.inactive') | translate }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if (canEdit()) {
+        <button class="icon-btn" [attr.data-testid]="'leave-policy-edit-' + $any(row).id"
+                [attr.aria-label]="'common.edit' | translate" (click)="openEdit($any(row))">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="(editing() ? 'leave.policy.edit' : 'leave.policy.add') | translate" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="100" [required]="true"
+                 data-testid="leave-policy-name" />
+      <div class="dialog-row">
+        <app-input [label]="'leave.policy.accrualRate' | translate" type="number" formControlName="accrualRatePerPayPeriod"
+                   [required]="true" data-testid="leave-policy-rate" />
+        <app-input [label]="'leave.policy.maxBalance' | translate" type="number" formControlName="maxBalance"
+                   data-testid="leave-policy-max" />
+      </div>
+      <div class="dialog-row">
+        <app-input [label]="'leave.policy.carryOver' | translate" type="number" formControlName="carryOverLimit"
+                   data-testid="leave-policy-carryover" />
+        <app-input [label]="'leave.policy.waitingPeriod' | translate" type="number" formControlName="waitingPeriodDays"
+                   data-testid="leave-policy-waiting" />
+      </div>
+      <app-toggle [label]="'leave.policy.accrueFromHire' | translate" formControlName="accrueFromHireDate" data-testid="leave-policy-from-hire" />
+      <app-toggle [label]="'leave.policy.paid' | translate" formControlName="isPaidLeave" data-testid="leave-policy-paid" />
+      @if (editing()) {
+        <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="leave-policy-active" />
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="leave-policy-save"
+                [disabled]="form.invalid || saving()" (click)="save()">
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

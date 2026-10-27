@@ -59,3 +59,12 @@
   color: var(--text-muted);
   font-size: $font-size-xs;
 }
+
+.overtime-panel {
+  display: block;
+  flex-shrink: 0;
+  max-height: 40%;
+  overflow: auto;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+}

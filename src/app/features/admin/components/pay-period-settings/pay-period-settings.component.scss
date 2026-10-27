@@ -1,0 +1,46 @@
+@use 'styles/variables' as *;
+
+.pay-period-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-bottom: $sp-md;
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+
+  &__preview {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: $font-size-sm;
+  }
+
+  &__period {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+
+    &--current {
+      font-weight: 600;
+    }
+  }
+}

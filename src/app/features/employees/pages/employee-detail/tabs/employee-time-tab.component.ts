@@ -7,11 +7,12 @@ import { DataTableComponent } from '../../../../../shared/components/data-table/
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { OvertimeBreakdownComponent } from '../../../../time-tracking/components/overtime-breakdown/overtime-breakdown.component';
 
 @Component({
   selector: 'app-employee-time-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, DataTableComponent, SelectComponent, TranslatePipe, OvertimeBreakdownComponent],
   templateUrl: './employee-time-tab.component.html',
   styleUrl: '../employee-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

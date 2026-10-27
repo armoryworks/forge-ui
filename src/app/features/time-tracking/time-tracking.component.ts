@@ -33,6 +33,11 @@ import { CapabilityService } from '../../shared/services/capability.service';
 import { RunningTimersComponent } from '../../shared/components/running-timers/running-timers.component';
 import { elapsedMs } from '../../shared/utils/elapsed-ms';
 import { secondTicker } from '../../shared/utils/second-ticker';
+import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
+import { JobOperationsService } from '../../shared/services/job-operations.service';
+import { JobOperationEntryType } from '../../shared/models/job-operation-entry-type.type';
+import { JobOperationRow } from '../../shared/models/job-operation-row.model';
+import { OvertimeBreakdownComponent } from './components/overtime-breakdown/overtime-breakdown.component';
 
 function durationInRange(group: AbstractControl): ValidationErrors | null {
   const total = (Number(group.get('hours')?.value) || 0) * 60 + (Number(group.get('minutes')?.value) || 0);
@@ -59,6 +64,8 @@ function durationInRange(group: AbstractControl): ValidationErrors | null {
     TranslatePipe,
     MatTooltipModule,
     RunningTimersComponent,
+    EntityPickerComponent,
+    OvertimeBreakdownComponent,
   ],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss',
@@ -77,6 +84,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   private readonly runningTimers = inject(RunningTimersService);
   private readonly auth = inject(AuthService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly jobOperations = inject(JobOperationsService);
 
   protected readonly billableEnabled = computed(() => this.capabilities.isEnabled('CAP-PS-TIME-BILLABLE'));
   protected readonly canSeeLaborReconciliation = computed(() =>
@@ -133,9 +141,29 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
   // Timer dialog
   protected readonly showTimerDialog = signal(false);
   protected readonly timerForm = new FormGroup({
+    jobId: new FormControl<number | null>(null),
+    operationId: new FormControl<number | null>(null),
+    entryType: new FormControl<JobOperationEntryType>('Run', { nonNullable: true }),
     category: new FormControl(''),
     notes: new FormControl(''),
   });
+  protected readonly operationTimersEnabled = computed(() => this.capabilities.isEnabled('CAP-MFG-MULTIOP', true));
+  protected readonly timerOperations = signal<JobOperationRow[]>([]);
+  protected readonly timerOperationOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('timeTracking.noOperation') },
+    ...this.timerOperations()
+      .filter(op => op.operationId !== null && op.status !== 'Complete')
+      .map(op => ({ value: op.operationId, label: `${op.stepNumber} · ${op.title}` })),
+  ]);
+  private readonly timerJobId = toSignal(this.timerForm.controls.jobId.valueChanges, { initialValue: null });
+  protected readonly timerHasJob = computed(() => this.timerJobId() !== null);
+  private readonly timerOperationId = toSignal(this.timerForm.controls.operationId.valueChanges, { initialValue: null });
+  protected readonly timerHasOperation = computed(() => this.timerHasJob() && this.timerOperationId() !== null);
+  protected readonly entryTypeOptions: SelectOption[] = [
+    { value: 'Run', label: this.translate.instant('timeTracking.entryTypeRun') },
+    { value: 'Setup', label: this.translate.instant('timeTracking.entryTypeSetup') },
+    { value: 'Rework', label: this.translate.instant('timeTracking.entryTypeRework') },
+  ];
 
   // Stop timer dialog
   protected readonly showStopDialog = signal(false);
@@ -202,6 +230,7 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
     this.dateFromControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
     this.dateToControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
+    this.timerForm.controls.jobId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(jobId => this.loadTimerOperations(jobId));
   }
 
   ngOnInit(): void {
@@ -290,8 +319,18 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
 
   // Timer
   protected openStartTimer(): void {
-    this.timerForm.reset({ category: '', notes: '' });
+    this.timerForm.reset({ jobId: null, operationId: null, entryType: 'Run', category: '', notes: '' });
+    this.timerOperations.set([]);
     this.showTimerDialog.set(true);
+  }
+
+  private loadTimerOperations(jobId: number | null): void {
+    this.timerForm.controls.operationId.setValue(null);
+    this.timerOperations.set([]);
+    if (!jobId || !this.operationTimersEnabled()) return;
+    this.jobOperations.getOperations(jobId).pipe(catchError(() => of(null))).subscribe(result => {
+      if (result && this.timerForm.controls.jobId.value === jobId) this.timerOperations.set(result.operations);
+    });
   }
 
   protected closeTimerDialog(): void { this.showTimerDialog.set(false); }
@@ -300,13 +339,20 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     if (this.saving()) return;
     const form = this.timerForm.getRawValue();
     this.saving.set(true);
-    this.service.startTimer({
-      category: form.category || undefined,
-      notes: form.notes || undefined,
-    }).subscribe({
+    const done = {
       next: () => { this.saving.set(false); this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
       error: () => this.saving.set(false),
-    });
+    };
+    if (form.jobId && form.operationId) {
+      this.jobOperations.startTimer(form.jobId, form.operationId, form.entryType).subscribe(done);
+      return;
+    }
+    this.service.startTimer({
+      jobId: form.jobId ?? undefined,
+      entryType: form.jobId ? form.entryType : undefined,
+      category: form.jobId ? undefined : form.category || undefined,
+      notes: form.notes || undefined,
+    }).subscribe(done);
   }
 
   protected openStopTimer(entry: TimeEntry | null = this.activeTimer()): void {

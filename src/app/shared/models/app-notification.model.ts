@@ -1,6 +1,6 @@
 export interface AppNotification {
   id: number;
-  type: 'assignment' | 'overdue' | 'expense' | 'maintenance' | 'system' | 'message' | 'mention';
+  type: 'assignment' | 'overdue' | 'expense' | 'maintenance' | 'system' | 'message' | 'mention' | 'event_invite' | 'leave';
   severity: 'info' | 'warning' | 'critical';
   source: string;
   title: string;

@@ -1,0 +1,49 @@
+<div class="leave-approvals">
+  <div class="leave-approvals__filters">
+    <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions"
+                data-testid="leave-approvals-status" />
+    @if (!canDecide()) {
+      <span class="chip chip--info" data-testid="leave-approvals-readonly">{{ 'leave.readOnly' | translate }}</span>
+    }
+  </div>
+
+  <app-data-table tableId="leave-team-requests" [columns]="columns" [data]="rows()" [loading]="loading()"
+    emptyIcon="how_to_reg" [emptyMessage]="'leave.noTeamRequests' | translate">
+    <ng-template appColumnCell="hours" let-row>{{ $any(row).hours | number:'1.0-2' }}</ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip {{ $any(row).chipClass }}">{{ ('leave.status.' + $any(row).status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if ($any(row).actionable) {
+        @if (!$any(row).isOwn) {
+          <button class="icon-btn" [attr.data-testid]="'leave-approve-' + $any(row).id" [disabled]="deciding()"
+                  [attr.aria-label]="'leave.approve' | translate" (click)="approve($any(row))">
+            <span class="material-icons-outlined">check_circle</span>
+          </button>
+        }
+        <button class="icon-btn icon-btn--danger" [attr.data-testid]="'leave-deny-' + $any(row).id" [disabled]="deciding()"
+                [attr.aria-label]="'leave.deny' | translate" (click)="openDeny($any(row))">
+          <span class="material-icons-outlined">cancel</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (denyTarget(); as target) {
+  <app-dialog [title]="'leave.denyTitle' | translate" width="480px" (closed)="closeDeny()">
+    <div>
+      <p class="leave-approvals__summary">
+        {{ 'leave.denySummary' | translate:{ name: target.userName, hours: (target.hours | number:'1.0-2'), type: target.policyName } }}
+      </p>
+      <app-textarea [label]="'leave.fields.note' | translate" [formControl]="denyNoteControl" [rows]="3" [maxlength]="1000"
+                    data-testid="leave-deny-note" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDeny()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--destructive" data-testid="leave-deny-confirm" [disabled]="deciding()" (click)="deny()">
+        {{ 'leave.deny' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}

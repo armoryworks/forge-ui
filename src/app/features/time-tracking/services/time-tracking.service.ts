@@ -10,6 +10,8 @@ import { UpdateTimeEntryRequest } from '../models/update-time-entry-request.mode
 import { ClockEvent } from '../models/clock-event.model';
 import { CreateClockEventRequest } from '../models/create-clock-event-request.model';
 import { PayPeriod } from '../models/pay-period.model';
+import { PayPeriodPreview } from '../models/pay-period-preview.model';
+import { StaffMember } from '../models/staff-member.model';
 import { TimeCorrectionLog } from '../models/time-correction-log.model';
 import { CorrectTimeEntryRequest } from '../models/correct-time-entry-request.model';
 import { OvertimeRule, CreateOvertimeRuleRequest, OvertimeBreakdown } from '../models/overtime.model';
@@ -74,12 +76,22 @@ export class TimeTrackingService {
     return this.http.delete<void>(`${this.base}/entries/${id}`);
   }
 
+  getStaff(): Observable<StaffMember[]> {
+    return this.http.get<StaffMember[]>(`${environment.apiUrl}/users`);
+  }
+
   getCurrentPayPeriod(): Observable<PayPeriod> {
     return this.http.get<PayPeriod>(`${this.base}/pay-period`);
   }
 
   updatePayPeriodSettings(type: string, anchorDate?: string): Observable<void> {
     return this.http.put<void>(`${this.base}/pay-period/settings`, { type, anchorDate });
+  }
+
+  previewPayPeriods(type: string, anchorDate?: string | null): Observable<PayPeriodPreview[]> {
+    let params = new HttpParams().set('type', type);
+    if (anchorDate) params = params.set('anchorDate', anchorDate);
+    return this.http.get<PayPeriodPreview[]>(`${this.base}/pay-period/preview`, { params });
   }
 
   correctTimeEntry(id: number, request: CorrectTimeEntryRequest): Observable<TimeEntry> {
