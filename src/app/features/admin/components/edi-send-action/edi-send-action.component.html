@@ -1,0 +1,19 @@
+@if (allowed() && partner(); as p) {
+  <span class="edi-send" [attr.data-testid]="'edi-send-' + transactionSet()">
+    <button class="action-btn" type="button" [disabled]="sending()" [attr.data-testid]="'edi-send-' + transactionSet() + '-btn'"
+      [attr.aria-label]="'edi.send.ariaLabel' | translate: { set: transactionSet(), partner: p.name }" (click)="send()">
+      <span class="material-icons-outlined" aria-hidden="true">{{ sending() ? 'sync' : 'swap_horiz' }}</span>
+      {{ 'edi.send.action' | translate: { set: transactionSet() } }}
+    </button>
+    @if (outcome(); as o) {
+      <a [class]="'edi-send__status edi-send__status--' + o" routerLink="/admin/edi"
+        [attr.data-testid]="'edi-send-' + transactionSet() + '-status'">
+        {{ ('edi.send.status.' + o) | translate }}
+        @if (lastTransaction()?.receivedAt) {
+          · {{ lastTransaction()!.receivedAt | date:'MM/dd/yyyy' }}
+        }
+        · {{ 'edi.send.viewLog' | translate }}
+      </a>
+    }
+  </span>
+}

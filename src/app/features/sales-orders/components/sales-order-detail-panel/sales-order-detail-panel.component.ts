@@ -64,6 +64,7 @@ import { TabListDirective, TabDirective } from '../../../../shared/directives/ta
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 import { LanguageService, SupportedLanguage } from '../../../../shared/services/language.service';
+import { EdiSendActionComponent } from '../../../admin/components/edi-send-action/edi-send-action.component';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -94,7 +95,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     ScheduleTimelineComponent, InvoiceDialogComponent, ShipmentDialogComponent,
     CapDirective, DialogComponent, TextareaComponent,
     AuthorizedByComponent,
-    DetailLoadErrorComponent,
+    DetailLoadErrorComponent, EdiSendActionComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',

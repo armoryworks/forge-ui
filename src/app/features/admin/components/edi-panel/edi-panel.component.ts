@@ -243,6 +243,7 @@ export class EdiPanelComponent {
     const payload: EdiTradingPartnerSaveRequest = {
       name: val.name,
       customerId: val.customerId,
+      clearCustomer: !!editing?.customerId && val.customerId == null,
       qualifierId: val.qualifierId,
       qualifierValue: val.qualifierValue,
       defaultFormat: val.defaultFormat,

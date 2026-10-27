@@ -41,7 +41,7 @@ import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { ScanLabelDialogComponent } from '../shipments/components/scan-label-dialog/scan-label-dialog.component';
 import { ScanLabelDialogData } from '../shipments/models/scan-label-dialog-data.model';
 import { httpProblemDetail } from '../../shared/utils/http-problem-detail';
-import { downloadBlob } from '../../shared/utils/download-blob';
+import { PrintPdfService } from '../../shared/services/print-pdf.service';
 import { describeStepGate, stepGateViolationOf } from '../../shared/utils/step-gate-error';
 import { focusCancelOnOpen } from '../../shared/utils/focus-dialog-cancel';
 import { describeNonClockScan } from './utils/describe-scan';
@@ -125,6 +125,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly poService = inject(PurchaseOrderService);
   private readonly inventoryService = inject(InventoryService);
   private readonly shipmentService = inject(ShipmentService);
+  private readonly printPdf = inject(PrintPdfService);
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -1350,7 +1351,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     if (!shipment) return;
     this.resetAutoLogoutTimer();
     this.shipmentService.getPackingSlip(shipment.id).subscribe({
-      next: (blob) => downloadBlob(blob, `packing-slip-${shipment.shipmentNumber || shipment.id}.pdf`),
+      next: (blob) => this.printPdf.print(blob, `packing-slip-${shipment.shipmentNumber || shipment.id}.pdf`),
       error: (err: unknown) => this.showScanFeedback(
         httpProblemDetail(err) ?? this.translate.instant('shopFloor.display.packingSlipFailed')),
     });

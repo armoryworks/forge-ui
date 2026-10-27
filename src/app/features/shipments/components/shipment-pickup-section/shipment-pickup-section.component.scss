@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+:host { display: contents; }
+
+.pickup {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  font-size: $font-size-sm;
+}
+
+.pickup__icon { color: var(--success); }
+.pickup__text { display: flex; flex-direction: column; gap: $sp-xs; flex: 1; }
+.pickup__label { font-weight: 700; }
+.pickup__number { font-family: $font-family-mono; font-weight: 600; }
+
+.pickup__form { display: flex; flex-direction: column; gap: $sp-md; }
+.pickup__times { display: grid; grid-template-columns: 1fr 1fr; gap: $sp-sm; }
+.pickup__origin { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }

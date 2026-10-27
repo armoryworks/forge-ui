@@ -1,0 +1,30 @@
+<app-dialog [title]="'pickWaves.confirm.title' | translate: { part: line().partNumber }" width="420px" (closed)="closed.emit()">
+  <div class="confirm-line" [formGroup]="form">
+    <dl class="confirm-line__facts">
+      <dt>{{ 'pickWaves.lines.from' | translate }}</dt>
+      <dd>{{ line().binPath || line().fromLocationName }}</dd>
+      @if (line().lotNumber) {
+        <dt>{{ 'pickWaves.lines.lot' | translate }}</dt>
+        <dd>{{ line().lotNumber }}</dd>
+      }
+      <dt>{{ 'pickWaves.lines.toPick' | translate }}</dt>
+      <dd>{{ line().requestedQuantity | number:'1.0-4' }}</dd>
+    </dl>
+    <app-input [label]="'pickWaves.lines.picked' | translate" type="number" formControlName="pickedQuantity" [required]="true"
+      min="0" [max]="line().requestedQuantity" data-testid="pick-line-picked-qty" />
+    @if (isShort()) {
+      <app-textarea [label]="'pickWaves.confirm.shortReason' | translate" formControlName="shortNotes" [rows]="2" [required]="true"
+        data-testid="pick-line-short-notes" />
+    }
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()"
+        data-testid="pick-line-confirm-btn" (click)="save()">
+        <span class="material-icons-outlined" aria-hidden="true">{{ isShort() ? 'report' : 'check' }}</span>
+        {{ (isShort() ? 'pickWaves.confirm.shortPick' : 'pickWaves.confirm.action') | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

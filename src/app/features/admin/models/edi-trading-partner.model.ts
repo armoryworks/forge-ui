@@ -37,6 +37,8 @@ export interface EdiSftpTransportInfo {
 export interface EdiTradingPartnerSaveRequest {
   name: string;
   customerId: number | null;
+  /** True unlinks the partner from its customer on update; a null customerId alone leaves the link as it is. */
+  clearCustomer?: boolean;
   qualifierId: string;
   qualifierValue: string;
   defaultFormat: EdiFormat;

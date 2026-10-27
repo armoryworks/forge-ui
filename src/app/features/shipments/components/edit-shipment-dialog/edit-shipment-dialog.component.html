@@ -28,6 +28,7 @@
         <app-toggle [label]="'shipments.edit.setDefault' | translate" formControlName="newDefault" />
       </div>
     }
+    <app-ship-to-validation [address]="shipToAddress()" (accepted)="acceptValidatedAddress($event)" />
 
     <div class="dialog-row">
       <app-input [label]="'shipments.edit.trackingNumber' | translate" formControlName="trackingNumber" />
@@ -44,6 +45,7 @@
       <app-input [label]="'shipments.edit.width' | translate" type="number" formControlName="width" />
       <app-input [label]="'shipments.edit.height' | translate" type="number" formControlName="height" />
     </div>
+    <app-shipment-packages-section [shipmentId]="shipment().id" />
     <app-textarea [label]="'shipments.edit.notes' | translate" formControlName="notes" [rows]="3" />
   </div>
 

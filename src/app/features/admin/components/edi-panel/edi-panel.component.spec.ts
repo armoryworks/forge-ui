@@ -102,4 +102,27 @@ describe('EdiPanelComponent partner customer link', () => {
 
     expect(updateTradingPartner).toHaveBeenCalledWith(5, expect.objectContaining({ customerId: 77 }));
   });
+
+  it('sends clearCustomer when the linked customer is removed', () => {
+    component.openEditPartner({
+      id: 5, name: 'Big Box Retail', customerId: 42, customerName: 'Big Box', qualifierId: 'ZZ', qualifierValue: 'BIGBOX',
+      defaultFormat: 'X12', transportMethod: 'Manual', autoProcess: true, requireAcknowledgment: true, notes: null,
+    } as EdiTradingPartner);
+
+    component.partnerForm.controls.customerId.setValue(null);
+    component.savePartner();
+
+    expect(updateTradingPartner).toHaveBeenCalledWith(5, expect.objectContaining({ customerId: null, clearCustomer: true }));
+  });
+
+  it('does not clear a customer the partner never had', () => {
+    component.openEditPartner({
+      id: 6, name: 'Unlinked', customerId: null, customerName: null, qualifierId: 'ZZ', qualifierValue: 'UNL',
+      defaultFormat: 'X12', transportMethod: 'Manual', autoProcess: true, requireAcknowledgment: true, notes: null,
+    } as EdiTradingPartner);
+
+    component.savePartner();
+
+    expect(updateTradingPartner).toHaveBeenCalledWith(6, expect.objectContaining({ clearCustomer: false }));
+  });
 });

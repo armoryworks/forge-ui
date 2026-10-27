@@ -1,0 +1,14 @@
+@use 'styles/variables' as *;
+
+.confirm-line { display: flex; flex-direction: column; gap: $sp-md; }
+
+.confirm-line__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $sp-xs $sp-md;
+  margin: 0;
+  font-size: $font-size-sm;
+
+  dt { color: var(--text-muted); }
+  dd { margin: 0; font-weight: 600; }
+}

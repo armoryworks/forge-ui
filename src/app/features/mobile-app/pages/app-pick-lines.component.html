@@ -1,0 +1,51 @@
+<div class="pick-lines" data-testid="mobile-app-pick-lines">
+  <h2 class="pick-lines__heading">{{ 'pickWaves.mobile.title' | translate }}</h2>
+
+  @if (needsIdentity()) {
+    <p class="pick-lines__hint">{{ 'pickWaves.mobile.identifyHint' | translate }}</p>
+    <button type="button" class="pick-lines__identify" data-testid="pick-lines-identify" (click)="identifying.set(true)">
+      <span class="material-icons-outlined" aria-hidden="true">badge</span>
+      {{ 'mobileApp.scan.actions.identify' | translate }}
+    </button>
+  } @else if (notAllowed()) {
+    <p class="pick-lines__hint" role="alert" data-testid="pick-lines-not-allowed">{{ 'pickWaves.mobile.notAllowed' | translate }}</p>
+  } @else if (loading() && lines().length === 0) {
+    <p class="pick-lines__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (failed()) {
+    <p class="pick-lines__hint" role="alert">{{ 'pickWaves.mobile.loadFailed' | translate }}</p>
+    <button type="button" class="pick-lines__retry" data-testid="pick-lines-retry" (click)="load()">
+      {{ 'pickWaves.mobile.retry' | translate }}
+    </button>
+  } @else {
+    <ul class="pick-lines__list" [attr.aria-label]="'pickWaves.mobile.title' | translate">
+      @for (line of lines(); track line.id) {
+        <li>
+          <button type="button" class="pick-lines__row" [attr.data-testid]="'pick-lines-row-' + line.id" (click)="openLine(line)">
+            <span class="pick-lines__bin">{{ line.binPath || line.fromLocationName }}</span>
+            <span class="pick-lines__part">{{ line.partNumber }}</span>
+            <span class="pick-lines__meta">
+              <span>{{ line.partDescription }}</span>
+              @if (line.lotNumber) {
+                <span>{{ 'pickWaves.mobile.lot' | translate: { lot: line.lotNumber } }}</span>
+              }
+              <span>{{ line.waveNumber }}@if (line.shipmentNumber) { · {{ line.shipmentNumber }} }</span>
+            </span>
+            <span class="pick-lines__qty">{{ line.requestedQuantity | number:'1.0-4' }}</span>
+          </button>
+        </li>
+      } @empty {
+        <li class="pick-lines__hint">{{ 'pickWaves.mobile.none' | translate }}</li>
+      }
+    </ul>
+  }
+
+  @if (identifying()) {
+    <div class="pick-lines__sheet">
+      <app-identity-prompt (identified)="onIdentified()" (cancelled)="identifying.set(false)" />
+    </div>
+  }
+</div>
+
+@if (confirming(); as line) {
+  <app-confirm-pick-line-dialog [line]="line" (closed)="confirming.set(null)" (confirmed)="onConfirmed()" />
+}

@@ -95,7 +95,8 @@
     "journalTemplates": "Journal Templates",
     "overheadPool": "Overhead Pool",
     "payRuns": "Pay Runs",
-    "openingOpenItems": "Opening Receivables & Payables"
+    "openingOpenItems": "Opening Receivables & Payables",
+    "pickWaves": "Pick waves"
   },
   "navGroups": {
     "operations": "Operations",
@@ -7312,7 +7313,66 @@
     "cancelShipmentTitle": "Cancel shipment?",
     "cancelShipmentMessage": "Cancel shipment {{number}}? Its quantities go back to the sales order so they can be shipped again.",
     "shipmentCancelled": "Shipment cancelled",
-    "cancelFailed": "Could not cancel the shipment"
+    "cancelFailed": "Could not cancel the shipment",
+    "packages": {
+      "title": "Packages",
+      "add": "Add package",
+      "addTitle": "Add package",
+      "editTitle": "Edit package",
+      "edit": "Edit package",
+      "remove": "Remove package",
+      "removeTitle": "Remove package?",
+      "removeMessage": "The package and its tracking number are removed from this shipment.",
+      "weight": "Weight",
+      "length": "Length (in)",
+      "width": "Width (in)",
+      "height": "Height (in)",
+      "dimensions": "Dimensions",
+      "inches": "in",
+      "tracking": "Tracking number",
+      "ratesHint": "Carrier rates are quoted on these packages.",
+      "empty": "No packages yet. Rates use the shipment's own weight and dimensions.",
+      "loadFailed": "Could not load the packages.",
+      "saveFailed": "Could not save the package.",
+      "removeFailed": "Could not remove the package.",
+      "total": "{{count}} packages, {{weight}} lb in all."
+    },
+    "pickup": {
+      "title": "Carrier pickup",
+      "schedule": "Schedule pickup",
+      "scheduleTitle": "Schedule carrier pickup",
+      "cancel": "Cancel pickup",
+      "cancelTitle": "Cancel pickup?",
+      "cancelMessage": "Pickup {{number}} will be cancelled with the carrier.",
+      "cancelled": "Pickup cancelled",
+      "cancelFailed": "Could not cancel the pickup.",
+      "scheduled": "Pickup scheduled, confirmation {{number}}",
+      "scheduleFailed": "Could not schedule the pickup.",
+      "confirmation": "Confirmation",
+      "date": "Pickup date",
+      "readyTime": "Ready from",
+      "closeTime": "Closes at",
+      "instructions": "Pickup location and instructions",
+      "instructionsPlaceholder": "e.g. Dock door 3, ring at shipping",
+      "windowOrder": "The close time must be after the ready time.",
+      "origin": "Picked up at {{location}}. Times are in {{zone}}.",
+      "defaultLocation": "the default company location",
+      "browserZone": "this device's time zone"
+    },
+    "documents": {
+      "packingSlip": "Packing slip",
+      "billOfLading": "Bill of lading"
+    },
+    "validateAddress": {
+      "action": "Validate address",
+      "validating": "Validating…",
+      "suggested": "Suggested address",
+      "accept": "Use suggested",
+      "keep": "Keep mine",
+      "valid": "Address verified",
+      "invalid": "The address could not be verified.",
+      "failed": "Address validation is unavailable."
+    }
   },
   "planning": {
     "title": "Planning",
@@ -13304,7 +13364,8 @@
       "clock": "Clock",
       "jobs": "Jobs",
       "move": "Move",
-      "lookup": "Lookup"
+      "lookup": "Lookup",
+      "picks": "Pick"
     },
     "scan": {
       "prompt": "Point at a job traveler, part, bin, or badge.",
@@ -15141,6 +15202,104 @@
     "type": {
       "VendorBill": "Bill",
       "VendorCreditMemo": "Credit memo"
+    }
+  },
+  "edi": {
+    "send": {
+      "action": "Send EDI {{set}}",
+      "ariaLabel": "Send EDI {{set}} to {{partner}}",
+      "sent": "EDI {{set}} sent to {{partner}}",
+      "failed": "The EDI document could not be sent.",
+      "status": {
+        "sent": "Sent",
+        "acknowledged": "Acknowledged",
+        "error": "Error"
+      },
+      "viewLog": "EDI log"
+    }
+  },
+  "pickWaves": {
+    "title": "Pick waves",
+    "subtitle": "Group open shipment lines into waves, release them to the floor and confirm what was picked.",
+    "wave": "Pick wave",
+    "empty": "No pick waves yet.",
+    "allStatuses": "All statuses",
+    "anyone": "Anyone",
+    "progress": "{{picked}} of {{total}}",
+    "releasedAt": "Released",
+    "completedAt": "Completed",
+    "print": "Print pick list",
+    "release": "Release",
+    "released": "Wave released to the floor",
+    "releaseFailed": "Could not release the wave.",
+    "complete": "Complete wave",
+    "completed": "Wave completed",
+    "completeFailed": "Could not complete the wave.",
+    "completeTitle": "Complete with lines unpicked?",
+    "completeMessage": "{{count}} lines have not been picked and will be marked skipped.",
+    "loadFailed": "Could not load the pick waves.",
+    "cols": {
+      "wave": "Wave",
+      "strategy": "Strategy",
+      "progress": "Lines picked",
+      "assignedTo": "Assigned to"
+    },
+    "status": {
+      "Draft": "Draft",
+      "Released": "Released",
+      "InProgress": "In progress",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "lineStatus": {
+      "Pending": "To pick",
+      "Picked": "Picked",
+      "Short": "Short",
+      "Skipped": "Skipped"
+    },
+    "strategy": {
+      "Zone": "Zone",
+      "Batch": "Batch",
+      "Discrete": "Order by order",
+      "WaveByCarrier": "By carrier"
+    },
+    "lines": {
+      "title": "Pick lines",
+      "part": "Part",
+      "from": "Bin",
+      "lot": "Lot",
+      "toPick": "To pick",
+      "picked": "Picked",
+      "empty": "This wave has no lines."
+    },
+    "confirm": {
+      "title": "Pick {{part}}",
+      "action": "Confirm pick",
+      "shortPick": "Record short pick",
+      "shortReason": "Reason for the short pick",
+      "picked": "Pick confirmed",
+      "shortRecorded": "Short pick recorded",
+      "failed": "Could not confirm the pick."
+    },
+    "generate": {
+      "open": "Auto-generate wave",
+      "title": "Auto-generate a pick wave",
+      "hint": "Takes the open shipment lines not yet in a wave, earliest requested delivery first.",
+      "strategy": "Picking strategy",
+      "shipBy": "Due to ship by",
+      "maxLines": "Most lines in the wave",
+      "action": "Generate",
+      "created": "Wave {{number}} created with {{lines}} lines",
+      "failed": "Could not generate a wave."
+    },
+    "mobile": {
+      "title": "My pick lines",
+      "identifyHint": "Identify yourself to see the lines you can pick.",
+      "loadFailed": "Could not load your pick lines.",
+      "retry": "Try again",
+      "lot": "Lot {{lot}}",
+      "none": "Nothing to pick right now.",
+      "notAllowed": "Your role cannot pick orders on this device."
     }
   }
 }

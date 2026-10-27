@@ -164,6 +164,13 @@ export const routes: Routes = [
           import('./features/shipping/shipping.routes').then((m) => m.SHIPPING_ROUTES),
       },
       {
+        path: 'pick-waves',
+        data: { titleKey: 'nav.pickWaves' },
+        canActivate: routeAccessGuards('pick-waves'),
+        loadChildren: () =>
+          import('./features/shipping/pick-waves/pick-waves.routes').then((m) => m.PICK_WAVES_ROUTES),
+      },
+      {
         path: 'inventory',
         data: { titleKey: 'nav.inventory' },
         canActivate: routeAccessGuards('inventory'),

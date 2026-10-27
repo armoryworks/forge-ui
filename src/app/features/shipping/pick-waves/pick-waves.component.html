@@ -1,0 +1,44 @@
+<app-page-header [title]="'pickWaves.title' | translate" [subtitle]="'pickWaves.subtitle' | translate">
+  <button class="action-btn action-btn--create" type="button" data-testid="pick-wave-generate-btn" (click)="showGenerate.set(true)">
+    <span class="material-icons-outlined" aria-hidden="true">auto_awesome_motion</span>
+    {{ 'pickWaves.generate.open' | translate }}
+  </button>
+</app-page-header>
+
+<div class="pick-waves">
+  <div class="filters-bar">
+    <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" data-testid="pick-wave-status-filter" />
+  </div>
+
+  <div [appLoadingBlock]="loading()" class="pick-waves__list">
+    <app-data-table tableId="pick-waves" [columns]="columns" [data]="filteredWaves()"
+      emptyIcon="inventory" [emptyMessage]="'pickWaves.empty' | translate"
+      [clickableRows]="true" (rowClick)="openWave($any($event))">
+      <ng-template appColumnCell="waveNumber" let-row>
+        <span class="pick-waves__mono">{{ row.waveNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="'chip ' + (statusChip[row.status] ?? '')">{{ ('pickWaves.status.' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="strategy" let-row>
+        {{ ('pickWaves.strategy.' + row.strategy) | translate }}
+      </ng-template>
+      <ng-template appColumnCell="pickedLines" let-row>
+        {{ 'pickWaves.progress' | translate: { picked: row.pickedLines, total: row.totalLines } }}
+      </ng-template>
+      <ng-template appColumnCell="assignedToName" let-row>
+        {{ row.assignedToName ?? ('pickWaves.anyone' | translate) }}
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+<app-detail-side-panel [open]="selectedId() !== null" [title]="selectedWave()?.waveNumber ?? ('pickWaves.wave' | translate)" (closed)="closeWave()">
+  @if (selectedId(); as id) {
+    <app-pick-wave-detail-panel [waveId]="id" (changed)="load()" />
+  }
+</app-detail-side-panel>
+
+@if (showGenerate()) {
+  <app-auto-generate-wave-dialog (closed)="showGenerate.set(false)" (created)="onGenerated($event)" />
+}

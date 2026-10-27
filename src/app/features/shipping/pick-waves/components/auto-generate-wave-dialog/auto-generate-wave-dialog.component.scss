@@ -1,0 +1,4 @@
+@use 'styles/variables' as *;
+
+.generate { display: flex; flex-direction: column; gap: $sp-md; }
+.generate__hint { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }

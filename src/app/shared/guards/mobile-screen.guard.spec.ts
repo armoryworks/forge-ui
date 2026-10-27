@@ -1,16 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 
+import { AuthService } from '../services/auth.service';
 import { CapabilityService } from '../services/capability.service';
+import { InstanceService } from '../services/instance.service';
 import { mobileScreenGuard } from './mobile-screen.guard';
 
 describe('mobileScreenGuard', () => {
   const isEnabled = vi.fn<(code: string, fallback?: boolean) => boolean>();
+  const hasAnyRole = vi.fn<(roles: string[]) => boolean>();
 
   beforeEach(() => {
     isEnabled.mockReset();
+    hasAnyRole.mockReset();
     TestBed.configureTestingModule({
-      providers: [{ provide: CapabilityService, useValue: { isEnabled } }],
+      providers: [
+        { provide: CapabilityService, useValue: { isEnabled } },
+        { provide: AuthService, useValue: { hasAnyRole, isAuthenticated: () => true } },
+        { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared: false }) } },
+      ],
     });
   });
 
@@ -36,6 +44,15 @@ describe('mobileScreenGuard', () => {
 
   it('sends the person to Account when no phone screen is on', () => {
     isEnabled.mockReturnValue(false);
+    expect(urlOf(run())).toBe('/app/account');
+  });
+
+  it('falls back to Pick only for a role that can pick', () => {
+    isEnabled.mockImplementation((code) => code === 'CAP-O2C-PICKPACK');
+    hasAnyRole.mockReturnValue(true);
+    expect(urlOf(run())).toBe('/app/picks');
+
+    hasAnyRole.mockReturnValue(false);
     expect(urlOf(run())).toBe('/app/account');
   });
 });

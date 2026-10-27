@@ -1,0 +1,34 @@
+<div class="ship-to-validation">
+  <button class="action-btn action-btn--sm" type="button" data-testid="ship-to-validate-btn"
+    [disabled]="!complete() || validating()" (click)="validate()">
+    <span class="material-icons-outlined" aria-hidden="true">{{ validating() ? 'sync' : 'fact_check' }}</span>
+    {{ (validating() ? 'shipments.validateAddress.validating' : 'shipments.validateAddress.action') | translate }}
+  </button>
+
+  @if (result(); as r) {
+    @if (suggestion(); as s) {
+      <div class="ship-to-validation__result ship-to-validation__result--suggest" data-testid="ship-to-suggestion">
+        <span class="ship-to-validation__heading">{{ 'shipments.validateAddress.suggested' | translate }}</span>
+        <span class="ship-to-validation__address">{{ s.line1 }}, {{ s.city }}, {{ s.state }} {{ s.postalCode }}</span>
+        <div class="ship-to-validation__choices">
+          <button class="action-btn action-btn--sm" type="button" data-testid="ship-to-keep-btn" (click)="keep()">
+            {{ 'shipments.validateAddress.keep' | translate }}
+          </button>
+          <button class="action-btn action-btn--sm action-btn--primary" type="button" data-testid="ship-to-accept-btn" (click)="useSuggestion()">
+            {{ 'shipments.validateAddress.accept' | translate }}
+          </button>
+        </div>
+      </div>
+    } @else if (r.isValid) {
+      <div class="ship-to-validation__result ship-to-validation__result--ok" data-testid="ship-to-valid">
+        <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+        {{ 'shipments.validateAddress.valid' | translate }}
+      </div>
+    } @else {
+      <div class="ship-to-validation__result ship-to-validation__result--bad" data-testid="ship-to-invalid">
+        <span class="material-icons-outlined" aria-hidden="true">warning</span>
+        {{ r.messages[0] ?? ('shipments.validateAddress.invalid' | translate) }}
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,5 @@
+@use 'styles/variables' as *;
+
+.pick-waves { display: flex; flex-direction: column; gap: $sp-md; padding: 0 $sp-lg $sp-lg; }
+.pick-waves__list { min-height: 200px; }
+.pick-waves__mono { font-family: $font-family-mono; font-weight: 600; }

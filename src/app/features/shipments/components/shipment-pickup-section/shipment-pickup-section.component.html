@@ -1,0 +1,53 @@
+@if (shipment().pickupConfirmationNumber) {
+  <div class="pickup" data-testid="shipment-pickup-scheduled">
+    <span class="material-icons-outlined pickup__icon" aria-hidden="true">event_available</span>
+    <div class="pickup__text">
+      <span class="pickup__label">{{ 'shipments.pickup.title' | translate }}</span>
+      <span>
+        {{ 'shipments.pickup.confirmation' | translate }}
+        <span class="pickup__number" data-testid="shipment-pickup-confirmation">{{ shipment().pickupConfirmationNumber }}</span>
+        @if (shipment().pickupScheduledDate) {
+          · {{ shipment().pickupScheduledDate | dateTime }}
+        }
+      </span>
+    </div>
+    <button class="action-btn action-btn--sm action-btn--danger" type="button" data-testid="shipment-pickup-cancel-btn" (click)="cancelPickup()">
+      <span class="material-icons-outlined" aria-hidden="true">event_busy</span>
+      {{ 'shipments.pickup.cancel' | translate }}
+    </button>
+  </div>
+} @else if (canSchedule()) {
+  <button class="action-btn" type="button" data-testid="shipment-pickup-schedule-btn" (click)="openSchedule()">
+    <span class="material-icons-outlined" aria-hidden="true">event</span>
+    {{ 'shipments.pickup.schedule' | translate }}
+  </button>
+}
+
+@if (showForm()) {
+  <app-dialog [title]="'shipments.pickup.scheduleTitle' | translate" width="460px" (closed)="closeForm()">
+    <div [formGroup]="form" class="pickup__form">
+      @if (origin(); as o) {
+        <p class="pickup__origin" data-testid="shipment-pickup-origin">
+          {{ 'shipments.pickup.origin' | translate: { location: o.locationName ?? ('shipments.pickup.defaultLocation' | translate), zone: o.timeZone ?? ('shipments.pickup.browserZone' | translate) } }}
+        </p>
+      }
+      <app-datepicker [label]="'shipments.pickup.date' | translate" formControlName="date" [required]="true" data-testid="shipment-pickup-date" />
+      <div class="pickup__times">
+        <app-input [label]="'shipments.pickup.readyTime' | translate" type="time" formControlName="readyTime" [required]="true" data-testid="shipment-pickup-ready" />
+        <app-input [label]="'shipments.pickup.closeTime' | translate" type="time" formControlName="closeTime" [required]="true" data-testid="shipment-pickup-close" />
+      </div>
+      <app-textarea [label]="'shipments.pickup.instructions' | translate" formControlName="instructions" [rows]="2"
+        [placeholder]="'shipments.pickup.instructionsPlaceholder' | translate" data-testid="shipment-pickup-instructions" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" type="button" (click)="closeForm()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()"
+          data-testid="shipment-pickup-submit-btn" (click)="schedule()">
+          <span class="material-icons-outlined" aria-hidden="true">event</span>
+          {{ 'shipments.pickup.schedule' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

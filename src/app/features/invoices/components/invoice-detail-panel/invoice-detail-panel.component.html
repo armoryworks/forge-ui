@@ -232,6 +232,9 @@
             {{ 'invoices.emailInvoice' | translate }}
           </button>
         }
+        @if (inv.status !== 'Draft' && inv.status !== 'Voided') {
+          <app-edi-send-action entityType="invoice" [entityId]="inv.id" [customerId]="inv.customerId" />
+        }
         <a class="action-btn" routerLink="/shipping">
           <span class="material-icons-outlined">local_shipping</span>
           {{ 'shipping.ship' | translate }}

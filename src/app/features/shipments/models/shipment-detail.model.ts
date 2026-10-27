@@ -23,6 +23,8 @@ export interface ShipmentDetail {
   width: number | null;
   height: number | null;
   notes: string | null;
+  pickupConfirmationNumber?: string | null;
+  pickupScheduledDate?: string | null;
   invoiceId: number | null;
   invoiceNumber?: string | null;
   lines: ShipmentLine[];

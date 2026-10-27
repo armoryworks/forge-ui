@@ -19,15 +19,16 @@ import { SharedIdentityService } from '../../shared/services/shared-identity.ser
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { UndoService } from '../../shared/services/undo.service';
-import { MOBILE_APP_SCREENS } from '../../shared/utils/mobile-app-screens';
+import { MOBILE_APP_SCREENS, screenOpenToViewer } from '../../shared/utils/mobile-app-screens';
 import { LanguageToggleComponent } from '../../shared/components/language-toggle/language-toggle.component';
 import { SyncIndicatorComponent } from './components/sync-indicator/sync-indicator.component';
 import { BottomChromeOffsetDirective } from './directives/bottom-chrome-offset.directive';
 
 /**
- * Native-shell chrome: top bar + five-tab bottom bar (Scan, Clock, Jobs,
- * Move, Lookup), each tab shown only while its CAP-MOBILE-* flag is on for
- * this instance; with none on, the bar is not drawn. Account lives behind
+ * Native-shell chrome: top bar + bottom tab bar (Scan, Clock, Jobs, Move,
+ * Lookup, Pick), each tab shown only while its flag is on for this
+ * instance, and Pick only to the picking roles; with none on, the bar is
+ * not drawn. Account lives behind
  * the gear, never a tab. While a timer runs, a strip above the tab bar
  * shows it ticking with a Stop button, one row per running operation timer
  * when operation tracking is on. With more than one timer running only the
@@ -53,7 +54,8 @@ export class MobileAppShellComponent {
   private readonly appInfo = inject(AppInfoService);
 
   protected readonly tabs = computed(() =>
-    MOBILE_APP_SCREENS.filter((tab) => this.capabilities.isEnabled(tab.capability, true)));
+    MOBILE_APP_SCREENS.filter((tab) => this.capabilities.isEnabled(tab.capability, true)
+      && screenOpenToViewer(tab, this.auth, !!this.instances.instance()?.shared)));
 
   protected readonly timer = inject(MobileTimerService);
   private readonly timerHub = inject(TimerHubService);

@@ -26,9 +26,10 @@ export class EdiService {
 
   // ── Trading Partners ──────────────────────────────────────
 
-  getTradingPartners(isActive?: boolean): Observable<EdiTradingPartner[]> {
+  getTradingPartners(isActive?: boolean, customerId?: number): Observable<EdiTradingPartner[]> {
     let params = new HttpParams();
     if (isActive !== undefined) params = params.set('isActive', isActive);
+    if (customerId !== undefined) params = params.set('customerId', customerId);
     return this.http.get<EdiTradingPartner[]>(`${this.baseUrl}/trading-partners`, { params });
   }
 
@@ -59,6 +60,8 @@ export class EdiService {
     transactionSet?: string;
     status?: EdiTransactionStatus;
     tradingPartnerId?: number;
+    relatedEntityType?: string;
+    relatedEntityId?: number;
     dateFrom?: string;
     dateTo?: string;
     page?: number;
@@ -69,6 +72,8 @@ export class EdiService {
     if (filters?.transactionSet) params = params.set('transactionSet', filters.transactionSet);
     if (filters?.status) params = params.set('status', filters.status);
     if (filters?.tradingPartnerId) params = params.set('tradingPartnerId', filters.tradingPartnerId);
+    if (filters?.relatedEntityType) params = params.set('relatedEntityType', filters.relatedEntityType);
+    if (filters?.relatedEntityId) params = params.set('relatedEntityId', filters.relatedEntityId);
     if (filters?.dateFrom) params = params.set('dateFrom', filters.dateFrom);
     if (filters?.dateTo) params = params.set('dateTo', filters.dateTo);
     if (filters?.page) params = params.set('page', filters.page);

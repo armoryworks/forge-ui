@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.packages {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.packages__head { @include flex-between; }
+.packages__title { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+
+.packages__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+.packages__row-actions { display: inline-flex; white-space: nowrap; }
+.packages__total { margin: 0; display: flex; flex-wrap: wrap; gap: $sp-sm; font-size: $font-size-sm; font-weight: 600; }
+.packages__hint { font-weight: 400; font-size: $font-size-xs; color: var(--text-muted); }
+
+.packages__form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.packages__dims {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $sp-sm;
+}

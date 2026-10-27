@@ -163,6 +163,7 @@ export class NavTreeService {
       icon: 'local_shipping', label: 'Fulfillment', i18nKey: 'navGroups.fulfillment',
       children: [
         { icon: 'local_shipping', label: 'Shipping', i18nKey: 'nav.shipping', route: '/shipping', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'inventory', label: 'Pick waves', i18nKey: 'nav.pickWaves', route: '/pick-waves', capability: 'CAP-O2C-PICKPACK', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker'] },
         { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
