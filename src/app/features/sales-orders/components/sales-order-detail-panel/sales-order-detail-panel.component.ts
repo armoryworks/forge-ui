@@ -219,7 +219,7 @@ export class SalesOrderDetailPanelComponent {
 
   protected readonly portalForm = new FormGroup({
     recipientEmail: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
-    verificationKey: new FormControl('', { nonNullable: true }),
+    verificationKey: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
     validDays: new FormControl<number | null>(null),
     language: new FormControl<SupportedLanguage>('en', { nonNullable: true }),
   });

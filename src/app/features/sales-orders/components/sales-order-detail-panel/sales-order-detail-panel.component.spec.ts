@@ -560,4 +560,20 @@ describe('SalesOrderDetailPanelComponent', () => {
     expect(requestPortal.mock.calls[0][1]).toEqual(expect.objectContaining({ recipientEmail: 'buyer@example.com', language: 'es' }));
     expect(snackbar['success']).toHaveBeenCalledWith('salesOrders.acceptance.portalLinkCreated');
   });
+
+  it('requires a verification key of at least 3 characters before generating the acceptance link', () => {
+    const panel = build(order({ status: 'Confirmed' }));
+
+    panel['openPortalDialog']();
+    panel['portalForm'].patchValue({ recipientEmail: 'buyer@example.com', verificationKey: '' });
+    expect(panel['portalForm'].get('verificationKey')!.hasError('required')).toBe(true);
+
+    panel['portalForm'].patchValue({ verificationKey: 'PO' });
+    expect(panel['portalForm'].get('verificationKey')!.hasError('minlength')).toBe(true);
+    panel['requestPortal']();
+    expect(requestPortal).not.toHaveBeenCalled();
+
+    panel['portalForm'].patchValue({ verificationKey: 'PO1' });
+    expect(panel['portalForm'].valid).toBe(true);
+  });
 });
