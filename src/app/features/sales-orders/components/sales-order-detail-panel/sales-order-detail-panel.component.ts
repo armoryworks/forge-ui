@@ -334,6 +334,7 @@ export class SalesOrderDetailPanelComponent {
   protected readonly editingHeader = signal(false);
   protected readonly savingHeader = signal(false);
   protected readonly creditTermsOptions = this.paymentTerms.options;
+  protected readonly canSeeTerms = this.paymentTerms.canRead;
   protected readonly headerForm = new FormGroup({
     customerPO: new FormControl<string>('', { nonNullable: true }),
     paymentTermsId: new FormControl<number | null>(null),

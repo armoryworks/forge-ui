@@ -11,6 +11,7 @@ import { CustomerIdentityClusterComponent } from './customer-identity-cluster.co
 import { CustomerSummary } from '../../models/customer-summary.model';
 import { environment } from '../../../../../environments/environment';
 import { SEEDED_PAYMENT_TERMS } from '../../../../shared/models/payment-terms.fixture';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -47,6 +48,7 @@ describe('CustomerIdentityClusterComponent', () => {
         provideHttpClientTesting(),
         provideAnimations(),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: AuthService, useValue: { hasRole: () => false, hasAnyRole: (roles: string[]) => roles.includes('OfficeManager') } },
       ],
     });
   });

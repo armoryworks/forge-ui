@@ -32,7 +32,8 @@ interface SalesTaxTableRow {
  * Sales-tax liability report — what the business owes a taxing authority,
  * grouped by ship-to jurisdiction over a date range. Read-only; sums the
  * seller's own liability (marketplace-facilitator tax the platform remits is
- * excluded server-side). The date-range filter is URL-driven (`?from=&to=`).
+ * excluded server-side and shown apart, so the totals still tie to Sales Tax
+ * Payable). The date-range filter is URL-driven (`?from=&to=`).
  */
 @Component({
   selector: 'app-sales-tax-liability',

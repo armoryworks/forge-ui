@@ -521,4 +521,31 @@ describe('SoDialogComponent', () => {
       httpMock.verify();
     });
   });
+
+  describe('payment terms', () => {
+    it('hides the terms field and never requests the terms list for a PM', () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          provideAnimations(),
+          provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+          { provide: MatDialog, useValue: { open: vi.fn() } },
+          { provide: AuthService, useValue: { hasAnyRole: (roles: string[]) => roles.includes('PM') } },
+        ],
+      });
+      const component = TestBed.runInInjectionContext(() => new SoDialogComponent());
+      const httpMock = TestBed.inject(HttpTestingController);
+
+      expect((component as unknown as { canSeeTerms(): boolean }).canSeeTerms()).toBe(false);
+      httpMock.expectNone(r => r.url.endsWith('/payment-terms'));
+    });
+
+    it('shows the terms field to the finance roles', () => {
+      const { component } = setup();
+
+      expect((component as unknown as { canSeeTerms(): boolean }).canSeeTerms()).toBe(true);
+    });
+  });
 });

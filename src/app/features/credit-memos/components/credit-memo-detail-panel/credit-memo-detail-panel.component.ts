@@ -12,6 +12,7 @@ import { CustomerRefundRequest } from '../../models/customer-refund-request.mode
 import { creditMemoStatusChip } from '../../credit-memo-status';
 import { CustomerRefundDialogComponent } from '../customer-refund-dialog/customer-refund-dialog.component';
 import { ApplyCreditMemoDialogComponent } from '../apply-credit-memo-dialog/apply-credit-memo-dialog.component';
+import { CreditMemoDialogComponent } from '../credit-memo-dialog/credit-memo-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
@@ -36,7 +37,7 @@ type VoidTarget = { kind: 'memo' } | { kind: 'refund'; refundId: number; refundN
     DecimalPipe, RouterLink, ReactiveFormsModule, MatTooltipModule, TranslatePipe, DateOnlyPipe,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent, EntityLinkComponent,
     CurrencyDisplayComponent, DetailLoadErrorComponent, LoadingBlockDirective,
-    CustomerRefundDialogComponent, ApplyCreditMemoDialogComponent,
+    CustomerRefundDialogComponent, ApplyCreditMemoDialogComponent, CreditMemoDialogComponent,
   ],
   templateUrl: './credit-memo-detail-panel.component.html',
   styleUrl: './credit-memo-detail-panel.component.scss',
@@ -60,6 +61,7 @@ export class CreditMemoDetailPanelComponent {
   protected readonly downloadingPdf = signal(false);
   protected readonly showRefund = signal(false);
   protected readonly showApply = signal(false);
+  protected readonly showEdit = signal(false);
   protected readonly voidTarget = signal<VoidTarget | null>(null);
 
   private readonly isFinance = computed(() => this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']));
@@ -118,6 +120,12 @@ export class CreditMemoDetailPanelComponent {
     this.memo.set(memo);
     this.busy.set(false);
     this.snackbar.success(this.translate.instant(messageKey, { number: memo.creditMemoNumber }));
+    this.updated.emit();
+  }
+
+  protected onEdited(id: number): void {
+    this.showEdit.set(false);
+    this.load(id);
     this.updated.emit();
   }
 

@@ -110,6 +110,7 @@ export class SoDialogComponent {
   protected readonly partFilters: Record<string, string> = { isActive: 'true' };
 
   protected readonly creditTermsOptions = this.paymentTerms.options;
+  protected readonly canSeeTerms = this.paymentTerms.canRead;
 
   protected readonly freightTermsOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('freight.terms.customerDefault') },

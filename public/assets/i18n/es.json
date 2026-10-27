@@ -7675,7 +7675,14 @@
     "deleteReportConfirm": "¿Eliminar el informe guardado \"{{name}}\"? Esta acción no se puede deshacer.",
     "chooseDataSourceFirst": "Elija una fuente de datos",
     "pickColumnFirst": "Elija al menos una columna",
-    "runFailed": "No se pudo ejecutar este informe."
+    "runFailed": "No se pudo ejecutar este informe.",
+    "filterOtherIncome": "Otros ingresos",
+    "totalOtherIncome": "Otros ingresos",
+    "pnlType": {
+      "Revenue": "Ingresos",
+      "OtherIncome": "Otros ingresos",
+      "Expense": "Gasto"
+    }
   },
   "qcInspections": {
     "tabTemplates": "Plantillas",
@@ -11839,7 +11846,8 @@
       "invoices": "Facturas",
       "unassigned": "Sin asignar",
       "range": "Rango de fechas",
-      "empty": "No hay impuesto sobre ventas por pagar en este período"
+      "empty": "No hay impuesto sobre ventas por pagar en este período",
+      "marketplaceCollected": "Recaudado por los marketplaces (no adeudado)"
     },
     "form1099": {
       "title": "Informe 1099",
@@ -12033,7 +12041,8 @@
       "closed": "{{job}} cerrada; variación de producción {{variance}}",
       "empty": "Ninguna orden tiene saldo de WIP abierto",
       "loadFailed": "No se pudieron cargar las órdenes con WIP abierto",
-      "notComplete": "Complete el trabajo antes de cerrar su costo"
+      "notComplete": "Complete el trabajo antes de cerrar su costo",
+      "receiptVariance": "Variación en recepciones"
     },
     "period": {
       "period": "Período",
@@ -14715,7 +14724,8 @@
       "returnCreditAmountRequired": "Esta devolución no está vinculada a una línea de factura; indique el importe del crédito.",
       "creditedDepositLine": "No se puede acreditar una línea de anticipo. Acredite la factura de anticipo.",
       "depositLineManual": "Las líneas de anticipo se agregan a partir de las facturas de anticipo de la orden de venta.",
-      "depositInvoiceInUse": "No se puede anular esta factura de anticipo: otras facturas posteriores de la orden ya usaron su anticipo. Anule primero esas facturas."
+      "depositInvoiceInUse": "No se puede anular esta factura de anticipo: otras facturas posteriores de la orden ya usaron su anticipo. Anule primero esas facturas.",
+      "creditMemoLineOverInvoiced": "Un crédito para una línea de factura no puede tener un precio mayor que el facturado, y la suma de los créditos de esa línea no puede superar su importe."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",
@@ -14963,7 +14973,11 @@
       "BankTransfer": "Transferencia bancaria",
       "Wire": "Giro",
       "Other": "Otro"
-    }
+    },
+    "editTitle": "Editar borrador {{number}}",
+    "updated": "Nota de crédito {{number}} actualizada",
+    "unappliedDepositHint": "La factura {{invoice}} se pagó con su depósito, así que no le queda saldo por acreditar. El crédito se emite sin aplicar: reembólselo al cliente o aplíquelo a una factura posterior.",
+    "unappliedPaidHint": "La factura {{invoice}} no tiene saldo por acreditar. El crédito se emite sin aplicar: reembólselo al cliente o aplíquelo a una factura posterior."
   },
   "vendorCredits": {
     "newMemo": "Nuevo crédito de proveedor",

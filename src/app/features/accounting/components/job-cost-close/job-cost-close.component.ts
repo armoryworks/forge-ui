@@ -40,6 +40,7 @@ export class JobCostCloseComponent implements OnInit {
     { field: 'title', header: this.translate.instant('accounting.jobCostClose.jobTitle'), sortable: true },
     { field: 'completedDate', header: this.translate.instant('accounting.jobCostClose.completed'), sortable: true, type: 'date', width: '120px' },
     { field: 'wipBalance', header: this.translate.instant('accounting.jobCostClose.wip'), sortable: true, type: 'number', align: 'right', width: '140px' },
+    { field: 'receiptVariance', header: this.translate.instant('accounting.jobCostClose.receiptVariance'), sortable: true, type: 'number', align: 'right', width: '150px' },
     { field: 'actions', header: this.translate.instant('accounting.common.actions'), align: 'right', width: '150px' },
   ];
 

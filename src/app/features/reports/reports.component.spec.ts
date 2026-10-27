@@ -20,6 +20,8 @@ interface ReportsInternals {
   arAgingData(): ArAgingItem[];
   jobsByStageData(): JobsByStageItem[];
   jobMarginData: { set(rows: JobMarginItem[]): void };
+  simplePnlData: { set(rows: { category: string; type: string; amount: number }[]): void };
+  pnlTotals(): { revenue: number; otherIncome: number; expenses: number; net: number };
   jobMarginTotals(): { avgMarginPct: number | null; measuredCount: number; jobCount: number; totalRevenue: number; totalMargin: number };
   jobMarginChart(): { labels?: unknown[] };
   reportPicker: FormControl<string>;
@@ -60,6 +62,17 @@ describe('ReportsComponent', () => {
         { provide: Router, useValue: router },
       ],
     });
+  });
+
+  it('keeps other income out of revenue on the simple P&L but in net income', () => {
+    const component = create();
+    component.simplePnlData.set([
+      { category: '40000 Sales Revenue', type: 'Revenue', amount: 730 },
+      { category: '90000 Foreign Exchange Gain', type: 'OtherIncome', amount: 20 },
+      { category: '61500 Marketplace Fees', type: 'Expense', amount: 37.5 },
+    ]);
+
+    expect(component.pnlTotals()).toEqual({ revenue: 730, otherIncome: 20, expenses: 37.5, net: 712.5 });
   });
 
   it('shows an error state and clears old rows when a report fails to load', () => {

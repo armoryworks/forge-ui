@@ -172,7 +172,7 @@
                 </span>
               </div>
             }
-            @if (so.paymentTerms?.name ?? so.creditTerms; as termsName) {
+            @if (canSeeTerms() && (so.paymentTerms?.name ?? so.creditTerms); as termsName) {
               <div class="info-item">
                 <span class="info-label">{{ 'salesOrders.creditTerms' | translate }}</span>
                 <span class="info-value" data-testid="so-terms-value">{{ termsName }}</span>
@@ -234,7 +234,9 @@
               <form class="line-edit-form" [formGroup]="headerForm" (ngSubmit)="saveHeader()">
                 <div class="line-edit-form__title">{{ 'salesOrders.editDetails' | translate }}</div>
                 <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" data-testid="so-header-po" />
-                <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" data-testid="so-header-terms" />
+                @if (canSeeTerms()) {
+                  <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" data-testid="so-header-terms" />
+                }
                 <app-select [label]="'salesOrders.shippingAddress' | translate" formControlName="shippingAddressId" [options]="shippingAddressOptions()" data-testid="so-header-shipping" />
                 <app-select [label]="'salesOrders.billingAddress' | translate" formControlName="billingAddressId" [options]="billingAddressOptions()" data-testid="so-header-billing" />
                 <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-header-delivery" />

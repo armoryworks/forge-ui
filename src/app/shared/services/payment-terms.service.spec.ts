@@ -7,13 +7,21 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { environment } from '../../../environments/environment';
 import { SEEDED_PAYMENT_TERMS } from '../models/payment-terms.fixture';
 import { PaymentTermsService } from './payment-terms.service';
+import { AuthService } from './auth.service';
 
 describe('PaymentTermsService', () => {
   let http: HttpTestingController;
+  let roles: string[];
 
   beforeEach(() => {
+    roles = ['OfficeManager'];
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting(), provideTranslateService()] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(), provideHttpClientTesting(), provideTranslateService(),
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
     http = TestBed.inject(HttpTestingController);
   });
 
@@ -28,6 +36,16 @@ describe('PaymentTermsService', () => {
     expect(service.options().map(o => o.value)).toEqual([null, 1, 9]);
     expect(service.forLegacy('DueOnReceipt')?.id).toBe(1);
     expect(service.find(9)?.discountPercent).toBe(2);
+    http.verify();
+  });
+
+  it('never requests the list for a PM, who may not read payment terms', () => {
+    roles = ['PM'];
+    const service = TestBed.inject(PaymentTermsService);
+    service.ensureLoaded();
+
+    expect(service.canRead()).toBe(false);
+    http.expectNone(r => r.url === `${environment.apiUrl}/payment-terms`);
     http.verify();
   });
 

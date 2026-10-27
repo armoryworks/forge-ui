@@ -95,7 +95,9 @@
         <app-select [label]="'salesOrders.shipTo' | translate" formControlName="shippingAddressId" [options]="shipToOptions()" data-testid="so-ship-to" />
         <app-select [label]="'salesOrders.billTo' | translate" formControlName="billingAddressId" [options]="billToOptions()" data-testid="so-bill-to" />
         <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
-        <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" data-testid="so-credit-terms" />
+        @if (canSeeTerms()) {
+          <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" data-testid="so-credit-terms" />
+        }
         <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-delivery-date" />
         <app-select [label]="'freight.freightTerms' | translate" formControlName="freightTerms" [options]="freightTermsOptions" data-testid="so-freight-terms" />
         <app-document-currency [currencyControl]="form.controls.currencyId" [fxRateControl]="form.controls.fxRate"

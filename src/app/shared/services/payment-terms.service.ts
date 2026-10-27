@@ -7,6 +7,10 @@ import { environment } from '../../../environments/environment';
 import { SelectOption } from '../components/select/select.component';
 import { PaymentTerm } from '../models/payment-term.model';
 import { PaymentTermRequest } from '../models/payment-term-request.model';
+import { AuthService } from './auth.service';
+
+/** Roles the API lets read the terms list (`GET payment-terms`); a PM never sees payment terms. */
+export const PAYMENT_TERMS_READ_ROLES = ['Admin', 'Manager', 'OfficeManager', 'Procurement', 'Controller'];
 
 /**
  * The payment terms master (Net 30, 2/10 Net 30, ...), loaded once and shared by every terms picker on customers,
@@ -16,11 +20,15 @@ import { PaymentTermRequest } from '../models/payment-term-request.model';
 export class PaymentTermsService {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
   private readonly base = `${environment.apiUrl}/payment-terms`;
   private readonly _terms = signal<PaymentTerm[]>([]);
   private requested = false;
 
   readonly terms = this._terms.asReadonly();
+
+  /** Whether the signed-in user's role may read the terms list; screens hide their terms field when it may not. */
+  readonly canRead = computed(() => this.auth.hasAnyRole(PAYMENT_TERMS_READ_ROLES));
 
   /** Active terms as picker options, led by a "None" choice. */
   readonly options = computed<SelectOption[]>(() => [
@@ -28,9 +36,9 @@ export class PaymentTermsService {
     ...this._terms().filter(t => t.isActive).map(t => ({ value: t.id, label: t.name })),
   ]);
 
-  /** Loads the list on first use; later calls reuse it. Returns the service for field initializers. */
+  /** Loads the list on first use when the role may read it; later calls reuse it. Returns the service for field initializers. */
   ensureLoaded(): this {
-    if (!this.requested) {
+    if (!this.requested && this.canRead()) {
       this.requested = true;
       this.reload();
     }

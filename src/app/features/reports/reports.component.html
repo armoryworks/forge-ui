@@ -271,6 +271,12 @@
             <span class="kpi-card__value">{{ pnlTotals().revenue | currency }}</span>
             <span class="kpi-card__label">{{ 'reports.totalRevenue' | translate }}</span>
           </div>
+          @if (pnlTotals().otherIncome !== 0) {
+            <div class="kpi-card" data-testid="pnl-other-income">
+              <span class="kpi-card__value">{{ pnlTotals().otherIncome | currency }}</span>
+              <span class="kpi-card__label">{{ 'reports.totalOtherIncome' | translate }}</span>
+            </div>
+          }
           <div class="kpi-card kpi-card--error">
             <span class="kpi-card__value">{{ pnlTotals().expenses | currency }}</span>
             <span class="kpi-card__label">{{ 'reports.totalExpenses' | translate }}</span>
@@ -282,6 +288,7 @@
         </div>
         <app-data-table tableId="report-pnl" [columns]="pnlColumns" [data]="simplePnlData()"
                         emptyIcon="balance" [emptyMessage]="'reports.emptyNoFinancialData' | translate">
+          <ng-template appColumnCell="type" let-row>{{ ('reports.pnlType.' + row.type) | translate }}</ng-template>
           <ng-template appColumnCell="amount" let-row>{{ row.amount | currency }}</ng-template>
         </app-data-table>
       }

@@ -56,6 +56,7 @@ const CODE_KEYS: Record<string, string> = {
   'payment-terms-duplicate': 'apiErrors.codes.paymentTermsDuplicate',
   'payment-terms-system': 'apiErrors.codes.paymentTermsSystem',
   'credit-exceeds-invoice-line': 'apiErrors.codes.creditExceedsInvoiceLine',
+  'credit-memo-line-over-invoiced': 'apiErrors.codes.creditMemoLineOverInvoiced',
   'credit-memo-applied': 'apiErrors.codes.creditMemoApplied',
   'invoice-has-credits': 'apiErrors.codes.invoiceHasCredits',
   'credit-memo-not-draft': 'apiErrors.codes.creditMemoNotDraft',

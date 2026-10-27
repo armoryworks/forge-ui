@@ -71,9 +71,11 @@
       }
       <app-toggle data-testid="customer-identity-tax-exempt" [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate" formControlName="isTaxExempt" [isReadonly]="!editing()" />
     </div>
-    <div class="cluster__form-row">
-      <app-select data-testid="customer-identity-credit-terms" [label]="'customers.workflow.creditAndTax.defaultCreditTermsLabel' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" [isReadonly]="!editing()" />
-    </div>
+    @if (canSeeTerms()) {
+      <div class="cluster__form-row">
+        <app-select data-testid="customer-identity-credit-terms" [label]="'customers.workflow.creditAndTax.defaultCreditTermsLabel' | translate" formControlName="paymentTermsId" [options]="creditTermsOptions()" [isReadonly]="!editing()" />
+      </div>
+    }
     <div class="cluster__form-row">
       <app-select data-testid="customer-identity-freight-terms" [label]="'freight.freightTerms' | translate" formControlName="freightTerms" [options]="freightTermsOptions" [isReadonly]="!editing()" />
     </div>

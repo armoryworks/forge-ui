@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { CreditMemoListItem } from '../models/credit-memo-list-item.model';
 import { CreditMemoDetail } from '../models/credit-memo-detail.model';
 import { CreateCreditMemoRequest } from '../models/create-credit-memo-request.model';
+import { UpdateCreditMemoRequest } from '../models/update-credit-memo-request.model';
 import { CustomerRefundRequest } from '../models/customer-refund-request.model';
 import { CustomerRefund } from '../models/customer-refund.model';
 
@@ -38,6 +39,11 @@ export class CreditMemoService {
 
   create(request: CreateCreditMemoRequest): Observable<CreditMemoDetail> {
     return this.http.post<CreditMemoDetail>(this.base, request);
+  }
+
+  update(id: number, request: UpdateCreditMemoRequest, rowVersion?: number): Observable<CreditMemoDetail> {
+    const headers = rowVersion != null ? new HttpHeaders({ 'If-Match': `"${rowVersion}"` }) : undefined;
+    return this.http.put<CreditMemoDetail>(`${this.base}/${id}`, request, { headers });
   }
 
   delete(id: number, rowVersion?: number): Observable<void> {
