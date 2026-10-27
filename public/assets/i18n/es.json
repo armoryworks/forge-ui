@@ -815,7 +815,11 @@
     "removePartConfirmMessage": "¿Quitar {{partNumber}} de esta orden de trabajo?",
     "removeBuildPartConfirmMessage": "{{partNumber}} es la pieza que fabrica esta orden de trabajo. Si la quita, la orden queda sin cantidad a fabricar. ¿Quitarla?",
     "bulkMoveBillingReason": "Las etapas de facturación las fijan la facturación y los pagos; su rol no puede mover órdenes de trabajo allí.",
-    "bulkMoveBlockedReason": "Ninguna de las órdenes de trabajo seleccionadas puede moverse aquí: ya están allí, no pueden retroceder o saltarían una etapa obligatoria."
+    "bulkMoveBlockedReason": "Ninguna de las órdenes de trabajo seleccionadas puede moverse aquí: ya están allí, no pueden retroceder o saltarían una etapa obligatoria.",
+    "dispositionWriteOffAccount": "Cuenta de cancelación",
+    "dispositionWriteOffDefault": "Variación de producción (predeterminada)",
+    "dispositionWriteOffHint": "El trabajo en proceso de la orden se cancela contra esta cuenta.",
+    "dispositionShipHint": "El trabajo en proceso de la orden se cierra contra el costo de ventas."
   },
   "jobDetailExtras": {
     "archive": "Archivar orden de trabajo",
@@ -1774,7 +1778,8 @@
       "overhead": "Gastos generales",
       "total": "Costo estándar",
       "rolled": "Costo estándar recalculado",
-      "rollFailed": "No se pudo recalcular el costo estándar"
+      "rollFailed": "No se pudo recalcular el costo estándar",
+      "frozenRates": "Calculado con las tarifas de centro de trabajo congeladas para el periodo de costeo actual."
     },
     "messages": {
       "updated": "Pieza actualizada"
@@ -1813,7 +1818,31 @@
       "Block": "Bloquear"
     },
     "stepGatingSaved": "Control de pasos guardado",
-    "stepGatingSaveFailed": "No se pudo guardar el control de pasos."
+    "stepGatingSaveFailed": "No se pudo guardar el control de pasos.",
+    "bomTreeLoadFailed": "No se pudieron cargar los componentes de {{part}}.",
+    "bomTreeRetry": "Reintentar",
+    "materialSpecsPage": {
+      "title": "Especificaciones de material",
+      "subtitle": "Los materiales con los que se fabrican las piezas. Se puede agregar una especificación antes de que una pieza la use.",
+      "partCount": "Piezas",
+      "status": "Estado",
+      "showRetired": "Mostrar retiradas",
+      "empty": "Aún no hay especificaciones de material",
+      "emptyHelp": "Agregue una especificación de material para que las piezas puedan usarla.",
+      "topLevel": "Categoría",
+      "active": "Activa",
+      "retiredStatus": "Retirada",
+      "rename": "Cambiar nombre",
+      "renameTitle": "Cambiar nombre de la especificación de material",
+      "renamed": "Nombre cambiado a {{name}}",
+      "retire": "Retirar",
+      "reactivate": "Reactivar",
+      "retired": "{{name}} retirada",
+      "reactivated": "{{name}} reactivada",
+      "retireFailed": "No se pudo retirar la especificación de material",
+      "reactivateFailed": "No se pudo reactivar la especificación de material",
+      "loadFailed": "No se pudieron cargar las especificaciones de material"
+    }
   },
   "partsCatalog": {
     "duplicateRow": "Duplicar {{partNumber}}"
@@ -9940,7 +9969,11 @@
       "onlyPrevious": "La Op {{step}} sigue al paso anterior hasta que la conecte con otro paso.",
       "firstStep": "El primer paso no tiene con qué ejecutarse en paralelo.",
       "edge": "Ese enlace no está en esta ruta."
-    }
+    },
+    "deadEnd": "Este paso no lleva a un paso posterior",
+    "deadEndTitle": "Pasos sin continuación",
+    "deadEndMessage": "La op. {{steps}} no lleva a un paso posterior. ¿Guardar la ruta de todos modos?",
+    "deadEndConfirm": "Guardar de todos modos"
   },
   "workCenterDialog": {
     "newTitle": "Nuevo Centro de Trabajo",

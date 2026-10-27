@@ -7,6 +7,7 @@
         @for (node of column; track node.operation.id) {
           @let operation = node.operation;
           <div class="routing-flow__operation" [class.routing-flow__operation--first]="colIdx === 0" role="listitem"
+               [class.routing-flow__operation--dead-end]="deadEnds().has(operation.id)"
                [attr.data-testid]="'routing-flow-op-' + operation.stepNumber">
             <div class="routing-flow__operation-number">{{ 'parts.operation' | translate }} {{ operation.stepNumber }}</div>
             <div class="routing-flow__operation-name" [title]="operation.title">{{ operation.title }}</div>
@@ -23,6 +24,12 @@
               <div class="routing-flow__operation-meta">
                 <span class="material-icons-outlined" aria-hidden="true">lock_clock</span>
                 {{ 'parts.waitsForTag' | translate: { steps: node.waitsFor } }}
+              </div>
+            }
+            @if (deadEnds().has(operation.id)) {
+              <div class="routing-flow__operation-meta routing-flow__operation-meta--warn" [attr.data-testid]="'routing-flow-dead-end-' + operation.stepNumber">
+                <span class="material-icons-outlined" aria-hidden="true">warning_amber</span>
+                {{ 'routingGraph.deadEnd' | translate }}
               </div>
             }
             @if (operation.workCenterName) {

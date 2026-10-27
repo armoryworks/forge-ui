@@ -69,6 +69,17 @@
           </button>
         }
       </div>
+      @if (node.loadFailed) {
+        <div class="bom-tree__row bom-tree__row--error" role="alert"
+             [attr.data-testid]="'bom-tree-error-' + node.entry.childPartNumber">
+          <span class="bom-tree__indent" [style.width.px]="(node.level + 1) * 24" aria-hidden="true"></span>
+          <span class="material-icons-outlined bom-tree__error-icon" aria-hidden="true">error_outline</span>
+          <span class="bom-tree__error-text">{{ 'parts.bomTreeLoadFailed' | translate: { part: node.entry.childPartNumber } }}</span>
+          <button type="button" class="action-btn action-btn--sm"
+                  [attr.data-testid]="'bom-tree-retry-' + node.entry.childPartNumber"
+                  (click)="retryChildren(node)">{{ 'parts.bomTreeRetry' | translate }}</button>
+        </div>
+      }
     }
   </div>
 }

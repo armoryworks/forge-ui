@@ -1,0 +1,24 @@
+<app-dialog [title]="'parts.materialSpecsPage.renameTitle' | translate" width="420px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input
+      data-testid="material-spec-rename-label"
+      [label]="'materialSpecs.name' | translate"
+      formControlName="label"
+      [maxlength]="200"
+      [required]="true" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="material-spec-rename-cancel" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button"
+        data-testid="material-spec-rename-save"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

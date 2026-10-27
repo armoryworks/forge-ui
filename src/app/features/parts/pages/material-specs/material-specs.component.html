@@ -1,0 +1,67 @@
+<app-page-layout
+  [pageTitle]="'parts.materialSpecsPage.title' | translate"
+  [pageSubtitle]="'parts.materialSpecsPage.subtitle' | translate">
+
+  <ng-container toolbar>
+    <app-toggle data-testid="material-specs-show-retired" [label]="'parts.materialSpecsPage.showRetired' | translate"
+                [formControl]="showRetired" />
+    <button class="action-btn action-btn--create" type="button" data-testid="material-specs-create" (click)="openCreate()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'materialSpecs.create' | translate }}
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <app-data-table
+      tableId="material-specs"
+      [columns]="columns"
+      [data]="specs()"
+      [loading]="loading()"
+      emptyIcon="category"
+      [emptyMessage]="'parts.materialSpecsPage.empty' | translate"
+      [emptyHelpText]="'parts.materialSpecsPage.emptyHelp' | translate">
+
+      <ng-template appColumnCell="label" let-row>
+        <span class="material-specs__label" [class.material-specs__label--child]="row.parentId !== null">{{ row.label }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="categoryLabel" let-row>
+        @if (row.categoryLabel) {
+          {{ row.categoryLabel }}
+        } @else {
+          <span class="material-specs__muted">{{ 'parts.materialSpecsPage.topLevel' | translate }}</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="isActive" let-row>
+        <span class="chip" [class.chip--success]="row.isActive" [class.chip--muted]="!row.isActive">
+          {{ (row.isActive ? 'parts.materialSpecsPage.active' : 'parts.materialSpecsPage.retiredStatus') | translate }}
+        </span>
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn" type="button" [attr.data-testid]="'material-spec-rename-' + row.id"
+                [matTooltip]="'parts.materialSpecsPage.rename' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'parts.materialSpecsPage.rename' | translate"
+                (click)="openRename(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        @if (row.isActive) {
+          <button class="icon-btn icon-btn--danger" type="button" [attr.data-testid]="'material-spec-retire-' + row.id"
+                  [matTooltip]="'parts.materialSpecsPage.retire' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'parts.materialSpecsPage.retire' | translate"
+                  (click)="setActive(row, false); $event.stopPropagation()">
+            <span class="material-icons-outlined">archive</span>
+          </button>
+        } @else {
+          <button class="icon-btn" type="button" [attr.data-testid]="'material-spec-reactivate-' + row.id"
+                  [matTooltip]="'parts.materialSpecsPage.reactivate' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'parts.materialSpecsPage.reactivate' | translate"
+                  (click)="setActive(row, true); $event.stopPropagation()">
+            <span class="material-icons-outlined">unarchive</span>
+          </button>
+        }
+      </ng-template>
+    </app-data-table>
+  </ng-container>
+</app-page-layout>

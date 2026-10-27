@@ -40,9 +40,11 @@
           <span class="material-icons-outlined">account_tree</span>
         </button>
       </div>
-      <button class="action-btn action-btn--create action-btn--sm" data-testid="routing-add-operation" (click)="openAddOperation()">
-        <span class="material-icons-outlined">add</span> {{ 'parts.addOperation' | translate }}
-      </button>
+      @if (canEditSteps) {
+        <button class="action-btn action-btn--create action-btn--sm" data-testid="routing-add-operation" (click)="openAddOperation()">
+          <span class="material-icons-outlined">add</span> {{ 'parts.addOperation' | translate }}
+        </button>
+      }
     </div>
   </div>
 
@@ -54,17 +56,23 @@
     }
   } @else {
     @if (operations().length === 0) {
-      <app-empty-state icon="route" data-testid="routing-empty-state"
-                       [message]="'parts.noOperations' | translate"
-                       [actionLabel]="'routingTools.copyFromPart' | translate"
-                       (action)="openCopyRouting()" />
+      @if (canEditSteps) {
+        <app-empty-state icon="route" data-testid="routing-empty-state"
+                         [message]="'parts.noOperations' | translate"
+                         [actionLabel]="'routingTools.copyFromPart' | translate"
+                         (action)="openCopyRouting()" />
+      } @else {
+        <app-empty-state icon="route" data-testid="routing-empty-state" [message]="'parts.noOperations' | translate" />
+      }
     } @else {
-      <div class="routing__operations" cdkDropList (cdkDropListDropped)="onReorderOperation($event)">
+      <div class="routing__operations" cdkDropList [cdkDropListDisabled]="!canEditSteps" (cdkDropListDropped)="onReorderOperation($event)">
         @for (operation of operations(); track operation.id) {
-          <div class="operation-card" cdkDrag>
-            <span class="operation-card__drag material-icons-outlined" cdkDragHandle
-                  [matTooltip]="'parts.reorderOperation' | translate" matTooltipPosition="above"
-                  [attr.aria-label]="'parts.reorderOperationAria' | translate">drag_indicator</span>
+          <div class="operation-card" cdkDrag [class.operation-card--dead-end]="deadEnds().has(operation.id)">
+            @if (canEditSteps) {
+              <span class="operation-card__drag material-icons-outlined" cdkDragHandle data-testid="op-drag-handle"
+                    [matTooltip]="'parts.reorderOperation' | translate" matTooltipPosition="above"
+                    [attr.aria-label]="'parts.reorderOperationAria' | translate">drag_indicator</span>
+            }
             <div class="operation-card__number">{{ operation.stepNumber }}</div>
             <div class="operation-card__content">
               <div class="operation-card__title">
@@ -95,6 +103,12 @@
                   <span class="operation-card__tag" data-testid="op-follows-meta">
                     <span class="material-icons-outlined">call_merge</span>
                     {{ 'parts.followsTag' | translate: { steps: follows } }}
+                  </span>
+                }
+                @if (deadEnds().has(operation.id)) {
+                  <span class="operation-card__tag operation-card__tag--warn" data-testid="op-dead-end">
+                    <span class="material-icons-outlined">warning_amber</span>
+                    {{ 'routingGraph.deadEnd' | translate }}
                   </span>
                 }
                 @if (operation.cycleCountdown) {
@@ -129,12 +143,14 @@
                   <span class="material-icons-outlined">{{ expandedInstructions().has(operation.id) ? 'expand_less' : 'expand_more' }}</span>
                 </button>
               }
-              <button class="icon-btn" (click)="openEditOperation(operation)" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.editOperationAria' | translate">
-                <span class="material-icons-outlined">edit</span>
-              </button>
-              <button class="icon-btn icon-btn--danger" (click)="deleteOperation(operation)" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.deleteOperationAria' | translate">
-                <span class="material-icons-outlined">delete</span>
-              </button>
+              @if (canEditSteps) {
+                <button class="icon-btn" data-testid="op-edit" (click)="openEditOperation(operation)" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.editOperationAria' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+                <button class="icon-btn icon-btn--danger" data-testid="op-delete" (click)="deleteOperation(operation)" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.deleteOperationAria' | translate">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              }
             </div>
           </div>
         }

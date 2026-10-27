@@ -815,7 +815,11 @@
     "removePartConfirmMessage": "Remove {{partNumber}} from this work order?",
     "removeBuildPartConfirmMessage": "{{partNumber}} is the part this work order builds. Removing it leaves the work order with no quantity to make. Remove it?",
     "bulkMoveBillingReason": "Billing stages are set by invoicing and payments; your role cannot move work orders there.",
-    "bulkMoveBlockedReason": "None of the selected work orders can move here: they are already there, cannot move back, or would skip a required stage."
+    "bulkMoveBlockedReason": "None of the selected work orders can move here: they are already there, cannot move back, or would skip a required stage.",
+    "dispositionWriteOffAccount": "Write-off account",
+    "dispositionWriteOffDefault": "Production variance (default)",
+    "dispositionWriteOffHint": "The work order's work in process is written off to this account.",
+    "dispositionShipHint": "The work order's work in process is closed to cost of goods sold."
   },
   "jobDetailExtras": {
     "archive": "Archive work order",
@@ -1777,7 +1781,8 @@
       "overhead": "Overhead",
       "total": "Standard cost",
       "rolled": "Standard cost recalculated",
-      "rollFailed": "Could not recalculate the standard cost"
+      "rollFailed": "Could not recalculate the standard cost",
+      "frozenRates": "Rolled from the work-center rates frozen for the current costing period."
     },
     "messages": {
       "updated": "Part updated"
@@ -1813,7 +1818,31 @@
       "Block": "Block"
     },
     "stepGatingSaved": "Step gating saved",
-    "stepGatingSaveFailed": "Couldn't save step gating."
+    "stepGatingSaveFailed": "Couldn't save step gating.",
+    "bomTreeLoadFailed": "Could not load the components of {{part}}.",
+    "bomTreeRetry": "Retry",
+    "materialSpecsPage": {
+      "title": "Material specs",
+      "subtitle": "The materials parts are made from. A spec can be added before any part uses it.",
+      "partCount": "Parts",
+      "status": "Status",
+      "showRetired": "Show retired",
+      "empty": "No material specs yet",
+      "emptyHelp": "Add a material spec so parts can use it.",
+      "topLevel": "Category",
+      "active": "Active",
+      "retiredStatus": "Retired",
+      "rename": "Rename",
+      "renameTitle": "Rename material spec",
+      "renamed": "Renamed to {{name}}",
+      "retire": "Retire",
+      "reactivate": "Reactivate",
+      "retired": "{{name}} retired",
+      "reactivated": "{{name}} reactivated",
+      "retireFailed": "Could not retire the material spec",
+      "reactivateFailed": "Could not reactivate the material spec",
+      "loadFailed": "Could not load the material specs"
+    }
   },
   "partsCatalog": {
     "duplicateRow": "Duplicate {{partNumber}}"
@@ -9947,7 +9976,11 @@
       "onlyPrevious": "Op {{step}} follows the step before it until you connect it to another step.",
       "firstStep": "The first step has nothing to run alongside.",
       "edge": "That link is not in this routing."
-    }
+    },
+    "deadEnd": "This step does not lead to a later step",
+    "deadEndTitle": "Steps that lead nowhere",
+    "deadEndMessage": "Op {{steps}} does not lead to a later step. Save the routing anyway?",
+    "deadEndConfirm": "Save anyway"
   },
   "workCenterDialog": {
     "newTitle": "New Work Center",

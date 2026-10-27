@@ -106,6 +106,10 @@
     cursor: grab;
     touch-action: none;
 
+    &--dead-end {
+      border-color: var(--warning);
+    }
+
     &--selected {
       border-color: var(--primary);
     }
@@ -133,6 +137,10 @@
     font-size: var(--font-size-xs);
     color: var(--text-muted);
     @include truncate;
+  }
+
+  &__node-meta--warn {
+    color: var(--warning);
   }
 
   &__handle {

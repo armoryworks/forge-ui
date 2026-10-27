@@ -12,6 +12,7 @@ import { OperationPredecessorRequest } from '../../models/operation-predecessor-
 import { UpdateOperationRequest } from '../../models/update-operation-request.model';
 import { defaultPredecessorIds } from '../../utils/routing-predecessors.utils';
 import { describeConflicts, predecessorConflictsOf } from '../../utils/predecessor-conflicts.utils';
+import { isRoutingGraphStale } from '../../utils/routing-graph-errors.utils';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { BOMLine } from '../../models/bom-line.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -51,6 +52,7 @@ export interface OperationDialogData {
   nextStepNumber?: number;
   operations?: Operation[];
   bomLines?: BOMLine[];
+  routingVersion?: string | null;
 }
 
 @Component({
@@ -318,13 +320,19 @@ export class OperationDialogComponent implements OnInit {
   }
 
   private submitUpdate(request: UpdateOperationRequest): void {
-    this.partsService.updateOperation(this.data.partId, this.data.operation!.id, request, true).subscribe({
+    const versioned: UpdateOperationRequest = { ...request, routingVersion: this.data.routingVersion ?? null };
+    this.partsService.updateOperation(this.data.partId, this.data.operation!.id, versioned, true).subscribe({
       next: (result) => {
         this.saving.set(false);
         this.dialogRef.clearDraft();
         this.matDialogRef.close(result);
       },
       error: (err: unknown) => {
+        if (isRoutingGraphStale(err)) {
+          this.saving.set(false);
+          this.confirmStaleReload();
+          return;
+        }
         const conflicts = predecessorConflictsOf(err);
         if (!conflicts) {
           this.saving.set(false);
@@ -347,6 +355,22 @@ export class OperationDialogComponent implements OnInit {
           this.saving.set(false);
         });
       },
+    });
+  }
+
+  private confirmStaleReload(): void {
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('routingGraph.staleTitle'),
+        message: this.translate.instant('routingGraph.staleMessage'),
+        confirmLabel: this.translate.instant('routingGraph.staleConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.dialogRef.clearDraft();
+      this.matDialogRef.close('stale');
     });
   }
 

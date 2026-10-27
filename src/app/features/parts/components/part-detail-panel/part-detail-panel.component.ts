@@ -22,6 +22,7 @@ import { UpdateBOMLineRequest } from '../../models/update-bom-line-request.model
 import { PartInventorySummary } from '../../models/part-inventory-summary.model';
 import { PartPurchaseHistoryItem } from '../../models/part-purchase-history-item.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { FileAttachment } from '../../../../shared/models/file.model';
@@ -136,6 +137,7 @@ export class PartDetailPanelComponent {
   protected readonly canViewTerms = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
   protected readonly canEditParts = this.auth.hasAnyRole(PART_EDIT_ROLES);
   private readonly dialog = inject(MatDialog);
+  private readonly pendingChanges = inject(PendingChangesService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly workflowService = inject(WorkflowService);
@@ -394,6 +396,17 @@ export class PartDetailPanelComponent {
   // ── Tab navigation ──
 
   protected selectTab(id: PartDetailTabId | 'serials' | 'viewer'): void {
+    if (id === this.activeTabId()) return;
+    if (this.pendingChanges.hasPending()) {
+      this.pendingChanges.confirmDiscard().subscribe(discard => {
+        if (discard) this.showTab(id);
+      });
+      return;
+    }
+    this.showTab(id);
+  }
+
+  private showTab(id: PartDetailTabId | 'serials' | 'viewer'): void {
     this.activeTabId.set(id);
     if (this.router && this.route) {
       this.router.navigate([], {

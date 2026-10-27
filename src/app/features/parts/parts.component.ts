@@ -40,6 +40,7 @@ import { ServerPageRequest, ServerPageState } from '../../shared/models/server-p
 import { TablePreferences } from '../../shared/models/table-preferences.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { RoleDirective } from '../../shared/directives/role.directive';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { PartDetailDialogComponent, PartDetailDialogData } from './components/part-detail-dialog/part-detail-dialog.component';
@@ -68,7 +69,7 @@ type ViewMode = 'table' | 'cards';
     InputComponent, SelectComponent, TextareaComponent,
     CurrencyDisplayComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationButtonComponent,
-    LoadingBlockDirective, MatTooltipModule, MatPaginatorModule,
+    LoadingBlockDirective, RoleDirective, MatTooltipModule, MatPaginatorModule,
     PartsCardGridComponent,
     EntityCompletenessChipComponent, EntityCompletenessBadgeComponent,
   ],
@@ -666,6 +667,10 @@ export class PartsComponent {
   /** Navigates to the bulk part-import page (CSV upload / paste → preview → commit). */
   protected openImport(): void {
     this.router.navigate(['/parts/import']);
+  }
+
+  protected openMaterialSpecs(): void {
+    this.router.navigate(['/parts/material-specs']);
   }
 
   /**

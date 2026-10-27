@@ -11,6 +11,7 @@ import { Operation } from '../../models/operation.model';
 import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { PendingChangesService } from '../../../../shared/services/pending-changes.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -27,6 +28,9 @@ interface RoutingInternals {
   onReorderOperation(event: { previousIndex: number; currentIndex: number }): void;
   followsByOperation(): Map<number, string>;
   gatingControl: { setValue(value: string | null): void; disabled: boolean };
+  canEditSteps: boolean;
+  deadEnds(): Set<number>;
+  version: { (): string | null; set(value: string | null): void };
 }
 
 function operation(id: number, stepNumber: number, estimatedMs: number | null, setupMinutes: number, runMinutesLot: number): Operation {
@@ -46,7 +50,7 @@ function setup(dialogOpen = vi.fn(), partsService: Record<string, unknown> = {},
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: MatDialog, useValue: { open: dialogOpen } },
-      { provide: PartsService, useValue: { getOperations: vi.fn(() => of([])), ...partsService } },
+      { provide: PartsService, useValue: { getRoutingGraph: vi.fn(() => of({ version: 'v2', operations: [] })), ...partsService } },
       { provide: DraftResumeService, useValue: { consume: vi.fn(() => false) } },
       { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
@@ -103,7 +107,7 @@ describe('RoutingComponent — totals and copy', () => {
   it('shows the copied routing in step order once the copy dialog returns it', () => {
     const copied = [operation(12, 20, 1000, 0, 0), operation(11, 10, 1000, 0, 0)];
     const dialogOpen = vi.fn(() => ({ afterClosed: () => of(copied) }));
-    const component = setup(dialogOpen);
+    const component = setup(dialogOpen, { getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: copied })) });
 
     component.openCopyRouting();
 
@@ -129,13 +133,14 @@ describe('RoutingComponent — step links and gating', () => {
   }
 
   it('saves a drag as one reorder that keeps the step numbers', () => {
-    const reorderOperations = vi.fn(() => of([operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)]));
-    const component = setup(vi.fn(), { reorderOperations });
+    const saved = [operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)];
+    const reorderOperations = vi.fn(() => of(saved));
+    const component = setup(vi.fn(), { reorderOperations, getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: saved })) });
     component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
 
     component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
 
-    expect(reorderOperations).toHaveBeenCalledWith(7, { operationIds: [2, 1], removeConflictingPredecessors: false });
+    expect(reorderOperations).toHaveBeenCalledWith(7, { operationIds: [2, 1], removeConflictingPredecessors: false, routingVersion: null });
     expect(component.operations().map(op => [op.id, op.stepNumber])).toEqual([[2, 10], [1, 20]]);
   });
 
@@ -150,7 +155,7 @@ describe('RoutingComponent — step links and gating', () => {
     component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
 
     expect(dialogOpen).toHaveBeenCalledTimes(1);
-    expect(reorderOperations).toHaveBeenLastCalledWith(7, { operationIds: [3, 1], removeConflictingPredecessors: true });
+    expect(reorderOperations).toHaveBeenLastCalledWith(7, { operationIds: [3, 1], removeConflictingPredecessors: true, routingVersion: null });
   });
 
   it('labels only the steps whose links differ from the previous step', () => {
@@ -215,14 +220,96 @@ describe('RoutingComponent — flow editor', () => {
 
   it('switches without asking when nothing is unsaved, and takes the saved order from the editor', () => {
     const open = vi.fn();
-    const component = setup(open) as unknown as FlowInternals;
+    const saved = [operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)];
+    const component = setup(open, { getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: saved })) }) as unknown as FlowInternals;
     component.showView('flow');
 
-    component.onFlowSaved([operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)]);
+    component.onFlowSaved(saved);
     component.showView('list');
 
     expect(open).not.toHaveBeenCalled();
     expect(component.routingViewMode()).toBe('list');
     expect(component.operations().map(op => op.id)).toEqual([1, 2]);
+  });
+});
+
+describe('RoutingComponent — overwrite protection, edit parity and dead ends', () => {
+  function stale(): HttpErrorResponse {
+    return new HttpErrorResponse({ status: 409, error: { code: 'routing-graph-stale', version: 'v9' } });
+  }
+
+  it('sends the routing version it opened with a reorder', () => {
+    const reorderOperations = vi.fn(() => of([]));
+    const component = setup(vi.fn(), { reorderOperations });
+    component.version.set('v1');
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(reorderOperations).toHaveBeenCalledWith(7, { operationIds: [2, 1], removeConflictingPredecessors: false, routingVersion: 'v1' });
+  });
+
+  it('shows the routing the new version belongs to after a reorder', () => {
+    const reorderOperations = vi.fn(() => of([operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)]));
+    const latest = [operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0), operation(3, 30, null, 0, 0)];
+    const component = setup(vi.fn(), { reorderOperations, getRoutingGraph: vi.fn(() => of({ version: 'v4', operations: latest })) });
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(component.version()).toBe('v4');
+    expect(component.operations().map(op => op.id)).toEqual([2, 1, 3]);
+  });
+
+  it('asks to reload when someone else changed the routing, and reloads it', () => {
+    const reorderOperations = vi.fn(() => throwError(() => stale()));
+    const getRoutingGraph = vi.fn(() => of({ version: 'v9', operations: [operation(5, 10, null, 0, 0)] }));
+    const dialogOpen = vi.fn(() => ({ afterClosed: () => of(true) }));
+    const component = setup(dialogOpen, { reorderOperations, getRoutingGraph });
+    component.version.set('v1');
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(dialogOpen).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({
+      data: expect.objectContaining({ title: 'routingGraph.staleTitle' }),
+    }));
+    expect(component.version()).toBe('v9');
+    expect(component.operations().map(op => op.id)).toEqual([5]);
+  });
+
+  it('keeps production workers out of list editing as well as the flowchart', () => {
+    const reorderOperations = vi.fn(() => of([]));
+    const component = setup(vi.fn(), { reorderOperations }, ['ProductionWorker']);
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(component.canEditSteps).toBe(false);
+    expect(reorderOperations).not.toHaveBeenCalled();
+  });
+
+  it('flags a step no later step follows, but not the final step', () => {
+    const component = setup();
+    component.operations.set([
+      operation(1, 10, null, 0, 0),
+      operation(2, 20, null, 0, 0),
+      { ...operation(3, 30, null, 0, 0), predecessors: [{ operationId: 1, stepNumber: 10, gate: 'Quantity' }] },
+    ]);
+
+    expect([...component.deadEnds()]).toEqual([2]);
+  });
+
+  it('marks unsaved flowchart edits as pending so leaving the page or tab asks first', () => {
+    const component = setup() as unknown as RoutingInternals & { flowDirty: { set(value: boolean): void } };
+    const pending = TestBed.inject(PendingChangesService);
+
+    component.flowDirty.set(true);
+    TestBed.flushEffects();
+    expect(pending.hasPending()).toBe(true);
+
+    component.flowDirty.set(false);
+    TestBed.flushEffects();
+    expect(pending.hasPending()).toBe(false);
   });
 });

@@ -25,6 +25,7 @@ import {
   removeConflicts, reorderSteps, runAfterPrevious, runAlongside, setLinkGate, sortDraft,
 } from '../../utils/routing-graph-draft.utils';
 import { isRoutingGraphStale, routingGraphIssuesOf } from '../../utils/routing-graph-errors.utils';
+import { deadEndStepIds } from '../../utils/routing-predecessors.utils';
 import {
   ROUTING_NODE_HEIGHT, ROUTING_NODE_WIDTH, connectorPath, nodeAt, routingGraphLayout,
 } from '../../utils/routing-graph-layout.utils';
@@ -89,6 +90,7 @@ export class RoutingGraphEditorComponent {
   protected readonly ordered = computed(() => sortDraft(this.draft()));
   protected readonly layout = computed(() => routingGraphLayout(this.draft()));
   protected readonly conflicts = computed(() => draftConflicts(this.draft()));
+  protected readonly deadEnds = computed(() => deadEndStepIds(this.draft()));
   protected readonly dirty = computed(() => draftSignature(this.draft()) !== draftSignature(this.original()));
   protected readonly selected = computed(() => this.draft().find(step => step.id === this.selectedId()) ?? null);
   protected readonly connectFrom = computed(() => this.draft().find(step => step.id === this.connectFromId()) ?? null);
@@ -293,6 +295,28 @@ export class RoutingGraphEditorComponent {
 
   protected save(): void {
     if (this.conflicts().length > 0 || this.saving()) return;
+    const deadEnds = this.ordered().filter(step => this.deadEnds().has(step.id));
+    if (deadEnds.length === 0) {
+      this.submit();
+      return;
+    }
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('routingGraph.deadEndTitle'),
+        message: this.translate.instant('routingGraph.deadEndMessage', {
+          steps: deadEnds.map(step => step.stepNumber).join(', '),
+        }),
+        confirmLabel: this.translate.instant('routingGraph.deadEndConfirm'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) this.submit();
+    });
+  }
+
+  private submit(): void {
+    if (this.saving()) return;
     this.saving.set(true);
     this.serverIssues.set([]);
     this.partsService.updateRoutingGraph(this.partId(), { version: this.version(), steps: draftRequest(this.draft()) }).subscribe({

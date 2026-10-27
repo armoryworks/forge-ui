@@ -5,4 +5,5 @@ export interface DisposeJobRequest {
   notes?: string;
   goodQuantity?: number;
   locationId?: number;
+  expenseGlAccountId?: number;
 }

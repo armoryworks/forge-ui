@@ -6,18 +6,18 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
-import { FileDownloadService } from '../../../../shared/services/file-download.service';
 import { environment } from '../../../../../environments/environment';
 import { LanguageService } from '../../../../shared/services/language.service';
 import { ChatFileAttachment, ChatMessage } from '../../models/chat-message.model';
 import { MentionRenderPipe } from '../../pipes/mention-render.pipe';
 import { formatTime as formatClockTime } from '../../../../shared/utils/date.utils';
+import { FileLinkDirective } from '../../../../shared/directives/file-link.directive';
 import { chatDateSeparator } from '../../utils/chat-time';
 
 @Component({
   selector: 'app-chat-message-area',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe, MentionRenderPipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe, MentionRenderPipe, FileLinkDirective],
   templateUrl: './chat-message-area.component.html',
   styleUrl: './chat-message-area.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +26,6 @@ export class ChatMessageAreaComponent {
   private readonly authService = inject(AuthService);
   private readonly language = inject(LanguageService);
   private readonly translate = inject(TranslateService);
-  private readonly fileDownload = inject(FileDownloadService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -54,11 +53,6 @@ export class ChatMessageAreaComponent {
 
   protected attachmentUrl(file: ChatFileAttachment): string {
     return `${environment.apiUrl}/files/${file.id}/download`;
-  }
-
-  protected downloadAttachment(event: Event, file: ChatFileAttachment): void {
-    event.preventDefault();
-    this.fileDownload.openOrDownload(this.attachmentUrl(file), file.fileName, file.contentType);
   }
 
   scrollToBottom(): void {

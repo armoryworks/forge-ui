@@ -18,7 +18,7 @@
         @if (msg.fileAttachment) {
           <div class="message-area__attachment">
             <span class="material-icons-outlined message-area__attachment-icon">{{ getFileIcon(msg.fileAttachment.contentType) }}</span>
-            <a class="message-area__attachment-name" [href]="attachmentUrl(msg.fileAttachment)" (click)="downloadAttachment($event, msg.fileAttachment)">
+            <a class="message-area__attachment-name" [appFileLink]="attachmentUrl(msg.fileAttachment)" [fileName]="msg.fileAttachment.fileName" [contentType]="msg.fileAttachment.contentType" data-testid="chat-attachment-link">
               {{ msg.fileAttachment.fileName }}
             </a>
             <span class="message-area__attachment-size">{{ formatFileSize(msg.fileAttachment.size) }}</span>

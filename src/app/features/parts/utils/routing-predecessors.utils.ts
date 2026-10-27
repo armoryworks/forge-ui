@@ -39,3 +39,13 @@ export function routingDepths(operations: readonly RoutingNode[]): Map<number, n
   }
   return depths;
 }
+
+export function deadEndStepIds(operations: readonly RoutingNode[]): Set<number> {
+  if (operations.length === 0) return new Set();
+  const followed = new Set<number>();
+  for (const links of effectivePredecessors(operations).values()) {
+    for (const link of links) followed.add(link.predecessorId);
+  }
+  const last = Math.max(...operations.map(op => op.stepNumber));
+  return new Set(operations.filter(op => op.stepNumber < last && !followed.has(op.id)).map(op => op.id));
+}

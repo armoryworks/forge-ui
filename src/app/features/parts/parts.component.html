@@ -1,4 +1,8 @@
 <app-page-header [title]="'parts.title' | translate" [subtitle]="'parts.subtitle' | translate" helpTourId="parts">
+  <button *appRole="['Admin', 'Manager', 'Engineer']" class="action-btn" data-testid="material-specs-btn" (click)="openMaterialSpecs()">
+    <span class="material-icons-outlined">category</span>
+    {{ 'parts.materialSpecsPage.title' | translate }}
+  </button>
   @if (canEditParts) {
     <button class="action-btn" data-testid="import-parts-btn" (click)="openImport()">
       <span class="material-icons-outlined">upload_file</span>

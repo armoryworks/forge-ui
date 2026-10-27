@@ -5,7 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { Operation } from '../../models/operation.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
-import { effectivePredecessors, routingDepths } from '../../utils/routing-predecessors.utils';
+import { deadEndStepIds, effectivePredecessors, routingDepths } from '../../utils/routing-predecessors.utils';
 
 interface FlowNode {
   operation: Operation;
@@ -23,6 +23,8 @@ interface FlowNode {
 })
 export class RoutingFlowViewComponent {
   readonly operations = input<Operation[]>([]);
+
+  protected readonly deadEnds = computed(() => deadEndStepIds(this.operations()));
 
   protected readonly columns = computed<FlowNode[][]>(() => {
     const operations = this.operations();

@@ -14,8 +14,8 @@
         <div class="file-item">
           <span class="material-icons-outlined">description</span>
           <a class="file-item__name"
-             [href]="partsService.getFileDownloadUrl(file.id)"
-             (click)="openFile($event, file)">{{ file.fileName }}</a>
+             [appFileLink]="partsService.getFileDownloadUrl(file.id)" [fileName]="file.fileName" [contentType]="file.contentType"
+             data-testid="part-file-link">{{ file.fileName }}</a>
           <span class="file-item__meta">{{ file.contentType }}</span>
         </div>
       }

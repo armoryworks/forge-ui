@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 import { Operation } from '../models/operation.model';
-import { defaultPredecessorIds, effectivePredecessors, routingDepths } from './routing-predecessors.utils';
+import { deadEndStepIds, defaultPredecessorIds, effectivePredecessors, routingDepths } from './routing-predecessors.utils';
 
 function op(id: number, stepNumber: number, predecessors: Operation['predecessors'] = []): Operation {
   return {
@@ -37,5 +37,17 @@ describe('routing predecessors', () => {
     ];
 
     expect([...routingDepths(ops).entries()]).toEqual([[1, 0], [2, 1], [3, 1], [4, 2]]);
+  });
+
+  it('finds no dead ends in a linear routing or an empty one', () => {
+    expect([...deadEndStepIds([op(1, 10), op(2, 20), op(3, 30)])]).toEqual([]);
+    expect([...deadEndStepIds([])]).toEqual([]);
+  });
+
+  it('flags a branch no later step follows, but not the final steps', () => {
+    const after10 = [{ operationId: 1, stepNumber: 10, gate: 'Quantity' as const }];
+    const ops = [op(1, 10), op(2, 20, after10), op(3, 30, after10), op(4, 40, [{ operationId: 3, stepNumber: 30, gate: 'Quantity' }]), op(5, 40, after10)];
+
+    expect([...deadEndStepIds(ops)]).toEqual([2]);
   });
 });

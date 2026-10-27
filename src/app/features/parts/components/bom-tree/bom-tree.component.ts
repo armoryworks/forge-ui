@@ -26,6 +26,7 @@ export class BomTreeComponent {
   protected readonly expandedKeys = signal<Set<string>>(new Set());
   private readonly childLines = signal<Map<number, BOMLine[]>>(new Map());
   private readonly loadingPartIds = signal<Set<number>>(new Set());
+  private readonly failedPartIds = signal<Set<number>>(new Set());
 
   /**
    * Builds the tree from the part's own BOM lines (level 0). A line whose child part has a BOM of
@@ -47,6 +48,7 @@ export class BomTreeComponent {
     const expanded = this.expandedKeys();
     const loaded = this.childLines();
     const loading = this.loadingPartIds();
+    const failed = this.failedPartIds();
     return lines.map(entry => {
       const key = `${parentKey}/${entry.id}`;
       const hasChildren = !!entry.childHasBom && !ancestors.has(entry.childPartId);
@@ -61,6 +63,7 @@ export class BomTreeComponent {
         level,
         isExpanded,
         isLoading: isExpanded && loading.has(entry.childPartId),
+        loadFailed: isExpanded && failed.has(entry.childPartId),
         hasChildren,
         children,
       };
@@ -87,8 +90,17 @@ export class BomTreeComponent {
     if (opening) this.loadChildren(node.entry.childPartId);
   }
 
+  protected retryChildren(node: BomTreeNode): void {
+    this.loadChildren(node.entry.childPartId);
+  }
+
   private loadChildren(partId: number): void {
     if (this.childLines().has(partId) || this.loadingPartIds().has(partId)) return;
+    this.failedPartIds.update(ids => {
+      const next = new Set(ids);
+      next.delete(partId);
+      return next;
+    });
     this.loadingPartIds.update(ids => new Set(ids).add(partId));
     this.partsService.getPartById(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: part => {
@@ -96,7 +108,10 @@ export class BomTreeComponent {
         this.childLines.update(map => new Map(map).set(partId, lines));
         this.finishLoading(partId);
       },
-      error: () => this.finishLoading(partId),
+      error: () => {
+        this.failedPartIds.update(ids => new Set(ids).add(partId));
+        this.finishLoading(partId);
+      },
     });
   }
 
