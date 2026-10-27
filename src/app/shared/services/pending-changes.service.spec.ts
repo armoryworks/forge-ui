@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
-import { Observable, firstValueFrom, of } from 'rxjs';
+import { Observable, Subject, firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { pendingChangesGuard } from '../guards/pending-changes.guard';
@@ -58,6 +58,30 @@ describe('PendingChangesService', () => {
 
     expect(await firstValueFrom(service.confirmDiscard())).toBe(true);
     expect(open).not.toHaveBeenCalled();
+  });
+
+  it('asks once when several callers want to discard at the same time', () => {
+    TestBed.resetTestingModule();
+    const answer = new Subject<boolean>();
+    const open = vi.fn(() => ({ afterClosed: () => answer.asObservable() }));
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: MatDialog, useValue: { open } },
+      ],
+    });
+    const service = TestBed.inject(PendingChangesService);
+    service.set({}, true);
+    const results: boolean[] = [];
+
+    service.confirmDiscard().subscribe(r => results.push(r));
+    service.confirmDiscard().subscribe(r => results.push(r));
+    answer.next(true);
+    answer.complete();
+
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(results).toEqual([true, true]);
+    expect(service.hasPending()).toBe(false);
   });
 
   it('guards route deactivation with the same question', async () => {

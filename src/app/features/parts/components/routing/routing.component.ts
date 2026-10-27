@@ -139,9 +139,12 @@ export class RoutingComponent implements OnInit {
     });
   }
 
-  private refreshVersion(): void {
+  private refreshRouting(): void {
     this.partsService.getRoutingGraph(this.partId()).subscribe({
-      next: (graph) => this.version.set(graph.version),
+      next: (graph) => {
+        this.operations.set([...graph.operations].sort((a, b) => a.stepNumber - b.stepNumber));
+        this.version.set(graph.version);
+      },
     });
   }
 
@@ -180,7 +183,7 @@ export class RoutingComponent implements OnInit {
 
   protected onFlowSaved(operations: Operation[]): void {
     this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
-    this.refreshVersion();
+    this.refreshRouting();
   }
 
   protected toggleInstructions(operationId: number): void {
@@ -204,7 +207,7 @@ export class RoutingComponent implements OnInit {
       if (result) {
         this.operations.update(list => [...list, result].sort((a, b) => a.stepNumber - b.stepNumber));
         this.snackbar.success(this.translate.instant('parts.operationAdded'));
-        this.refreshVersion();
+        this.refreshRouting();
       }
     });
   }
@@ -216,7 +219,7 @@ export class RoutingComponent implements OnInit {
     }).afterClosed().subscribe((result: Operation[] | null | undefined) => {
       if (result) {
         this.operations.set([...result].sort((a, b) => a.stepNumber - b.stepNumber));
-        this.refreshVersion();
+        this.refreshRouting();
       }
     });
   }
@@ -259,7 +262,7 @@ export class RoutingComponent implements OnInit {
       next: (operations) => {
         this.operations.set([...operations].sort((a, b) => a.stepNumber - b.stepNumber));
         this.snackbar.success(this.translate.instant('parts.operationReordered'));
-        this.refreshVersion();
+        this.refreshRouting();
       },
       error: (err: unknown) => {
         if (isRoutingGraphStale(err)) {

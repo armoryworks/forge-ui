@@ -2,7 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, map, of, tap } from 'rxjs';
+import { Observable, finalize, map, of, shareReplay, tap } from 'rxjs';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../components/confirm-dialog/confirm-dialog.component';
 
@@ -17,6 +17,7 @@ export class PendingChangesService {
   private readonly translate = inject(TranslateService);
 
   private readonly holders = signal<ReadonlySet<object>>(new Set());
+  private prompt: Observable<boolean> | null = null;
 
   /** True while any holder has unsaved edits. */
   readonly hasPending = computed(() => this.holders().size > 0);
@@ -34,11 +35,13 @@ export class PendingChangesService {
 
   /**
    * Emits true straight away when nothing is unsaved; otherwise asks whether to discard the edits and emits the
-   * answer. Discarding clears every holder.
+   * answer. Discarding clears every holder. A second call while the question is open shares it instead of asking
+   * again.
    */
   confirmDiscard(): Observable<boolean> {
     if (!this.hasPending()) return of(true);
-    return this.dialog
+    if (this.prompt) return this.prompt;
+    const prompt = this.dialog
       .open(ConfirmDialogComponent, {
         width: '400px',
         data: {
@@ -55,6 +58,12 @@ export class PendingChangesService {
         tap(discard => {
           if (discard) this.holders.set(new Set());
         }),
+        finalize(() => {
+          if (this.prompt === prompt) this.prompt = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
+    this.prompt = prompt;
+    return prompt;
   }
 }

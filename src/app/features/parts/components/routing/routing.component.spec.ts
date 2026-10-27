@@ -107,7 +107,7 @@ describe('RoutingComponent — totals and copy', () => {
   it('shows the copied routing in step order once the copy dialog returns it', () => {
     const copied = [operation(12, 20, 1000, 0, 0), operation(11, 10, 1000, 0, 0)];
     const dialogOpen = vi.fn(() => ({ afterClosed: () => of(copied) }));
-    const component = setup(dialogOpen);
+    const component = setup(dialogOpen, { getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: copied })) });
 
     component.openCopyRouting();
 
@@ -133,8 +133,9 @@ describe('RoutingComponent — step links and gating', () => {
   }
 
   it('saves a drag as one reorder that keeps the step numbers', () => {
-    const reorderOperations = vi.fn(() => of([operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)]));
-    const component = setup(vi.fn(), { reorderOperations });
+    const saved = [operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)];
+    const reorderOperations = vi.fn(() => of(saved));
+    const component = setup(vi.fn(), { reorderOperations, getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: saved })) });
     component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
 
     component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
@@ -219,10 +220,11 @@ describe('RoutingComponent — flow editor', () => {
 
   it('switches without asking when nothing is unsaved, and takes the saved order from the editor', () => {
     const open = vi.fn();
-    const component = setup(open) as unknown as FlowInternals;
+    const saved = [operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)];
+    const component = setup(open, { getRoutingGraph: vi.fn(() => of({ version: 'v3', operations: saved })) }) as unknown as FlowInternals;
     component.showView('flow');
 
-    component.onFlowSaved([operation(2, 20, null, 0, 0), operation(1, 10, null, 0, 0)]);
+    component.onFlowSaved(saved);
     component.showView('list');
 
     expect(open).not.toHaveBeenCalled();
@@ -245,6 +247,18 @@ describe('RoutingComponent — overwrite protection, edit parity and dead ends',
     component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
 
     expect(reorderOperations).toHaveBeenCalledWith(7, { operationIds: [2, 1], removeConflictingPredecessors: false, routingVersion: 'v1' });
+  });
+
+  it('shows the routing the new version belongs to after a reorder', () => {
+    const reorderOperations = vi.fn(() => of([operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0)]));
+    const latest = [operation(2, 10, null, 0, 0), operation(1, 20, null, 0, 0), operation(3, 30, null, 0, 0)];
+    const component = setup(vi.fn(), { reorderOperations, getRoutingGraph: vi.fn(() => of({ version: 'v4', operations: latest })) });
+    component.operations.set([operation(1, 10, null, 0, 0), operation(2, 20, null, 0, 0)]);
+
+    component.onReorderOperation({ previousIndex: 1, currentIndex: 0 });
+
+    expect(component.version()).toBe('v4');
+    expect(component.operations().map(op => op.id)).toEqual([2, 1, 3]);
   });
 
   it('asks to reload when someone else changed the routing, and reloads it', () => {
