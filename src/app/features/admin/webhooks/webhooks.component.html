@@ -1,0 +1,167 @@
+<app-page-layout [pageTitle]="'webhooksAdmin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'webhooksAdmin.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="webhook-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'webhooksAdmin.newSubscription' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-webhooks"
+        [columns]="columns"
+        [data]="subscriptions()"
+        emptyIcon="webhook"
+        [emptyMessage]="'webhooksAdmin.empty' | translate">
+
+        <ng-template appColumnCell="url" let-row>
+          <div class="cell-stack">
+            <span class="mono">{{ row.url }}</span>
+            @if (row.description) {
+              <span class="muted">{{ row.description }}</span>
+            }
+          </div>
+        </ng-template>
+
+        <ng-template appColumnCell="events" let-row>
+          @for (event of events($any(row)); track event) {
+            <span class="chip chip--info">{{ event === '*' ? ('webhooksAdmin.allEvents' | translate) : event }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          <span class="chip" [class.chip--success]="row.isActive && row.failureCount === 0"
+            [class.chip--warning]="row.isActive && row.failureCount > 0" [class.chip--muted]="!row.isActive">
+            {{ statusKey($any(row)) | translate }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="lastDeliveredAt" let-row>
+          {{ row.lastDeliveredAt ? (row.lastDeliveredAt | dateTime) : '—' }}
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'webhooksAdmin.edit' | translate" [attr.title]="'webhooksAdmin.edit' | translate"
+            (click)="openEdit($any(row))" data-testid="webhook-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" [attr.aria-label]="'webhooksAdmin.test' | translate" [attr.title]="'webhooksAdmin.test' | translate"
+            [disabled]="testingId() === row.id || !row.isActive" (click)="test($any(row))" data-testid="webhook-test-btn">
+            <span class="material-icons-outlined" [class.spin]="testingId() === row.id">{{ testingId() === row.id ? 'sync' : 'send' }}</span>
+          </button>
+          <button class="icon-btn" [attr.aria-label]="'webhooksAdmin.deliveries' | translate" [attr.title]="'webhooksAdmin.deliveries' | translate"
+            (click)="openDeliveries($any(row))" data-testid="webhook-deliveries-btn">
+            <span class="material-icons-outlined">history</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [attr.title]="'common.delete' | translate"
+            (click)="confirmDelete($any(row))" data-testid="webhook-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showEditor()) {
+  <app-dialog [title]="(editing() ? 'webhooksAdmin.editSubscription' : 'webhooksAdmin.newSubscription') | translate"
+    width="560px" (closed)="closeEditor()">
+    <div [formGroup]="form" class="editor">
+      <app-input [label]="'webhooksAdmin.fieldUrl' | translate" formControlName="url" [required]="true"
+        [placeholder]="'webhooksAdmin.urlPlaceholder' | translate" data-testid="webhook-url" />
+      <app-input [label]="'webhooksAdmin.fieldDescription' | translate" formControlName="description" data-testid="webhook-description" />
+      <app-toggle [label]="'webhooksAdmin.fieldAllEvents' | translate" formControlName="allEvents" data-testid="webhook-all-events" />
+      @if (!form.controls.allEvents.value) {
+        <app-select [label]="'webhooksAdmin.fieldEvents' | translate" formControlName="eventTypes" [options]="eventOptions()"
+          [multiple]="true" data-testid="webhook-events" />
+      }
+      @if (form.hasError('events')) {
+        <p class="field-error">{{ 'webhooksAdmin.eventsRequired' | translate }}</p>
+      }
+      <app-input [label]="'webhooksAdmin.fieldMaxRetries' | translate" type="number" formControlName="maxRetries"
+        [min]="0" [max]="20" data-testid="webhook-max-retries" />
+      <app-toggle [label]="'webhooksAdmin.fieldAutoDisable' | translate" formControlName="autoDisableOnFailure" data-testid="webhook-auto-disable" />
+      <app-textarea [label]="'webhooksAdmin.fieldHeaders' | translate" formControlName="headersJson" [rows]="3"
+        [hint]="'webhooksAdmin.headersHint' | translate" data-testid="webhook-headers" />
+      @if (editing()) {
+        <app-toggle [label]="'webhooksAdmin.fieldActive' | translate" formControlName="isActive" data-testid="webhook-active" />
+        <app-toggle [label]="'webhooksAdmin.fieldRotateSecret' | translate" formControlName="rotateSecret" data-testid="webhook-rotate-secret" />
+      } @else {
+        <p class="note">{{ 'webhooksAdmin.secretNote' | translate }}</p>
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEditor()" data-testid="webhook-cancel-btn">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="webhook-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (revealedSecret(); as secret) {
+  <app-dialog [title]="'webhooksAdmin.secretTitle' | translate" width="520px" (closed)="closeSecret()">
+    <p class="note">{{ 'webhooksAdmin.secretShownOnce' | translate }}</p>
+    <div class="secret-box">
+      <code class="mono" data-testid="webhook-secret-value">{{ secret }}</code>
+      <button class="icon-btn" [attr.aria-label]="'webhooksAdmin.copySecret' | translate" [attr.title]="'webhooksAdmin.copySecret' | translate"
+        (click)="copySecret()" data-testid="webhook-secret-copy-btn">
+        <span class="material-icons-outlined">content_copy</span>
+      </button>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="closeSecret()" data-testid="webhook-secret-done-btn">{{ 'common.done' | translate }}</button>
+    </div>
+  </app-dialog>
+}
+
+@if (deliveriesFor(); as sub) {
+  <app-dialog [title]="('webhooksAdmin.deliveriesFor' | translate) + ' ' + sub.url" width="900px" (closed)="closeDeliveries()">
+    <div [appLoadingBlock]="deliveriesLoading()">
+      <app-data-table
+        tableId="admin-webhook-deliveries"
+        [columns]="deliveryColumns"
+        [data]="deliveries()"
+        emptyIcon="history"
+        [emptyMessage]="'webhooksAdmin.noDeliveries' | translate">
+
+        <ng-template appColumnCell="attemptedAt" let-row>{{ row.attemptedAt | dateTime }}</ng-template>
+
+        <ng-template appColumnCell="statusCode" let-row>
+          <span class="chip" [class.chip--success]="row.isSuccess" [class.chip--error]="!row.isSuccess">
+            {{ row.statusCode ?? ('webhooksAdmin.noResponse' | translate) }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="durationMs" let-row>{{ 'webhooksAdmin.durationMs' | translate: { ms: (row.durationMs | number: '1.0-0') } }}</ng-template>
+
+        <ng-template appColumnCell="detail" let-row>
+          <button class="link-btn" (click)="toggleDetail($any(row))" data-testid="webhook-delivery-detail-btn">
+            {{ (row.errorMessage ?? row.responseBody ?? '—') | slice: 0 : 60 }}
+          </button>
+          @if (expandedDeliveryId() === row.id) {
+            <pre class="response-body" data-testid="webhook-delivery-response">{{ row.errorMessage ? row.errorMessage + '\n' : '' }}{{ row.responseBody }}</pre>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'webhooksAdmin.redeliver' | translate" [attr.title]="'webhooksAdmin.redeliver' | translate"
+            [disabled]="redeliveringId() === row.id || !sub.isActive" (click)="redeliver($any(row))" data-testid="webhook-redeliver-btn">
+            <span class="material-icons-outlined" [class.spin]="redeliveringId() === row.id">{{ redeliveringId() === row.id ? 'sync' : 'replay' }}</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDeliveries()" data-testid="webhook-deliveries-close-btn">{{ 'common.close' | translate }}</button>
+    </div>
+  </app-dialog>
+}

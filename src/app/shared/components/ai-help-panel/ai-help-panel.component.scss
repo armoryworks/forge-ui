@@ -364,3 +364,14 @@
     background: color-mix(in srgb, var(--primary) 10%, var(--bg));
   }
 }
+
+.ai-help-panel__notice {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: $sp-sm 0;
+  padding: $sp-sm $sp-md;
+  border: 1px solid var(--warning);
+  font-size: $font-size-sm;
+  color: var(--text-primary);
+}

@@ -92,7 +92,7 @@ export class IntegrationConfigDialogComponent {
         // previous strict "=== 'True'" comparison rendered every saved-ON
         // toggle as OFF on reload (silent state corruption).
         ? field.value?.toLowerCase() === 'true'
-        : field.value;
+        : field.isSensitive ? '' : field.value;
       controls[this.controlName(field)] = new FormControl(value);
       this.originalValues.set(field.key, field.value ?? '');
     }
@@ -103,6 +103,10 @@ export class IntegrationConfigDialogComponent {
       entityId: this.data.integration.provider,
       route: '/admin/integrations',
     };
+  }
+
+  isSecretSet(field: IntegrationSettingField): boolean {
+    return field.isSensitive && !!field.value;
   }
 
   controlName(field: IntegrationSettingField): string {
@@ -132,7 +136,9 @@ export class IntegrationConfigDialogComponent {
     const settings: Record<string, string> = {};
     for (const field of this.fields) {
       const val = this.form.controls[this.controlName(field)]?.value;
-      settings[field.key] = val?.toString() ?? '';
+      const text = val?.toString() ?? '';
+      if (field.isSensitive && text === '') continue;
+      settings[field.key] = text;
     }
 
     // Detect mode changes BEFORE the request fires — comparing against the

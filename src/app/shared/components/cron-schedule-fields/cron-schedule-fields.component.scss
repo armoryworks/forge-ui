@@ -1,0 +1,15 @@
+@use 'styles/variables' as *;
+
+.cron-fields__preview {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0 0 $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  code {
+    font-family: var(--font-mono, $font-family-mono);
+    color: var(--text-muted);
+  }
+}

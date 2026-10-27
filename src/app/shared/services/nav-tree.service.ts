@@ -321,6 +321,10 @@ export class NavTreeService {
             { icon: 'smart_toy', label: 'AI Assistants', i18nKey: 'admin.tabs.aiAssistants', route: '/admin/ai-assistants', allowedRoles: ['Admin'] },
             { icon: 'auto_awesome', label: 'Auto-PO', i18nKey: 'admin.tabs.autoPo', route: '/admin/auto-po', allowedRoles: ['Admin'] },
             { icon: 'local_shipping', label: 'Carriers', i18nKey: 'admin.tabs.carriers', route: '/admin/carriers', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+            { icon: 'webhook', label: 'Webhooks', i18nKey: 'admin.tabs.webhooks', route: '/admin/webhooks', capability: 'CAP-CROSS-WEBHOOKS', allowedRoles: ['Admin'] },
+            { icon: 'cloud', label: 'Cloud Storage', i18nKey: 'admin.tabs.cloudStorage', route: '/admin/cloud-storage', capability: 'CAP-EXT-CLOUD-STORAGE', allowedRoles: ['Admin'] },
+            { icon: 'manage_search', label: 'AI Search Index', i18nKey: 'admin.tabs.aiIndex', route: '/admin/ai-index', capability: 'CAP-EXT-AI-ASSISTANT', allowedRoles: ['Admin'] },
+            { icon: 'sensors', label: 'Machine Connections', i18nKey: 'admin.tabs.machineConnections', route: '/admin/machine-connections', capability: 'CAP-MFG-MACHINE-CONNECT', allowedRoles: ['Admin', 'Manager'] },
           ],
         },
         {
@@ -328,6 +332,7 @@ export class NavTreeService {
           children: [
             { icon: 'auto_fix_high', label: 'Automations', i18nKey: 'admin.tabs.automations', route: '/admin/automations', allowedRoles: ['Admin'] },
             { icon: 'event', label: 'Events', i18nKey: 'admin.tabs.events', route: '/admin/events', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'event_repeat', label: 'Scheduled Tasks', i18nKey: 'admin.tabs.scheduledTasks', route: '/admin/scheduled-tasks', allowedRoles: ['Admin'] },
             { icon: 'campaign', label: 'Announcements', i18nKey: 'admin.tabs.announcements', route: '/admin/announcements', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', capability: 'CAP-QC-COMPLIANCE-FORMS', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },

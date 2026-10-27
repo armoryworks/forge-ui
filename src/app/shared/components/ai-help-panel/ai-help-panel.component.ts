@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { AiHelpMessage, AiService } from '../../services/ai.service';
+import { AiHelpMessage, AiService, AiStreamError } from '../../services/ai.service';
 import { AuthService } from '../../services/auth.service';
 import { TrainingContextCard } from '../training-context-panel/training-context-panel.component';
 import { trainingContentIcon } from '../../utils/training-content-icon';
@@ -35,6 +35,7 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
   readonly loading = signal(false);
   readonly open = signal(false);
   readonly streamingContent = signal<string>('');
+  readonly streamNoticeKey = signal<string | null>(null);
   protected readonly suggestedModules = signal<TrainingContextCard[]>([]);
 
   protected readonly inputControl = new FormControl('');
@@ -92,6 +93,7 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
     this.messages.update(msgs => [...msgs, userMessage]);
     this.loading.set(true);
     this.streamingContent.set('');
+    this.streamNoticeKey.set(null);
     this.scrollToBottom();
 
     const history = this.messages().slice(0, -1);
@@ -103,10 +105,12 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
           this.streamingContent.update(current => current + token);
           this.scrollToBottom();
         },
-        error: () => {
+        error: (err: unknown) => {
           // Fallback: if streaming fails, push whatever we accumulated (or error message)
           const accumulated = this.streamingContent();
-          const content = accumulated || this.translate.instant('aiHelp.errorMessage');
+          const noticeKey = AiHelpPanelComponent.streamNoticeKeyFor(err);
+          this.streamNoticeKey.set(accumulated ? noticeKey : null);
+          const content = accumulated || this.translate.instant(noticeKey ?? 'aiHelp.errorMessage');
           const assistantMessage: AiHelpMessage = { role: 'assistant', content };
           this.messages.update(msgs => {
             const updated = [...msgs, assistantMessage].slice(-MAX_STORED_MESSAGES);
@@ -135,6 +139,11 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
           }
         },
       });
+  }
+
+  static streamNoticeKeyFor(err: unknown): string | null {
+    if (!(err instanceof AiStreamError)) return null;
+    return err.code === 'ai-stream-stalled' ? 'aiHelp.streamStalled' : 'aiHelp.streamFailed';
   }
 
   private loadSuggestedModules(): void {

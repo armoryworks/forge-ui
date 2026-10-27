@@ -1,0 +1,101 @@
+<app-page-layout [pageTitle]="'scheduledTasksAdmin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'scheduledTasksAdmin.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="scheduled-task-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'scheduledTasksAdmin.newTask' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-scheduled-tasks"
+        [columns]="columns"
+        [data]="tasks()"
+        emptyIcon="event_repeat"
+        [emptyMessage]="'scheduledTasksAdmin.empty' | translate">
+
+        <ng-template appColumnCell="schedule" let-row>
+          <div class="cell-stack">
+            <span>{{ scheduleText($any(row)) }}</span>
+            <code class="muted">{{ row.cronExpression }}</code>
+          </div>
+        </ng-template>
+
+        <ng-template appColumnCell="nextRunAt" let-row>
+          {{ row.isActive && row.nextRunAt ? (row.nextRunAt | dateTime) : '—' }}
+        </ng-template>
+
+        <ng-template appColumnCell="lastRunAt" let-row>
+          {{ row.lastRunAt ? (row.lastRunAt | dateTime) : ('scheduledTasksAdmin.neverRun' | translate) }}
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'scheduledTasksAdmin.pausedChip' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'scheduledTasksAdmin.runNow' | translate" [attr.title]="'scheduledTasksAdmin.runNow' | translate"
+            [disabled]="busyId() === row.id" (click)="runNow($any(row))" data-testid="scheduled-task-run-btn">
+            <span class="material-icons-outlined">play_arrow</span>
+          </button>
+          <button class="icon-btn"
+            [attr.aria-label]="(row.isActive ? 'scheduledTasksAdmin.pause' : 'scheduledTasksAdmin.resume') | translate"
+            [attr.title]="(row.isActive ? 'scheduledTasksAdmin.pause' : 'scheduledTasksAdmin.resume') | translate"
+            [disabled]="busyId() === row.id" (click)="toggleActive($any(row))" data-testid="scheduled-task-toggle-btn">
+            <span class="material-icons-outlined">{{ row.isActive ? 'pause' : 'play_circle' }}</span>
+          </button>
+          <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [attr.title]="'common.edit' | translate"
+            (click)="openEdit($any(row))" data-testid="scheduled-task-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [attr.title]="'common.delete' | translate"
+            (click)="confirmDelete($any(row))" data-testid="scheduled-task-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showEditor()) {
+  <app-dialog [title]="(editing() ? 'scheduledTasksAdmin.editTask' : 'scheduledTasksAdmin.newTask') | translate"
+    width="520px" (closed)="closeEditor()">
+    <div [formGroup]="form">
+      <app-input [label]="'scheduledTasksAdmin.fieldName' | translate" formControlName="name" [required]="true" data-testid="scheduled-task-name" />
+      <app-textarea [label]="'scheduledTasksAdmin.fieldDescription' | translate" formControlName="description" [rows]="2"
+        data-testid="scheduled-task-description" />
+      <app-select [label]="'scheduledTasksAdmin.fieldTaskType' | translate" formControlName="trackTypeId" [options]="trackTypeOptions()"
+        [required]="true" data-testid="scheduled-task-track-type" />
+      <app-select [label]="'scheduledTasksAdmin.fieldProjectType' | translate" formControlName="internalProjectTypeId"
+        [options]="projectTypeOptions()" data-testid="scheduled-task-project-type" />
+      <app-select [label]="'scheduledTasksAdmin.fieldAssignee' | translate" formControlName="assigneeId" [options]="assigneeOptions()"
+        data-testid="scheduled-task-assignee" />
+    </div>
+    <app-cron-schedule-fields [group]="scheduleForm" testIdPrefix="scheduled-task-schedule" />
+    @if (editing()) {
+      <div [formGroup]="form">
+        <app-toggle [label]="'scheduledTasksAdmin.fieldActive' | translate" formControlName="isActive" data-testid="scheduled-task-active" />
+      </div>
+    }
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEditor()" data-testid="scheduled-task-cancel-btn">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="form.invalid || scheduleForm.invalid || saving()" (click)="save()"
+          data-testid="scheduled-task-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

@@ -10,6 +10,7 @@ import {
   RunReportResponse,
 } from '../models/report-builder.model';
 import { CreateSavedReportRequest } from '../models/create-saved-report-request.model';
+import { CreateReportScheduleRequest, ReportSchedule, ReportScheduleRunResult } from '../models/report-schedule.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportBuilderService {
@@ -70,5 +71,21 @@ export class ReportBuilderService {
     sortDirection?: string;
   }): Observable<RunReportResponse> {
     return this.http.post<RunReportResponse>(`${this.API}/run`, params);
+  }
+
+  getSchedules(): Observable<ReportSchedule[]> {
+    return this.http.get<ReportSchedule[]>(`${this.API}/schedules`);
+  }
+
+  createSchedule(request: CreateReportScheduleRequest): Observable<ReportSchedule> {
+    return this.http.post<ReportSchedule>(`${this.API}/schedules`, request);
+  }
+
+  runScheduleNow(id: number): Observable<ReportScheduleRunResult> {
+    return this.http.post<ReportScheduleRunResult>(`${this.API}/schedules/${id}/run`, {});
+  }
+
+  deleteSchedule(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API}/schedules/${id}`);
   }
 }

@@ -32,6 +32,8 @@ import {
   RunReportResponse,
 } from '../../models/report-builder.model';
 import { SaveReportDialogComponent, SaveReportDialogData } from '../save-report-dialog/save-report-dialog.component';
+import { ReportSchedulesDialogComponent, ReportSchedulesDialogData } from '../report-schedules-dialog/report-schedules-dialog.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 interface FilterRow {
@@ -76,6 +78,9 @@ export class ReportBuilderComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canSchedule = computed(() => this.auth.hasRole('Admin') || this.auth.hasRole('Manager'));
 
   // Form controls
   protected readonly entityControl = new FormControl<string>('', { nonNullable: true });
@@ -434,6 +439,15 @@ export class ReportBuilderComponent {
 
   protected clearDrillFilter(): void {
     this.drillFilter.set(null);
+  }
+
+  protected openSchedules(): void {
+    const report = this.editingReport();
+    if (!report) return;
+    this.dialog.open(ReportSchedulesDialogComponent, {
+      width: '620px',
+      data: { reportId: report.id, reportName: report.name } satisfies ReportSchedulesDialogData,
+    });
   }
 
   protected openSaveDialog(): void {

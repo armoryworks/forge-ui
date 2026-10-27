@@ -1,0 +1,136 @@
+<app-page-layout [pageTitle]="'machineConnectionsAdmin.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'machineConnectionsAdmin.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="machine-connection-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'machineConnectionsAdmin.newConnection' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-machine-connections"
+        [columns]="columns"
+        [data]="connections()"
+        emptyIcon="sensors"
+        [emptyMessage]="'machineConnectionsAdmin.empty' | translate">
+
+        <ng-template appColumnCell="name" let-row>
+          <div class="cell-stack">
+            <span>{{ row.name }}</span>
+            @if (!row.isActive) {
+              <span class="muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </div>
+        </ng-template>
+
+        <ng-template appColumnCell="opcUaEndpoint" let-row><span class="mono">{{ row.opcUaEndpoint }}</span></ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="'chip ' + statusClass($any(row))" [attr.title]="row.lastError ?? ''">
+            {{ ('machineConnectionsAdmin.status.' + row.status) | translate }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="lastDataPointAt" let-row>
+          {{ row.lastDataPointAt ? (row.lastDataPointAt | dateTime) : ('machineConnectionsAdmin.noData' | translate) }}
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [attr.title]="'common.edit' | translate"
+            (click)="openEdit($any(row))" data-testid="machine-connection-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" [attr.aria-label]="'machineConnectionsAdmin.test' | translate" [attr.title]="'machineConnectionsAdmin.test' | translate"
+            [disabled]="testingId() === row.id" (click)="test($any(row))" data-testid="machine-connection-test-btn">
+            <span class="material-icons-outlined" [class.spin]="testingId() === row.id">{{ testingId() === row.id ? 'sync' : 'wifi_tethering' }}</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showEditor()) {
+  <app-dialog [title]="(editing() ? 'machineConnectionsAdmin.editConnection' : 'machineConnectionsAdmin.newConnection') | translate"
+    width="860px" (closed)="closeEditor()">
+    <div [formGroup]="form">
+      <p class="note">{{ 'machineConnectionsAdmin.protocolNote' | translate }}</p>
+      <div class="grid">
+        <app-input [label]="'machineConnectionsAdmin.fieldName' | translate" formControlName="name" [required]="true"
+          data-testid="machine-connection-name" />
+        <app-select [label]="'machineConnectionsAdmin.fieldWorkCenter' | translate" formControlName="workCenterId"
+          [options]="workCenterOptions()" [required]="true" data-testid="machine-connection-work-center" />
+        <app-input [label]="'machineConnectionsAdmin.fieldEndpoint' | translate" formControlName="opcUaEndpoint" [required]="true"
+          [placeholder]="'machineConnectionsAdmin.endpointPlaceholder' | translate" data-testid="machine-connection-endpoint" />
+        <app-input [label]="'machineConnectionsAdmin.fieldPollInterval' | translate" type="number" formControlName="pollIntervalMs"
+          [min]="100" [suffix]="'machineConnectionsAdmin.msSuffix' | translate" data-testid="machine-connection-poll" />
+        <app-select [label]="'machineConnectionsAdmin.fieldSecurity' | translate" formControlName="securityPolicy"
+          [options]="securityOptions" data-testid="machine-connection-security" />
+        <app-select [label]="'machineConnectionsAdmin.fieldAuth' | translate" formControlName="authType"
+          [options]="authOptions" data-testid="machine-connection-auth" />
+        @if (form.controls.authType.value !== 'Anonymous') {
+          <app-input [label]="'machineConnectionsAdmin.fieldCredentials' | translate" type="password" formControlName="credentials"
+            [placeholder]="(editing()?.credentialsConfigured ? 'machineConnectionsAdmin.credentialsKeep' : 'machineConnectionsAdmin.credentialsPlaceholder') | translate"
+            data-testid="machine-connection-credentials" />
+        }
+        @if (editing()) {
+          <app-toggle [label]="'machineConnectionsAdmin.fieldActive' | translate" formControlName="isActive" data-testid="machine-connection-active" />
+        }
+      </div>
+
+      <div class="tags-header">
+        <h4>{{ 'machineConnectionsAdmin.tagMap' | translate }}</h4>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--sm" (click)="addTag()" data-testid="machine-tag-add-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'machineConnectionsAdmin.addTag' | translate }}
+        </button>
+      </div>
+      @if (duplicateNodeIds()) {
+        <p class="error-text">{{ 'machineConnectionsAdmin.duplicateNode' | translate }}</p>
+      }
+      <div formArrayName="tags">
+        @for (tag of tags.controls; track tag; let i = $index) {
+          <div class="tag-row" [formGroupName]="i" data-testid="machine-tag-row">
+            <app-input [label]="'machineConnectionsAdmin.fieldTagName' | translate" formControlName="tagName" [required]="true"
+              data-testid="machine-tag-name" />
+            <app-input [label]="'machineConnectionsAdmin.fieldNodeId' | translate" formControlName="opcNodeId" [required]="true"
+              [placeholder]="'machineConnectionsAdmin.nodePlaceholder' | translate" data-testid="machine-tag-node" />
+            <app-select [label]="'machineConnectionsAdmin.fieldDataType' | translate" formControlName="dataType"
+              [options]="dataTypeOptions" data-testid="machine-tag-type" />
+            <app-input [label]="'machineConnectionsAdmin.fieldUnit' | translate" formControlName="unit" data-testid="machine-tag-unit" />
+            <app-input [label]="'machineConnectionsAdmin.fieldWarnLow' | translate" type="number" formControlName="warningThresholdLow"
+              data-testid="machine-tag-warn-low" />
+            <app-input [label]="'machineConnectionsAdmin.fieldWarnHigh' | translate" type="number" formControlName="warningThresholdHigh"
+              data-testid="machine-tag-warn-high" />
+            <app-input [label]="'machineConnectionsAdmin.fieldAlarmLow' | translate" type="number" formControlName="alarmThresholdLow"
+              data-testid="machine-tag-alarm-low" />
+            <app-input [label]="'machineConnectionsAdmin.fieldAlarmHigh' | translate" type="number" formControlName="alarmThresholdHigh"
+              data-testid="machine-tag-alarm-high" />
+            <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.remove' | translate" [attr.title]="'common.remove' | translate"
+              (click)="removeTag(i)" data-testid="machine-tag-remove-btn">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        } @empty {
+          <p class="muted">{{ 'machineConnectionsAdmin.noTags' | translate }}</p>
+        }
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEditor()" data-testid="machine-connection-cancel-btn">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="form.invalid || duplicateNodeIds() || saving()" (click)="save()"
+          data-testid="machine-connection-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

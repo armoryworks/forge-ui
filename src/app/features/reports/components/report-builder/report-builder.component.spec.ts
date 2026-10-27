@@ -11,6 +11,8 @@ import { ReportBuilderComponent } from './report-builder.component';
 import { ReportBuilderService } from '../../services/report-builder.service';
 import { ReportEntityDefinition } from '../../models/report-builder.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { ReportSchedulesDialogComponent } from '../report-schedules-dialog/report-schedules-dialog.component';
 
 interface BuilderInternals {
   entityControl: FormControl<string>;
@@ -23,6 +25,8 @@ interface BuilderInternals {
   runReport(): void;
   runError(): boolean;
   reportResults(): unknown;
+  canSchedule(): boolean;
+  openSchedules(): void;
 }
 
 describe('ReportBuilderComponent', () => {
@@ -30,6 +34,7 @@ describe('ReportBuilderComponent', () => {
   let dialogOpen: ReturnType<typeof vi.fn>;
   let deleteReport: ReturnType<typeof vi.fn>;
   let runReport: ReturnType<typeof vi.fn>;
+  let roles: string[];
 
   const jobs = { entitySource: 'Jobs', label: 'Jobs', fields: [{ field: 'jobNumber', label: 'Job #' }] } as unknown as ReportEntityDefinition;
 
@@ -37,6 +42,7 @@ describe('ReportBuilderComponent', () => {
     dialogOpen = vi.fn();
     deleteReport = vi.fn(() => of(undefined));
     runReport = vi.fn();
+    roles = ['Admin'];
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -55,6 +61,7 @@ describe('ReportBuilderComponent', () => {
         },
         { provide: MatDialog, useValue: { open: dialogOpen } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: AuthService, useValue: { hasRole: (role: string) => roles.includes(role) } },
       ],
     });
     builder = TestBed.runInInjectionContext(() => new ReportBuilderComponent()) as unknown as BuilderInternals;
@@ -111,5 +118,22 @@ describe('ReportBuilderComponent', () => {
 
     expect(builder.reportResults()).toBeNull();
     expect(builder.runError()).toBe(true);
+  });
+
+  it('opens the schedules for the saved report', () => {
+    builder.editingReport.set({ id: 3, name: 'Weekly jobs' });
+
+    builder.openSchedules();
+
+    expect(builder.canSchedule()).toBe(true);
+    expect(dialogOpen).toHaveBeenCalledWith(ReportSchedulesDialogComponent, expect.objectContaining({
+      data: { reportId: 3, reportName: 'Weekly jobs' },
+    }));
+  });
+
+  it('hides scheduling from roles the schedules API refuses', () => {
+    roles = ['PM'];
+
+    expect(builder.canSchedule()).toBe(false);
   });
 });

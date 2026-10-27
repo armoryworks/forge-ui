@@ -41,6 +41,12 @@
           }
         </div>
       }
+      @if (streamNoticeKey(); as noticeKey) {
+        <div class="ai-help-panel__notice" role="status" data-testid="ai-help-stream-notice">
+          <span class="material-icons-outlined">warning_amber</span>
+          <span>{{ noticeKey | translate }}</span>
+        </div>
+      }
       @if (loading()) {
         <div class="ai-help-msg ai-help-msg--assistant">
           <span class="material-icons-outlined ai-help-msg__avatar">smart_toy</span>

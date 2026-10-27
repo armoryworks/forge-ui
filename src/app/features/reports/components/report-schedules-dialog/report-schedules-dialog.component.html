@@ -1,0 +1,64 @@
+<app-dialog [title]="('reportSchedules.title' | translate) + ' — ' + data.reportName" width="620px" (closed)="close()">
+  <section class="schedules" data-testid="report-schedules-list">
+    @if (loading()) {
+      <p class="muted">{{ 'common.loading' | translate }}</p>
+    } @else {
+      @for (row of schedules(); track row.id) {
+        <div class="schedule" data-testid="report-schedule-row">
+          <div class="schedule__main">
+            <strong>{{ scheduleText(row) }}</strong>
+            <span class="muted">{{ row.format }} · {{ recipients(row) }}</span>
+            <span class="muted">
+              {{ 'reportSchedules.nextRun' | translate }}: {{ row.nextRunAt ? (row.nextRunAt | dateTime) : '—' }}
+              · {{ 'reportSchedules.lastSent' | translate }}: {{ row.lastSentAt ? (row.lastSentAt | dateTime) : ('reportSchedules.neverSent' | translate) }}
+            </span>
+          </div>
+          <button class="icon-btn" [attr.aria-label]="'reportSchedules.runNow' | translate" [attr.title]="'reportSchedules.runNow' | translate"
+            [disabled]="busyId() === row.id" (click)="runNow(row)" data-testid="report-schedule-run-btn">
+            <span class="material-icons-outlined">send</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [attr.title]="'common.delete' | translate"
+            [disabled]="busyId() === row.id" (click)="remove(row)" data-testid="report-schedule-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+      } @empty {
+        <p class="muted">{{ 'reportSchedules.empty' | translate }}</p>
+      }
+    }
+  </section>
+
+  @if (adding()) {
+    <section class="new-schedule" data-testid="report-schedule-form">
+      <h4>{{ 'reportSchedules.newSchedule' | translate }}</h4>
+      <app-cron-schedule-fields [group]="scheduleForm" testIdPrefix="report-schedule" />
+      <div [formGroup]="form">
+        <app-select [label]="'reportSchedules.fieldFormat' | translate" formControlName="format" [options]="formatOptions"
+          [required]="true" data-testid="report-schedule-format" />
+        <app-textarea [label]="'reportSchedules.fieldRecipients' | translate" formControlName="recipients" [rows]="2"
+          [hint]="'reportSchedules.recipientsHint' | translate" [required]="true" data-testid="report-schedule-recipients" />
+        <app-input [label]="'reportSchedules.fieldSubject' | translate" formControlName="subjectTemplate"
+          data-testid="report-schedule-subject" />
+      </div>
+    </section>
+  }
+
+  <div dialog-footer>
+    @if (adding()) {
+      <button class="action-btn" (click)="cancelAdding()" data-testid="report-schedule-cancel-btn">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="form.invalid || scheduleForm.invalid || saving()" (click)="save()"
+          data-testid="report-schedule-save-btn">
+          <span class="material-icons-outlined">schedule_send</span>
+          {{ 'reportSchedules.save' | translate }}
+        </button>
+      </app-validation-button>
+    } @else {
+      <button class="action-btn" (click)="startAdding()" data-testid="report-schedule-add-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'reportSchedules.newSchedule' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary" (click)="close()" data-testid="report-schedules-close-btn">{{ 'common.close' | translate }}</button>
+    }
+  </div>
+</app-dialog>

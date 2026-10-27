@@ -257,6 +257,39 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./database/database-transfer.component').then((m) => m.DatabaseTransferComponent),
   },
+  {
+    path: 'webhooks',
+    data: { titleKey: 'admin.tabs.webhooks' },
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-CROSS-WEBHOOKS')],
+    loadComponent: () => import('./webhooks/webhooks.component').then((m) => m.WebhooksComponent),
+  },
+  {
+    path: 'scheduled-tasks',
+    data: { titleKey: 'admin.tabs.scheduledTasks' },
+    canActivate: [roleGuard('Admin')],
+    loadComponent: () =>
+      import('./scheduled-tasks/scheduled-tasks.component').then((m) => m.ScheduledTasksComponent),
+  },
+  {
+    path: 'cloud-storage',
+    data: { titleKey: 'admin.tabs.cloudStorage' },
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-EXT-CLOUD-STORAGE')],
+    loadComponent: () =>
+      import('./cloud-storage/cloud-storage.component').then((m) => m.CloudStorageComponent),
+  },
+  {
+    path: 'ai-index',
+    data: { titleKey: 'admin.tabs.aiIndex' },
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-EXT-AI-ASSISTANT')],
+    loadComponent: () => import('./ai-index/ai-index.component').then((m) => m.AiIndexComponent),
+  },
+  {
+    path: 'machine-connections',
+    data: { titleKey: 'admin.tabs.machineConnections' },
+    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-MFG-MACHINE-CONNECT')],
+    loadComponent: () =>
+      import('./machine-connections/machine-connections.component').then((m) => m.MachineConnectionsComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

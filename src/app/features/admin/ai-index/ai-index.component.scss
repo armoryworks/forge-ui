@@ -1,0 +1,46 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.toolbar__hint,
+.muted {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+  margin-bottom: $sp-md;
+}
+
+.progress {
+  position: relative;
+  height: 24px;
+  margin-bottom: $sp-md;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.progress__bar {
+  height: 100%;
+  background: var(--primary);
+  opacity: 0.25;
+  transition: width 0.3s ease;
+}
+
+.progress__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 $sp-md;
+  font-size: $font-size-sm;
+}

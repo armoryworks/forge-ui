@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { isCapabilityDisabledError } from '../errors/capability-disabled.error';
 import { SILENT_HTTP_ERRORS } from '../interceptors/silent-http-errors.token';
 import { RagSearchResponse } from '../models/rag-search-response.model';
+import { AiIndexStatus } from '../models/ai-index-status.model';
 import { CapabilityService } from './capability.service';
 
 export interface AiGenerateRequest {
@@ -48,6 +49,13 @@ export interface AiHelpRequest {
 
 export interface AiHelpResponse {
   answer: string;
+}
+
+export class AiStreamError extends Error {
+  constructor(readonly code: string) {
+    super(code);
+    this.name = 'AiStreamError';
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -144,6 +152,7 @@ export class AiService {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
+        let eventName = '';
 
         const pump = (): Promise<void> =>
           reader.read().then(({ done, value }) => {
@@ -157,8 +166,21 @@ export class AiService {
             buffer = lines.pop() ?? '';
 
             for (const line of lines) {
+              if (line === '') {
+                eventName = '';
+                continue;
+              }
+              if (line.startsWith('event: ')) {
+                eventName = line.slice(7).trim();
+                continue;
+              }
               if (!line.startsWith('data: ')) continue;
               const payload = line.slice(6);
+              if (eventName === 'error') {
+                subscriber.error(new AiStreamError(AiService.streamErrorCode(payload)));
+                void reader.cancel();
+                return;
+              }
               if (payload === '[DONE]') {
                 subscriber.complete();
                 return;
@@ -182,6 +204,15 @@ export class AiService {
     });
   }
 
+  static streamErrorCode(payload: string): string {
+    try {
+      const parsed = JSON.parse(payload) as { code?: unknown };
+      return typeof parsed.code === 'string' ? parsed.code : 'ai-stream-failed';
+    } catch {
+      return 'ai-stream-failed';
+    }
+  }
+
   ragSearch(query: string, entityTypeFilter?: string, includeAnswer = false): Observable<RagSearchResponse> {
     return this.http.post<RagSearchResponse>(`${this.base}/search`, {
       query,
@@ -192,6 +223,14 @@ export class AiService {
 
   ragHelpChat(message: string, conversationHistory?: string[]): Observable<string> {
     return this.http.post(`${this.base}/help`, { message, conversationHistory }, { responseType: 'text' });
+  }
+
+  indexStatus(): Observable<AiIndexStatus> {
+    return this.http.get<AiIndexStatus>(`${this.base}/index/status`);
+  }
+
+  bulkIndex(entityType?: string): Observable<{ totalChunksIndexed: number }> {
+    return this.http.post<{ totalChunksIndexed: number }>(`${this.base}/bulk-index`, { entityType: entityType ?? null });
   }
 
   indexDocument(entityType: string, entityId: number): Observable<number> {
