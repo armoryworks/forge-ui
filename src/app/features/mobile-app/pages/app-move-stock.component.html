@@ -1,4 +1,10 @@
 <div class="move" data-testid="mobile-app-move-stock">
+  @if (physicalCountOn()) {
+    <a class="move__count-link" routerLink="/app/count" data-testid="move-physical-count">
+      <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
+      {{ 'mobileApp.physicalCount.open' | translate }}
+    </a>
+  }
   <ol class="move__steps" [attr.aria-label]="'mobileApp.move.stepsLabel' | translate">
     <li class="move__step" [class.move__step--done]="part()" [class.move__step--active]="step() === 'part'">
       <span class="move__step-label">{{ 'mobileApp.move.part' | translate }}</span>

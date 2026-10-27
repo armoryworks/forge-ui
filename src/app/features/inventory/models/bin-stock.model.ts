@@ -12,4 +12,6 @@ export interface BinStock {
   lotId: number | null;
   lotExpirationDate: string | null;
   supplierLotNumber: string | null;
+  ownerVendorId?: number | null;
+  ownerVendorName?: string | null;
 }

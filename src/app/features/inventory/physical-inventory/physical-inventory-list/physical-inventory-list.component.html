@@ -1,0 +1,40 @@
+<app-page-header [title]="'physicalInventory.title' | translate" [subtitle]="'physicalInventory.subtitle' | translate" />
+
+<div class="page-header">
+  <app-select [label]="'common.status' | translate" [formControl]="statusControl" [options]="statusOptions" data-testid="pi-status-filter" />
+  <span class="page-header__spacer"></span>
+  @if (canManage()) {
+    <button class="action-btn action-btn--create" type="button" data-testid="pi-new-btn" (click)="showCreate.set(true)">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'physicalInventory.new' | translate }}
+    </button>
+  }
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="physical-inventories"
+    [columns]="columns"
+    [data]="inventories()"
+    emptyIcon="fact_check"
+    [emptyMessage]="'physicalInventory.empty' | translate"
+    [clickableRows]="true"
+    (rowClick)="open($event)">
+    <ng-template appColumnCell="scopeLocationName" let-row>
+      {{ row.scopeLocationName ?? ('physicalInventory.wholeSite' | translate) }}
+    </ng-template>
+    <ng-template appColumnCell="progress" let-row>
+      {{ row.countedTagCount }} / {{ row.tagCount }}
+    </ng-template>
+    <ng-template appColumnCell="totalVarianceValue" let-row>
+      <app-currency-display [value]="row.totalVarianceValue" />
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="statusClass(row.status)">{{ ('physicalInventory.status.' + row.status) | translate }}</span>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showCreate()) {
+  <app-physical-inventory-create-dialog (closed)="showCreate.set(false)" (created)="onCreated($event)" />
+}

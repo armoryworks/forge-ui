@@ -1,0 +1,39 @@
+<app-dialog [title]="(editing() ? 'consignment.editTitle' : 'consignment.newTitle') | translate" width="520px" (closed)="closed.emit()">
+  <div class="ca-form" [formGroup]="form">
+    @if (agreement(); as a) {
+      <p class="ca-form__fixed" data-testid="ca-fixed">{{ a.vendorName }} · {{ a.partNumber }}</p>
+    } @else {
+      <app-entity-picker [label]="'consignment.vendor' | translate" entityType="vendors" displayField="companyName"
+        formControlName="vendorId" [required]="true" data-testid="ca-vendor" />
+      <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+        formControlName="partId" [required]="true" data-testid="ca-part" />
+    }
+    <app-currency-input [label]="'consignment.agreedPrice' | translate" formControlName="agreedUnitPrice" [required]="true"
+      data-testid="ca-price" />
+    <div class="dialog-row">
+      <app-input [label]="'consignment.minStock' | translate" type="number" min="0" formControlName="minStockQuantity" data-testid="ca-min" />
+      <app-input [label]="'consignment.maxStock' | translate" type="number" min="0" formControlName="maxStockQuantity" data-testid="ca-max" />
+    </div>
+    <div class="dialog-row">
+      <app-datepicker [label]="'consignment.effectiveFrom' | translate" formControlName="effectiveFrom" [required]="true" data-testid="ca-from" />
+      <app-datepicker [label]="'consignment.effectiveTo' | translate" formControlName="effectiveTo" data-testid="ca-to" />
+    </div>
+    <app-input [label]="'consignment.reconcileEvery' | translate" type="number" min="1" formControlName="reconciliationFrequencyDays"
+      [required]="true" data-testid="ca-frequency" />
+    <app-toggle [label]="'consignment.invoiceOnConsumption' | translate" formControlName="invoiceOnConsumption" data-testid="ca-invoice-on-use" />
+    @if (editing()) {
+      <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions" data-testid="ca-status" />
+    }
+    <app-textarea [label]="'consignment.terms' | translate" formControlName="terms" data-testid="ca-terms" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="ca-cancel" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="ca-save"
+        [disabled]="form.invalid || saving()" (click)="submit()">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

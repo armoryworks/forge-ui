@@ -554,6 +554,7 @@ export class InventoryComponent {
       QcRelease: 'qcReleased', Ship: 'shipped', Move: 'moved',
       Adjustment: 'adjusted', Return: 'returned',
       Transfer: 'transferred', CycleCount: 'cycleCount',
+      PhysicalInventory: 'physicalInventory', ConsignmentConsume: 'consignmentConsume',
     };
     const key = keys[reason];
     return key ? this.translate.instant(`inventory.reasons.${key}`) : reason;

@@ -57,6 +57,12 @@ export const MOBILE_APP_ROUTES: Routes = [
         loadComponent: () => import('./pages/app-receive.component').then((m) => m.AppReceiveComponent),
       },
       {
+        path: 'count',
+        data: { titleKey: 'mobileApp.physicalCount.title' },
+        canActivate: [mobileScreenGuard('CAP-MOBILE-STOCK'), mobileScreenGuard('CAP-INV-PHYSICAL')],
+        loadComponent: () => import('./pages/app-physical-count.component').then((m) => m.AppPhysicalCountComponent),
+      },
+      {
         path: 'jobs',
         data: { titleKey: 'mobileApp.tabs.jobs' },
         canActivate: [mobileScreenGuard('CAP-MOBILE-JOBS')],

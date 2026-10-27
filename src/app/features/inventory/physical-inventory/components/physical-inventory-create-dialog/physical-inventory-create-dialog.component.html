@@ -1,0 +1,26 @@
+<app-dialog [title]="'physicalInventory.newTitle' | translate" width="520px" (closed)="closed.emit()">
+  <div class="pi-create" [formGroup]="form">
+    <app-input [label]="'common.description' | translate" formControlName="description" [maxlength]="200"
+      [placeholder]="'physicalInventory.descriptionPlaceholder' | translate" data-testid="pi-create-description" />
+    <app-select [label]="'physicalInventory.scope' | translate" formControlName="scopeLocationId" [options]="scopeOptions()"
+      data-testid="pi-create-scope" />
+    <app-datepicker [label]="'physicalInventory.countDate' | translate" formControlName="countDate" [required]="true"
+      data-testid="pi-create-count-date" />
+    <app-input [label]="'physicalInventory.recountTolerance' | translate" type="number" formControlName="recountTolerancePercent"
+      min="0" max="100" step="0.5" data-testid="pi-create-tolerance" />
+    <p class="pi-create__hint">{{ 'physicalInventory.recountToleranceHint' | translate }}</p>
+    <app-toggle [label]="'physicalInventory.blindCount' | translate" formControlName="blindCount" data-testid="pi-create-blind" />
+    <p class="pi-create__hint">{{ 'physicalInventory.blindCountHint' | translate }}</p>
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="pi-create-notes" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="pi-create-cancel" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="pi-create-submit"
+        [disabled]="form.invalid || saving()" (click)="submit()">
+        <span class="material-icons-outlined" aria-hidden="true">add</span>
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

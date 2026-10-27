@@ -134,6 +134,7 @@ export class NavTreeService {
         { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', capability: 'CAP-MD-VENDORS', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
         { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', capability: 'CAP-P2P-RFQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
+        { icon: 'handshake', label: 'Consignment', i18nKey: 'nav.consignment', route: '/inventory/consignment', capability: 'CAP-MD-CONTRACTS-CONSIGNMENT', allowedRoles: ['Admin', 'Manager', 'OfficeManager', 'Engineer'] },
         { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
@@ -143,6 +144,7 @@ export class NavTreeService {
       icon: 'inventory_2', label: 'Inventory', i18nKey: 'navGroups.inventory',
       children: [
         { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'fact_check', label: 'Physical Inventory', i18nKey: 'nav.physicalInventory', route: '/inventory/physical-inventory', capability: 'CAP-INV-PHYSICAL', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
       ],
     },
 

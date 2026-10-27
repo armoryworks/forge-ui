@@ -14,4 +14,6 @@ export interface BinContentItem {
   jobNumber: string | null;
   status: BinContentStatus;
   placedAt: Date;
+  ownerVendorId?: number | null;
+  ownerVendorName?: string | null;
 }

@@ -1,0 +1,65 @@
+<div class="count" data-testid="mobile-app-physical-count">
+  @if (loading()) {
+    <p class="count__hint" role="status">{{ 'common.loading' | translate }}</p>
+  } @else if (inventories().length === 0) {
+    <p class="count__hint" role="status" data-testid="count-none">{{ 'mobileApp.physicalCount.none' | translate }}</p>
+  } @else {
+    @if (inventories().length > 1) {
+      <div class="count__choices" role="group" [attr.aria-label]="'mobileApp.physicalCount.choose' | translate">
+        @for (inv of inventories(); track inv.id) {
+          <button type="button" class="count__choice" [class.count__choice--active]="inventory()?.id === inv.id"
+            [attr.data-testid]="'count-choose-' + inv.id" (click)="choose(inv)">
+            {{ inv.inventoryNumber }} · {{ inv.scopeLocationName ?? ('physicalInventory.wholeSite' | translate) }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (inventory(); as inv) {
+      <header class="count__head">
+        <span class="count__number" data-testid="count-inventory">{{ inv.inventoryNumber }}</span>
+        <span>{{ 'mobileApp.physicalCount.progress' | translate: { counted: inv.countedTagCount, total: inv.tagCount } }}</span>
+      </header>
+
+      <div class="count__find">
+        <app-input class="count__tag-input" type="number" min="1" [label]="'mobileApp.physicalCount.tagNumber' | translate"
+          [formControl]="tagNumberControl" data-testid="count-tag-number" />
+        <button type="button" class="count__button" data-testid="count-find" [disabled]="busy() || !tagNumberControl.value" (click)="lookUp()">
+          <span class="material-icons-outlined" aria-hidden="true">search</span>{{ 'mobileApp.physicalCount.find' | translate }}
+        </button>
+        <button type="button" class="count__button" data-testid="count-scan" [disabled]="busy() || scanning()" (click)="startScan()">
+          <span class="material-icons-outlined" aria-hidden="true">qr_code_scanner</span>{{ 'mobileApp.physicalCount.scan' | translate }}
+        </button>
+      </div>
+      <div id="physical-count-viewfinder" class="count__viewfinder" [class.count__viewfinder--on]="scanning()"></div>
+
+      @if (tag(); as t) {
+        <section class="count__tag" [attr.aria-label]="'mobileApp.physicalCount.tagLabel' | translate: { tag: t.tagNumber }" data-testid="count-tag">
+          <div class="count__tag-head">
+            <span class="count__tag-number">#{{ t.tagNumber }}</span>
+            <span class="count__part">{{ t.partNumber }}</span>
+          </div>
+          <dl class="count__facts">
+            <div><dt>{{ 'physicalInventory.location' | translate }}</dt><dd>{{ t.locationName }}</dd></div>
+            @if (t.lotNumber) {
+              <div><dt>{{ 'physicalInventory.lot' | translate }}</dt><dd>{{ t.lotNumber }}</dd></div>
+            }
+            @if (t.frozenQuantity !== null) {
+              <div><dt>{{ 'physicalInventory.bookQuantity' | translate }}</dt><dd data-testid="count-book">{{ t.frozenQuantity }}</dd></div>
+            }
+          </dl>
+          <app-input type="number" min="0"
+            [label]="(isRecount() ? 'physicalInventory.recount' : 'physicalInventory.counted') | translate"
+            [formControl]="quantityControl" data-testid="count-quantity" />
+          <button type="button" class="count__save" data-testid="count-save" [disabled]="busy() || quantityControl.invalid" (click)="save()">
+            <span class="material-icons-outlined" aria-hidden="true">save</span>{{ 'common.save' | translate }}
+          </button>
+        </section>
+      }
+    }
+  }
+
+  @if (notice(); as n) {
+    <p class="count__notice" role="status" data-testid="count-notice">{{ n }}</p>
+  }
+</div>

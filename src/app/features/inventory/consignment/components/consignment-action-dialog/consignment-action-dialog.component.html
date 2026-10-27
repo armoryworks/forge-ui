@@ -1,0 +1,77 @@
+<app-dialog [title]="titleKey() | translate" width="520px" (closed)="closed.emit()">
+  <p class="ca-action__context">{{ stock().ownerName }} · {{ stock().partNumber }} ·
+    {{ 'consignment.onConsignment' | translate: { quantity: stock().onHandQuantity } }}</p>
+
+  @if (action() === 'reconcile') {
+    @if (result(); as r) {
+      <div class="ca-action__result" data-testid="ca-reconcile-result">
+        <p>{{ 'consignment.statement' | translate: { quantity: r.consumedQuantity } }}
+          <app-currency-display [value]="r.consumedAmount" /></p>
+        @if (r.variance !== 0) {
+          <p>{{ 'consignment.countAdjusted' | translate: { book: r.bookQuantity, counted: r.physicalQuantity } }}</p>
+        }
+        @if (r.vendorBillId) {
+          <p>{{ 'consignment.billDrafted' | translate }}
+            <app-entity-link type="vendor-bill" [entityId]="r.vendorBillId">{{ r.vendorBillNumber }}</app-entity-link></p>
+        } @else if (!r.billingAvailable) {
+          <p>{{ 'consignment.billingOff' | translate }}</p>
+        } @else if (r.consumedQuantity === 0) {
+          <p>{{ 'consignment.nothingToBill' | translate }}</p>
+        }
+      </div>
+    } @else {
+      <div class="ca-action__form" [formGroup]="reconcileForm">
+        <div class="dialog-row">
+          <app-datepicker [label]="'consignment.periodFrom' | translate" formControlName="periodFrom" data-testid="ca-period-from" />
+          <app-datepicker [label]="'consignment.periodTo' | translate" formControlName="periodTo" data-testid="ca-period-to" />
+        </div>
+        <app-input [label]="'consignment.physicalCount' | translate" type="number" min="0" formControlName="physicalCount"
+          [placeholder]="'common.optional' | translate" data-testid="ca-physical-count" />
+        <app-toggle [label]="'consignment.createBill' | translate" formControlName="createBill" data-testid="ca-create-bill" />
+        <app-input [label]="'consignment.vendorInvoiceNumber' | translate" formControlName="vendorInvoiceNumber" [maxlength]="60"
+          [placeholder]="'common.optional' | translate" data-testid="ca-vendor-invoice" />
+      </div>
+    }
+  } @else {
+    <div class="ca-action__form" [formGroup]="form">
+      <app-input [label]="'common.quantity' | translate" type="number" min="0" formControlName="quantity" [required]="true"
+        data-testid="ca-quantity" />
+      <app-select [label]="'consignment.location' | translate" formControlName="storageLocationId" [options]="locationOptions()"
+        data-testid="ca-location" />
+      @if (action() === 'receive') {
+        <app-input [label]="'consignment.lot' | translate" formControlName="lotNumber" [maxlength]="100"
+          [placeholder]="'common.optional' | translate" data-testid="ca-lot" />
+      } @else {
+        <app-entity-picker [label]="'consignment.issueToJob' | translate" entityType="jobs" displayField="jobNumber"
+          secondaryDisplayField="title" formControlName="jobId" [placeholder]="'common.optional' | translate" data-testid="ca-job" />
+        <p class="ca-action__hint">{{ 'consignment.consumeHint' | translate }}</p>
+      }
+      <app-input [label]="'common.notes' | translate" formControlName="notes" [maxlength]="2000" data-testid="ca-notes" />
+    </div>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="ca-action-close" (click)="closed.emit()">
+      {{ (result() ? 'common.close' : 'common.cancel') | translate }}
+    </button>
+    @if (!result()) {
+      @if (action() === 'reconcile') {
+        <app-validation-button [violations]="reconcileViolations" [loading]="saving()">
+          <button class="action-btn action-btn--primary" type="button" data-testid="ca-action-submit"
+            [disabled]="reconcileForm.invalid || saving()" (click)="submit()">
+            <span class="material-icons-outlined" aria-hidden="true">check</span>
+            {{ titleKey() | translate }}
+          </button>
+        </app-validation-button>
+      } @else {
+        <app-validation-button [violations]="violations" [loading]="saving()">
+          <button class="action-btn action-btn--primary" type="button" data-testid="ca-action-submit"
+            [disabled]="form.invalid || saving()" (click)="submit()">
+            <span class="material-icons-outlined" aria-hidden="true">check</span>
+            {{ titleKey() | translate }}
+          </button>
+        </app-validation-button>
+      }
+    }
+  </div>
+</app-dialog>

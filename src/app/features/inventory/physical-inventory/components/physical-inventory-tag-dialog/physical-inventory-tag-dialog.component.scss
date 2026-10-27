@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+.pi-tag-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}

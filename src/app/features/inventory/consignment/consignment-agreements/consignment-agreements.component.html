@@ -1,0 +1,87 @@
+<app-page-header [title]="'consignment.title' | translate" [subtitle]="'consignment.subtitle' | translate" />
+
+<div class="page-header">
+  @if (summary(); as s) {
+    <span class="ca-kpi">{{ 'consignment.activeAgreements' | translate }} <strong>{{ s.activeAgreements }}</strong></span>
+    <span class="ca-kpi">{{ 'consignment.consignedValue' | translate }} <app-currency-display [value]="s.totalConsignedValue" /></span>
+    <span class="ca-kpi">{{ 'consignment.unbilledValue' | translate }} <app-currency-display [value]="s.totalUnbilledValue" /></span>
+  }
+  <span class="page-header__spacer"></span>
+  <button class="action-btn action-btn--create" type="button" data-testid="ca-new" (click)="openNew()">
+    <span class="material-icons-outlined" aria-hidden="true">add</span>
+    {{ 'consignment.new' | translate }}
+  </button>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="consignment-agreements" [columns]="columns" [data]="rows()" trackByField="agreementId"
+    emptyIcon="handshake" [emptyMessage]="'consignment.empty' | translate" [clickableRows]="true" (rowClick)="select($event)">
+    <ng-template appColumnCell="agreedUnitPrice" let-row><app-currency-display [value]="row.agreedUnitPrice" /></ng-template>
+    <ng-template appColumnCell="onHandValue" let-row><app-currency-display [value]="row.onHandValue" /></ng-template>
+    <ng-template appColumnCell="stockFlag" let-row>
+      @if (row.stockFlagKey) {
+        <span class="chip chip--warning">{{ row.stockFlagKey | translate }}</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="row.statusClass">{{ ('consignment.status.' + row.status) | translate }}</span>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<app-detail-side-panel [open]="!!selected()" [title]="selected()?.partNumber ?? ''" (closed)="closePanel()">
+  @if (selected(); as s) {
+    <div class="ca-panel">
+      <dl class="ca-panel__facts">
+        <div><dt>{{ 'consignment.vendor' | translate }}</dt><dd>{{ s.ownerName }}</dd></div>
+        <div><dt>{{ 'consignment.agreedPrice' | translate }}</dt><dd><app-currency-display [value]="s.agreedUnitPrice" /></dd></div>
+        <div><dt>{{ 'consignment.onHand' | translate }}</dt><dd data-testid="ca-panel-on-hand">{{ s.onHandQuantity }}</dd></div>
+        <div><dt>{{ 'consignment.unbilled' | translate }}</dt><dd>{{ s.unbilledQuantity }} · <app-currency-display [value]="s.unbilledValue" /></dd></div>
+        <div><dt>{{ 'consignment.minMax' | translate }}</dt><dd>{{ s.minStockQuantity ?? '—' }} / {{ s.maxStockQuantity ?? '—' }}</dd></div>
+      </dl>
+      <div class="ca-panel__actions">
+        <button class="action-btn" type="button" data-testid="ca-receive" [disabled]="s.status !== 'Active'" (click)="action.set('receive')">
+          <span class="material-icons-outlined" aria-hidden="true">move_to_inbox</span>{{ 'consignment.actions.receive' | translate }}
+        </button>
+        <button class="action-btn" type="button" data-testid="ca-consume" [disabled]="s.onHandQuantity <= 0" (click)="action.set('consume')">
+          <span class="material-icons-outlined" aria-hidden="true">output</span>{{ 'consignment.actions.consume' | translate }}
+        </button>
+        <button class="action-btn" type="button" data-testid="ca-reconcile" (click)="action.set('reconcile')">
+          <span class="material-icons-outlined" aria-hidden="true">receipt_long</span>{{ 'consignment.actions.reconcile' | translate }}
+        </button>
+      </div>
+      <h3 class="ca-panel__title">{{ 'consignment.history' | translate }}</h3>
+      <app-data-table tableId="consignment-transactions" [columns]="transactionColumns" [data]="transactions()" emptyIcon="history"
+        [emptyMessage]="'consignment.noHistory' | translate">
+        <ng-template appColumnCell="createdAt" let-row>{{ row.createdAt | dateOnly }}</ng-template>
+        <ng-template appColumnCell="type" let-row>{{ ('consignment.transactionType.' + row.type) | translate }}</ng-template>
+        <ng-template appColumnCell="extendedAmount" let-row><app-currency-display [value]="row.extendedAmount" /></ng-template>
+        <ng-template appColumnCell="reference" let-row>
+          @if (row.vendorBillId) {
+            <app-entity-link type="vendor-bill" [entityId]="row.vendorBillId">{{ row.vendorBillNumber }}</app-entity-link>
+          } @else if (row.jobId) {
+            <app-entity-link type="job" [entityId]="row.jobId">{{ row.jobNumber }}</app-entity-link>
+          } @else {
+            {{ row.storageLocationName ?? row.notes ?? '' }}
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+  <div panel-actions>
+    <button class="action-btn" type="button" data-testid="ca-edit" [disabled]="!selectedAgreement()" (click)="openEdit()">
+      <span class="material-icons-outlined" aria-hidden="true">edit</span>{{ 'common.edit' | translate }}
+    </button>
+  </div>
+</app-detail-side-panel>
+
+@if (showAgreementDialog()) {
+  <app-consignment-agreement-dialog [agreement]="editingAgreement()" (closed)="showAgreementDialog.set(false)"
+    (saved)="onAgreementSaved($event)" />
+}
+
+@if (action(); as act) {
+  @if (selected(); as s) {
+    <app-consignment-action-dialog [action]="act" [stock]="s" (closed)="action.set(null)" (done)="onActionDone()" />
+  }
+}
