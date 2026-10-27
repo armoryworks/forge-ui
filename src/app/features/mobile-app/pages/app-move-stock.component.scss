@@ -220,3 +220,10 @@ $on-scrim: rgba(255, 255, 255, 0.95);
     border-top: $border-width-accent solid var(--primary);
   }
 }
+
+.move__count-link {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  color: var(--primary);
+}

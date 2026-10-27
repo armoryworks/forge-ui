@@ -1,0 +1,12 @@
+@use 'styles/variables' as *;
+
+.ca-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.ca-form__fixed {
+  margin: 0;
+  font-weight: 600;
+}

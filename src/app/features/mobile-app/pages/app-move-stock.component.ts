@@ -2,7 +2,7 @@ import {
   AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, computed, inject, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { firstValueFrom, map } from 'rxjs';
@@ -11,6 +11,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { OnHand, ScanResolveResult, isQueued } from '../../../shared/models/mobile-api.model';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
 import { OfflineQueueService } from '../../../shared/services/offline-queue.service';
@@ -38,7 +39,7 @@ type Step = 'part' | 'from' | 'to' | 'quantity';
 @Component({
   selector: 'app-app-move-stock',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, IdentityPromptComponent, ManualCodeEntryComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, InputComponent, IdentityPromptComponent, ManualCodeEntryComponent],
   templateUrl: './app-move-stock.component.html',
   styleUrl: './app-move-stock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,10 +55,12 @@ export class AppMoveStockComponent implements AfterViewInit, OnDestroy {
   private readonly identity = inject(SharedIdentityService);
   private readonly instances = inject(InstanceService);
   private readonly route = inject(ActivatedRoute);
+  private readonly capabilities = inject(CapabilityService);
 
   private readonly prefillCode = toSignal(
     this.route.queryParamMap.pipe(map((p) => p.get('code'))), { initialValue: null });
 
+  protected readonly physicalCountOn = computed(() => this.capabilities.isEnabled('CAP-INV-PHYSICAL'));
   protected readonly step = signal<Step>('part');
   protected readonly part = signal<ScanResolveResult | null>(null);
   protected readonly from = signal<ScanResolveResult | null>(null);

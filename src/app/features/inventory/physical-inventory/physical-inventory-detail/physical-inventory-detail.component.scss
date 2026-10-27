@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+
+:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+
+.page-header__spacer { flex: 1; }
+
+.pi-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__hint {
+    margin: 0 $sp-lg;
+    color: var(--text-muted);
+  }
+}
+
+.pi-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+  margin: 0;
+  padding: 0 $sp-lg;
+  list-style: none;
+
+  &__step {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+
+  &__step--done { color: var(--success); }
+
+  &__step--current {
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+.pi-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $sp-md;
+  margin: 0;
+  padding: 0 $sp-lg;
+
+  dt {
+    color: var(--text-muted);
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+  }
+
+  dd { margin: 0; }
+}
+
+.pi-count {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+
+  &__input { flex: 1; }
+}
+
+.pi-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+  padding: 0 $sp-lg;
+
+  &__net { font-weight: 600; }
+}

@@ -1,0 +1,128 @@
+<div class="pi-detail" [appLoadingBlock]="loading()">
+  @if (inventory(); as inv) {
+    <app-page-header [title]="inv.inventoryNumber" [subtitle]="inv.description ?? ('physicalInventory.title' | translate)" />
+
+    <div class="page-header">
+      <a class="action-btn" routerLink="/inventory/physical-inventory" data-testid="pi-back">
+        <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+        {{ 'common.back' | translate }}
+      </a>
+      <span [class]="statusClass(inv.status)" data-testid="pi-status">{{ ('physicalInventory.status.' + inv.status) | translate }}</span>
+      <span class="page-header__spacer"></span>
+      @if (inv.status !== 'Draft' && inv.status !== 'Cancelled') {
+        <button class="action-btn" type="button" data-testid="pi-print-sheets" [disabled]="busy()" (click)="printSheets()">
+          <span class="material-icons-outlined" aria-hidden="true">print</span>
+          {{ 'physicalInventory.printSheets' | translate }}
+        </button>
+      }
+      @if (canManage()) {
+        @if (!closed()) {
+          <button class="action-btn action-btn--danger" type="button" data-testid="pi-cancel" [disabled]="busy()" (click)="cancel()">
+            <span class="material-icons-outlined" aria-hidden="true">block</span>
+            {{ 'physicalInventory.cancelCount' | translate }}
+          </button>
+        }
+        @if (inv.status === 'Draft') {
+          <button class="action-btn action-btn--primary" type="button" data-testid="pi-freeze" [disabled]="busy()" (click)="freeze()">
+            <span class="material-icons-outlined" aria-hidden="true">ac_unit</span>
+            {{ 'physicalInventory.freeze' | translate }}
+          </button>
+        }
+        @if (counting()) {
+          <button class="action-btn action-btn--primary" type="button" data-testid="pi-submit-review"
+            [disabled]="busy() || !canSubmitReview()" (click)="submitForReview()">
+            <span class="material-icons-outlined" aria-hidden="true">fact_check</span>
+            {{ 'physicalInventory.submitReview' | translate }}
+          </button>
+        }
+        @if (inv.status === 'Review') {
+          <button class="action-btn" type="button" data-testid="pi-reopen" [disabled]="busy()" (click)="reopen()">
+            <span class="material-icons-outlined" aria-hidden="true">undo</span>
+            {{ 'physicalInventory.reopen' | translate }}
+          </button>
+          <button class="action-btn action-btn--primary" type="button" data-testid="pi-post" [disabled]="busy()" (click)="post()">
+            <span class="material-icons-outlined" aria-hidden="true">check</span>
+            {{ 'physicalInventory.post' | translate }}
+          </button>
+        }
+      }
+    </div>
+
+    <ol class="pi-steps" [attr.aria-label]="'physicalInventory.stepsLabel' | translate">
+      @for (step of steps(); track step.status) {
+        <li class="pi-steps__step" [class.pi-steps__step--done]="step.done" [class.pi-steps__step--current]="step.current"
+          [attr.aria-current]="step.current ? 'step' : null">
+          <span class="material-icons-outlined" aria-hidden="true">{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          {{ ('physicalInventory.step.' + step.status) | translate }}
+        </li>
+      }
+    </ol>
+
+    <dl class="pi-facts">
+      <div><dt>{{ 'physicalInventory.scope' | translate }}</dt><dd>{{ inv.scopeLocationName ?? ('physicalInventory.wholeSite' | translate) }}</dd></div>
+      <div><dt>{{ 'physicalInventory.countDate' | translate }}</dt><dd>{{ inv.countDate | dateOnly }}</dd></div>
+      <div><dt>{{ 'physicalInventory.progress' | translate }}</dt><dd data-testid="pi-progress">{{ inv.countedTagCount }} / {{ inv.tagCount }}</dd></div>
+      <div><dt>{{ 'physicalInventory.recounts' | translate }}</dt><dd>{{ inv.recountTagCount }}</dd></div>
+      <div><dt>{{ 'physicalInventory.blindCount' | translate }}</dt><dd>{{ (inv.blindCount ? 'common.yes' : 'common.no') | translate }}</dd></div>
+      <div><dt>{{ 'physicalInventory.recountTolerance' | translate }}</dt><dd>{{ inv.recountTolerancePercent | number: '1.0-2' }}%</dd></div>
+    </dl>
+
+    @if (inv.status === 'Draft') {
+      <p class="pi-detail__hint">{{ 'physicalInventory.draftHint' | translate }}</p>
+    }
+
+    @if (counting()) {
+      <section class="pi-detail__section" [attr.aria-label]="'physicalInventory.countEntry' | translate">
+        <div class="page-header">
+          <app-input [label]="'physicalInventory.searchTags' | translate" [formControl]="searchControl" data-testid="pi-tag-search" />
+          <app-toggle [label]="'physicalInventory.pendingOnly' | translate" [formControl]="pendingOnlyControl" data-testid="pi-pending-only" />
+          <span class="page-header__spacer"></span>
+          <button class="action-btn action-btn--create" type="button" data-testid="pi-add-tag" (click)="showTagDialog.set(true)">
+            <span class="material-icons-outlined" aria-hidden="true">add</span>
+            {{ 'physicalInventory.addFound' | translate }}
+          </button>
+        </div>
+        <app-data-table tableId="physical-inventory-tags" [columns]="countColumns()" [data]="rows()" emptyIcon="sell"
+          [emptyMessage]="'physicalInventory.noTags' | translate">
+          <ng-template appColumnCell="lotNumber" let-row>{{ row.serialNumber ?? row.lotNumber ?? '' }}</ng-template>
+          <ng-template appColumnCell="finalQuantity" let-row>
+            <div class="pi-count">
+              <app-input class="pi-count__input" type="number" min="0"
+                [label]="(row.isRecount ? 'physicalInventory.recount' : 'physicalInventory.counted') | translate"
+                [formControl]="row.control" [attr.data-testid]="'pi-count-' + row.tagNumber" />
+              <button class="icon-btn" type="button" [attr.data-testid]="'pi-save-count-' + row.tagNumber"
+                [attr.aria-label]="'physicalInventory.saveCount' | translate: { tag: row.tagNumber }"
+                [disabled]="savingTagId() !== null || row.control.invalid || row.control.value === null" (click)="saveCount(row)">
+                <span class="material-icons-outlined" aria-hidden="true">save</span>
+              </button>
+            </div>
+          </ng-template>
+          <ng-template appColumnCell="status" let-row>
+            <span [class]="statusClass(row.status)">{{ ('physicalInventory.tagStatus.' + row.status) | translate }}</span>
+          </ng-template>
+        </app-data-table>
+      </section>
+    }
+
+    @if (reviewing() && canManage() && variance(); as v) {
+      <section class="pi-detail__section" [attr.aria-label]="'physicalInventory.varianceReview' | translate">
+        <div class="pi-totals" data-testid="pi-variance-totals">
+          <span>{{ 'physicalInventory.shortage' | translate }} <app-currency-display [value]="v.shortageValue" /></span>
+          <span>{{ 'physicalInventory.overage' | translate }} <app-currency-display [value]="v.overageValue" /></span>
+          <span class="pi-totals__net">{{ 'physicalInventory.netVariance' | translate }} <app-currency-display [value]="v.netVarianceValue" /></span>
+          <span>{{ 'physicalInventory.varianceTags' | translate: { count: v.varianceTagCount, total: v.tagCount } }}</span>
+        </div>
+        <app-data-table tableId="physical-inventory-variance" [columns]="varianceColumns" [data]="v.lines" emptyIcon="check_circle"
+          [emptyMessage]="'physicalInventory.noVariance' | translate">
+          <ng-template appColumnCell="unitCost" let-row><app-currency-display [value]="row.unitCost" /></ng-template>
+          <ng-template appColumnCell="varianceValue" let-row><app-currency-display [value]="row.varianceValue" /></ng-template>
+        </app-data-table>
+      </section>
+    }
+  }
+</div>
+
+@if (showTagDialog() && inventory(); as inv) {
+  <app-physical-inventory-tag-dialog [inventoryId]="inv.id"
+    (closed)="showTagDialog.set(false)" (added)="onTagAdded($event)" />
+}

@@ -1,0 +1,46 @@
+@use 'styles/variables' as *;
+
+:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+
+.page-header__spacer { flex: 1; }
+
+.ca-kpi {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+}
+
+.ca-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-sm;
+    margin: 0;
+
+    dt {
+      color: var(--text-muted);
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+    }
+
+    dd { margin: 0; }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__title {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+  }
+}

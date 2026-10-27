@@ -1,0 +1,24 @@
+<app-dialog [title]="'physicalInventory.addFoundTitle' | translate" width="480px" (closed)="closed.emit()">
+  <div class="pi-tag-form" [formGroup]="form">
+    <p class="pi-tag-form__hint">{{ 'physicalInventory.addFoundHint' | translate }}</p>
+    <app-select [label]="'physicalInventory.location' | translate" formControlName="locationId" [options]="locationOptions()"
+      [required]="true" data-testid="pi-tag-location" />
+    <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
+      formControlName="partId" [required]="true" data-testid="pi-tag-part" />
+    <app-input [label]="'physicalInventory.lot' | translate" formControlName="lotNumber" [maxlength]="100"
+      [placeholder]="'common.optional' | translate" data-testid="pi-tag-lot" />
+    <app-input [label]="'physicalInventory.counted' | translate" type="number" min="0" formControlName="quantity" [required]="true"
+      data-testid="pi-tag-quantity" />
+    <app-input [label]="'common.notes' | translate" formControlName="notes" [maxlength]="500" data-testid="pi-tag-notes" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" data-testid="pi-tag-cancel" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" data-testid="pi-tag-submit"
+        [disabled]="form.invalid || saving()" (click)="submit()">
+        <span class="material-icons-outlined" aria-hidden="true">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

@@ -62,6 +62,12 @@ export const MOBILE_APP_ROUTES: Routes = [
         data: { titleKey: 'mobileApp.tabs.picks' },
         canActivate: [mobileScreenGuard('CAP-O2C-PICKPACK'), mobileRoleGuard('/app/picks')],
         loadComponent: () => import('./pages/app-pick-lines.component').then((m) => m.AppPickLinesComponent),
+        },
+        {
+        path: 'count',
+        data: { titleKey: 'mobileApp.physicalCount.title' },
+        canActivate: [mobileScreenGuard('CAP-MOBILE-STOCK'), mobileScreenGuard('CAP-INV-PHYSICAL')],
+        loadComponent: () => import('./pages/app-physical-count.component').then((m) => m.AppPhysicalCountComponent),
       },
       {
         path: 'jobs',

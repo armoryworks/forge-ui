@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+.ca-action {
+  &__context {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  &__form,
+  &__result {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__result p { margin: 0; }
+
+  &__hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}

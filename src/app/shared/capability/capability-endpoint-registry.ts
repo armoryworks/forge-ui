@@ -72,6 +72,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'inventory/abc', capability: 'CAP-PLAN-ABC' },
   { prefix: 'inventory/inspect', capability: 'CAP-QC-INSPECTION' },
   { prefix: 'inventory/pending-inspection', capability: 'CAP-QC-INSPECTION' },
+  { prefix: 'inventory/physical-inventory', capability: 'CAP-INV-PHYSICAL' },
   { prefix: 'inventory/set-on-hand', capability: 'CAP-INV-ADJUST' },
   { prefix: 'inventory/transfers', capability: 'CAP-INV-MULTILOC' },
   { prefix: 'inventory/uom', capability: 'CAP-MD-UOM' },

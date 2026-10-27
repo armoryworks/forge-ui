@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { OnHand, ScanResolveResult } from '../../../shared/models/mobile-api.model';
+import { CapabilityService } from '../../../shared/services/capability.service';
 import { CameraScannerService } from '../../../shared/services/camera-scanner.service';
 import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileApiService } from '../../../shared/services/mobile-api.service';
@@ -82,6 +83,7 @@ describe('AppMoveStockComponent', () => {
         { provide: SharedIdentityService, useValue: { identified: () => false, touch: vi.fn() } },
         { provide: InstanceService, useValue: { instance: () => ({ id: 'shop', shared: false }) } },
         { provide: ActivatedRoute, useValue: { queryParamMap: of(convertToParamMap({})) } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
       ],
     });
   });

@@ -199,6 +199,9 @@
                       <span [class]="getStatusClass(bin.status)">
                         {{ getStatusLabel(bin.status) }}
                       </span>
+                      @if (bin.ownerVendorId) {
+                        <span class="chip chip--info" [attr.title]="bin.ownerVendorName">{{ 'inventory.consigned' | translate }}</span>
+                      }
                     </td>
                     <td>
                       @if (bin.lotNumber) {
@@ -376,6 +379,9 @@
                           <span [class]="getStatusClass(item.status)">
                             {{ getStatusLabel(item.status) }}
                           </span>
+                          @if (item.ownerVendorId) {
+                            <span class="chip chip--info" [attr.title]="item.ownerVendorName">{{ 'inventory.consigned' | translate }}</span>
+                          }
                         </td>
                         <td class="text-muted">{{ item.lotNumber ?? '—' }}</td>
                         <td class="text-muted">{{ item.placedAt | dateTime }}</td>

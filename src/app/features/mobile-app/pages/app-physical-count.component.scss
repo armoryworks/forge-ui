@@ -1,0 +1,100 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.count {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+
+  &__hint,
+  &__notice {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  &__choices {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__choice,
+  &__button,
+  &__save {
+    @include touch-target;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-sm;
+    border: $border-width solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: $font-size-md;
+  }
+
+  &__choice--active {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &__save {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-btn-text);
+  }
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    font-size: $font-size-md;
+  }
+
+  &__number,
+  &__tag-number { font-weight: 600; }
+
+  &__find {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__tag-input { flex: 1; }
+
+  &__viewfinder { display: none; }
+
+  &__viewfinder--on {
+    display: block;
+    min-height: 240px;
+  }
+
+  &__tag {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__tag-head {
+    display: flex;
+    gap: $sp-md;
+    font-size: $font-size-lg;
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-sm;
+    margin: 0;
+
+    dt {
+      color: var(--text-muted);
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+    }
+
+    dd { margin: 0; }
+  }
+}
