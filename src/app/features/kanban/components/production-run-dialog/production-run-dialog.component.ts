@@ -83,10 +83,14 @@ export class ProductionRunDialogComponent implements OnInit {
       });
     }
     if (this.showTooling) {
+      const currentToolId = this.data.run?.toolingAssetId ?? null;
+      const noneOption: SelectOption[] = currentToolId === null
+        ? [{ value: null, label: this.translate.instant(this.isEdit ? 'productionRuns.toolingNone' : 'productionRuns.toolingDefault') }]
+        : [];
       this.assetsService.getAssets('Tooling').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: assets => this.toolingOptions.set([
-          { value: null, label: this.translate.instant(this.isEdit ? 'productionRuns.toolingNone' : 'productionRuns.toolingDefault') },
-          ...assets.filter(a => a.status !== 'Retired').map(a => ({
+          ...noneOption,
+          ...assets.filter(a => a.status !== 'Retired' || a.id === currentToolId).map(a => ({
             value: a.id,
             label: a.cavityCount ? this.translate.instant('productionRuns.toolingOption', { name: a.name, cavities: a.cavityCount }) : a.name,
           })),

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
+import { Signal } from '@angular/core';
 import { provideTranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../../shared/services/auth.service';
@@ -20,6 +21,7 @@ interface DialogView {
   ngOnInit(): void;
   showWorkCenter: boolean;
   showTooling: boolean;
+  toolingOptions: Signal<{ value: unknown; label: string }[]>;
 }
 
 const RUN = {
@@ -96,6 +98,20 @@ describe('ProductionRunDialogComponent', () => {
     cleared.view.form.controls.runTimeMinutes.markAsDirty();
     cleared.view.save();
     expect(cleared.runs.updateRun).toHaveBeenCalledWith(7, 11, expect.objectContaining({ runTimeMinutes: 0 }));
+  });
+
+  it('offers no tooling-clearing option on a run that already has tooling, and keeps a retired current tool listed', () => {
+    const { view, assets } = setup({ jobId: 7, partId: 3, defaultTargetQuantity: null, run: RUN });
+    assets.getAssets.mockReturnValue(of([{ id: 9, name: 'Mold A', cavityCount: 4, status: 'Retired' }]));
+    view.ngOnInit();
+
+    expect(view.toolingOptions().map(o => o.value)).toEqual([9]);
+  });
+
+  it('offers the default tooling option on a new run', () => {
+    const { view } = setup({ jobId: 7, partId: 3, defaultTargetQuantity: 10, run: null });
+
+    expect(view.toolingOptions().map(o => o.value)).toEqual([null, 9]);
   });
 
   it('refuses a target below one', () => {
