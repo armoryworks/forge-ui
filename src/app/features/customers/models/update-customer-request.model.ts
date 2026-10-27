@@ -28,4 +28,6 @@ export interface UpdateCustomerRequest {
   clearCurrency?: boolean;
   freightTerms?: FreightTerms;
   clearFreightTerms?: boolean;
+  defaultTaxCodeId?: number;
+  clearDefaultTaxCode?: boolean;
 }

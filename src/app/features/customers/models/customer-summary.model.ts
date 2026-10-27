@@ -40,4 +40,5 @@ export interface CustomerSummary {
   isOnCreditHold?: boolean;
   currencyId?: number | null;
   currencyLocked?: boolean;
+  defaultTaxCodeId?: number | null;
 }
