@@ -9,4 +9,5 @@ export interface OperationQuantityDialogResult {
   skipped?: boolean;
   acknowledgeGate?: boolean;
   overrideReason?: string | null;
+  bookReworkTime?: boolean;
 }

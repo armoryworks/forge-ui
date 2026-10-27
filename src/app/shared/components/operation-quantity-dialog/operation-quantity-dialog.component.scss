@@ -79,3 +79,24 @@
   margin: 0;
   font-size: $font-size-md;
 }
+
+.op-qty__rework-time {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin: $sp-md 0;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.op-qty__rework-time-question {
+  margin: 0;
+  color: var(--text);
+  font-size: $font-size-md;
+}
+
+.op-qty__rework-time-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+}

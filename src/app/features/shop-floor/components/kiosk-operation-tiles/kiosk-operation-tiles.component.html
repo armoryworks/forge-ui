@@ -111,6 +111,15 @@
             <span class="material-icons-outlined">exposure_plus_1</span>
             {{ 'shopFloor.operations.addQuantity' | translate }}
           </button>
+          @if (tile.hasSpc) {
+            <button type="button" class="op-tile__btn"
+                    [disabled]="busy()"
+                    (click)="recordSpc.emit(tile.row)"
+                    [attr.data-testid]="'kiosk-op-spc-' + tile.row.stepNumber">
+              <span class="material-icons-outlined">straighten</span>
+              {{ 'shopFloor.operations.recordSpc' | translate }}
+            </button>
+          }
           <button type="button" class="op-tile__btn op-tile__btn--done"
                   [disabled]="busy()"
                   (click)="done.emit(tile.row)"

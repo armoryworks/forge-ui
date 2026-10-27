@@ -4,4 +4,5 @@ export interface OperationQuantityEntry {
   rework: number;
   reason: string | null;
   complete: boolean;
+  bookReworkTime?: boolean;
 }

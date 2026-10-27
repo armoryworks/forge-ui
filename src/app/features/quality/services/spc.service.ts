@@ -27,6 +27,10 @@ export class SpcService {
     return this.http.get<SpcCharacteristic[]>(`${this.baseUrl}/characteristics`, { params });
   }
 
+  getJobCharacteristics(jobId: number): Observable<SpcCharacteristic[]> {
+    return this.http.get<SpcCharacteristic[]>(`${this.baseUrl}/jobs/${jobId}/characteristics`);
+  }
+
   getCharacteristic(id: number): Observable<SpcCharacteristic> {
     return this.http.get<SpcCharacteristic>(`${this.baseUrl}/characteristics/${id}`);
   }

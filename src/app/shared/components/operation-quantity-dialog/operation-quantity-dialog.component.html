@@ -25,6 +25,23 @@
                    [label]="'jobOperations.dialog.rework' | translate" formControlName="rework" />
       </div>
     }
+    @if (offerReworkTime()) {
+      <div class="op-qty__rework-time" role="group" [attr.aria-label]="'jobOperations.dialog.reworkTimeQuestion' | translate"
+           data-testid="operation-qty-rework-time">
+        <p class="op-qty__rework-time-question">{{ 'jobOperations.dialog.reworkTimeQuestion' | translate }}</p>
+        <div class="op-qty__rework-time-choices">
+          <button type="button" class="action-btn" [class.action-btn--primary]="bookRework()" [attr.aria-pressed]="bookRework()"
+                  data-testid="operation-qty-rework-book" (click)="chooseReworkTime(true)">
+            <span class="material-icons-outlined" aria-hidden="true">replay</span>
+            {{ 'jobOperations.dialog.reworkTimeBook' | translate }}
+          </button>
+          <button type="button" class="action-btn" [class.action-btn--primary]="!bookRework()" [attr.aria-pressed]="!bookRework()"
+                  data-testid="operation-qty-rework-already" (click)="chooseReworkTime(false)">
+            {{ 'jobOperations.dialog.reworkTimeAlready' | translate }}
+          </button>
+        </div>
+      </div>
+    }
     @if (askReason()) {
       <app-select data-testid="operation-qty-reason" [label]="'jobOperations.dialog.reason' | translate"
                   [options]="reasonOptions" formControlName="reason" />

@@ -90,7 +90,8 @@
     "exchangeRates": "Exchange Rates",
     "openingStock": "Opening Stock",
     "inventoryValuation": "Inventory Valuation",
-    "creditMemos": "Credit Memos"
+    "creditMemos": "Credit Memos",
+    "andon": "Andon"
   },
   "navGroups": {
     "operations": "Operations",
@@ -7807,11 +7808,19 @@
       "clear": "Clear",
       "record": "Record subgroup",
       "recorded": "Subgroup #{{number}} recorded.",
-      "recordedOoc": "Subgroup #{{number}} recorded. Out of control: {{rule}}"
+      "recordedOoc": "Subgroup #{{number}} recorded. Out of control: {{rule}}",
+      "resultInControl": "Subgroup #{{number}} is in control.",
+      "resultOoc": "Subgroup #{{number}} is OUT OF CONTROL ({{rule}}). An out-of-control event was raised.",
+      "resultOutOfSpec": "A reading is outside the spec limits."
     },
     "ooc": {
       "capaCreatedNumber": "Created {{number}} from the out-of-control event",
       "capaCreated": "CAPA created from the out-of-control event"
+    },
+    "record": {
+      "title": "Record SPC",
+      "pick": "Which characteristic are you measuring?",
+      "spec": "Spec {{lower}}–{{upper}} {{unit}}"
     }
   },
   "quality": {
@@ -8317,7 +8326,18 @@
       "submitting": "Issuing...",
       "confirm": "Confirm Issue",
       "success": "Issued {{quantity}} x {{part}} to {{workOrder}}",
-      "failed": "Issue failed. Please try again."
+      "failed": "Issue failed. Please try again.",
+      "sourcePrompt": "Pick the lot or bin to issue from — first-expiring is chosen for you. Scanning a lot or bin label picks it.",
+      "sourcesFailed": "Couldn't load the bins and lots for this part.",
+      "sourceNotEligible": "{{code}} is not an issuable lot or bin for this part (it may be on hold, expired or empty).",
+      "noLot": "No lot",
+      "lot": "Lot",
+      "fefoFirst": "Expires first",
+      "sourceAvailable": "Available: {{count}}",
+      "expires": "Expires {{date}}",
+      "noSources": "No issuable stock for this part. Held and expired lots can't be issued.",
+      "scanSource": "Scan or type a lot or bin label",
+      "useCode": "Use"
     },
     "move": {
       "title": "Move Inventory",
@@ -8650,7 +8670,9 @@
       "receivingLoadFailed": "Couldn't load the purchase orders to receive. Go back and try again.",
       "shippingLoadFailed": "Couldn't load the shipments. Go back and try again.",
       "piecesRecorded": "Pieces recorded on {{jobNumber}}",
-      "piecesRecordFailed": "Could not record the pieces: {{reason}}"
+      "piecesRecordFailed": "Could not record the pieces: {{reason}}",
+      "andonBoard": "Andon board",
+      "andonOpen": "Andon board — {{count}} open"
     },
     "trainingModeActive": "TRAINING MODE — Actions will not be saved",
     "trainingModeEnabled": "Training mode enabled",
@@ -8781,7 +8803,10 @@
       "gateBlocked": "Blocked by step gating",
       "cycleCountdown": "Time left in this cycle",
       "recordCycles": "+{{count}}",
-      "recordCyclesAria": "Record {{count}} pieces from finished cycles on {{jobNumber}}"
+      "recordCyclesAria": "Record {{count}} pieces from finished cycles on {{jobNumber}}",
+      "reworkBooked": "Run timer stopped; rework timer started on {{step}} {{title}}.",
+      "recordSpc": "Record SPC",
+      "spcTitle": "SPC · {{step}} {{title}}"
     },
     "returnFlow": {
       "title": "Return Items",
@@ -13272,7 +13297,9 @@
       "typeCount": "Type a number",
       "typedCount": "Good pieces",
       "recordedWithScrap": "Recorded {{count}} good and {{scrap}} scrap on {{name}}",
-      "completedWithScrap": "{{name}} done · {{scrap}} scrap"
+      "completedWithScrap": "{{name}} done · {{scrap}} scrap",
+      "reworkBooked": "Rework timer started on {{name}}.",
+      "recordSpc": "SPC"
     },
     "pinPad": {
       "backspace": "Backspace"
@@ -13789,7 +13816,10 @@
       "stop": "Stop",
       "stopAndRecord": "Stop and record {{count}}",
       "stopAndDone": "Stop and mark done ({{count}})",
-      "overPlanned": "{{total}} is more than the {{planned}} planned for this step. Check the count before you continue."
+      "overPlanned": "{{total}} is more than the {{planned}} planned for this step. Check the count before you continue.",
+      "reworkTimeQuestion": "You're on a Run timer for this step. Book the rework time now?",
+      "reworkTimeBook": "Book rework time now",
+      "reworkTimeAlready": "Already on a rework timer"
     },
     "messages": {
       "completed": "{{operation}} marked done",
@@ -14654,5 +14684,34 @@
       "Wire": "Wire",
       "Other": "Other"
     }
+  },
+  "andon": {
+    "title": "Andon board",
+    "subtitle": "Open help calls from the floor, oldest first",
+    "loadFailed": "Couldn't load the andon alerts.",
+    "signInToAct": "Sign in at this kiosk to acknowledge or resolve an alert.",
+    "none": "No open andon alerts.",
+    "types": {
+      "Help": "Help",
+      "Quality": "Quality",
+      "Material": "Material",
+      "Maintenance": "Maintenance",
+      "Safety": "Safety",
+      "Stoppage": "Stoppage"
+    },
+    "status": {
+      "Active": "Waiting",
+      "Acknowledged": "Acknowledged",
+      "Resolved": "Resolved"
+    },
+    "raisedBy": "Raised by {{name}}",
+    "job": "Work order {{number}}",
+    "acknowledgedBy": "Acknowledged by {{name}}",
+    "acknowledge": "Acknowledge",
+    "resolve": "Resolve",
+    "resolveNote": "What was done (optional)",
+    "acknowledged": "Alert at {{workCenter}} acknowledged.",
+    "resolved": "Alert at {{workCenter}} resolved.",
+    "actionFailed": "Couldn't update the alert. It may have been handled already."
   }
 }

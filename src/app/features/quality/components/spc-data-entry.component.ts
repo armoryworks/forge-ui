@@ -3,7 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SpcService } from '../services/spc.service';
-import { SpcCharacteristic, SpcSubgroupEntry } from '../models/spc.model';
+import { SpcCharacteristic, SpcMeasurement, SpcSubgroupEntry } from '../models/spc.model';
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
@@ -23,9 +23,11 @@ export class SpcDataEntryComponent {
   private readonly translate = inject(TranslateService);
 
   readonly characteristic = input.required<SpcCharacteristic>();
+  readonly jobId = input<number | null>(null);
   readonly measurementRecorded = output<void>();
 
   protected readonly saving = signal(false);
+  protected readonly lastResult = signal<SpcMeasurement | null>(null);
   protected readonly values = signal<(number | null)[]>([]);
   protected readonly notes = new FormControl('');
   protected readonly jobIdControl = new FormControl<number | null>(null);
@@ -91,7 +93,7 @@ export class SpcDataEntryComponent {
 
     this.spcService.recordMeasurements({
       characteristicId: this.characteristic().id,
-      jobId: this.jobIdControl.value ?? undefined,
+      jobId: this.jobId() ?? this.jobIdControl.value ?? undefined,
       lotNumber: this.lotNumberControl.value?.trim() || undefined,
       subgroups: [subgroup],
     }).subscribe({
@@ -99,6 +101,7 @@ export class SpcDataEntryComponent {
         this.saving.set(false);
         this.clearForm();
         const m = measurements[0];
+        this.lastResult.set(m ?? null);
         this.snackbar.success(m?.isOutOfControl
           ? this.translate.instant('spc.dataEntry.recordedOoc', { number: m.subgroupNumber, rule: m.oocRuleViolated })
           : this.translate.instant('spc.dataEntry.recorded', { number: m?.subgroupNumber }));

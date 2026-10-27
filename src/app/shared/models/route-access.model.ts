@@ -51,6 +51,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'lots': { roles: ['Admin', 'Manager', 'Engineer'] },
   'mrp': { roles: ['Admin', 'Manager'] },
   'oee': { roles: ['Admin', 'Manager'] },
+  'andon': { capabilities: ['CAP-EXT-ANDON'] },
   'scheduling': { roles: ['Admin', 'Manager'] },
   'admin': { roles: ['Admin', 'Manager', 'OfficeManager'] },
 };

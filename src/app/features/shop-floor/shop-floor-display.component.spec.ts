@@ -40,6 +40,7 @@ describe('ShopFloorDisplayComponent — kiosk vs inert training preview', () => 
     isAuthenticated: vi.fn(() => true),
     scanLogin: vi.fn(() => of({})),
     login: vi.fn(() => of({})),
+    user: () => null,
   };
   const scanner = {
     setContext: vi.fn(), restart: vi.fn(), stop: vi.fn(), clearLastScan: vi.fn(), enable: vi.fn(), disable: vi.fn(),
@@ -238,7 +239,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     },
   });
 
-  const auth = { clearAuth: vi.fn(), isAuthenticated: vi.fn(() => false), scanLogin: vi.fn(), login: vi.fn() };
+  const auth = { clearAuth: vi.fn(), isAuthenticated: vi.fn(() => false), scanLogin: vi.fn(), login: vi.fn(), user: () => null };
   const scanner = {
     setContext: vi.fn(), restart: vi.fn(), stop: vi.fn(), clearLastScan: vi.fn(), enable: vi.fn(), disable: vi.fn(),
     lastScan: () => null,
@@ -263,7 +264,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
     getConfig: vi.fn(() => of({ operationTracking: false })),
     stopOperationTimer: vi.fn((_jobId: number, _operationId: number, _request?: unknown) => of({ stopped: true, entry: null })),
     getOperations: vi.fn(() => of({
-      jobId: 41, jobQuantity: 40, operations: [{ operationId: 401, completedQuantity: 10, scrapQuantity: 1, version: 3 }],
+      jobId: 41, jobQuantity: 40, operations: [{ operationId: 401, completedQuantity: 10, scrapQuantity: 1, version: 3, openTimers: [] }],
     })),
     updateOperationProgress: vi.fn((_jobId: number, _operationId: number, _request: unknown) => of({ operation: {}, allOperationsComplete: false })),
   };
@@ -1368,7 +1369,7 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
       c.selectedWorker.set(worker);
       shopFloor.getOperations.mockReturnValueOnce(of({
         jobId: 41, jobQuantity: 40, stepGating: 'Warn',
-        operations: [{ operationId: 401, stepNumber: 2, title: 'Press', completedQuantity: 10, scrapQuantity: 1, version: 3, available: 12, availableFromStep: 1 }],
+        operations: [{ operationId: 401, stepNumber: 2, title: 'Press', completedQuantity: 10, scrapQuantity: 1, version: 3, available: 12, availableFromStep: 1, openTimers: [] }],
       }) as never);
       dialog.open.mockReturnValueOnce({
         afterClosed: () => of({

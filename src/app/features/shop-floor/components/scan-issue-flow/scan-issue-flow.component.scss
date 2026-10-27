@@ -84,6 +84,11 @@
     border-color: var(--warning);
     background: color-mix(in srgb, var(--warning) 5%, transparent);
   }
+
+  &--selected {
+    border-color: var(--warning);
+    background: color-mix(in srgb, var(--warning) 10%, transparent);
+  }
 }
 
 .scan-flow__job-header {
@@ -217,4 +222,17 @@
 
 .scan-flow__spinner {
   animation: spin 1s linear infinite;
+}
+
+.scan-flow__source-tag {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  margin-left: auto;
+  color: var(--success);
+}
+
+.scan-flow__notice {
+  margin: 0;
+  font-size: $font-size-base;
+  color: var(--error);
+  text-align: center;
 }

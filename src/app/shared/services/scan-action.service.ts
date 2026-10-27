@@ -11,6 +11,7 @@ import {
   ScanReceiveRequest,
   ScanIssueRequest,
 } from '../models/scan-action.model';
+import { ScanIssueSource } from '../models/scan-issue-source.model';
 import { ScanLogEntry, ScanDevice } from '../models/scan-log.model';
 
 @Injectable({ providedIn: 'root' })
@@ -32,6 +33,10 @@ export class ScanActionService {
 
   receive(request: ScanReceiveRequest): Observable<number> {
     return this.http.post<number>(`${this.base}/receive`, request);
+  }
+
+  getIssueSources(partId: number): Observable<ScanIssueSource[]> {
+    return this.http.get<ScanIssueSource[]>(`${this.base}/issue-sources/${partId}`);
   }
 
   issue(request: ScanIssueRequest): Observable<number> {

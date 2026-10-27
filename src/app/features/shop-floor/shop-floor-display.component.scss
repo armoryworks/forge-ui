@@ -1753,6 +1753,47 @@
 
 .sf-panel-container { max-width: 900px; }
 .sf-panel-container--narrow { max-width: 480px; }
+
+.sf-header__control-btn--andon {
+  position: relative;
+}
+
+.sf-header__control-btn--alert {
+  color: var(--error);
+}
+
+.sf-header__badge {
+  position: absolute;
+  top: -$sp-sm;
+  right: -$sp-sm;
+  min-width: 20px;
+  padding: 0 $sp-sm;
+  background: var(--error);
+  color: var(--error-text);
+  font-size: $font-size-xs;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.sf-andon-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  max-width: 720px;
+}
+
+.sf-andon-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sf-andon-panel__title {
+  margin: 0;
+  font-size: $font-size-xl;
+}
 .sf-location-view-container { max-width: 600px; }
 
 // ─── Undo Panel Slide-Out ───
