@@ -110,7 +110,7 @@ export class PpapDetailComponent {
 
   protected saveNotes(element: PpapElement): void {
     const notes = this.notesControls.get(element.elementNumber)?.value.trim() ?? '';
-    this.saveElement(element, { notes: notes || null });
+    this.saveElement(element, { notes });
   }
 
   private saveElement(element: PpapElement, request: { status?: PpapElementStatus; notes?: string | null }): void {

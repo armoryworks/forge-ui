@@ -107,7 +107,8 @@ export class ControlledDocumentDetailDialogComponent {
   }
 
   protected submit(revision: DocumentRevision): void {
-    this.act(this.documentService.submitRevision(this.document().id, revision.id), 'controlledDocuments.revisionSubmitted', 'InReview');
+    this.act(this.documentService.submitRevision(this.document().id, revision.id), 'controlledDocuments.revisionSubmitted',
+      this.document().status === 'Draft' ? 'InReview' : null);
   }
 
   protected approve(revision: DocumentRevision): void {
@@ -116,7 +117,9 @@ export class ControlledDocumentDetailDialogComponent {
   }
 
   protected reject(revision: DocumentRevision): void {
-    this.act(this.documentService.rejectRevision(this.document().id, revision.id), 'controlledDocuments.revisionRejected', null);
+    const backToDraft = this.document().status === 'InReview' && !this.revisions().some(r => r.status === 'Approved');
+    this.act(this.documentService.rejectRevision(this.document().id, revision.id), 'controlledDocuments.revisionRejected',
+      backToDraft ? 'Draft' : null);
   }
 
   private act(call: ReturnType<ControlledDocumentService['submitRevision']>, messageKey: string,

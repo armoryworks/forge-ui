@@ -20,6 +20,8 @@ interface DetailApi {
   canSign(): boolean;
   incompleteRequired(): PpapElement[];
   statusControls: Map<number, { setValue(v: string): void }>;
+  notesControls: Map<number, { setValue(v: string): void }>;
+  saveNotes(e: PpapElement): void;
   changeElementStatus(e: PpapElement): void;
   submit(): void;
   signPsw(): void;
@@ -83,6 +85,16 @@ describe('PpapDetailComponent', () => {
 
     detail.submit();
     expect(service['submit']).toHaveBeenCalledWith(3);
+  });
+
+  it('clears an element note when the text is removed', () => {
+    current = submission('InProgress', [{ notes: 'Old note' }]);
+    const detail = setup();
+    detail.notesControls.get(1)!.setValue('   ');
+
+    detail.saveNotes(current.elements[0]);
+
+    expect(service['updateElement']).toHaveBeenCalledWith(3, 1, { notes: '' });
   });
 
   it('lets only a manager record the customer response, and only once submitted', () => {

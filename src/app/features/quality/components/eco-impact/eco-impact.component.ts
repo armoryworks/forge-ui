@@ -23,13 +23,17 @@ export class EcoImpactComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly ecoId = input.required<number>();
+  readonly affectedItemCount = input(0);
 
   protected readonly impact = signal<EcoImpact | null>(null);
   protected readonly loading = signal(false);
   protected readonly failed = signal(false);
 
   constructor() {
-    effect(() => this.load(this.ecoId()));
+    effect(() => {
+      this.affectedItemCount();
+      this.load(this.ecoId());
+    });
   }
 
   protected load(ecoId: number): void {

@@ -20,17 +20,21 @@ interface DialogApi {
   onUploaded(file: { id: string; fileName: string }): void;
   saveRevision(): void;
   approve(r: DocumentRevision): void;
+  submit(r: DocumentRevision): void;
+  reject(r: DocumentRevision): void;
   obsolete(): void;
   close(): void;
 }
 
 const DOC = { id: 5, documentNumber: 'DOC-00005', title: 'Turning WI', status: 'Draft', currentRevision: 0 } as unknown as ControlledDocument;
 
-function setup(roles: string[], revisions: Partial<DocumentRevision>[]) {
+function setup(roles: string[], revisions: Partial<DocumentRevision>[], document: ControlledDocument = DOC) {
   const service = {
     revisions: vi.fn(() => of(revisions)),
     createRevision: vi.fn(() => of({ id: 9 })),
     approveRevision: vi.fn(() => of({ id: 9 })),
+    submitRevision: vi.fn(() => of({ id: 9 })),
+    rejectRevision: vi.fn(() => of({ id: 9 })),
     obsolete: vi.fn(() => of(undefined)),
   };
   const close = vi.fn();
@@ -39,7 +43,7 @@ function setup(roles: string[], revisions: Partial<DocumentRevision>[]) {
     providers: [
       { provide: ControlledDocumentService, useValue: service },
       { provide: MatDialogRef, useValue: { close } },
-      { provide: MAT_DIALOG_DATA, useValue: { document: DOC } },
+      { provide: MAT_DIALOG_DATA, useValue: { document } },
       { provide: MatDialog, useValue: { open: vi.fn(() => ({ afterClosed: () => of(true) })) } },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
       { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
@@ -77,6 +81,26 @@ describe('ControlledDocumentDetailDialogComponent', () => {
 
     dialog.close();
     expect(close).toHaveBeenCalledWith(true);
+  });
+
+  it('keeps a released document released while its next revision is in review', () => {
+    const released = { ...DOC, status: 'Released', currentRevision: 1 } as ControlledDocument;
+    const { dialog, service } = setup(['Engineer'], [{ id: 2, status: 'Approved', revisionNumber: 1 }, { id: 3, status: 'Draft', revisionNumber: 2 }], released);
+
+    dialog.submit({ id: 3, revisionNumber: 2 } as DocumentRevision);
+
+    expect(service.submitRevision).toHaveBeenCalledWith(5, 3);
+    expect(dialog.document().status).toBe('Released');
+  });
+
+  it('returns a never-released document to draft when its revision is rejected', () => {
+    const inReview = { ...DOC, status: 'InReview' } as ControlledDocument;
+    const { dialog, service } = setup(['Manager'], [{ id: 2, status: 'InReview', revisionNumber: 1 }], inReview);
+
+    dialog.reject({ id: 2, revisionNumber: 1 } as DocumentRevision);
+
+    expect(service.rejectRevision).toHaveBeenCalledWith(5, 2);
+    expect(dialog.document().status).toBe('Draft');
   });
 
   it('keeps approval away from engineers', () => {

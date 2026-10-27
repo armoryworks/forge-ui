@@ -55,6 +55,28 @@ describe('EcoImpactComponent', () => {
     expect(el.querySelector('[data-testid="eco-impact-stock-none"]')).not.toBeNull();
   });
 
+  it('reloads the impact when the ECO gains an affected item', () => {
+    getImpact = vi.fn(() => of(IMPACT));
+    TestBed.configureTestingModule({
+      imports: [EcoImpactComponent, TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        { provide: EcoService, useValue: { getImpact } },
+        { provide: EntityPreviewService, useValue: { getPreview: vi.fn(() => of(null)) } },
+      ],
+    });
+    const fixture = TestBed.createComponent(EcoImpactComponent);
+    fixture.componentRef.setInput('ecoId', 4);
+    fixture.componentRef.setInput('affectedItemCount', 1);
+    fixture.detectChanges();
+    expect(getImpact).toHaveBeenCalledTimes(1);
+
+    fixture.componentRef.setInput('affectedItemCount', 2);
+    fixture.detectChanges();
+
+    expect(getImpact).toHaveBeenCalledTimes(2);
+  });
+
   it('offers a retry when the impact cannot be loaded', () => {
     getImpact = vi.fn(() => throwError(() => new Error('down')));
     const el = render();
