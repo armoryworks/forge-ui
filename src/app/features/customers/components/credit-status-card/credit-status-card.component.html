@@ -14,7 +14,7 @@
             <p>{{ c.holdReason }}</p>
           }
         </div>
-        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="releaseHold()">
+        <button class="action-btn action-btn--sm" data-testid="credit-release-hold-btn" [disabled]="saving()" (click)="releaseHold()">
           {{ 'customers.creditStatus.release' | translate }}
         </button>
       </div>
@@ -113,7 +113,7 @@
 
     @if (!c.isOnHold) {
       <div class="credit-card__actions">
-        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="openHoldDialog()"
+        <button class="action-btn action-btn--sm" data-testid="credit-place-hold-btn" [disabled]="saving()" (click)="openHoldDialog()"
                 [attr.aria-label]="'customers.creditStatus.placeHoldAriaLabel' | translate">
           <span class="material-icons-outlined">block</span> {{ 'customers.creditStatus.placeHold' | translate }}
         </button>
@@ -127,8 +127,8 @@
     <p class="text-muted">{{ 'customers.creditStatus.placeHoldDialogHint' | translate }}</p>
     <app-textarea [label]="'customers.creditStatus.holdReason' | translate" [formControl]="holdReason" [rows]="3" [required]="true" [maxlength]="500" />
     <div dialog-footer>
-      <button class="action-btn" (click)="showHoldDialog.set(false)">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary" [disabled]="holdReason.invalid || saving()" (click)="placeHold()">
+      <button class="action-btn" data-testid="credit-hold-cancel-btn" (click)="showHoldDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" data-testid="credit-hold-confirm-btn" [disabled]="holdReason.invalid || saving()" (click)="placeHold()">
         {{ 'customers.creditStatus.placeHold' | translate }}
       </button>
     </div>

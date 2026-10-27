@@ -13,6 +13,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
+import { SalesTaxCodesService } from '../../../../shared/services/sales-tax-codes.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { FREIGHT_TERMS, FreightTerms } from '../../../../shared/models/freight-terms.const';
 import { CustomerSummary } from '../../models/customer-summary.model';
 
@@ -41,6 +43,8 @@ export class CustomerIdentityClusterComponent {
   private readonly translate = inject(TranslateService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
+  private readonly capability = inject(CapabilityService);
+  private readonly taxCodes = inject(SalesTaxCodesService);
 
   readonly customer = input.required<CustomerSummary>();
   readonly editing = input(false);
@@ -57,6 +61,8 @@ export class CustomerIdentityClusterComponent {
   protected readonly allowManualCustomerNumbers = computed(() => this.manualNumberSettings.isEnabled('customers'));
   protected readonly creditTermsOptions = this.paymentTerms.options;
   protected readonly canSeeTerms = this.paymentTerms.canRead;
+  protected readonly taxCodesEnabled = computed(() => this.capability.isEnabled('CAP-MD-TAXCODES', true));
+  protected readonly taxCodeOptions = this.taxCodes.options;
   protected readonly freightTermsOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('freight.terms.installDefault') },
     ...FREIGHT_TERMS.map(t => ({ value: t, label: this.translate.instant(`freight.terms.${t}`) })),
@@ -75,6 +81,7 @@ export class CustomerIdentityClusterComponent {
     paymentTermsId: new FormControl<number | null>(null),
     currencyId: new FormControl<number | null>(null),
     freightTerms: new FormControl<FreightTerms | null>(null),
+    defaultTaxCodeId: new FormControl<number | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -107,7 +114,9 @@ export class CustomerIdentityClusterComponent {
         paymentTermsId: c.paymentTermsId ?? this.paymentTerms.forLegacy(c.defaultCreditTerms)?.id ?? null,
         currencyId: c.currencyId ?? null,
         freightTerms: c.freightTerms ?? null,
+        defaultTaxCodeId: c.defaultTaxCodeId ?? null,
       });
+      if (this.taxCodesEnabled()) this.taxCodes.ensureLoaded();
       if (this.editing()) {
         this.form.enable();
       } else {
@@ -132,6 +141,7 @@ export class CustomerIdentityClusterComponent {
       patch.taxExemptionId = v.isTaxExempt ? v.taxExemptionId.trim() : '';
       if (this.creditLimitsEnabled()) patch.creditLimit = v.creditLimit;
       patch.paymentTermsId = v.paymentTermsId;
+      if (this.taxCodesEnabled()) patch.defaultTaxCodeId = v.defaultTaxCodeId;
     }
     if (v.freightTerms !== (this.customer().freightTerms ?? null)) patch.freightTerms = v.freightTerms;
     if (!this.customer().currencyLocked && this.form.controls.currencyId.dirty && v.currencyId !== (this.customer().currencyId ?? null)) {

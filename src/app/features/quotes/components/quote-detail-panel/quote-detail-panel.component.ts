@@ -27,6 +27,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { fromIsoDate, toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -65,7 +67,7 @@ interface MilestoneActionRow {
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, FileUploadZoneComponent,
     EntityLinkComponent, CurrencyDisplayComponent,
-    EntityPickerComponent, InputComponent, CurrencyInputComponent,
+    EntityPickerComponent, InputComponent, CurrencyInputComponent, DatepickerComponent,
     PaymentProgressComponent,
     DetailLoadErrorComponent,
   ],
@@ -111,6 +113,15 @@ export class QuoteDetailPanelComponent {
   protected readonly quoteNumberLocked = computed(() => this.allowManualQuoteNumbers() && !this.canEditQuoteNumber());
   protected readonly canEditQuoteNumber = computed(
     () => this.allowManualQuoteNumbers() && this.quote()?.status === 'Draft');
+
+  protected readonly editingValidUntil = signal(false);
+  protected readonly savingValidUntil = signal(false);
+  protected readonly validUntilControl = new FormControl<Date | null>(null, { validators: [Validators.required] });
+  protected readonly today = todayStart();
+  protected readonly canEditValidUntil = computed(() => {
+    const status = this.quote()?.status;
+    return status === 'Draft' || status === 'Sent' || status === 'Expired';
+  });
 
   // --- Line editing (Draft only) ---
   // editingLineId: null = editor closed, 0 = adding a new line, >0 = editing that line.
@@ -412,6 +423,35 @@ export class QuoteDetailPanelComponent {
         this.snackbar.success(this.translate.instant('quotes.quoteUpdated'));
       },
       error: () => this.savingNumber.set(false),
+    });
+  }
+
+  protected startEditValidUntil(): void {
+    const q = this.quote();
+    if (!q) return;
+    this.validUntilControl.reset(q.expirationDate ? fromIsoDate(q.expirationDate) : null);
+    this.editingValidUntil.set(true);
+  }
+
+  protected cancelValidUntilEdit(): void {
+    this.editingValidUntil.set(false);
+  }
+
+  protected saveValidUntil(): void {
+    const q = this.quote();
+    const date = this.validUntilControl.value;
+    if (!q || !date || this.validUntilControl.invalid || this.savingValidUntil()) return;
+    const reopens = q.status === 'Expired';
+    this.savingValidUntil.set(true);
+    this.quoteService.updateQuote(q.id, { expirationDate: toIsoDate(date) ?? undefined }).subscribe({
+      next: () => {
+        this.savingValidUntil.set(false);
+        this.editingValidUntil.set(false);
+        this.loadQuote(q.id);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant(reopens ? 'quotes.validUntilReopened' : 'quotes.validUntilSaved'));
+      },
+      error: () => this.savingValidUntil.set(false),
     });
   }
 

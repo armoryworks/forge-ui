@@ -3,7 +3,7 @@
   width="480px"
   (closed)="cancel()">
   <div [formGroup]="form" [appLoadingBlock]="loading()">
-    <p>{{ 'leads.outreachPrefs.intro' | translate }}</p>
+    <p>{{ (data.introKey ?? 'leads.outreachPrefs.intro') | translate }}</p>
     <app-toggle [label]="'leads.outreachPrefs.emailOptOut' | translate" formControlName="emailOptOut" data-testid="prefs-email-opt-out" />
     <app-toggle [label]="'leads.outreachPrefs.callOptOut' | translate" formControlName="callOptOut" data-testid="prefs-call-opt-out" />
     <app-toggle [label]="'leads.outreachPrefs.smsOptOut' | translate" formControlName="smsOptOut" data-testid="prefs-sms-opt-out" />

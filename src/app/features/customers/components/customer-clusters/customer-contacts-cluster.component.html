@@ -58,6 +58,10 @@
             }
           </div>
           <div class="contact-card__actions">
+            <button class="icon-btn" data-testid="contact-outreach-prefs-btn" (click)="openOutreachPreferences(contact)"
+                    [attr.aria-label]="'customers.contactsCluster.outreachPrefsAriaLabel' | translate">
+              <span class="material-icons-outlined">notifications_off</span>
+            </button>
             <button class="icon-btn" (click)="openEdit(contact)"
                     [attr.aria-label]="'customers.contactsCluster.editContactAriaLabel' | translate">
               <span class="material-icons-outlined">edit</span>

@@ -21,6 +21,13 @@
           {{ 'customers.detail.back' | translate }}
         </a>
         <div class="cd-header__actions">
+          @if (canSendSample()) {
+            <button class="action-btn" data-testid="customer-send-sample-btn" (click)="openSendSample()"
+                    [attr.aria-label]="'leads.sendSample.open' | translate">
+              <span class="material-icons-outlined">local_shipping</span>
+              {{ 'leads.sendSample.open' | translate }}
+            </button>
+          }
           <button class="action-btn" (click)="toggleEdit()" [attr.aria-label]="'customers.detail.editAriaLabel' | translate">
             <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
             {{ (editing() ? 'customers.detail.done' : 'customers.detail.edit') | translate }}

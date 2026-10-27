@@ -12,6 +12,7 @@ import { CustomerSummary } from '../../models/customer-summary.model';
 import { environment } from '../../../../../environments/environment';
 import { SEEDED_PAYMENT_TERMS } from '../../../../shared/models/payment-terms.fixture';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -197,6 +198,44 @@ describe('CustomerIdentityClusterComponent', () => {
       c.onSave();
 
       expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ paymentTermsId: 9 }));
+    });
+
+    it('loads the default tax code options and saves a new pick', () => {
+      const { c, cb } = build(true, true, { defaultTaxCodeId: 3 });
+      TestBed.inject(HttpTestingController)
+        .match(r => r.url === `${environment.apiUrl}/sales-tax-rates`)
+        .forEach(r => r.flush([
+          { id: 3, name: 'Utah', code: 'UT', rate: 0.0725, isActive: true },
+          { id: 5, name: 'Nevada', code: 'NV', rate: 0.0685, isActive: true },
+        ]));
+      const internals = c as unknown as { taxCodeOptions(): { value: number | null }[] };
+      const raw = (c.form as unknown as { getRawValue(): { defaultTaxCodeId: number | null } }).getRawValue();
+      expect(raw.defaultTaxCodeId).toBe(3);
+      expect(internals.taxCodeOptions().map(o => o.value)).toEqual([null, 3, 5]);
+      c.form.patchValue({ defaultTaxCodeId: 5 });
+
+      c.onSave();
+
+      expect(cb.mock.calls[0][0]).toEqual(expect.objectContaining({ defaultTaxCodeId: 5 }));
+    });
+
+    it('sends no tax code for roles that cannot change commercial terms', () => {
+      const { c, cb } = build(false, true, { defaultTaxCodeId: 3 });
+
+      c.onSave();
+
+      expect(cb.mock.calls[0][0]).not.toHaveProperty('defaultTaxCodeId');
+    });
+
+    it('hides and skips the tax code when tax codes are turned off', () => {
+      TestBed.overrideProvider(CapabilityService, { useValue: { isEnabled: (code: string) => code !== 'CAP-MD-TAXCODES' } });
+      const { c, cb } = build(true, true, { defaultTaxCodeId: 3 });
+
+      c.onSave();
+
+      expect((c as unknown as { taxCodesEnabled(): boolean }).taxCodesEnabled()).toBe(false);
+      expect(cb.mock.calls[0][0]).not.toHaveProperty('defaultTaxCodeId');
+      TestBed.inject(HttpTestingController).expectNone(`${environment.apiUrl}/sales-tax-rates`);
     });
   });
 });

@@ -1,0 +1,70 @@
+<app-page-layout [pageTitle]="'invoiceImport.title' | translate" [pageSubtitle]="'invoiceImport.subtitle' | translate">
+  <ng-container content>
+    <div class="imp" [appLoadingBlock]="working()">
+      <app-csv-import-source
+        testIdPrefix="invoice-import"
+        [hint]="'invoiceImport.columnsHint' | translate"
+        [errors]="parseErrors()"
+        [hasRows]="rows().length > 0"
+        (textLoaded)="load($event)"
+        (templateRequested)="downloadTemplate()"
+        (resetRequested)="reset()" />
+
+      <div class="imp-notice" role="note" data-testid="invoice-import-gl-notice">
+        <span class="material-icons-outlined">info</span>
+        <p>{{ (fullGl() ? 'invoiceImport.noGlFullGl' : 'invoiceImport.noGl') | translate }}</p>
+      </div>
+
+      @if (rows().length > 0) {
+        <section class="imp-card">
+          <h3 class="imp-card__title">
+            {{ 'csvImport.step2' | translate }}
+            <span class="chip chip--info">{{ 'csvImport.rowCount' | translate: { count: rows().length } }}</span>
+            <span class="chip chip--info">{{ 'invoiceImport.invoiceCount' | translate: { count: invoiceCount() } }}</span>
+          </h3>
+          @if (result(); as r) {
+            <div class="imp-summary" data-testid="invoice-import-summary">
+              @if (r.committed) {
+                <span class="chip chip--success">{{ 'invoiceImport.committed' | translate: { count: r.createdCount } }}</span>
+              } @else {
+                <span class="chip chip--success">{{ 'csvImport.validCount' | translate: { count: r.validCount } }}</span>
+                <span class="chip" [class.chip--error]="r.invalidCount > 0" [class.chip--muted]="r.invalidCount === 0">{{ 'csvImport.invalidCount' | translate: { count: r.invalidCount } }}</span>
+              }
+            </div>
+            @if (!r.committed && r.invalidCount > 0) {
+              <p class="imp-card__hint">{{ 'csvImport.fixAndRetry' | translate }}</p>
+            }
+          }
+
+          <app-data-table
+            tableId="invoice-import-rows"
+            trackByField="id"
+            [columns]="columns"
+            [data]="displayRows()"
+            emptyIcon="upload_file">
+            <ng-template appColumnCell="status" let-row>
+              <span [class]="statusClass($any(row))">{{ ('csvImport.status.' + ($any(row).result?.status ?? 'Pending')) | translate }}</span>
+              @for (err of $any(row).result?.errors ?? []; track $index) {
+                <span class="imp-error">{{ err }}</span>
+              }
+            </ng-template>
+          </app-data-table>
+
+          <div class="imp-actions">
+            <button type="button" class="action-btn action-btn--sm" data-testid="invoice-import-validate" [disabled]="!canValidate()" (click)="validate()">
+              <span class="material-icons-outlined">fact_check</span>{{ 'csvImport.validate' | translate }}
+            </button>
+            <button type="button" class="action-btn action-btn--sm action-btn--primary" data-testid="invoice-import-commit" [disabled]="!canCommit()" (click)="commit()">
+              <span class="material-icons-outlined">check</span>{{ 'csvImport.commit' | translate }}
+            </button>
+            @if (result()?.committed) {
+              <button type="button" class="action-btn action-btn--sm" data-testid="invoice-import-view" (click)="viewInvoices()">
+                <span class="material-icons-outlined">list</span>{{ 'invoiceImport.viewInvoices' | translate }}
+              </button>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

@@ -52,6 +52,9 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
+.info-item--edit { grid-column: 1 / -1; }
+.info-hint { font-size: $font-size-xs; color: var(--text-muted); }
+.info-value .icon-btn { vertical-align: middle; }
 .info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .info-value { font-size: $font-size-sm; }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }

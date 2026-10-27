@@ -194,6 +194,97 @@ describe('AppHeaderComponent search', () => {
   });
 });
 
+describe('AppHeaderComponent AI search suggestions', () => {
+  type SuggestHarness = {
+    searchControl: { setValue(v: string): void; value: string | null };
+    aiSuggestions: () => { label: string; url: string }[];
+    showResults: () => boolean;
+    pickSuggestion(s: { label: string; description: string; url: string; icon: string }): void;
+  };
+  let searchSuggest: ReturnType<typeof vi.fn>;
+  let navigateByUrl: ReturnType<typeof vi.fn>;
+  let available: ReturnType<typeof signal<boolean>>;
+
+  function build(): SuggestHarness {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { user: signal(null) } },
+        { provide: Router, useValue: { events: of(), url: '/dashboard', navigate: vi.fn(), navigateByUrl } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k } },
+        { provide: LanguageService, useValue: { currentLanguage: signal('en'), availableLanguages: [] } },
+        { provide: NotificationService, useValue: { unreadCount: signal(0), panelOpen: signal(false) } },
+        { provide: NavTreeService, useValue: { breadcrumbTrail: signal([]), flatLeaves: signal([]), recordCrumb: signal(null) } },
+        { provide: ThemeService, useValue: { theme: signal('light') } },
+        { provide: CapabilityService, useValue: { isEnabled: () => false } },
+        { provide: AiService, useValue: { available, searchSuggest, ragSearch: () => of({ results: [], generatedAnswer: null }) } },
+        { provide: SearchService, useValue: { search: () => of([]) } },
+        { provide: VersionService, useValue: {} },
+        { provide: BrandingService, useValue: {} },
+        { provide: LayoutService, useValue: { closeMobileMenu: vi.fn() } },
+      ],
+    });
+    return TestBed.runInInjectionContext(() => new AppHeaderComponent()) as unknown as SuggestHarness;
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    available = signal(true);
+    navigateByUrl = vi.fn();
+    searchSuggest = vi.fn(() => of([
+      { label: 'Open quotes for Acme', description: 'Quotes list', url: '/quotes?q=acme', icon: 'request_quote' },
+      { label: 'acme brackets', description: 'Search again', url: '', icon: 'search' },
+    ]));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('shows suggestions under the results once the typing settles', () => {
+    const header = build();
+
+    header.searchControl.setValue('acme');
+    vi.advanceTimersByTime(300);
+    expect(searchSuggest).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(300);
+
+    expect(searchSuggest).toHaveBeenCalledWith('acme');
+    expect(header.aiSuggestions().map(s => s.label)).toEqual(['Open quotes for Acme', 'acme brackets']);
+    expect(header.showResults()).toBe(true);
+  });
+
+  it('hides suggestions when the suggest call fails', () => {
+    searchSuggest.mockReturnValue(throwError(() => new Error('503')));
+    const header = build();
+
+    header.searchControl.setValue('acme');
+    vi.advanceTimersByTime(600);
+
+    expect(header.aiSuggestions()).toEqual([]);
+  });
+
+  it('never asks for suggestions when the AI assistant is off', () => {
+    available.set(false);
+    const header = build();
+
+    header.searchControl.setValue('acme');
+    vi.advanceTimersByTime(600);
+
+    expect(searchSuggest).not.toHaveBeenCalled();
+    expect(header.aiSuggestions()).toEqual([]);
+  });
+
+  it('opens a suggestion that has a destination and runs one that does not as the search', () => {
+    const header = build();
+
+    header.pickSuggestion({ label: 'Open quotes for Acme', description: '', url: '/quotes?q=acme', icon: '' });
+    expect(navigateByUrl).toHaveBeenCalledWith('/quotes?q=acme');
+
+    header.pickSuggestion({ label: 'acme brackets', description: '', url: '', icon: '' });
+    expect(header.searchControl.value).toBe('acme brackets');
+  });
+});
+
 describe('AppHeaderComponent Escape', () => {
   interface HeaderInternals {
     onKeydown(event: KeyboardEvent): void;

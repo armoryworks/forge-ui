@@ -16,6 +16,13 @@
         </div>
       </div>
       <div class="detail-header__actions">
+        @if (canSendSample()) {
+          <button class="icon-btn" data-testid="lead-send-sample-btn"
+            [matTooltip]="'leads.sendSample.open' | translate" matTooltipPosition="above"
+            [attr.aria-label]="'leads.sendSample.open' | translate" (click)="openSendSample()">
+            <span class="material-icons-outlined">local_shipping</span>
+          </button>
+        }
         <button class="icon-btn" data-testid="lead-outreach-prefs-btn"
           [matTooltip]="'leads.outreachPrefs.open' | translate" matTooltipPosition="above"
           [attr.aria-label]="'leads.outreachPrefs.open' | translate" (click)="openOutreachPreferences()">

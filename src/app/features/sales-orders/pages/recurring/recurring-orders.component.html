@@ -40,6 +40,14 @@
         </ng-template>
 
         <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" data-testid="recurring-toggle-active-btn"
+                  [disabled]="togglingId() !== null"
+                  [matTooltip]="(row.isActive ? 'salesOrders.recurring.pause' : 'salesOrders.recurring.resume') | translate"
+                  matTooltipPosition="above"
+                  [attr.aria-label]="(row.isActive ? 'salesOrders.recurring.pause' : 'salesOrders.recurring.resume') | translate"
+                  (click)="toggleActive($any(row))">
+            <span class="material-icons-outlined">{{ row.isActive ? 'pause_circle' : 'play_circle' }}</span>
+          </button>
           <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate"
                   (click)="confirmDelete($any(row))" data-testid="recurring-delete-btn">
             <span class="material-icons-outlined">delete</span>

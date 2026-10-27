@@ -19,6 +19,7 @@ import { CustomerTaxEditability } from '../models/customer-tax-editability.model
 import { BulkCustomerIntakeRequest, BulkCustomerIntakeResponse } from '../models/bulk-customer-intake.model';
 import { FlatContactRow } from '../models/flat-contact.model';
 import { PortalAccessRow } from '../models/portal-access.model';
+import { OutreachPreferences, UpdateOutreachPreferencesRequest } from '../../leads/models/suppression.model';
 
 /** Phase 3 F7-partial / WU-17 — paged customer list query parameters. */
 export interface CustomerListPagedQuery extends PagedQuery {
@@ -96,6 +97,16 @@ export class CustomerService {
 
   deleteContact(customerId: number, contactId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${customerId}/contacts/${contactId}`);
+  }
+
+  getContactOutreachPreferences(customerId: number, contactId: number): Observable<OutreachPreferences | null> {
+    return this.http.get<OutreachPreferences | null>(`${this.base}/${customerId}/contacts/${contactId}/outreach-preferences`);
+  }
+
+  updateContactOutreachPreferences(
+    customerId: number, contactId: number, request: UpdateOutreachPreferencesRequest,
+  ): Observable<OutreachPreferences> {
+    return this.http.put<OutreachPreferences>(`${this.base}/${customerId}/contacts/${contactId}/outreach-preferences`, request);
   }
 
   getCustomerSummary(id: number): Observable<CustomerSummary> {

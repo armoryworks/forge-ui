@@ -8,6 +8,9 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { Contact } from '../../models/contact.model';
 import { CustomerContactDialogComponent } from './customer-contact-dialog.component';
+import {
+  OutreachPreferencesDialogComponent, OutreachPreferencesDialogData,
+} from '../../../leads/components/outreach-preferences-dialog/outreach-preferences-dialog.component';
 
 /**
  * Wave 6 — Customer Contacts cluster.
@@ -88,6 +91,21 @@ export class CustomerContactsClusterComponent implements OnInit {
   protected onDialogSaved(): void {
     this.closeDialog();
     this.loadContacts();
+  }
+
+  protected openOutreachPreferences(contact: Contact): void {
+    const customerId = this.customerId();
+    this.dialog.open<OutreachPreferencesDialogComponent, OutreachPreferencesDialogData>(OutreachPreferencesDialogComponent, {
+      width: '480px',
+      data: {
+        leadName: `${contact.lastName}, ${contact.firstName}`,
+        introKey: 'customers.contactsCluster.outreachIntro',
+        source: {
+          load: () => this.customerService.getContactOutreachPreferences(customerId, contact.id),
+          save: (request) => this.customerService.updateContactOutreachPreferences(customerId, contact.id, request),
+        },
+      },
+    });
   }
 
   protected deleteContact(contact: Contact): void {

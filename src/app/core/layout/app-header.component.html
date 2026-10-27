@@ -120,7 +120,24 @@
                 </div>
               </button>
             }
-            @if (!aiLoading() && ragResults().length === 0 && !ragAnswer()) {
+            @if (aiSuggestions().length > 0) {
+              <div class="search-results__col-header search-results__col-header--ai" data-testid="search-suggestions-header">
+                <span class="material-icons-outlined">tips_and_updates</span>
+                {{ 'header.suggestions' | translate }}
+              </div>
+              @for (suggestion of aiSuggestions(); track suggestion.label) {
+                <button class="search-result search-result--ai" data-testid="search-suggestion-item" (mousedown)="pickSuggestion(suggestion)">
+                  <span class="material-icons-outlined search-result__icon">{{ suggestion.icon || 'search' }}</span>
+                  <div class="search-result__content">
+                    <span class="search-result__title">{{ suggestion.label }}</span>
+                    @if (suggestion.description) {
+                      <span class="search-result__subtitle">{{ suggestion.description }}</span>
+                    }
+                  </div>
+                </button>
+              }
+            }
+            @if (!aiLoading() && ragResults().length === 0 && !ragAnswer() && aiSuggestions().length === 0) {
               <div class="search-results__empty">{{ 'header.typeForAi' | translate }}</div>
             }
           </div>

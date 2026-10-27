@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.imp {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  max-width: 1100px;
+}
+
+.imp-card {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin: 0;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+}
+
+.imp-summary,
+.imp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+}
+
+.imp-error {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--error);
+  white-space: normal;
+}

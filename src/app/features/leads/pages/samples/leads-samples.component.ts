@@ -73,7 +73,7 @@ export class LeadsSamplesComponent {
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'leadId', header: this.translate.instant('leads.samples.colLead'), sortable: true, width: '100px' },
+    { field: 'leadId', header: this.translate.instant('leads.samples.colRecipient'), sortable: true, width: '120px' },
     { field: 'partDescription', header: this.translate.instant('leads.samples.colPart'), sortable: true },
     { field: 'quantity', header: this.translate.instant('leads.samples.colQty'), sortable: true, type: 'number', align: 'right', width: '70px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, width: '140px' },
@@ -124,6 +124,10 @@ export class LeadsSamplesComponent {
   }
 
   protected openLead(sample: SampleShipment): void {
+    if (sample.leadId == null && sample.customerId != null) {
+      this.router.navigate(['/customers', sample.customerId]);
+      return;
+    }
     this.router.navigate(['/leads'], { queryParams: { detail: `lead:${sample.leadId}` } });
   }
 
@@ -183,6 +187,8 @@ export class LeadsSamplesComponent {
       trackingNumber: s.trackingNumber,
       carrier: s.carrier,
       notes: s.notes,
+      shipToAddress: s.shipToAddress ?? null,
+      followUpDate: s.followUpDate ?? null,
     }).subscribe({
       next: () => {
         this.snackbar.success(this.translate.instant('leads.samples.transitioned', {

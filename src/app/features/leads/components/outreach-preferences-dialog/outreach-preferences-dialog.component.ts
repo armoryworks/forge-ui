@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable } from 'rxjs';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
@@ -16,11 +17,16 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { LeadsService } from '../../services/leads.service';
 import { OutreachPreferences } from '../../models/suppression.model';
+import { OutreachPreferencesSource } from '../../models/outreach-preferences-source.model';
 
 export interface OutreachPreferencesDialogData {
-  leadId: number;
+  leadId?: number;
   leadName: string;
   suppress?: boolean;
+  /** Where the preferences live when they are not a lead's (a customer contact's). */
+  source?: OutreachPreferencesSource;
+  /** Overrides the lead-worded introduction. */
+  introKey?: string;
 }
 
 /**
@@ -65,7 +71,7 @@ export class OutreachPreferencesDialogComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.leads.getOutreachPreferences(this.data.leadId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (prefs) => {
         this.loading.set(false);
         this.seed(prefs);
@@ -86,7 +92,7 @@ export class OutreachPreferencesDialogComponent implements OnInit {
     const f = this.form.getRawValue();
     const source = f.source.trim() || undefined;
     this.saving.set(true);
-    this.leads.updateOutreachPreferences(this.data.leadId, {
+    const request = {
       emailOptOut: f.emailOptOut,
       emailOptOutSource: f.emailOptOut ? source : undefined,
       callOptOut: f.callOptOut,
@@ -95,7 +101,11 @@ export class OutreachPreferencesDialogComponent implements OnInit {
       smsOptOutSource: f.smsOptOut ? source : undefined,
       cooldownUntil: f.cooldownUntil ? (toIsoDate(f.cooldownUntil) ?? null) : null,
       cooldownNotes: f.cooldownNotes.trim() || undefined,
-    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    };
+    const save = this.data.source
+      ? this.data.source.save(request)
+      : this.leads.updateOutreachPreferences(this.data.leadId ?? 0, request);
+    save.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('leads.outreachPrefs.saved'));
@@ -103,6 +113,10 @@ export class OutreachPreferencesDialogComponent implements OnInit {
       },
       error: () => this.saving.set(false),
     });
+  }
+
+  private load(): Observable<OutreachPreferences | null> {
+    return this.data.source ? this.data.source.load() : this.leads.getOutreachPreferences(this.data.leadId ?? 0);
   }
 
   private seed(prefs: OutreachPreferences | null): void {
