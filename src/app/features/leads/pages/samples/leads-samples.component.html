@@ -22,7 +22,11 @@
         [emptyMessage]="'leads.samples.empty' | translate">
 
         <ng-template appColumnCell="leadId" let-row>
-          <span class="lead-link">#{{ row.leadId }}</span>
+          @if (row.leadId !== null) {
+            <span class="lead-link">#{{ row.leadId }}</span>
+          } @else {
+            <span class="lead-link">{{ 'leads.samples.customerRef' | translate: { id: row.customerId } }}</span>
+          }
         </ng-template>
 
         <ng-template appColumnCell="partDescription" let-row>

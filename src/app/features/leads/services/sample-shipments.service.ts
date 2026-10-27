@@ -14,9 +14,10 @@ export class SampleShipmentsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/sample-shipments`;
 
-  list(leadId?: number): Observable<SampleShipment[]> {
+  list(leadId?: number, customerId?: number): Observable<SampleShipment[]> {
     let params = new HttpParams();
     if (leadId) params = params.set('leadId', String(leadId));
+    if (customerId) params = params.set('customerId', String(customerId));
     return this.http.get<SampleShipment[]>(this.base, { params });
   }
 

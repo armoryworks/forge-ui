@@ -8,6 +8,8 @@ import { Subject, throwError } from 'rxjs';
 import { LeadsService } from '../../services/leads.service';
 import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { SendSampleDialogComponent } from '../send-sample-dialog/send-sample-dialog.component';
 import { LeadDetailPanelComponent } from './lead-detail-panel.component';
 
 interface PanelInternals {
@@ -27,6 +29,7 @@ function lostSetup(updateLead: ReturnType<typeof vi.fn>): PanelInternals {
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
       { provide: MatDialog, useValue: {} },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
+      { provide: AuthService, useValue: { hasAnyRole: () => true } },
     ],
   });
   const panel = TestBed.runInInjectionContext(() => new LeadDetailPanelComponent()) as unknown as PanelInternals;
@@ -47,6 +50,7 @@ describe('LeadDetailPanelComponent', () => {
         { provide: SnackbarService, useValue: {} },
         { provide: MatDialog, useValue: {} },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
       ],
     });
     const component = TestBed.runInInjectionContext(() => new LeadDetailPanelComponent());
@@ -78,5 +82,46 @@ describe('LeadDetailPanelComponent', () => {
     panel.confirmLost();
 
     expect(updateLead).toHaveBeenCalledTimes(2);
+  });
+
+  describe('send sample', () => {
+    function sampleSetup(roles: string[]) {
+      const open = vi.fn();
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: Router, useValue: { navigate: vi.fn() } },
+          { provide: LeadsService, useValue: {} },
+          { provide: OutreachCampaignsService, useValue: {} },
+          { provide: SnackbarService, useValue: {} },
+          { provide: MatDialog, useValue: { open } },
+          { provide: TranslateService, useValue: { instant: (key: string) => key } },
+          { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+        ],
+      });
+      const panel = TestBed.runInInjectionContext(() => new LeadDetailPanelComponent()) as unknown as PanelInternals & {
+        canSendSample(): boolean;
+        openSendSample(): void;
+      };
+      panel.lead.set({ id: 4, companyName: 'Prospect Co', status: 'Contacted' });
+      return { panel, open };
+    }
+
+    it('opens the send-sample dialog for the lead', () => {
+      const { panel, open } = sampleSetup(['PM']);
+
+      expect(panel.canSendSample()).toBe(true);
+      panel.openSendSample();
+
+      expect(open).toHaveBeenCalledWith(SendSampleDialogComponent, expect.objectContaining({
+        data: { leadId: 4, recipientName: 'Prospect Co' },
+      }));
+    });
+
+    it('hides Send sample from roles the samples API refuses', () => {
+      const { panel } = sampleSetup(['OfficeManager']);
+
+      expect(panel.canSendSample()).toBe(false);
+    });
   });
 });

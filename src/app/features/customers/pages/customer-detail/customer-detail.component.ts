@@ -19,6 +19,8 @@ import { CapabilityService } from '../../../../shared/services/capability.servic
 import { AuthService } from '../../../../shared/services/auth.service';
 import { NavTreeService } from '../../../../shared/services/nav-tree.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SendSampleDialogComponent, SendSampleDialogData } from '../../../leads/components/send-sample-dialog/send-sample-dialog.component';
+import { SAMPLE_SHIPMENT_ROLES } from '../../../leads/sample-shipment-roles';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerEstimatesTabComponent } from './tabs/customer-estimates-tab.component';
 import { CustomerQuotesTabComponent } from './tabs/customer-quotes-tab.component';
@@ -129,6 +131,9 @@ export class CustomerDetailComponent {
 
   protected readonly canViewCommercialDocuments = computed(() =>
     this.auth.hasAnyRole(CustomerDetailComponent.COMMERCIAL_RECORD_ROLES));
+
+  protected readonly canSendSample = computed(() =>
+    this.capabilityService.isEnabled('CAP-O2C-LEAD') && this.auth.hasAnyRole(SAMPLE_SHIPMENT_ROLES));
 
   protected readonly customerId = toSignal(
     this.route.paramMap.pipe(map(p => parsePositiveId(p.get('id')))),
@@ -334,7 +339,24 @@ export class CustomerDetailComponent {
         changes.paymentTermsId = patch.paymentTermsId;
       }
     }
+    if (patch.defaultTaxCodeId !== undefined) {
+      const current = this.customer()?.defaultTaxCodeId ?? null;
+      if (patch.defaultTaxCodeId === null) {
+        if (current != null) changes.clearDefaultTaxCode = true;
+      } else if (patch.defaultTaxCodeId !== current) {
+        changes.defaultTaxCodeId = patch.defaultTaxCodeId;
+      }
+    }
     return changes;
+  }
+
+  protected openSendSample(): void {
+    const c = this.customer();
+    if (!c) return;
+    this.dialog.open<SendSampleDialogComponent, SendSampleDialogData>(SendSampleDialogComponent, {
+      width: '560px',
+      data: { customerId: c.id, recipientName: c.name },
+    });
   }
 
   protected archiveCustomer(): void {

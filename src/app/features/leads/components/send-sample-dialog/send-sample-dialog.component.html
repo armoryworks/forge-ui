@@ -1,0 +1,73 @@
+<app-dialog
+  [title]="'leads.sendSample.title' | translate: { name: data.recipientName }"
+  width="560px"
+  (closed)="cancel()">
+  <div [formGroup]="form">
+    <app-entity-picker
+      [label]="'common.part' | translate"
+      entityType="parts"
+      displayField="partNumber"
+      secondaryDisplayField="name"
+      formControlName="partId"
+      [placeholder]="'parts.searchPlaceholder' | translate"
+      (selected)="onPartPicked($event)"
+      data-testid="send-sample-part" />
+    <app-input
+      [label]="'leads.sendSample.description' | translate"
+      formControlName="partDescription"
+      [maxlength]="500"
+      [required]="true"
+      data-testid="send-sample-description" />
+    <app-input
+      [label]="'leads.sendSample.quantity' | translate"
+      type="number"
+      formControlName="quantity"
+      [required]="true"
+      min="1"
+      step="1"
+      data-testid="send-sample-quantity" />
+    <app-textarea
+      [label]="'leads.sendSample.shipTo' | translate"
+      formControlName="shipToAddress"
+      [rows]="3"
+      [maxlength]="1000"
+      data-testid="send-sample-ship-to" />
+    <div class="dialog-row">
+      <app-input
+        [label]="'leads.sendSample.carrier' | translate"
+        formControlName="carrier"
+        [maxlength]="50"
+        data-testid="send-sample-carrier" />
+      <app-input
+        [label]="'leads.sendSample.tracking' | translate"
+        formControlName="trackingNumber"
+        [maxlength]="100"
+        [info]="'leads.sendSample.trackingHint' | translate"
+        data-testid="send-sample-tracking" />
+    </div>
+    <app-datepicker
+      [label]="'leads.sendSample.followUp' | translate"
+      formControlName="followUpDate"
+      [min]="today"
+      data-testid="send-sample-follow-up" />
+    <app-textarea
+      [label]="'common.notes' | translate"
+      formControlName="notes"
+      [rows]="2"
+      [maxlength]="2000"
+      data-testid="send-sample-notes" />
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" data-testid="send-sample-cancel" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button type="button" class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()"
+        data-testid="send-sample-save">
+        <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+        {{ 'leads.sendSample.send' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

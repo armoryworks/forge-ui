@@ -16,6 +16,7 @@ import { UpdateCustomerRequest } from '../../models/update-customer-request.mode
 import { CustomerDetailLayoutResolverService } from '../../services/customer-detail-layout-resolver.service';
 import { CustomerService } from '../../services/customer.service';
 import { CustomerDetailComponent } from './customer-detail.component';
+import { SendSampleDialogComponent } from '../../../leads/components/send-sample-dialog/send-sample-dialog.component';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -307,5 +308,48 @@ describe('CustomerDetailComponent · bad links', () => {
     view.reloadCustomer();
     expect(calls).toBe(2);
     expect(view.loadError()).toBeNull();
+  });
+});
+
+describe('CustomerDetailComponent · send sample', () => {
+  function setup(roles: string[], leadsOn = true) {
+    const open = vi.fn();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id: '5', tab: 'overview' })) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: NavTreeService, useValue: navTreeStub },
+        { provide: CustomerService, useValue: { getCustomerSummary: () => of(CUSTOMER) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: MatDialog, useValue: { open } },
+        { provide: CustomerDetailLayoutResolverService, useValue: { deriveLifecycle: () => 'active', resolve: () => [] } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code !== 'CAP-O2C-LEAD' || leadsOn } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new CustomerDetailComponent()) as unknown as {
+      canSendSample(): boolean;
+      openSendSample(): void;
+    };
+    TestBed.flushEffects();
+    return { component, open };
+  }
+
+  it('opens the send-sample dialog for the customer', () => {
+    const { component, open } = setup(['Engineer']);
+
+    expect(component.canSendSample()).toBe(true);
+    component.openSendSample();
+
+    expect(open).toHaveBeenCalledWith(SendSampleDialogComponent, expect.objectContaining({
+      data: { customerId: 5, recipientName: 'Acme Co' },
+    }));
+  });
+
+  it('hides Send sample from roles the samples API refuses and when leads are off', () => {
+    expect(setup(['OfficeManager']).component.canSendSample()).toBe(false);
+    expect(setup(['Admin'], false).component.canSendSample()).toBe(false);
   });
 });

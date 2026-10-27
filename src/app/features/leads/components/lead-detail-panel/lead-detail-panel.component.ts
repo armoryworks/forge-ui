@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,9 @@ import { OutreachCampaignsService } from '../../services/outreach-campaigns.serv
 import { LeadItem, CapabilityFitStatus, NdaState, ExportControlClearance } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
 import { OutreachPreferencesDialogComponent, OutreachPreferencesDialogData } from '../outreach-preferences-dialog/outreach-preferences-dialog.component';
+import { SendSampleDialogComponent, SendSampleDialogData } from '../send-sample-dialog/send-sample-dialog.component';
+import { SAMPLE_SHIPMENT_ROLES } from '../../sample-shipment-roles';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
@@ -48,6 +51,7 @@ export class LeadDetailPanelComponent {
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
   private readonly fileDownload = inject(FileDownloadService);
 
   readonly leadId = input.required<number>();
@@ -301,6 +305,17 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
     this.editRequested.emit(lead);
+  }
+
+  protected readonly canSendSample = computed(() => this.auth.hasAnyRole(SAMPLE_SHIPMENT_ROLES));
+
+  protected openSendSample(): void {
+    const lead = this.lead();
+    if (!lead) return;
+    this.dialog.open<SendSampleDialogComponent, SendSampleDialogData>(SendSampleDialogComponent, {
+      width: '560px',
+      data: { leadId: lead.id, recipientName: lead.companyName || lead.contactName || '' },
+    });
   }
 
   protected openOutreachPreferences(): void {

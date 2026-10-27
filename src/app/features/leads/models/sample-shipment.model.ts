@@ -5,7 +5,10 @@ export type SampleShipmentStatus =
 
 export interface SampleShipment {
   id: number;
-  leadId: number;
+  leadId: number | null;
+  customerId?: number | null;
+  shipToAddress?: string | null;
+  followUpDate?: string | null;
   partId: number | null;
   partDescription: string | null;
   quantity: number;
@@ -22,10 +25,15 @@ export interface SampleShipment {
 }
 
 export interface CreateSampleShipmentRequest {
-  leadId: number;
+  leadId?: number | null;
+  customerId?: number | null;
   partId?: number | null;
   partDescription?: string | null;
   quantity: number;
+  shipToAddress?: string | null;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+  followUpDate?: string | null;
   notes?: string | null;
 }
 
@@ -42,4 +50,6 @@ export interface UpdateSampleShipmentRequest {
   trackingNumber?: string | null;
   carrier?: string | null;
   notes?: string | null;
+  shipToAddress?: string | null;
+  followUpDate?: string | null;
 }
