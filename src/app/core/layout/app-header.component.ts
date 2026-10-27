@@ -215,6 +215,20 @@ export class AppHeaderComponent implements OnInit {
     });
 
     this.searchControl.valueChanges.pipe(
+      debounceTime(600),
+      distinctUntilChanged(),
+      filter(v => (v?.length ?? 0) >= 2),
+      switchMap(term => this.aiService.available()
+        ? this.aiService.searchSuggest(term!).pipe(catchError(() => of([] as AiSearchSuggestion[])))
+        : of([] as AiSearchSuggestion[])),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(suggestions => {
+      if ((this.searchControl.value?.length ?? 0) < 2) return;
+      this.aiSuggestions.set((suggestions ?? []).filter(s => !!s?.label).slice(0, 5));
+      if (this.aiSuggestions().length > 0) this.showResults.set(true);
+    });
+
+    this.searchControl.valueChanges.pipe(
       filter(v => !v || v.length < 2),
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => {
@@ -327,6 +341,16 @@ export class AppHeaderComponent implements OnInit {
     } else {
       this.router.navigateByUrl(result.url);
     }
+  }
+
+  /** A suggestion with a destination opens it; one without runs its label as the search. */
+  protected pickSuggestion(suggestion: AiSearchSuggestion): void {
+    if (suggestion.url && suggestion.url.startsWith('/')) {
+      this.navigateToSuggestion(suggestion);
+      return;
+    }
+    this.aiSuggestions.set([]);
+    this.searchControl.setValue(suggestion.label);
   }
 
   protected navigateToSuggestion(suggestion: AiSearchSuggestion): void {
