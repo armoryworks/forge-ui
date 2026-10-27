@@ -70,15 +70,20 @@ describe('SoLinePurchasingComponent', () => {
     const strip = create({
       line: line({
         shippedQuantity: 3,
-        purchases: [purchase({ orderedQuantity: 4, receivedQuantity: 2 }), purchase({ purchaseOrderLineId: 41, status: 'Cancelled', orderedQuantity: 5 })],
+        purchases: [purchase({ orderedQuantity: 4, receivedQuantity: 2, remainingQuantity: 2 }), purchase({ purchaseOrderLineId: 41, status: 'Cancelled', orderedQuantity: 5 })],
       }),
     });
     expect(strip.openQuantity()).toBe(5);
   });
 
+  it('frees what a short-closed PO line no longer buys', () => {
+    const strip = create({ line: line({ purchases: [purchase({ orderedQuantity: 6, receivedQuantity: 0, remainingQuantity: 2 })] }) });
+    expect(strip.openQuantity()).toBe(8);
+  });
+
   it('offers nothing to buy on a draft order or a fully covered line', () => {
     expect(create({ status: 'Draft' }).canBuy()).toBe(false);
-    expect(create({ line: line({ purchases: [purchase({ orderedQuantity: 10 })] }) }).canBuy()).toBe(false);
+    expect(create({ line: line({ purchases: [purchase({ orderedQuantity: 10, remainingQuantity: 10 })] }) }).canBuy()).toBe(false);
   });
 
   it('confirms delivery only on a sent drop-ship PO with quantity left, and marks a received back-to-back ready', () => {

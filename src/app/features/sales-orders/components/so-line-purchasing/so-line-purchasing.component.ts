@@ -50,7 +50,7 @@ export class SoLinePurchasingComponent {
   protected readonly openQuantity = computed(() => {
     const line = this.line();
     const purchases = this.purchases();
-    const covered = purchases.reduce((sum, p) => sum + p.orderedQuantity, 0);
+    const covered = purchases.reduce((sum, p) => sum + p.receivedQuantity + p.remainingQuantity, 0);
     const dropShipped = purchases.filter(p => p.fulfilmentType === 'DropShip').reduce((sum, p) => sum + p.receivedQuantity, 0);
     const shippedFromStock = Math.max(0, line.shippedQuantity - dropShipped);
     return Math.max(0, Math.round((line.quantity - shippedFromStock - covered) * 10000) / 10000);
