@@ -29,6 +29,14 @@ export class RecurringOrdersService {
     return this.http.post<RecurringOrderListItem>(this.base, request);
   }
 
+  activate(id: number): Observable<RecurringOrderDetail> {
+    return this.http.post<RecurringOrderDetail>(`${this.base}/${id}/activate`, {});
+  }
+
+  deactivate(id: number): Observable<RecurringOrderDetail> {
+    return this.http.post<RecurringOrderDetail>(`${this.base}/${id}/deactivate`, {});
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

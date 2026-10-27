@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { RecurringOrdersService } from '../../services/recurring-orders.service';
@@ -22,16 +23,15 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
  * each due template into a fresh SalesOrder + lines; this page is where
  * admins/managers create/manage those templates.
  *
- * Edit isn't supported by the backend today (only Create + Delete) — the
- * lifecycle assumes that template changes are infrequent and that altering
- * an existing template is rare enough to "delete the old + create new".
- * That keeps the auto-generation job's assumptions stable.
+ * Each row can be paused (the job skips it) and resumed; resuming a
+ * template whose next run has passed moves that run forward to today or
+ * later instead of generating catch-up orders.
  */
 @Component({
   selector: 'app-recurring-orders',
   standalone: true,
   imports: [
-    DatePipe, TranslatePipe,
+    DatePipe, TranslatePipe, MatTooltipModule,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,
     DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective,
@@ -49,6 +49,7 @@ export class RecurringOrdersComponent {
 
   protected readonly rows = signal<RecurringOrderListItem[]>([]);
   protected readonly loading = signal(true);
+  protected readonly togglingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('salesOrders.recurring.colName'), sortable: true },
@@ -58,7 +59,7 @@ export class RecurringOrdersComponent {
     { field: 'lastGeneratedDate', header: this.translate.instant('salesOrders.recurring.colLastRun'), sortable: true, type: 'date', width: '130px' },
     { field: 'lineCount', header: this.translate.instant('salesOrders.recurring.colLines'), sortable: true, type: 'number', align: 'right', width: '80px' },
     { field: 'isActive', header: this.translate.instant('common.active'), sortable: true, width: '90px', align: 'center' },
-    { field: 'actions', header: '', width: '90px', align: 'right' },
+    { field: 'actions', header: '', width: '120px', align: 'right' },
   ];
 
   constructor() {
@@ -84,6 +85,23 @@ export class RecurringOrdersComponent {
           this.load();
         },
       });
+    });
+  }
+
+  protected toggleActive(row: RecurringOrderListItem): void {
+    if (this.togglingId() !== null) return;
+    this.togglingId.set(row.id);
+    const call = row.isActive ? this.service.deactivate(row.id) : this.service.activate(row.id);
+    call.subscribe({
+      next: (detail) => {
+        this.togglingId.set(null);
+        this.rows.update(rows => rows.map(r => r.id === row.id
+          ? { ...r, isActive: detail.isActive, nextGenerationDate: detail.nextGenerationDate }
+          : r));
+        this.snackbar.success(this.translate.instant(
+          detail.isActive ? 'salesOrders.recurring.resumed' : 'salesOrders.recurring.paused', { name: row.name }));
+      },
+      error: () => this.togglingId.set(null),
     });
   }
 
