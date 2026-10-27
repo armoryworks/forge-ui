@@ -1,4 +1,10 @@
 <app-page-header [title]="'quotes.title' | translate" [subtitle]="'quotes.subtitle' | translate">
+  @if (canConfigure()) {
+    <button data-testid="new-configured-quote-btn" class="action-btn" (click)="showConfigureDialog.set(true)">
+      <span class="material-icons-outlined">tune</span>
+      {{ 'cpq.configure.newConfiguredQuote' | translate }}
+    </button>
+  }
   <button data-testid="new-quote-btn" class="action-btn action-btn--create" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'quotes.newQuote' | translate }}
@@ -49,6 +55,11 @@
     </div>
   </div>
 </div>
+
+@if (showConfigureDialog()) {
+  <app-configure-quote-dialog (closed)="showConfigureDialog.set(false)" (quoteCreated)="onConfiguredQuoteCreated($event)"
+    (partCreated)="showConfigureDialog.set(false)" />
+}
 
 @if (showCreateDialog()) {
   <app-quote-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />

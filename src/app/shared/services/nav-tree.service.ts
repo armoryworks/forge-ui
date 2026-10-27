@@ -98,6 +98,7 @@ export class NavTreeService {
           ],
         },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', capability: 'CAP-O2C-QUOTE', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'tune', label: 'Configurators', i18nKey: 'nav.configurators', route: '/cpq', capability: 'CAP-O2C-CPQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', capability: 'CAP-O2C-SO', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'event_repeat', label: 'Recurring Orders', i18nKey: 'nav.recurringOrders', route: '/sales-orders/recurring', capability: 'CAP-O2C-RECURRING', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],

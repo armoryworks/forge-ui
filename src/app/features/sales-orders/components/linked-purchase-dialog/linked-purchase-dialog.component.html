@@ -1,0 +1,28 @@
+<app-dialog [title]="titleKey() | translate: { line: line().lineNumber }" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <p class="linked-purchase__hint">{{ hintKey() | translate }}</p>
+  <div [formGroup]="form">
+    <app-entity-picker
+      data-testid="linked-purchase-vendor"
+      [label]="'vendors.vendor' | translate"
+      [placeholder]="'salesOrderEngines.purchase.vendorPlaceholder' | translate"
+      entityType="vendors"
+      displayField="companyName"
+      formControlName="vendorId" />
+    <app-input data-testid="linked-purchase-quantity" type="number" [label]="'salesOrderEngines.purchase.quantity' | translate"
+      formControlName="quantity" [min]="0" [max]="openQuantity()" [step]="'any'"
+      [info]="'salesOrderEngines.purchase.openQuantity' | translate: { qty: openQuantity() }" />
+    <app-currency-input data-testid="linked-purchase-unit-cost" [label]="'salesOrderEngines.purchase.unitCost' | translate"
+      formControlName="unitCost" />
+    <app-datepicker data-testid="linked-purchase-expected" [label]="'salesOrderEngines.purchase.expectedDate' | translate"
+      formControlName="expectedDeliveryDate" />
+    <app-textarea data-testid="linked-purchase-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="linked-purchase-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="linked-purchase-save" [disabled]="form.invalid || saving()" (click)="save()">
+        {{ 'salesOrderEngines.purchase.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

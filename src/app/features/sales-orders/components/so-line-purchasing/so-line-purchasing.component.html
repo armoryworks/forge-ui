@@ -1,0 +1,50 @@
+<div class="so-line-purchasing">
+  @for (purchase of purchases(); track purchase.purchaseOrderLineId) {
+    <span class="so-line-purchasing__po" [attr.data-testid]="'so-line-po-' + purchase.purchaseOrderLineId">
+      <span class="chip" [class.chip--info]="purchase.fulfilmentType === 'DropShip'" [class.chip--muted]="purchase.fulfilmentType !== 'DropShip'">
+        {{ (purchase.fulfilmentType === 'DropShip' ? 'salesOrderEngines.purchase.dropShip' : 'salesOrderEngines.purchase.backToBack') | translate }}
+      </span>
+      <app-entity-link type="purchase-order" [entityId]="purchase.purchaseOrderId">{{ purchase.poNumber }}</app-entity-link>
+      <span class="so-line-purchasing__meta">
+        {{ purchase.vendorName }} · {{ ('purchaseOrders.status' + purchase.status) | translate }} ·
+        {{ 'salesOrderEngines.purchase.receivedOf' | translate: { received: (purchase.receivedQuantity | number:'1.0-4'), ordered: (purchase.orderedQuantity | number:'1.0-4') } }}
+      </span>
+      @if (readyToShip(purchase)) {
+        <span class="chip chip--success">{{ 'salesOrderEngines.purchase.readyToShip' | translate }}</span>
+      }
+      @if (canConfirmDelivery(purchase)) {
+        <button class="action-btn action-btn--sm" [attr.data-testid]="'so-line-confirm-delivery-' + purchase.purchaseOrderLineId"
+          (click)="delivering.set(purchase)">
+          <span class="material-icons-outlined">task_alt</span>
+          {{ 'salesOrderEngines.delivery.confirm' | translate }}
+        </button>
+      }
+    </span>
+  }
+  @if (canBuy()) {
+    <span class="so-line-purchasing__actions">
+      @if (canDropShip()) {
+        <button class="action-btn action-btn--sm" [attr.data-testid]="'so-line-drop-ship-' + line().id" (click)="openBuy('DropShip')">
+          <span class="material-icons-outlined">local_shipping</span>
+          {{ 'salesOrderEngines.purchase.dropShipAction' | translate }}
+        </button>
+      }
+      @if (canBackToBack()) {
+        <button class="action-btn action-btn--sm" [attr.data-testid]="'so-line-back-to-back-' + line().id" (click)="openBuy('BackToBack')">
+          <span class="material-icons-outlined">swap_horiz</span>
+          {{ 'salesOrderEngines.purchase.backToBackAction' | translate }}
+        </button>
+      }
+    </span>
+  }
+</div>
+
+@if (buying(); as type) {
+  <app-linked-purchase-dialog [type]="type" [salesOrderId]="salesOrderId()" [line]="line()" [openQuantity]="openQuantity()"
+    (closed)="buying.set(null)" (created)="onBought()" />
+}
+@if (delivering(); as purchase) {
+  <app-drop-ship-delivery-dialog [purchaseOrderId]="purchase.purchaseOrderId" [purchaseOrderLineId]="purchase.purchaseOrderLineId"
+    [poNumber]="purchase.poNumber" [remainingQuantity]="purchase.remainingQuantity"
+    (closed)="delivering.set(null)" (confirmed)="onDelivered()" />
+}

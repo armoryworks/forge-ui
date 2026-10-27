@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+.cpq-quote {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__head {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__description {
+    margin: 0 0 $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+}

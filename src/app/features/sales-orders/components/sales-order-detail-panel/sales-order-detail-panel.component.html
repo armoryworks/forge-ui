@@ -485,6 +485,14 @@
                       </td>
                     </tr>
                   }
+                  @if (showLinePurchasing(line, so.status)) {
+                    <tr class="line-purchasing-row">
+                      <td></td>
+                      <td colspan="7">
+                        <app-so-line-purchasing [salesOrderId]="so.id" [line]="line" [orderStatus]="so.status" (changed)="onLinePurchasingChanged()" />
+                      </td>
+                    </tr>
+                  }
                   <!-- Expanded jobs -->
                   @if (isLineExpanded(line.id)) {
                     @for (job of line.jobs; track job.id) {
@@ -583,66 +591,7 @@
 
       <!-- Staged Schedule Tab (S4c) -->
       @if (activeTab() === 'stages') {
-        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="stagesLoading()">
-          @if (stages(); as st) {
-            @if (!st.isActivated) {
-              <app-empty-state
-                icon="linear_scale"
-                message="{{ 'salesOrders.stages.notActivated' | translate }}"
-                helpText="{{ 'salesOrders.stages.activateHint' | translate }}"
-                [actionLabel]="'salesOrders.stages.activate' | translate"
-                (action)="activateStagedSchedule()" />
-            } @else {
-              <div class="so-stages">
-                @for (stage of st.stages; track stage.id) {
-                  <div class="so-stage-card">
-                    <div class="so-stage-card__header">
-                      <span class="so-stage-card__seq">{{ stage.sequence }}</span>
-                      <span class="so-stage-card__name">{{ stage.name }}</span>
-                      <span [class]="stageStatusClass(stage.status)">{{ stage.status }}</span>
-                    </div>
-                    <div class="so-stage-card__meta">
-                      @if (stage.plannedShipDate) {
-                        <span>{{ 'salesOrders.stages.plannedShip' | translate }}: {{ stage.plannedShipDate | date:'MM/dd/yyyy' }}</span>
-                      }
-                      @if (stage.actualShipDate) {
-                        <span class="so-stage-card__shipped">{{ 'salesOrders.stages.shipped' | translate }}: {{ stage.actualShipDate | date:'MM/dd/yyyy' }}</span>
-                      }
-                      @if (stage.paymentMilestoneName) {
-                        <span>{{ 'salesOrders.stages.milestone' | translate }}: {{ stage.paymentMilestoneName }}</span>
-                      }
-                    </div>
-                    @if (stage.lines.length > 0) {
-                      <div class="so-stage-card__lines">
-                        @for (line of stage.lines; track line.id) {
-                          <span class="so-stage-card__line">{{ line.partNumber || line.description }} · {{ line.quantity | number:'1.0-4' }}</span>
-                        }
-                      </div>
-                    }
-                    @if (stage.lots.length > 0) {
-                      <div class="so-stage-card__lots">
-                        @for (lot of stage.lots; track lot.id) {
-                          <span class="chip chip--muted">{{ lot.lotNumber }}</span>
-                        }
-                      </div>
-                    }
-                    <div class="so-stage-card__actions">
-                      @if (stage.status === 'Planned' || stage.status === 'InProduction') {
-                        <button class="action-btn action-btn--sm" (click)="completeStage(stage.id)">{{ 'salesOrders.stages.markReady' | translate }}</button>
-                      }
-                      @if (stage.status === 'ReadyToShip') {
-                        <button class="action-btn action-btn--primary action-btn--sm" (click)="shipStage(stage.id)">
-                          <span class="material-icons-outlined">local_shipping</span>
-                          {{ 'salesOrders.stages.ship' | translate }}
-                        </button>
-                      }
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          }
-        </div>
+        <app-sales-order-stages-tab [salesOrderId]="so.id" [lines]="so.lines" (shipped)="changed.emit()" />
       }
 
       <!-- Shipments Tab -->

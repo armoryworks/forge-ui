@@ -1,0 +1,94 @@
+<div class="tab-panel" role="tabpanel" [appLoadingBlock]="loading()">
+  @if (stages(); as st) {
+    @if (!st.isActivated) {
+      <app-empty-state
+        icon="linear_scale"
+        message="{{ 'salesOrders.stages.notActivated' | translate }}"
+        helpText="{{ 'salesOrders.stages.activateHint' | translate }}"
+        [actionLabel]="'salesOrders.stages.activate' | translate"
+        (action)="activate()" />
+    } @else {
+      <div class="so-stages">
+        <div class="so-stages__toolbar">
+          <button class="action-btn action-btn--sm action-btn--primary" data-testid="so-stage-add" (click)="editing.set('new')">
+            <span class="material-icons-outlined">add</span>
+            {{ 'salesOrderEngines.stages.add' | translate }}
+          </button>
+        </div>
+        @for (stage of st.stages; track stage.id) {
+          <div class="so-stage-card" [attr.data-testid]="'so-stage-' + stage.id">
+            <div class="so-stage-card__header">
+              <span class="so-stage-card__seq">{{ stage.sequence }}</span>
+              <span class="so-stage-card__name">{{ stage.name }}</span>
+              <span [class]="stageStatusClass(stage.status)">{{ stage.status }}</span>
+            </div>
+            <div class="so-stage-card__meta">
+              @if (stage.plannedProductionComplete) {
+                <span>{{ 'salesOrderEngines.stages.plannedComplete' | translate }}: {{ stage.plannedProductionComplete | date:'MM/dd/yyyy' }}</span>
+              }
+              @if (stage.plannedShipDate) {
+                <span>{{ 'salesOrders.stages.plannedShip' | translate }}: {{ stage.plannedShipDate | date:'MM/dd/yyyy' }}</span>
+              }
+              @if (stage.actualShipDate) {
+                <span class="so-stage-card__shipped">{{ 'salesOrders.stages.shipped' | translate }}: {{ stage.actualShipDate | date:'MM/dd/yyyy' }}</span>
+              }
+              @if (stage.paymentMilestoneName) {
+                <span>{{ 'salesOrders.stages.milestone' | translate }}: {{ stage.paymentMilestoneName }}</span>
+              }
+            </div>
+            @if (stage.lines.length > 0) {
+              <div class="so-stage-card__lines">
+                @for (line of stage.lines; track line.id) {
+                  <span class="so-stage-card__line">{{ line.partNumber || line.description }} · {{ line.quantity | number:'1.0-4' }}</span>
+                }
+              </div>
+            } @else {
+              <span class="so-stage-card__empty">{{ 'salesOrderEngines.stages.noLines' | translate }}</span>
+            }
+            @if (stage.lots.length > 0) {
+              <div class="so-stage-card__lots">
+                @for (lot of stage.lots; track lot.id) {
+                  <span class="chip chip--muted">{{ lot.lotNumber }}</span>
+                }
+              </div>
+            }
+            <div class="so-stage-card__actions">
+              @if (!isLocked(stage)) {
+                <button class="action-btn action-btn--sm" [attr.data-testid]="'so-stage-edit-' + stage.id" (click)="editing.set(stage)">
+                  <span class="material-icons-outlined">edit</span>
+                  {{ 'common.edit' | translate }}
+                </button>
+                <button class="action-btn action-btn--sm" [attr.data-testid]="'so-stage-assign-' + stage.id" (click)="assigning.set(stage)">
+                  <span class="material-icons-outlined">playlist_add</span>
+                  {{ 'salesOrderEngines.stages.assignLines' | translate }}
+                </button>
+                <button class="action-btn action-btn--sm action-btn--danger" [attr.data-testid]="'so-stage-delete-' + stage.id" (click)="deleteStage(stage)">
+                  <span class="material-icons-outlined">delete</span>
+                  {{ 'common.delete' | translate }}
+                </button>
+              }
+              @if (stage.status === 'Planned' || stage.status === 'InProduction') {
+                <button class="action-btn action-btn--sm" [attr.data-testid]="'so-stage-ready-' + stage.id" (click)="completeStage(stage.id)">{{ 'salesOrders.stages.markReady' | translate }}</button>
+              }
+              @if (stage.status === 'ReadyToShip') {
+                <button class="action-btn action-btn--primary action-btn--sm" [attr.data-testid]="'so-stage-ship-' + stage.id" (click)="shipStage(stage.id)">
+                  <span class="material-icons-outlined">local_shipping</span>
+                  {{ 'salesOrders.stages.ship' | translate }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (editing() !== null) {
+      <app-stage-dialog [salesOrderId]="salesOrderId()" [stage]="editingStage()" [nextSequence]="nextSequence()"
+        (closed)="editing.set(null)" (saved)="onStageSaved()" />
+    }
+    @if (assigning(); as stage) {
+      <app-stage-lines-dialog [stage]="stage" [stages]="st.stages" [lines]="lines()"
+        (closed)="assigning.set(null)" (saved)="onLinesSaved()" />
+    }
+  }
+</div>

@@ -61,4 +61,8 @@ export interface PurchaseOrderDetail {
   receivingFallbackBinPath?: string | null;
   currencyId?: number | null;
   currencyCode?: string | null;
+  /** Standard, DropShip (the vendor ships to the customer) or BackToBack (bought for one sales order line). */
+  fulfilmentType?: 'Standard' | 'DropShip' | 'BackToBack';
+  dropShipAddressId?: number | null;
+  dropShipAddressText?: string | null;
 }

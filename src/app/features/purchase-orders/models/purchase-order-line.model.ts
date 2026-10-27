@@ -26,4 +26,9 @@ export interface PurchaseOrderLine {
   quantityDecimalPlaces?: number | null;
   /** Days a received lot keeps; drives the default lot expiry at receipt (null = no shelf life). */
   shelfLifeDays?: number | null;
+  /** The sales order line a drop-ship or back-to-back line buys for. */
+  salesOrderLineId?: number | null;
+  salesOrderId?: number | null;
+  salesOrderNumber?: string | null;
+  salesOrderLineNumber?: number | null;
 }

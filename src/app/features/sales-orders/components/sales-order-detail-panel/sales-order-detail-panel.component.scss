@@ -182,6 +182,11 @@
   }
 }
 
+.line-purchasing-row td {
+  padding: $sp-xs $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
 .line-warning-icon {
   font-size: $icon-size-xs;
   vertical-align: middle;
@@ -464,65 +469,6 @@
 }
 
 // --- S4c staged schedule ---
-.so-stages {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-  padding: $sp-md;
-}
-
-.so-stage-card {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-sm;
-  padding: $sp-md;
-  border: $border-width-thin solid var(--border);
-  background: var(--surface);
-
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: $sp-sm;
-  }
-
-  &__seq {
-    @include flex-center;
-    width: 20px;
-    height: 20px;
-    background: var(--primary);
-    color: var(--surface);
-    font-size: $font-size-xs;
-  }
-
-  &__name {
-    flex: 1;
-    font-weight: 600;
-  }
-
-  &__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $sp-md;
-    font-size: $font-size-xs;
-    color: var(--text-muted);
-  }
-
-  &__shipped { color: var(--success); }
-
-  &__lines, &__lots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $sp-sm;
-    font-size: $font-size-xs;
-  }
-
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: $sp-sm;
-  }
-}
-
 // --- S4a customer-PO document ---
 .so-cpo {
   display: flex;

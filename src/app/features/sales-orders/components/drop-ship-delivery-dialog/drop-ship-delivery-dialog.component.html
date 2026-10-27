@@ -1,0 +1,17 @@
+<app-dialog [title]="'salesOrderEngines.delivery.title' | translate: { po: poNumber() }" width="420px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input data-testid="drop-ship-delivery-quantity" type="number" [label]="'salesOrderEngines.delivery.quantity' | translate"
+      formControlName="deliveredQuantity" [min]="0" [max]="remainingQuantity()" [step]="'any'"
+      [info]="'salesOrderEngines.delivery.remaining' | translate: { qty: remainingQuantity() }" />
+    <app-input data-testid="drop-ship-delivery-tracking" [label]="'salesOrderEngines.delivery.tracking' | translate"
+      formControlName="trackingNumber" [maxlength]="100" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="drop-ship-delivery-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="drop-ship-delivery-save" [disabled]="form.invalid || saving()" (click)="save()">
+        {{ 'salesOrderEngines.delivery.confirm' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

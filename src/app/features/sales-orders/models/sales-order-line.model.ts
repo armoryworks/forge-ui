@@ -1,5 +1,6 @@
 import { DocumentLineType } from '../../../shared/models/document-line-type.type';
 import { SalesOrderLineJob } from './sales-order-line-job.model';
+import { SalesOrderLinePurchase } from './sales-order-line-purchase.model';
 
 export interface SalesOrderLine {
   id: number;
@@ -19,4 +20,5 @@ export interface SalesOrderLine {
   shipsGoods?: boolean;
   lineType?: DocumentLineType;
   taxable?: boolean;
+  purchases?: SalesOrderLinePurchase[];
 }

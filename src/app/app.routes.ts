@@ -345,6 +345,13 @@ export const routes: Routes = [
           import('./features/sales-orders/sales-orders.routes').then((m) => m.SALES_ORDERS_ROUTES),
       },
       {
+        path: 'cpq',
+        data: { titleKey: 'nav.configurators' },
+        canActivate: routeAccessGuards('cpq'),
+        loadChildren: () =>
+          import('./features/cpq/cpq.routes').then((m) => m.CPQ_ROUTES),
+      },
+      {
         path: 'quotes',
         data: { titleKey: 'nav.quotes' },
         canActivate: routeAccessGuards('quotes'),

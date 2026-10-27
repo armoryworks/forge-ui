@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+
+.po-fulfilment {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__address {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+  }
+
+  &__arrow {
+    font-size: $icon-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__qty {
+    color: var(--text-muted);
+  }
+}
