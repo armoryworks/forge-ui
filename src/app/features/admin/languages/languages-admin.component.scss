@@ -1,0 +1,69 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.languages {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__error {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--error);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    flex-wrap: wrap;
+  }
+
+  &__file-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+
+    &:focus-visible + .languages__file-name {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+  }
+
+  &__file-name {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}

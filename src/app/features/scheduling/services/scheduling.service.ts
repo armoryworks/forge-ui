@@ -9,6 +9,7 @@ import {
   ScheduledOperation,
   ScheduleRun,
   Shift,
+  UpdateShiftRequest,
   WorkCenter,
   WorkCenterLoad,
 } from '../models/scheduling.model';
@@ -88,7 +89,7 @@ export class SchedulingService {
     return this.http.post<Shift>(`${this.baseUrl}/shifts`, request);
   }
 
-  updateShift(id: number, request: Partial<Shift>) {
+  updateShift(id: number, request: UpdateShiftRequest) {
     return this.http.put<Shift>(`${this.baseUrl}/shifts/${id}`, request);
   }
 

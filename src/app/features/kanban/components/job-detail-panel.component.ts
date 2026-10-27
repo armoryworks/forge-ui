@@ -10,6 +10,7 @@ import { FileUploadZoneComponent, UploadedFile } from '../../../shared/component
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { CapDirective } from '../../../shared/directives/cap.directive';
 import { JobGatesSectionComponent } from '../../sequences/components/job-gates-section/job-gates-section.component';
+import { JobCustomFieldsSectionComponent } from './job-custom-fields-section/job-custom-fields-section.component';
 import { SelectComponent } from '../../../shared/components/select/select.component';
 import { EntityActivitySectionComponent } from '../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileAttachment } from '../../../shared/models/file.model';
@@ -54,7 +55,7 @@ import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DateTimePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DateTimePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, JobCustomFieldsSectionComponent, DetailLoadErrorComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

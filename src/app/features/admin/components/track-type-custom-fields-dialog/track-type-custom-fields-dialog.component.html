@@ -1,0 +1,53 @@
+<app-dialog
+  [title]="'admin.customFields.dialogTitle' | translate: { name: data.trackTypeName }"
+  width="800px"
+  (closed)="close()">
+  <div [formGroup]="form" class="cf">
+    <p class="cf__hint">{{ 'admin.customFields.hint' | translate }}</p>
+    @if (!loading() && fields.length === 0) {
+      <p class="cf__hint" data-testid="custom-fields-empty">{{ 'admin.customFields.empty' | translate }}</p>
+    }
+    <div formArrayName="fields" class="cf__rows">
+      @for (row of fields.controls; track row; let i = $index; let last = $last) {
+        <div class="cf__row" [formGroupName]="i" [attr.data-testid]="'custom-field-row-' + i">
+          <app-input [label]="'admin.customFields.label' | translate" formControlName="label" [required]="true" (focusout)="fillKey(i)" [attr.data-testid]="'custom-field-label-' + i" />
+          <app-input [label]="'admin.customFields.key' | translate" formControlName="key" [required]="true" [attr.data-testid]="'custom-field-key-' + i" />
+          <app-select [label]="'admin.customFields.type' | translate" formControlName="type" [options]="typeOptions" [attr.data-testid]="'custom-field-type-' + i" />
+          @if (row.controls.type.value === 'select') {
+            <app-input [label]="'admin.customFields.options' | translate" formControlName="options" [required]="true" [attr.data-testid]="'custom-field-options-' + i" />
+          } @else {
+            <span></span>
+          }
+          <app-toggle [label]="'admin.customFields.required' | translate" formControlName="isRequired" [attr.data-testid]="'custom-field-required-' + i" />
+          <div class="cf__row-actions">
+            <button class="icon-btn" type="button" (click)="move(i, -1)" [disabled]="i === 0" [attr.aria-label]="'admin.customFields.moveUp' | translate" [attr.data-testid]="'custom-field-up-' + i">
+              <span class="material-icons-outlined">arrow_upward</span>
+            </button>
+            <button class="icon-btn" type="button" (click)="move(i, 1)" [disabled]="last" [attr.aria-label]="'admin.customFields.moveDown' | translate" [attr.data-testid]="'custom-field-down-' + i">
+              <span class="material-icons-outlined">arrow_downward</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="remove(i)" [attr.aria-label]="'admin.customFields.remove' | translate" [attr.data-testid]="'custom-field-remove-' + i">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+    <div>
+      <button class="action-btn action-btn--sm" type="button" (click)="add()" data-testid="custom-field-add-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'admin.customFields.add' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="custom-fields-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving() || loading()" (click)="save()" data-testid="custom-fields-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

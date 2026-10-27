@@ -19,6 +19,8 @@ import { TabListDirective, TabDirective } from '../../shared/directives/tab-list
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
 import { humanizeNotificationSource } from '../../shared/utils/notification-origin';
 
+type EmailEventPref = 'email_critical' | 'email_assignment' | 'email_mention';
+
 @Component({
   selector: 'app-notifications',
   standalone: true,
@@ -110,6 +112,18 @@ export class NotificationsComponent {
   });
 
   readonly emailDigestEnabled = signal(this.prefs.get<boolean>('notif:email_digest') ?? true);
+
+  readonly emailEventPrefs: readonly { key: EmailEventPref; testId: string; labelKey: string; descKey: string; toggleKey: string }[] = [
+    { key: 'email_critical', testId: 'pref-email-critical', labelKey: 'notifications.emailCritical', descKey: 'notifications.emailCriticalDesc', toggleKey: 'notifications.toggleEmailCritical' },
+    { key: 'email_assignment', testId: 'pref-email-assignment', labelKey: 'notifications.emailAssignment', descKey: 'notifications.emailAssignmentDesc', toggleKey: 'notifications.toggleEmailAssignment' },
+    { key: 'email_mention', testId: 'pref-email-mention', labelKey: 'notifications.emailMention', descKey: 'notifications.emailMentionDesc', toggleKey: 'notifications.toggleEmailMention' },
+  ];
+
+  readonly emailEvents = signal<Record<EmailEventPref, boolean>>({
+    email_critical: this.prefs.get<boolean>('notif:email_critical') ?? true,
+    email_assignment: this.prefs.get<boolean>('notif:email_assignment') ?? true,
+    email_mention: this.prefs.get<boolean>('notif:email_mention') ?? true,
+  });
   readonly soundEnabled = signal(this.prefs.get<boolean>('notif:sound') ?? true);
 
   setTab(tab: 'all' | 'preferences'): void {
@@ -130,6 +144,9 @@ export class NotificationsComponent {
 
     if (key === 'sound') this.soundEnabled.set(newVal);
     if (key === 'email_digest') this.emailDigestEnabled.set(newVal);
+    if (key === 'email_critical' || key === 'email_assignment' || key === 'email_mention') {
+      this.emailEvents.update(prefs => ({ ...prefs, [key]: newVal }));
+    }
   }
 
   private sourceLabel(source: string): string {

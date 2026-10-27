@@ -7,6 +7,7 @@ import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { routeAccessGuards } from './shared/guards/route-access.guard';
 import { rootRedirectGuard } from './shared/guards/root-redirect.guard';
+import { openEntityGuard } from './shared/guards/open-entity.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
 import { devOnlyRoutes } from './shared/utils/dev-only-routes';
 import { portalTerminologyGuard } from './features/portal/services/portal-terminology.guard';
@@ -358,6 +359,11 @@ export const routes: Routes = [
         canActivate: routeAccessGuards('payables'),
         loadChildren: () =>
           import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
+      },
+      {
+        path: 'open/:type/:id',
+        canActivate: [openEntityGuard],
+        children: [],
       },
       {
         path: 'notifications',

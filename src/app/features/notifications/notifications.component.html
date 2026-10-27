@@ -46,6 +46,20 @@
           {{ emailDigestEnabled() ? 'toggle_on' : 'toggle_off' }}
         </span>
       </div>
+
+      @for (pref of emailEventPrefs; track pref.key) {
+        <div class="pref-row" role="button" tabindex="0" [attr.data-testid]="pref.testId" [attr.aria-label]="pref.toggleKey | translate" (click)="togglePref(pref.key, emailEvents()[pref.key])" (keydown.enter)="togglePref(pref.key, emailEvents()[pref.key])">
+          <div class="pref-row__info">
+            <span class="pref-row__label">{{ pref.labelKey | translate }}</span>
+            <span class="pref-row__desc">{{ pref.descKey | translate }}</span>
+          </div>
+          <span class="material-icons-outlined pref-row__toggle"
+                [class.pref-row__toggle--on]="emailEvents()[pref.key]">
+            {{ emailEvents()[pref.key] ? 'toggle_on' : 'toggle_off' }}
+          </span>
+        </div>
+      }
+      <p class="pref-section__note">{{ 'notifications.emailEventsNote' | translate }}</p>
     </div>
 
     <div class="pref-section">

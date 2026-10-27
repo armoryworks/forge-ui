@@ -61,6 +61,9 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   protected readonly selectedUserId = computed(() => this.selectedConversation()?.userId ?? null);
   protected readonly hasSelection = computed(() => this.selectedConversation() !== null || this.selectedChannel() !== null);
   protected readonly isChannel = computed(() => this.selectedChannel() !== null);
+  protected readonly canAttachFile = computed(() =>
+    this.selectedChannel() !== null
+    || (this.selectedConversation() !== null && this.capabilities.isEnabled('CAP-CROSS-ATTACHMENTS', true)));
   protected readonly isReadOnly = computed(() => this.selectedChannel()?.isReadOnly ?? false);
   protected readonly mutedChannelIds = computed(() => mutedChannelIds(this.channels(), this.currentUserId()));
   protected readonly canStartDirectMessage = computed(() => this.capabilities.isEnabled('CAP-IDEN-USERS', true));
@@ -194,9 +197,13 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   protected onFileSelected(file: File): void {
     this.pendingFile.set(file);
     const channel = this.selectedChannel();
-    if (channel) {
+    const conv = this.selectedConversation();
+    const upload = channel
+      ? this.chatService.uploadChatFile(channel.id, file)
+      : conv ? this.chatService.uploadDirectMessageFile(conv.userId, file) : null;
+    if (upload) {
       this.isUploading.set(true);
-      this.chatService.uploadChatFile(channel.id, file).subscribe({
+      upload.subscribe({
         next: (attachment) => {
           this.pendingFileAttachmentId.set(attachment.id);
           this.isUploading.set(false);

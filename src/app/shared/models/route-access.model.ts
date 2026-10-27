@@ -52,6 +52,9 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'mrp': { roles: ['Admin', 'Manager'] },
   'oee': { roles: ['Admin', 'Manager'] },
   'scheduling': { roles: ['Admin', 'Manager'] },
+  'admin/plants': { roles: ['Admin'], capabilities: ['CAP-MD-LOCATIONS'] },
+  'admin/scanners': { roles: ['Admin', 'Manager'], capabilities: ['CAP-MFG-SHOPFLOOR'] },
+  'admin/languages': { roles: ['Admin'], capabilities: ['CAP-ADMIN-I18N'] },
   'admin': { roles: ['Admin', 'Manager', 'OfficeManager'] },
 };
 

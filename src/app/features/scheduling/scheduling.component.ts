@@ -27,6 +27,7 @@ import { SchedulingService } from './services/scheduling.service';
 import { WorkCenterDialogComponent } from './components/work-center-dialog/work-center-dialog.component';
 import { SchedulingTimelineComponent } from './components/scheduling-timeline/scheduling-timeline.component';
 import { ShiftAssignmentsPanelComponent } from './components/shift-assignments-panel/shift-assignments-panel.component';
+import { ShiftDialogComponent, ShiftDialogData } from './components/shift-dialog/shift-dialog.component';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import {
@@ -37,6 +38,7 @@ import {
   DispatchListItem,
   WorkCenterLoad,
   Shift,
+  UpdateShiftRequest,
 } from './models/scheduling.model';
 import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
@@ -112,7 +114,7 @@ export class SchedulingComponent implements OnInit {
   // Data signals
   protected readonly ganttOps = signal<ScheduledOperation[]>([]);
   protected readonly workCenters = signal<WorkCenter[]>([]);
-  protected readonly shifts = signal<Shift[]>([]);
+  protected readonly shifts = signal<(Shift & { workCenterNames: string })[]>([]);
   protected readonly scheduleRuns = signal<ScheduleRun[]>([]);
   protected readonly dispatchList = signal<DispatchListItem[]>([]);
   protected readonly workCenterLoad = signal<WorkCenterLoad | null>(null);
@@ -184,6 +186,8 @@ export class SchedulingComponent implements OnInit {
     { field: 'breakMinutes', header: this.translate.instant('scheduling.cols.breakMin'), sortable: true, type: 'number', width: '100px' },
     { field: 'netHours', header: this.translate.instant('scheduling.cols.netHours'), sortable: true, type: 'number', width: '100px' },
     { field: 'isActive', header: this.translate.instant('scheduling.cols.active'), sortable: true, width: '70px' },
+    { field: 'workCenterNames', header: this.translate.instant('scheduling.cols.workCenters'), sortable: true },
+    { field: 'actions', header: '', width: '60px' },
   ];
 
   protected readonly runColumns: ColumnDef[] = [
@@ -332,9 +336,41 @@ export class SchedulingComponent implements OnInit {
   private loadShifts(): void {
     this.loading.set(true);
     this.schedulingService.getShifts().subscribe({
-      next: s => { this.shifts.set(s); this.loading.set(false); },
+      next: s => {
+        this.shifts.set(s.map(shift => ({
+          ...shift,
+          workCenterNames: (shift.workCenters ?? []).map(wc => wc.workCenterName ?? '').filter(Boolean).join(', '),
+        })));
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected openCreateShift(): void {
+    this.openShiftDialog({ workCenters: this.workCenters() });
+  }
+
+  protected openEditShift(shift: Shift): void {
+    this.openShiftDialog({ shift, workCenters: this.workCenters() });
+  }
+
+  private openShiftDialog(data: ShiftDialogData): void {
+    this.dialog.open<ShiftDialogComponent, ShiftDialogData, UpdateShiftRequest>(ShiftDialogComponent, { width: '560px', data })
+      .afterClosed()
+      .subscribe(request => {
+        if (!request) return;
+        const save = data.shift
+          ? this.schedulingService.updateShift(data.shift.id, request)
+          : this.schedulingService.createShift(request);
+        save.subscribe({
+          next: () => {
+            this.snackbar.success(this.translate.instant(data.shift ? 'scheduling.snackbar.shiftUpdated' : 'scheduling.snackbar.shiftCreated'));
+            this.loadShifts();
+          },
+          error: (err: unknown) => this.snackbar.errorFrom(err, 'scheduling.snackbar.shiftSaveFailed'),
+        });
+      });
   }
 
   private loadRuns(): void {

@@ -22,6 +22,8 @@ import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
 import { TerminologyPanelComponent } from './components/terminology-panel/terminology-panel.component';
 import { AddDeviceDialogComponent } from './components/add-device-dialog/add-device-dialog.component';
+import { UserSetupInviteComponent } from './components/user-setup-invite/user-setup-invite.component';
+import { TrackTypeCustomFieldsDialogComponent, TrackTypeCustomFieldsDialogData } from './components/track-type-custom-fields-dialog/track-type-custom-fields-dialog.component';
 import { TelemetryConsentDialogComponent } from './components/telemetry-consent-dialog/telemetry-consent-dialog.component';
 import { TelemetryService } from './services/telemetry.service';
 import { TelemetryAgreement, TelemetryConsentRecord, TelemetryStatus } from './models/telemetry.model';
@@ -92,7 +94,7 @@ import { formatDate } from '../../shared/utils/date.utils';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,
-    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, DateTimePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, CapDirective, TelemetryConsentDialogComponent,
+    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, DateTimePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, UserSetupInviteComponent, CapDirective, TelemetryConsentDialogComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -682,6 +684,11 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  protected onInviteSent(user: AdminUser, sentAt: string): void {
+    this.users.update(list => list.map(u => (u.id === user.id ? { ...u, lastInviteSentAt: sentAt } : u)));
+    if (this.editingUser()?.id === user.id) this.editingUser.set({ ...this.editingUser()!, lastInviteSentAt: sentAt });
+  }
+
   protected toggleUserActive(user: AdminUser): void {
     this.adminService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
       next: () => this.loadUsers(),
@@ -786,6 +793,11 @@ export class AdminComponent implements OnInit {
   protected openEditTrackType(tt: TrackType): void {
     this.editingTrackType.set(tt);
     this.showTrackTypeDialog.set(true);
+  }
+
+  protected openCustomFields(tt: TrackType): void {
+    this.dialog.open<TrackTypeCustomFieldsDialogComponent, TrackTypeCustomFieldsDialogData, boolean>(
+      TrackTypeCustomFieldsDialogComponent, { width: '800px', data: { trackTypeId: tt.id, trackTypeName: tt.name } });
   }
 
   protected closeTrackTypeDialog(): void {

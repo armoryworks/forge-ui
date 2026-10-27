@@ -1,0 +1,33 @@
+<app-dialog
+  [title]="(isEdit ? 'admin.plants.editPlant' : 'admin.plants.newPlant') | translate"
+  width="520px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'admin.plants.code' | translate" formControlName="code" [required]="true" [maxlength]="20" data-testid="plant-code" />
+      <app-input [label]="'admin.plants.name' | translate" formControlName="name" [required]="true" [maxlength]="200" data-testid="plant-name" />
+    </div>
+    @if (locationOptions.length === 0) {
+      <p class="dialog-hint" data-testid="plant-no-locations">{{ 'admin.plants.noLocations' | translate }}</p>
+    }
+    <app-select [label]="'admin.plants.location' | translate" formControlName="companyLocationId" [options]="locationOptions" [required]="true" data-testid="plant-location" />
+    <div class="dialog-row">
+      <app-select [label]="'admin.plants.timeZone' | translate" formControlName="timeZone" [options]="timeZoneOptions" data-testid="plant-time-zone" />
+      <app-input [label]="'admin.plants.currency' | translate" formControlName="currencyCode" [maxlength]="3" data-testid="plant-currency" />
+    </div>
+    <app-toggle [label]="'admin.plants.isDefault' | translate" formControlName="isDefault" data-testid="plant-default" />
+    @if (isEdit) {
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="plant-active" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="plant-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid" (click)="save()" data-testid="plant-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

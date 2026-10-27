@@ -14,7 +14,7 @@ import { TerminologyEntryItem } from '../models/terminology-entry-item.model';
 import { TerminologySaveResult } from '../models/terminology-save-result.model';
 import { SystemSetting } from '../models/system-setting.model';
 import { TrackType } from '../../../shared/models/track-type.model';
-import { CustomFieldDefinition } from '../models/custom-field-definition.model';
+import { CustomFieldDefinition } from '../../../shared/models/custom-field-definition.model';
 import { EmployeeDocument } from '../models/employee-document.model';
 import { SalesTaxRate } from '../models/sales-tax-rate.model';
 import { CreateSalesTaxRateRequest } from '../models/create-sales-tax-rate-request.model';

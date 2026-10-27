@@ -123,6 +123,14 @@
   <!-- Shifts Tab -->
   @if (activeTab() === 'shifts') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
+      @if (shiftAssignmentsEnabled()) {
+        <app-toolbar>
+          <span appSpacer></span>
+          <button class="action-btn action-btn--create" (click)="openCreateShift()" data-testid="scheduling-new-shift-btn">
+            <span class="material-icons-outlined">add</span> {{ 'scheduling.newShift' | translate }}
+          </button>
+        </app-toolbar>
+      }
       @if (shifts().length === 0 && !loading()) {
         <app-empty-state icon="schedule" [message]="'scheduling.noShifts' | translate" />
       } @else {
@@ -136,6 +144,18 @@
           <ng-template appColumnCell="endTime" let-row>{{ row.endTime | dateTime:'time' }}</ng-template>
           <ng-template appColumnCell="isActive" let-row>
             <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ (row.isActive ? 'scheduling.active' : 'scheduling.inactive') | translate }}</span>
+          </ng-template>
+          <ng-template appColumnCell="workCenterNames" let-row>
+            {{ row.workCenterNames || '—' }}
+          </ng-template>
+          <ng-template appColumnCell="actions" let-row>
+            @if (shiftAssignmentsEnabled()) {
+              <div class="row-actions">
+                <button class="icon-btn" (click)="openEditShift(row)" [attr.aria-label]="'common.edit' | translate" data-testid="scheduling-edit-shift-btn">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+              </div>
+            }
           </ng-template>
         </app-data-table>
       }

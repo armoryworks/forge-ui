@@ -164,7 +164,9 @@
       "runDiscoveryToGetATailored": "Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.",
       "searchByNameCodeDescription": "Search by name, code, description",
       "toggleConsultantMode": "Toggle consultant mode",
-      "welcomeLetSSetUpForge": "Welcome — let's set up forge for your business."
+      "welcomeLetSSetUpForge": "Welcome — let's set up forge for your business.",
+      "bankingTitle": "Banking",
+      "bankingDesc": "Company bank account, ACH and payment file settings"
     },
     "systemSettings": {
       "defaultValue": "Default: {{value}}",
@@ -806,7 +808,12 @@
     "removePartConfirmMessage": "Remove {{partNumber}} from this work order?",
     "removeBuildPartConfirmMessage": "{{partNumber}} is the part this work order builds. Removing it leaves the work order with no quantity to make. Remove it?",
     "bulkMoveBillingReason": "Billing stages are set by invoicing and payments; your role cannot move work orders there.",
-    "bulkMoveBlockedReason": "None of the selected work orders can move here: they are already there, cannot move back, or would skip a required stage."
+    "bulkMoveBlockedReason": "None of the selected work orders can move here: they are already there, cannot move back, or would skip a required stage.",
+    "customFields": {
+      "title": "Custom fields",
+      "saved": "Custom fields saved",
+      "saveFailed": "Could not save the custom fields"
+    }
   },
   "jobDetailExtras": {
     "archive": "Archive work order",
@@ -3683,7 +3690,10 @@
       "tariffs": "Tariff Rates",
       "workingCalendars": "Working Calendars",
       "database": "Database Transfer",
-      "paymentTerms": "Payment Terms"
+      "paymentTerms": "Payment Terms",
+      "plants": "Plants",
+      "scanners": "Scanners",
+      "languages": "Languages"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -4475,6 +4485,101 @@
       "missing": "Cannot enable {{name}} — enable these dependencies first: {{list}}.",
       "conflicts": "{{name}} conflicts with: {{list}}. Disable the peer first.",
       "concurrency": "{{name}} was modified by another admin. The page has been refreshed; try again."
+    },
+    "plants": {
+      "title": "Plants",
+      "hint": "The sites this company operates. Each plant sits at a company location, which holds its address.",
+      "newPlant": "New plant",
+      "editPlant": "Edit plant",
+      "code": "Code",
+      "name": "Name",
+      "location": "Location (address)",
+      "timeZone": "Time zone",
+      "noTimeZone": "Company time zone",
+      "currency": "Currency",
+      "isDefault": "Default plant",
+      "noLocations": "Add a company location under Admin > Settings first; a plant needs an address.",
+      "empty": "No plants yet",
+      "saved": "Plant saved",
+      "saveFailed": "Could not save the plant"
+    },
+    "scanners": {
+      "title": "Scanners",
+      "hint": "Paired barcode scanners and who each is assigned to. Scanning does not require a paired device.",
+      "pairScanner": "Pair scanner",
+      "editScanner": "Edit scanner",
+      "pairHint": "Scan the barcode on the device label into the device ID field, or type it.",
+      "deviceId": "Device ID",
+      "deviceName": "Name",
+      "assignedUser": "Assigned to",
+      "unassigned": "Unassigned",
+      "lastSeen": "Last scan",
+      "neverSeen": "Not yet",
+      "pairedAt": "Paired",
+      "pair": "Pair",
+      "unpair": "Unpair",
+      "unpairTitle": "Unpair scanner?",
+      "unpairMessage": "{{name}} will be removed from the scanner registry.",
+      "unpaired": "Scanner unpaired",
+      "saved": "Scanner saved",
+      "saveFailed": "Could not save the scanner",
+      "empty": "No scanners paired yet"
+    },
+    "languages": {
+      "title": "Languages",
+      "language": "Language",
+      "exportTitle": "Export translations",
+      "exportHint": "Every label in this language ({{keys}} keys), with this installation's {{overrides}} customized labels in place of the shipped text.",
+      "exportCsv": "Export CSV",
+      "exportJson": "Export JSON",
+      "importTitle": "Import translations",
+      "importHint": "Choose an edited CSV (key and value columns) or JSON file. You will see the labels that change before anything is saved; text equal to the shipped label goes back to it.",
+      "chooseFile": "Choose file",
+      "noFile": "No file chosen",
+      "unreadable": "That file could not be read. Use the CSV or JSON layout the export produces.",
+      "planSummary": "{{changed}} labels change, {{unchanged}} are unchanged, {{unknown}} keys are not in the catalog and will be skipped.",
+      "noChanges": "Nothing to change",
+      "revertsToShipped": "back to shipped text",
+      "apply": "Apply {{count}} changes",
+      "imported": "Imported: {{created}} added, {{updated}} updated, {{reverted}} back to shipped text",
+      "importFailed": "Could not import the translations",
+      "key": "Key",
+      "currentValue": "Current",
+      "newValue": "New"
+    },
+    "customFields": {
+      "title": "Custom fields",
+      "dialogTitle": "Custom fields: {{name}}",
+      "hint": "Fields every job on this track type carries, in the order shown here.",
+      "empty": "No custom fields yet.",
+      "label": "Label",
+      "key": "Key",
+      "type": "Type",
+      "options": "Options (comma separated)",
+      "required": "Required",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "remove": "Remove field",
+      "add": "Add field",
+      "saved": "Custom fields saved",
+      "saveFailed": "Could not save the custom fields",
+      "optionsRequired": "A list field needs at least one option",
+      "duplicateKey": "Each field needs its own key",
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "date": "Date",
+        "select": "List",
+        "toggle": "Yes / No"
+      }
+    },
+    "invite": {
+      "send": "Send setup invite",
+      "resend": "Resend invite",
+      "lastSent": "last sent {{date}}",
+      "lastSentLabel": "Last sent",
+      "sent": "Setup invite sent to {{email}}",
+      "failed": "Could not send the setup invite"
     }
   },
   "teamsPanel": {
@@ -6044,8 +6149,19 @@
       "sales_orders": "Sales orders",
       "scanner": "Scanner",
       "shipments": "Shipments",
-      "time_tracking": "Time tracking"
-    }
+      "time_tracking": "Time tracking",
+      "assignments": "Assignments"
+    },
+    "emailCritical": "Critical alerts",
+    "emailCriticalDesc": "Email me right away when a critical alert is raised for me",
+    "toggleEmailCritical": "Toggle critical alert emails",
+    "emailAssignment": "Assignments",
+    "emailAssignmentDesc": "Email me when a job, task, approval or lead is assigned to me",
+    "toggleEmailAssignment": "Toggle assignment emails",
+    "emailMention": "Mentions",
+    "emailMentionDesc": "Email me when someone @mentions me in chat or a comment",
+    "toggleEmailMention": "Toggle mention emails",
+    "emailEventsNote": "Emails go out only while your company has email notifications turned on. Repeats about the same record within five minutes are sent once."
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -9615,7 +9731,8 @@
       "dueDate": "Due Date",
       "endTime": "End Time",
       "startTime": "Start Time",
-      "mode": "Mode"
+      "mode": "Mode",
+      "workCenters": "Work centers"
     },
     "statuses": {
       "scheduled": "Scheduled",
@@ -9639,7 +9756,10 @@
       "unlocked": "Schedule unlocked",
       "workCenterCreated": "Work center created",
       "workCenterUpdated": "Work center updated",
-      "workCenterDeleted": "Work center deleted"
+      "workCenterDeleted": "Work center deleted",
+      "shiftCreated": "Shift created",
+      "shiftUpdated": "Shift updated",
+      "shiftSaveFailed": "Could not save the shift"
     },
     "load": "Load",
     "noDispatch": "No dispatch items",
@@ -9687,6 +9807,32 @@
     "runModes": {
       "simulation": "Simulation",
       "live": "Live"
+    },
+    "newShift": "New shift",
+    "shiftDialog": {
+      "newTitle": "New shift",
+      "editTitle": "Edit shift",
+      "name": "Name",
+      "startTime": "Start",
+      "endTime": "End",
+      "breakMinutes": "Break (minutes)",
+      "workCenters": "Work centers",
+      "addWorkCenter": "Add work center",
+      "noWorkCenters": "Not assigned to a work center.",
+      "workCenter": "Work center",
+      "daysLabel": "Days",
+      "removeWorkCenter": "Remove work center",
+      "breakTooLong": "The break must be shorter than the shift",
+      "duplicateWorkCenter": "Each work center can be listed once",
+      "days": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
     }
   },
   "routingTools": {

@@ -61,6 +61,13 @@ export const SETTINGS_SEARCH_TOPICS: SettingsSearchTopic[] = [
     descKey: 'capabilityAreas.settingsSearch.payPeriodDesc',
     keywords: ['pay period', 'lock', 'timesheet'],
   },
+  {
+    highlight: 'banking',
+    titleKey: 'capabilityAreas.settingsSearch.bankingTitle',
+    descKey: 'capabilityAreas.settingsSearch.bankingDesc',
+    keywords: ['bank', 'banking', 'ach', 'routing', 'account number', 'payments', 'banco'],
+    route: '/admin/banking',
+  },
 ];
 
 export function matchSettingsTopics(search: string): SettingsSearchTopic[] {

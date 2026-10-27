@@ -1,0 +1,50 @@
+<app-dialog
+  [title]="(isEdit ? 'scheduling.shiftDialog.editTitle' : 'scheduling.shiftDialog.newTitle') | translate"
+  width="560px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'scheduling.shiftDialog.name' | translate" formControlName="name" [required]="true" [maxlength]="100" data-testid="shift-name" />
+    <div class="dialog-row">
+      <app-input [label]="'scheduling.shiftDialog.startTime' | translate" type="time" formControlName="startTime" [required]="true" data-testid="shift-start" />
+      <app-input [label]="'scheduling.shiftDialog.endTime' | translate" type="time" formControlName="endTime" [required]="true" data-testid="shift-end" />
+    </div>
+    <app-input [label]="'scheduling.shiftDialog.breakMinutes' | translate" type="number" formControlName="breakMinutes" [required]="true" data-testid="shift-break" />
+    @if (isEdit) {
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="shift-active" />
+    }
+
+    <div class="shift-wc">
+      <div class="shift-wc__header">
+        <span class="shift-wc__title">{{ 'scheduling.shiftDialog.workCenters' | translate }}</span>
+        <button class="action-btn action-btn--sm" type="button" (click)="addWorkCenter()" [disabled]="workCenterOptions.length === 0" data-testid="shift-add-work-center">
+          <span class="material-icons-outlined">add</span>
+          {{ 'scheduling.shiftDialog.addWorkCenter' | translate }}
+        </button>
+      </div>
+      @if (workCenters.length === 0) {
+        <p class="shift-wc__hint">{{ 'scheduling.shiftDialog.noWorkCenters' | translate }}</p>
+      }
+      <div formArrayName="workCenters" class="shift-wc__rows">
+        @for (row of workCenters.controls; track row; let i = $index) {
+          <div class="shift-wc__row" [formGroupName]="i">
+            <app-select [label]="'scheduling.shiftDialog.workCenter' | translate" formControlName="workCenterId" [options]="workCenterOptions" [required]="true" [attr.data-testid]="'shift-wc-' + i" />
+            <app-select [label]="'scheduling.shiftDialog.daysLabel' | translate" formControlName="days" [options]="dayOptions" [multiple]="true" [required]="true" [attr.data-testid]="'shift-wc-days-' + i" />
+            <button class="icon-btn icon-btn--danger" type="button" (click)="removeWorkCenter(i)" [attr.aria-label]="'scheduling.shiftDialog.removeWorkCenter' | translate" [attr.data-testid]="'shift-wc-remove-' + i">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="shift-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid" (click)="save()" data-testid="shift-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

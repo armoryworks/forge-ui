@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.dialog-hint {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}

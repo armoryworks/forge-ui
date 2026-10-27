@@ -30,6 +30,7 @@ import { JobDispositionStock } from '../models/job-disposition-stock.model';
 import { ChildJob } from '../models/child-job.model';
 import { BomExplosionResponse } from '../models/bom-explosion-response.model';
 import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
+import { CustomFieldDefinition } from '../../../shared/models/custom-field-definition.model';
 
 const BOARD_PAGE_SIZE = 200;
 const BOARD_MAX_ROWS = 2000;
@@ -200,7 +201,10 @@ export class KanbanService {
     ).pipe(map(p => p.items));
   }
 
-  // Custom field values
+  getCustomFieldDefinitions(trackTypeId: number): Observable<CustomFieldDefinition[]> {
+    return this.http.get<CustomFieldDefinition[]>(`${environment.apiUrl}/track-types/${trackTypeId}/custom-fields`);
+  }
+
   getCustomFieldValues(jobId: number): Observable<CustomFieldValues> {
     return this.http.get<CustomFieldValues>(`${environment.apiUrl}/jobs/${jobId}/custom-fields`);
   }

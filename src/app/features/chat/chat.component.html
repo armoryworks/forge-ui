@@ -322,7 +322,7 @@
           @if (isInputDisabled()) {
             <span class="chat-panel__readonly">{{ 'chat.readOnly' | translate }}</span>
           } @else {
-            @if (selectedChannel()) {
+            @if (canAttachFile()) {
               <input type="file" #fileInput class="chat-panel__file-input" (change)="onFileSelected($event)"
                 accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt" />
               <button class="icon-btn" (click)="fileInput.click()" [attr.aria-label]="'chat.attachFile' | translate" [matTooltip]="'chat.attachFile' | translate" matTooltipPosition="above" data-testid="chat-attach-btn">
