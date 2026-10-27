@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideTranslateService } from '@ngx-translate/core';
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { I18nOverridesService } from '../../../shared/services/i18n-overrides.service';
 import { LanguageService } from '../../../shared/services/language.service';
@@ -23,6 +23,7 @@ interface PageInternals {
 describe('LanguagesAdminComponent', () => {
   const transfer = { load: vi.fn(), import: vi.fn() };
   const overrides = { refresh: vi.fn() };
+  const snackbar = { success: vi.fn(), errorFrom: vi.fn() };
 
   function build(): PageInternals {
     TestBed.resetTestingModule();
@@ -32,7 +33,7 @@ describe('LanguagesAdminComponent', () => {
         { provide: TranslationTransferService, useValue: transfer },
         { provide: I18nOverridesService, useValue: overrides },
         { provide: LanguageService, useValue: { availableLanguages: [{ code: 'en', label: 'English' }, { code: 'es', label: 'Español' }] } },
-        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+        { provide: SnackbarService, useValue: snackbar },
       ],
     });
     return TestBed.runInInjectionContext(() => new LanguagesAdminComponent()) as unknown as PageInternals;
@@ -71,6 +72,18 @@ describe('LanguagesAdminComponent', () => {
     page.applyImport();
 
     expect(page.unreadable()).toBe(true);
+    expect(transfer.import).not.toHaveBeenCalled();
+  });
+
+  it('shows nothing to export and reports the error when the catalog cannot load', () => {
+    transfer.load.mockReturnValue(throwError(() => new Error('offline')));
+    const page = build();
+
+    page.preview('key,value\na.b,Primero\n', 'es.csv');
+    page.applyImport();
+
+    expect(page.keyCount()).toBe(0);
+    expect(snackbar.errorFrom).toHaveBeenCalledWith(expect.any(Error), 'admin.languages.loadFailed');
     expect(transfer.import).not.toHaveBeenCalled();
   });
 });

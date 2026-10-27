@@ -71,15 +71,23 @@ export class LanguagesAdminComponent {
   }
 
   private load(): void {
+    const language = this.languageControl.value;
     this.loading.set(true);
     this.clearImport();
-    this.transfer.load(this.languageControl.value).subscribe({
+    this.shipped.set({});
+    this.overrides.set({});
+    this.transfer.load(language).subscribe({
       next: ({ shipped, overrides }) => {
+        if (language !== this.languageControl.value) return;
         this.shipped.set(shipped);
         this.overrides.set(overrides);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err: unknown) => {
+        if (language !== this.languageControl.value) return;
+        this.loading.set(false);
+        this.snackbar.errorFrom(err, 'admin.languages.loadFailed');
+      },
     });
   }
 
@@ -119,7 +127,7 @@ export class LanguagesAdminComponent {
 
   protected applyImport(): void {
     const changes = this.changes();
-    if (changes.length === 0 || this.busy()) return;
+    if (changes.length === 0 || this.busy() || this.keyCount() === 0) return;
     this.busy.set(true);
     this.transfer.import(this.languageControl.value, changes).subscribe({
       next: result => {

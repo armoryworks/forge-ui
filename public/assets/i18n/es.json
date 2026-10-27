@@ -4543,6 +4543,7 @@
       "apply": "Aplicar {{count}} cambios",
       "imported": "Importado: {{created}} agregadas, {{updated}} actualizadas, {{reverted}} vueltas al texto original",
       "importFailed": "No se pudieron importar las traducciones",
+      "loadFailed": "No se pudieron cargar las etiquetas de este idioma",
       "key": "Clave",
       "currentValue": "Actual",
       "newValue": "Nuevo"
@@ -4550,7 +4551,7 @@
     "customFields": {
       "title": "Campos personalizados",
       "dialogTitle": "Campos personalizados: {{name}}",
-      "hint": "Campos que lleva cada trabajo de este tipo de seguimiento, en el orden mostrado.",
+      "hint": "Campos que lleva cada orden de trabajo de este tipo de seguimiento, en el orden mostrado.",
       "empty": "Aún no hay campos personalizados.",
       "label": "Etiqueta",
       "key": "Clave",
@@ -6149,7 +6150,7 @@
     "emailCriticalDesc": "Enviarme un correo de inmediato cuando se genere una alerta crítica para mí",
     "toggleEmailCritical": "Activar o desactivar correos de alertas críticas",
     "emailAssignment": "Asignaciones",
-    "emailAssignmentDesc": "Enviarme un correo cuando se me asigne un trabajo, tarea, aprobación o prospecto",
+    "emailAssignmentDesc": "Enviarme un correo cuando se me asigne una orden de trabajo, tarea, aprobación o prospecto",
     "toggleEmailAssignment": "Activar o desactivar correos de asignaciones",
     "emailMention": "Menciones",
     "emailMentionDesc": "Enviarme un correo cuando alguien me @mencione en el chat o en un comentario",

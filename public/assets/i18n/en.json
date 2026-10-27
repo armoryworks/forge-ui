@@ -4543,6 +4543,7 @@
       "apply": "Apply {{count}} changes",
       "imported": "Imported: {{created}} added, {{updated}} updated, {{reverted}} back to shipped text",
       "importFailed": "Could not import the translations",
+      "loadFailed": "Could not load this language's labels",
       "key": "Key",
       "currentValue": "Current",
       "newValue": "New"

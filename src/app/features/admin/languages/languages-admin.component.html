@@ -12,11 +12,11 @@
           {{ 'admin.languages.exportHint' | translate: { keys: keyCount(), overrides: overrideCount() } }}
         </p>
         <div class="languages__actions">
-          <button class="action-btn" (click)="exportCsv()" [disabled]="loading()" data-testid="languages-export-csv">
+          <button class="action-btn" (click)="exportCsv()" [disabled]="loading() || keyCount() === 0" data-testid="languages-export-csv">
             <span class="material-icons-outlined">download</span>
             {{ 'admin.languages.exportCsv' | translate }}
           </button>
-          <button class="action-btn" (click)="exportJson()" [disabled]="loading()" data-testid="languages-export-json">
+          <button class="action-btn" (click)="exportJson()" [disabled]="loading() || keyCount() === 0" data-testid="languages-export-json">
             <span class="material-icons-outlined">data_object</span>
             {{ 'admin.languages.exportJson' | translate }}
           </button>
