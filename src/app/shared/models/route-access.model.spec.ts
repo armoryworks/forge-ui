@@ -20,7 +20,20 @@ describe('ROUTE_ACCESS', () => {
 
   it('gates the board on the roles the jobs API admits', () => {
     expect([...(ROUTE_ACCESS['kanban'].roles ?? [])].sort()).toEqual(
-      ['Admin', 'Engineer', 'Manager', 'OfficeManager', 'PM', 'ProductionWorker']);
+      ['Admin', 'Engineer', 'Manager', 'OfficeManager', 'PM', 'Production Planner', 'ProductionWorker']);
+  });
+
+  it('opens the planning screens to the Production Planner and keeps money and people closed', () => {
+    for (const route of ['mrp', 'scheduling', 'planning', 'kanban', 'inventory', 'parts']) {
+      expect(ROUTE_ACCESS[route].roles, route).toContain('Production Planner');
+    }
+    for (const route of ['accounting', 'invoices', 'payables', 'employees', 'purchase-orders', 'sales-orders', 'costing']) {
+      expect(ROUTE_ACCESS[route].roles, route).not.toContain('Production Planner');
+    }
+  });
+
+  it('lands a Production Planner on MRP', () => {
+    expect(ROLE_LANDING['Production Planner']).toBe('/mrp');
   });
 
   it('builds a role guard then a capability guard from an entry', () => {

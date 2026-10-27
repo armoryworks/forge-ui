@@ -37,12 +37,14 @@
         <app-input class="inv-home__search" [label]="'inventory.home.searchLabel' | translate"
           [formControl]="searchControl" />
         <span class="inv-home__toolbar-spacer"></span>
-        <button class="action-btn action-btn--create" (click)="openVerb('receive')">
-          <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.verbs.receive' | translate }}
-        </button>
-        <button class="action-btn" (click)="openVerb('use')">
-          <span class="material-icons-outlined">remove_circle_outline</span>{{ 'inventory.home.verbs.use' | translate }}
-        </button>
+        @if (canEditStock()) {
+          <button class="action-btn action-btn--create" (click)="openVerb('receive')">
+            <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.verbs.receive' | translate }}
+          </button>
+          <button class="action-btn" (click)="openVerb('use')">
+            <span class="material-icons-outlined">remove_circle_outline</span>{{ 'inventory.home.verbs.use' | translate }}
+          </button>
+        }
         @if (canCount()) {
           <button class="action-btn" (click)="openVerb('count')">
             <span class="material-icons-outlined">fact_check</span>{{ 'inventory.home.verbs.count' | translate }}
@@ -56,9 +58,13 @@
             <span class="material-icons-outlined">warning_amber</span>{{ 'inventory.home.lowStock' | translate }}
           </span>
           @for (a of lowStock(); track a.partId) {
-            <button class="chip chip--warning" (click)="openVerb('receive')" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
-              {{ a.partNumber }} · {{ a.currentStock | number }}
-            </button>
+            @if (canEditStock()) {
+              <button class="chip chip--warning" (click)="openVerb('receive')" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
+                {{ a.partNumber }} · {{ a.currentStock | number }}
+              </button>
+            } @else {
+              <span class="chip chip--warning">{{ a.partNumber }} · {{ a.currentStock | number }}</span>
+            }
           }
         </div>
       }
@@ -67,21 +73,25 @@
         @if (filteredParts().length > 0) {
           <app-data-table tableId="inventory-home-stock" [columns]="stockColumns" [data]="filteredParts()">
             <ng-template appColumnCell="actions" let-row>
-              <div class="inv-home__row-actions">
-                <button class="icon-btn" (click)="openVerb('receive', row)" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
-                  <span class="material-icons-outlined">add_box</span>
-                </button>
-                <button class="icon-btn" (click)="openVerb('use', row)" [attr.aria-label]="'inventory.home.verbs.use' | translate">
-                  <span class="material-icons-outlined">remove_circle_outline</span>
-                </button>
-              </div>
+              @if (canEditStock()) {
+                <div class="inv-home__row-actions">
+                  <button class="icon-btn" (click)="openVerb('receive', row)" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
+                    <span class="material-icons-outlined">add_box</span>
+                  </button>
+                  <button class="icon-btn" (click)="openVerb('use', row)" [attr.aria-label]="'inventory.home.verbs.use' | translate">
+                    <span class="material-icons-outlined">remove_circle_outline</span>
+                  </button>
+                </div>
+              }
             </ng-template>
           </app-data-table>
         } @else {
           <app-empty-state icon="inventory_2" [message]="'inventory.home.empty' | translate">
-            <button class="action-btn action-btn--create" (click)="openVerb('receive')">
-              <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.emptyCta' | translate }}
-            </button>
+            @if (canEditStock()) {
+              <button class="action-btn action-btn--create" (click)="openVerb('receive')">
+                <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.emptyCta' | translate }}
+              </button>
+            }
           </app-empty-state>
         }
       </div>
@@ -114,9 +124,11 @@
               <span class="inv-home__lowstock-part">{{ a.partNumber }}</span>
               <span class="inv-home__lowstock-desc">{{ a.description }}</span>
               <span class="inv-home__lowstock-qty">{{ a.currentStock | number }} / {{ (a.minStockThreshold ?? a.reorderPoint) | number }}</span>
-              <button class="action-btn action-btn--sm action-btn--create" (click)="openVerb('receive')">
-                {{ 'inventory.home.verbs.receive' | translate }}
-              </button>
+              @if (canEditStock()) {
+                <button class="action-btn action-btn--sm action-btn--create" (click)="openVerb('receive')">
+                  {{ 'inventory.home.verbs.receive' | translate }}
+                </button>
+              }
             </li>
           }
         </ul>

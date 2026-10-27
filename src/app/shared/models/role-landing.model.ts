@@ -19,6 +19,7 @@ export const ROLE_LANDING: Readonly<Record<string, string>> = {
   OfficeManager: '/customers',
   ComplianceOfficer: '/compliance',
   PM: '/backlog',
+  'Production Planner': '/mrp',
 };
 
 /** A selectable landing-screen choice for the profile customization screen. */

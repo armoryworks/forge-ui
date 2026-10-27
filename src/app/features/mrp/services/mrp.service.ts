@@ -20,6 +20,7 @@ import {
   UpdateMasterScheduleRequest,
   GenerateForecastRequest,
 } from '../models/mrp.model';
+import { MrpReleaseResult } from '../models/mrp-release-result.model';
 
 @Injectable({ providedIn: 'root' })
 export class MrpService {
@@ -57,12 +58,12 @@ export class MrpService {
     return this.http.patch<void>(`${this.base}/planned-orders/${id}`, { isFirmed, notes });
   }
 
-  releasePlannedOrder(id: number): Observable<{ createdEntityType: string; createdEntityId: number }> {
-    return this.http.post<{ createdEntityType: string; createdEntityId: number }>(`${this.base}/planned-orders/${id}/release`, {});
+  releasePlannedOrder(id: number): Observable<MrpReleaseResult> {
+    return this.http.post<MrpReleaseResult>(`${this.base}/planned-orders/${id}/release`, {});
   }
 
-  bulkReleasePlannedOrders(ids: number[]): Observable<{ createdEntityType: string; createdEntityId: number }[]> {
-    return this.http.post<{ createdEntityType: string; createdEntityId: number }[]>(`${this.base}/planned-orders/bulk-release`, { ids });
+  bulkReleasePlannedOrders(ids: number[]): Observable<MrpReleaseResult[]> {
+    return this.http.post<MrpReleaseResult[]>(`${this.base}/planned-orders/bulk-release`, { ids });
   }
 
   deletePlannedOrder(id: number): Observable<void> {

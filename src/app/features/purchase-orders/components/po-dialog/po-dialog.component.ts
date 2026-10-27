@@ -626,6 +626,8 @@ export class PoDialogComponent {
   protected readonly offTierLines = signal<CheckTierVarianceResult[]>([]);
   protected readonly noTierLines = signal<CheckTierVarianceResult[]>([]);
   protected readonly offTierThresholdPct = signal(5);
+  protected readonly purchaseUnitLookup = computed(() =>
+    new Map(this.lines().flatMap(l => l.partId == null ? [] : [[l.partId, l.purchaseUnitId ?? null] as [number, number | null]])));
   protected readonly partLookup = computed(() => {
     const map = new Map<number, { partNumber: string; description: string }>();
     for (const line of this.lines()) {
@@ -679,6 +681,12 @@ export class PoDialogComponent {
     });
   }
 
+  private applyReviewedReasons(reasonsByPart: Record<number, string>): void {
+    if (Object.keys(reasonsByPart).length === 0) return;
+    this.lines.update(prev => prev.map(l =>
+      l.partId != null && reasonsByPart[l.partId] ? { ...l, overrideReason: reasonsByPart[l.partId] } : l));
+  }
+
   protected onOffTierCancel(): void {
     this.showOffTierPrompt.set(false);
     this.offTierLines.set([]);
@@ -688,6 +696,7 @@ export class PoDialogComponent {
   protected onOffTierConfirm(result: OffTierPromptResult): void {
     this.showOffTierPrompt.set(false);
     this.saving.set(true);
+    this.applyReviewedReasons(result.reasonsByPart);
 
     // For lines flagged "update tier", upsert a new VendorPartPriceTier.
     // Skip lines that already exist with no VendorPartId — those need a

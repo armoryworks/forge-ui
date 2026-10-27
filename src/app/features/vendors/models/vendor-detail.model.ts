@@ -1,3 +1,4 @@
+import { AutoPoMode } from '../../purchase-orders/models/auto-po-settings.model';
 import { PurchaseOrderListItem } from '../../purchase-orders/models/purchase-order-list-item.model';
 
 export interface VendorDetail {
@@ -34,4 +35,5 @@ export interface VendorDetail {
   currencyId?: number | null;
   currencyCode?: string | null;
   currencyLocked?: boolean;
+  autoPoMode?: AutoPoMode | null;
 }

@@ -25,9 +25,11 @@ import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggl
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { SchedulingService } from './services/scheduling.service';
 import { WorkCenterDialogComponent } from './components/work-center-dialog/work-center-dialog.component';
+import { RunScheduleDialogComponent } from './components/run-schedule-dialog/run-schedule-dialog.component';
 import { SchedulingTimelineComponent } from './components/scheduling-timeline/scheduling-timeline.component';
 import { ShiftAssignmentsPanelComponent } from './components/shift-assignments-panel/shift-assignments-panel.component';
 import { CapabilityService } from '../../shared/services/capability.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import {
   ScheduleRun,
@@ -37,6 +39,7 @@ import {
   DispatchListItem,
   WorkCenterLoad,
   Shift,
+  RunSchedulerRequest,
 } from './models/scheduling.model';
 import { SCHEDULING_TABS, SchedulingTab } from './models/scheduling-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
@@ -81,8 +84,9 @@ export class SchedulingComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly draftResume = inject(DraftResumeService);
   private readonly capabilities = inject(CapabilityService);
+  protected readonly canManageWorkCenters = inject(AuthService).hasAnyRole(['Admin', 'Manager']);
 
-  protected readonly shiftAssignmentsEnabled = computed(() => this.capabilities.isEnabled('CAP-HR-SHIFTS'));
+  protected readonly shiftAssignmentsEnabled = computed(() => this.canManageWorkCenters && this.capabilities.isEnabled('CAP-HR-SHIFTS'));
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -358,25 +362,20 @@ export class SchedulingComponent implements OnInit {
   // Actions
   protected executeSchedule(): void {
     if (this.runningSchedule()) return;
-    this.runningSchedule.set(true);
-    const now = new Date();
-    const from = toDateOnly(now)!;
-    const to = toDateOnly(new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000))!;
-
-    this.schedulingService.runScheduler({
-      direction: 'Forward',
-      scheduleFrom: from,
-      scheduleTo: to,
-      priorityRule: 'DueDate',
-    }).subscribe({
-      next: run => {
-        this.runningSchedule.set(false);
-        this.snackbar.success(`${this.translate.instant('scheduling.snackbar.scheduled')} ${run.operationsScheduled} ${this.translate.instant('scheduling.snackbar.operations')}`);
-        this.loadGanttData();
-        this.loadRuns();
-      },
-      error: () => this.runningSchedule.set(false),
-    });
+    this.dialog.open<RunScheduleDialogComponent, void, RunSchedulerRequest | undefined>(RunScheduleDialogComponent, { width: '480px' })
+      .afterClosed().subscribe(request => {
+        if (!request || this.runningSchedule()) return;
+        this.runningSchedule.set(true);
+        this.schedulingService.runScheduler(request).subscribe({
+          next: run => {
+            this.runningSchedule.set(false);
+            this.snackbar.success(`${this.translate.instant('scheduling.snackbar.scheduled')} ${run.operationsScheduled} ${this.translate.instant('scheduling.snackbar.operations')}`);
+            this.loadGanttData();
+            this.loadRuns();
+          },
+          error: () => this.runningSchedule.set(false),
+        });
+      });
   }
 
   protected toggleLock(op: ScheduledOperation): void {

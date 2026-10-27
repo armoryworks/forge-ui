@@ -33,6 +33,28 @@ describe('NavTreeService · purchasing and payables', () => {
   });
 });
 
+describe('NavTreeService · production planner', () => {
+  it('lists MRP, scheduling, planning, the board, parts and stock', () => {
+    expect(routesFor(['Production Planner'])).toEqual(
+      expect.arrayContaining(['/mrp', '/scheduling', '/planning', '/kanban', '/parts', '/inventory']));
+  });
+
+  it('keeps money, purchasing, sales and people off the planner menu', () => {
+    const routes = routesFor(['Production Planner']);
+
+    for (const route of ['/invoices', '/payables', '/purchase-orders', '/vendors', '/sales-orders', '/employees', '/costing']) {
+      expect(routes).not.toContain(route);
+    }
+  });
+
+  it('hides MRP and scheduling when their capabilities are off', () => {
+    const routes = routesFor(['Production Planner'], code => code !== 'CAP-PLAN-MRP' && code !== 'CAP-PLAN-CAPACITY');
+
+    expect(routes).not.toContain('/mrp');
+    expect(routes).not.toContain('/scheduling');
+  });
+});
+
 describe('NavTreeService · assets', () => {
   it('lists assets for engineers, who maintain them', () => {
     expect(routesFor(['Engineer'])).toContain('/assets');

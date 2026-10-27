@@ -226,6 +226,8 @@
     [thresholdPct]="offTierThresholdPct()"
     [partLookup]="partLookup()"
     [noTierLines]="noTierLines()"
+    [vendorId]="form.controls.vendorId.value"
+    [purchaseUnitLookup]="purchaseUnitLookup()"
     (cancelled)="onOffTierCancel()"
     (confirmed)="onOffTierConfirm($event)" />
 }

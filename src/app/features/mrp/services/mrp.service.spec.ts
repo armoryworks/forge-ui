@@ -83,13 +83,23 @@ describe('MrpService', () => {
 
   describe('releasePlannedOrder', () => {
     it('should POST to /mrp/planned-orders/{id}/release', () => {
-      const mockResult = { createdEntityType: 'PurchaseOrder', createdEntityId: 99 };
+      const mockResult = { plannedOrderId: 12, orderType: 'Purchase', createdPurchaseOrderId: 99, createdJobId: null };
       service.releasePlannedOrder(12).subscribe(res => {
         expect(res).toEqual(mockResult);
       });
       const req = httpMock.expectOne(`${base}/planned-orders/12/release`);
       expect(req.request.method).toBe('POST');
       req.flush(mockResult);
+    });
+  });
+
+  describe('bulkReleasePlannedOrders', () => {
+    it('should POST the ids to /mrp/planned-orders/bulk-release', () => {
+      service.bulkReleasePlannedOrders([3, 4]).subscribe();
+      const req = httpMock.expectOne(`${base}/planned-orders/bulk-release`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ ids: [3, 4] });
+      req.flush([]);
     });
   });
 

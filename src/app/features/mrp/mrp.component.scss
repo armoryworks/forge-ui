@@ -68,3 +68,36 @@
   display: flex;
   justify-content: flex-end;
 }
+
+.mrp__release-results {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  padding: $sp-md $sp-lg;
+  margin-bottom: $sp-md;
+}
+
+.mrp__release-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mrp__release-results-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.mrp__release-results-item {
+  display: flex;
+  gap: $sp-md;
+  font-size: $font-size-sm;
+}
+
+.mrp__release-results-part {
+  font-weight: 600;
+  min-width: 120px;
+}

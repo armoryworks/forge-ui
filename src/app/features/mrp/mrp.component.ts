@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked, viewChild } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs';
@@ -17,6 +17,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { DisplayLabelService } from '../../shared/services/display-label.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ColumnDef } from '../../shared/models/column-def.model';
@@ -34,6 +35,7 @@ import {
   MasterScheduleDetail,
   DemandForecast,
 } from './models/mrp.model';
+import { MrpReleaseResult } from './models/mrp-release-result.model';
 import {
   ExecuteMrpRunDialogComponent,
   ExecuteMrpRunDialogData,
@@ -86,6 +88,7 @@ import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive
     LoadingBlockDirective,
     ViewModeToggleComponent,
     MrpFlowVisualComponent,
+    RouterLink,
   ],
   templateUrl: './mrp.component.html',
   styleUrl: './mrp.component.scss',
@@ -99,6 +102,8 @@ export class MrpComponent {
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly labels = inject(DisplayLabelService);
+  private readonly layout = inject(LayoutService);
+  private readonly ordersTable = viewChild<DataTableComponent>('ordersTable');
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -164,6 +169,30 @@ export class MrpComponent {
     const status = this.orderStatusFilter();
     const orders = this.plannedOrders();
     return status ? orders.filter(o => o.status === status) : orders;
+  });
+
+  protected readonly selectedOrders = signal<MrpPlannedOrder[]>([]);
+  protected readonly releasableSelection = computed(() =>
+    this.selectedOrders().filter(o => o.status === 'Planned' || o.status === 'Firmed'));
+  protected readonly releasingSelection = signal(false);
+  protected readonly releaseResults = signal<MrpReleaseResult[]>([]);
+  protected readonly releaseResultRows = computed(() => {
+    const parts = new Map(this.plannedOrders().map(o => [o.id, o.partNumber]));
+    const canOpenPurchaseOrders = this.layout.canOpen('/purchase-orders');
+    const canOpenJobs = this.layout.canOpen('/kanban');
+    return this.releaseResults().map(r => {
+      const isPurchase = r.createdPurchaseOrderId != null;
+      const createdId = r.createdPurchaseOrderId ?? r.createdJobId;
+      const canOpen = isPurchase ? canOpenPurchaseOrders : canOpenJobs;
+      return {
+        plannedOrderId: r.plannedOrderId,
+        partNumber: parts.get(r.plannedOrderId) ?? '',
+        labelKey: isPurchase ? 'mrp.bulkRelease.createdPurchaseOrder' : 'mrp.bulkRelease.createdJob',
+        createdId,
+        route: canOpen && createdId != null ? (isPurchase ? '/purchase-orders' : '/kanban') : null,
+        queryParams: { detail: `${isPurchase ? 'purchase-order' : 'job'}:${createdId}` },
+      };
+    });
   });
 
   protected readonly visibleExceptions = computed(() =>
@@ -361,10 +390,59 @@ export class MrpComponent {
   protected releaseOrder(order: MrpPlannedOrder): void {
     this.mrpService.releasePlannedOrder(order.id).subscribe({
       next: (result) => {
-        this.snackbar.success(`${this.translate.instant('mrp.snackbar.releasedAs')} ${result.createdEntityType} #${result.createdEntityId}`);
+        this.releaseResults.set([result]);
+        this.snackbar.success(this.translate.instant('mrp.bulkRelease.released', { count: 1 }));
         this.loadPlannedOrders();
       },
     });
+  }
+
+  protected onOrderSelectionChange(rows: unknown[]): void {
+    this.selectedOrders.set(rows as MrpPlannedOrder[]);
+  }
+
+  protected releaseSelected(): void {
+    const orders = this.releasableSelection();
+    if (orders.length === 0 || this.releasingSelection()) return;
+    const purchaseCount = orders.filter(o => o.orderType === 'Purchase').length;
+    const jobCount = orders.length - purchaseCount;
+    const skipped = this.selectedOrders().length - orders.length;
+    const details = [
+      this.translate.instant('mrp.bulkRelease.purchaseOrders', { count: purchaseCount }),
+      this.translate.instant('mrp.bulkRelease.jobs', { count: jobCount }),
+    ];
+    if (skipped > 0) details.push(this.translate.instant('mrp.bulkRelease.skipped', { count: skipped }));
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('mrp.bulkRelease.confirmTitle'),
+        message: this.translate.instant('mrp.bulkRelease.confirmMessage', { count: orders.length }),
+        details,
+        confirmLabel: this.translate.instant('mrp.bulkRelease.confirm'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.releasingSelection.set(true);
+      this.mrpService.bulkReleasePlannedOrders(orders.map(o => o.id)).subscribe({
+        next: (results) => {
+          this.releasingSelection.set(false);
+          this.releaseResults.set(results);
+          this.selectedOrders.set([]);
+          this.ordersTable()?.clearSelection();
+          this.snackbar.success(this.translate.instant('mrp.bulkRelease.released', { count: results.length }));
+          this.loadPlannedOrders();
+        },
+        error: () => {
+          this.releasingSelection.set(false);
+          this.loadPlannedOrders();
+        },
+      });
+    });
+  }
+
+  protected dismissReleaseResults(): void {
+    this.releaseResults.set([]);
   }
 
   protected resolveException(exception: MrpException): void {

@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { MrpComponent } from './mrp.component';
 import { MrpService } from './services/mrp.service';
 
@@ -18,9 +19,13 @@ interface MrpApi {
   unresolvedExceptionCount(): number;
   plannedOrderCount(): number;
   openForecast(forecast: unknown): void;
+  onOrderSelectionChange(rows: unknown[]): void;
+  releasableSelection(): { id: number }[];
+  releaseSelected(): void;
+  releaseResultRows(): { plannedOrderId: number; partNumber: string; labelKey: string; createdId: number | null; route: string | null }[];
 }
 
-function setup(tab: string, dialogResult: unknown = undefined) {
+function setup(tab: string, dialogResult: unknown = undefined, canOpen: (url: string) => boolean = () => true) {
   const mrp = {
     getRuns: vi.fn(() => of([])),
     getPlannedOrders: vi.fn(() => of([
@@ -32,6 +37,10 @@ function setup(tab: string, dialogResult: unknown = undefined) {
     getMasterSchedules: vi.fn(() => of([])),
     getForecasts: vi.fn(() => of([])),
     approveForecast: vi.fn(() => of(undefined)),
+    bulkReleasePlannedOrders: vi.fn(() => of([
+      { plannedOrderId: 1, orderType: 'Purchase', createdPurchaseOrderId: 40, createdJobId: null },
+      { plannedOrderId: 2, orderType: 'Manufacture', createdPurchaseOrderId: null, createdJobId: 70 },
+    ])),
   };
   const open = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
   TestBed.resetTestingModule();
@@ -43,6 +52,7 @@ function setup(tab: string, dialogResult: unknown = undefined) {
       { provide: MrpService, useValue: mrp },
       { provide: SnackbarService, useValue: { success: vi.fn(), warn: vi.fn() } },
       { provide: MatDialog, useValue: { open } },
+      { provide: LayoutService, useValue: { canOpen: vi.fn(canOpen) } },
     ],
   });
   const page = TestBed.runInInjectionContext(() => new MrpComponent()) as unknown as MrpApi;
@@ -92,5 +102,57 @@ describe('MrpComponent · forecast detail', () => {
     page.openForecast(forecast);
 
     expect(mrp.getForecasts).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('MrpComponent · bulk release', () => {
+  const orders = [
+    { id: 1, status: 'Planned', orderType: 'Purchase', partNumber: 'P-1' },
+    { id: 2, status: 'Firmed', orderType: 'Manufacture', partNumber: 'P-2' },
+    { id: 3, status: 'Released', orderType: 'Purchase', partNumber: 'P-3' },
+  ];
+
+  it('releases only the selected orders that are still open, after a confirm that counts each type', () => {
+    const { page, mrp, open } = setup('planned-orders', true);
+    page.onOrderSelectionChange(orders);
+
+    expect(page.releasableSelection().map(o => o.id)).toEqual([1, 2]);
+    page.releaseSelected();
+
+    const confirm = (open.mock.calls[0] as unknown[])[1] as { data: { details: string[] } };
+    expect(confirm.data.details).toEqual(['mrp.bulkRelease.purchaseOrders', 'mrp.bulkRelease.jobs', 'mrp.bulkRelease.skipped']);
+    expect(mrp.bulkReleasePlannedOrders).toHaveBeenCalledWith([1, 2]);
+  });
+
+  it('does nothing when the confirm is dismissed', () => {
+    const { page, mrp } = setup('planned-orders', false);
+    page.onOrderSelectionChange(orders);
+
+    page.releaseSelected();
+
+    expect(mrp.bulkReleasePlannedOrders).not.toHaveBeenCalled();
+  });
+
+  it('does not open the confirm when nothing releasable is selected', () => {
+    const { page, open } = setup('planned-orders', true);
+    page.onOrderSelectionChange([orders[2]]);
+
+    page.releaseSelected();
+
+    expect(open).not.toHaveBeenCalled();
+  });
+
+  it('lists what the release created, linking only the screens the user may open', () => {
+    const { page } = setup('planned-orders', true, (url) => url === '/kanban');
+    page.onOrderSelectionChange(orders);
+
+    page.releaseSelected();
+
+    const rows = page.releaseResultRows();
+    expect(rows.map(r => [r.plannedOrderId, r.labelKey, r.createdId, r.route])).toEqual([
+      [1, 'mrp.bulkRelease.createdPurchaseOrder', 40, null],
+      [2, 'mrp.bulkRelease.createdJob', 70, '/kanban'],
+    ]);
+    expect(page.releasableSelection().length).toBe(0);
   });
 });

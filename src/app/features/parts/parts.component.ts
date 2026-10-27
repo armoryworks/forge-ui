@@ -52,6 +52,8 @@ import { EntityCompletenessService } from '../../shared/services/entity-complete
 import { ClonePartDialogComponent, ClonePartDialogData } from './components/clone-part-dialog/clone-part-dialog.component';
 import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
+import { AuthService } from '../../shared/services/auth.service';
+import { PART_EDIT_ROLES } from './part-roles';
 
 type ViewMode = 'table' | 'cards';
 
@@ -78,6 +80,7 @@ export class PartsComponent {
   protected readonly partsService = inject(PartsService);
   protected readonly manualNumbers = inject(ManualNumberSettingsService);
   private readonly dialog = inject(MatDialog);
+  protected readonly canEditParts = inject(AuthService).hasAnyRole(PART_EDIT_ROLES);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly translate = inject(TranslateService);

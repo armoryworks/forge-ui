@@ -6534,7 +6534,9 @@
     },
     "messages": {
       "removedFromCatalog": "Eliminado del catálogo"
-    }
+    },
+    "autoPoMode": "Compras automáticas",
+    "autoPoModeDefault": "Usar el predeterminado"
   },
   "poCreate": {
     "vendorContact": "Contacto del proveedor",
@@ -6707,7 +6709,27 @@
     "noReleasesYet": "Aún no hay entregas parciales",
     "purchaseOrderLineItems": "Líneas de la orden de compra",
     "releasesCount": "Entregas parciales ({{count}})",
-    "requestedDeliveryDate": "Fecha de entrega solicitada"
+    "requestedDeliveryDate": "Fecha de entrega solicitada",
+    "priceReview": {
+      "open": "Revisar precio",
+      "title": "Revisión de precio",
+      "titleFor": "Revisión de precio: {{part}}",
+      "loading": "Revisando el precio…",
+      "risk": "Riesgo",
+      "riskLow": "Bajo",
+      "riskMedium": "Medio",
+      "riskHigh": "Alto",
+      "aiOff": "El asistente de IA está desactivado; esta es la revisión estándar.",
+      "aiOffline": "El asistente de IA no respondió; esta es la revisión estándar.",
+      "cannedMedium": "Moderadamente fuera del precio de nivel esperado. Confirme que el motivo sea suficiente.",
+      "cannedHigh": "Muy fuera del precio de nivel esperado. Se recomienda una revisión del supervisor.",
+      "cannedJustification": "Se ingresó {{entered}} frente al nivel {{tier}} ({{variance}}% de variación) para la cantidad {{qty}}.",
+      "suggested": "Justificación sugerida",
+      "accept": "Usar esta justificación",
+      "ownReason": "O indique su propio motivo",
+      "useReason": "Usar mi motivo",
+      "reasonRecorded": "Motivo registrado"
+    }
   },
   "poManage": {
     "packingSlipNumber": "N.º de lista de empaque",
@@ -9397,7 +9419,6 @@
       "simulationComplete": "Simulación MRP completada",
       "runComplete": "Ejecución MRP completada",
       "orderFirmed": "Orden confirmada",
-      "releasedAs": "Liberada como",
       "exceptionResolved": "Excepción resuelta",
       "scheduleActivated": "Programación activada",
       "forecastApproved": "Pronóstico aprobado",
@@ -9516,6 +9537,19 @@
       "apply": "Aplicar al plan",
       "overridesSaved": "Ajustes guardados",
       "applied": "Pronóstico aplicado al plan maestro"
+    },
+    "bulkRelease": {
+      "button": "Liberar seleccionadas ({{count}})",
+      "confirmTitle": "Liberar órdenes planificadas",
+      "confirmMessage": "¿Liberar {{count}} orden(es) planificada(s)? Cada una se convierte en una orden de compra o un trabajo.",
+      "purchaseOrders": "Órdenes de compra por crear: {{count}}",
+      "jobs": "Trabajos por crear: {{count}}",
+      "skipped": "Ya liberadas o canceladas, se dejan igual: {{count}}",
+      "confirm": "Liberar",
+      "released": "Se liberaron {{count}} orden(es) planificada(s)",
+      "resultsTitle": "Creado por la liberación",
+      "createdPurchaseOrder": "Orden de compra n.º {{id}}",
+      "createdJob": "Trabajo n.º {{id}}"
     }
   },
   "portal": {
@@ -9765,6 +9799,18 @@
     "runModes": {
       "simulation": "Simulación",
       "live": "Real"
+    },
+    "runDialog": {
+      "title": "Ejecutar el programador",
+      "hint": "Hacia adelante coloca la ruta de cada trabajo lo antes que permita la capacidad desde la fecha de inicio; hacia atrás parte de la fecha de fin. Las operaciones bloqueadas no se mueven.",
+      "direction": "Dirección",
+      "forward": "Hacia adelante",
+      "backward": "Hacia atrás",
+      "from": "Desde",
+      "to": "Hasta",
+      "priorityRule": "Regla de prioridad",
+      "toBeforeFrom": "La fecha de fin debe ser igual o posterior a la fecha de inicio.",
+      "run": "Ejecutar"
     }
   },
   "routingTools": {

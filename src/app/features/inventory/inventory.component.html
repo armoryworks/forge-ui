@@ -1,23 +1,23 @@
 <app-page-header [title]="'inventory.title' | translate" [subtitle]="'inventory.subtitle' | translate" helpTourId="inventory">
-  @if (activeTab() === 'locations') {
+  @if (activeTab() === 'locations' && canEditStock) {
     <button class="action-btn action-btn--create" data-testid="add-location-btn" (click)="openCreateLocation()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.addLocation' | translate }}
     </button>
   }
-  @if (activeTab() === 'reservations') {
+  @if (activeTab() === 'reservations' && canEditStock) {
     <button class="action-btn action-btn--create" data-testid="reserve-stock-btn" (click)="openReservationDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.reserveStock' | translate }}
     </button>
   }
-  @if (activeTab() === 'receiving') {
+  @if (activeTab() === 'receiving' && canEditStock) {
     <button class="action-btn action-btn--create" data-testid="receive-goods-btn" (click)="openReceiveDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.receiveGoods' | translate }}
     </button>
   }
-  @if (activeTab() === 'stockOps') {
+  @if (activeTab() === 'stockOps' && canEditStock) {
     <button class="action-btn" data-testid="transfer-btn" (click)="openTransferDialog()">
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'inventory.transfer' | translate }}
@@ -29,7 +29,7 @@
       </button>
     }
   }
-  @if (activeTab() === 'cycleCounts') {
+  @if (activeTab() === 'cycleCounts' && canEditStock) {
     <button class="action-btn action-btn--create" (click)="openCreateCycleCountDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.newCount' | translate }}
@@ -119,10 +119,12 @@
             <span class="low-stock-banner__text">
               {{ lowStockAlerts().length }} {{ lowStockAlerts().length === 1 ? ('inventory.lowStockBannerSingular' | translate) : ('inventory.lowStockBannerPlural' | translate) }}
             </span>
-            <button class="action-btn action-btn--sm" (click)="createPoForPart()">
-              <span class="material-icons-outlined">add</span>
-              {{ 'inventory.createPo' | translate }}
-            </button>
+            @if (canEditStock) {
+              <button class="action-btn action-btn--sm" (click)="createPoForPart()">
+                <span class="material-icons-outlined">add</span>
+                {{ 'inventory.createPo' | translate }}
+              </button>
+            }
           </div>
         }
 
@@ -331,11 +333,13 @@
                 <div class="detail-name">{{ loc.name }}</div>
                 <div class="detail-path">{{ loc.locationPath }}</div>
               </div>
-              <button class="action-btn action-btn--create action-btn--sm detail-header__add-child"
-                (click)="openCreateLocation(loc.id)">
-                <span class="material-icons-outlined">add</span>
-                {{ 'inventory.addChild' | translate }}
-              </button>
+              @if (canEditStock) {
+                <button class="action-btn action-btn--create action-btn--sm detail-header__add-child"
+                  (click)="openCreateLocation(loc.id)">
+                  <span class="material-icons-outlined">add</span>
+                  {{ 'inventory.addChild' | translate }}
+                </button>
+              }
             </div>
 
             <div class="detail-meta">
@@ -468,11 +472,13 @@
     @if (activeTab() === 'stockOps') {
       <div class="tab-panel stock-ops-panel">
         <div class="stock-ops-grid">
-          <div class="stock-ops-card" role="button" tabindex="0" [attr.aria-label]="'inventory.transferStock' | translate" (click)="openTransferDialog()" (keydown.enter)="openTransferDialog()">
-            <span class="material-icons-outlined stock-ops-card__icon">swap_horiz</span>
-            <div class="stock-ops-card__title">{{ 'inventory.transferStock' | translate }}</div>
-            <div class="stock-ops-card__desc">{{ 'inventory.transferStockDesc' | translate }}</div>
-          </div>
+          @if (canEditStock) {
+            <div class="stock-ops-card" role="button" tabindex="0" [attr.aria-label]="'inventory.transferStock' | translate" (click)="openTransferDialog()" (keydown.enter)="openTransferDialog()">
+              <span class="material-icons-outlined stock-ops-card__icon">swap_horiz</span>
+              <div class="stock-ops-card__title">{{ 'inventory.transferStock' | translate }}</div>
+              <div class="stock-ops-card__desc">{{ 'inventory.transferStockDesc' | translate }}</div>
+            </div>
+          }
           @if (canAdjustStock) {
             <div class="stock-ops-card" role="button" tabindex="0" data-testid="adjust-card" [attr.aria-label]="'inventory.adjustStock' | translate" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
               <span class="material-icons-outlined stock-ops-card__icon">tune</span>
@@ -555,13 +561,15 @@
           </ng-template>
 
           <ng-template appColumnCell="actions" let-row>
-            <button class="icon-btn icon-btn--danger"
-              [disabled]="saving()"
-              (click)="releaseReservation($any(row).id); $event.stopPropagation()"
-              [attr.aria-label]="'inventory.releaseReservation' | translate"
-              [matTooltip]="'inventory.releaseReservation' | translate" matTooltipPosition="above">
-              <span class="material-icons-outlined">lock_open</span>
-            </button>
+            @if (canEditStock) {
+              <button class="icon-btn icon-btn--danger"
+                [disabled]="saving()"
+                (click)="releaseReservation($any(row).id); $event.stopPropagation()"
+                [attr.aria-label]="'inventory.releaseReservation' | translate"
+                [matTooltip]="'inventory.releaseReservation' | translate" matTooltipPosition="above">
+                <span class="material-icons-outlined">lock_open</span>
+              </button>
+            }
           </ng-template>
         </app-data-table>
       </div>

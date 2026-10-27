@@ -1,0 +1,58 @@
+<section class="price-review" [attr.aria-label]="'purchaseOrders.priceReview.title' | translate" data-testid="po-price-review-panel">
+  <div class="price-review__header">
+    <h4 class="price-review__title">{{ 'purchaseOrders.priceReview.titleFor' | translate: { part: partNumber() } }}</h4>
+    <button class="icon-btn" type="button" [attr.aria-label]="'common.close' | translate" [title]="'common.close' | translate"
+      (click)="close()" data-testid="po-price-review-close">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <p class="price-review__muted" data-testid="po-price-review-loading">{{ 'purchaseOrders.priceReview.loading' | translate }}</p>
+  } @else if (review(); as r) {
+    <dl class="price-review__facts">
+      <dt>{{ 'purchaseOrders.offTier.tierPrice' | translate }}</dt>
+      <dd>
+        @if (r.tierPrice !== null) {
+          <app-currency-display [value]="r.tierPrice" [currency]="line().currency" />
+        } @else {
+          —
+        }
+      </dd>
+      <dt>{{ 'purchaseOrders.offTier.enteredPrice' | translate }}</dt>
+      <dd><app-currency-display [value]="line().unitPrice" [currency]="line().currency" /></dd>
+      <dt>{{ 'purchaseOrders.variance' | translate }}</dt>
+      <dd>{{ r.variancePct === null ? '—' : (r.variancePct | number:'1.0-1') + '%' }}</dd>
+      <dt>{{ 'purchaseOrders.priceReview.risk' | translate }}</dt>
+      <dd>
+        <span class="price-review__risk" [class.price-review__risk--high]="r.riskLevel === 'High'" data-testid="po-price-review-risk">
+          {{ riskKey() | translate }}
+        </span>
+      </dd>
+    </dl>
+
+    <p class="price-review__assessment" data-testid="po-price-review-assessment">{{ r.assessment }}</p>
+    @if (!r.aiAvailable) {
+      <p class="price-review__muted" data-testid="po-price-review-canned">
+        {{ (aiEnabled() ? 'purchaseOrders.priceReview.aiOffline' : 'purchaseOrders.priceReview.aiOff') | translate }}
+      </p>
+    }
+
+    <div class="price-review__suggestion">
+      <span class="price-review__label">{{ 'purchaseOrders.priceReview.suggested' | translate }}</span>
+      <p class="price-review__suggestion-text" data-testid="po-price-review-suggestion">{{ r.suggestedJustification }}</p>
+      <button class="action-btn action-btn--primary" type="button" (click)="acceptSuggestion()" data-testid="po-price-review-accept">
+        {{ 'purchaseOrders.priceReview.accept' | translate }}
+      </button>
+    </div>
+
+    <div class="price-review__override">
+      <app-textarea [label]="'purchaseOrders.priceReview.ownReason' | translate" [formControl]="reasonControl" [rows]="2"
+        [maxlength]="500" data-testid="po-price-review-reason" />
+      <button class="action-btn" type="button" [disabled]="reasonControl.invalid" (click)="useOwnReason()"
+        data-testid="po-price-review-use-reason">
+        {{ 'purchaseOrders.priceReview.useReason' | translate }}
+      </button>
+    </div>
+  }
+</section>

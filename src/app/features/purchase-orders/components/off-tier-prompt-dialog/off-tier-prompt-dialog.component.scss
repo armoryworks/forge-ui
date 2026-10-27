@@ -71,6 +71,12 @@
     font-size: var(--font-size-xs);
   }
 
+  &__reason {
+    margin-top: $sp-xs;
+    font-size: var(--font-size-xs);
+    color: var(--success);
+  }
+
   &__no-tier {
     display: flex;
     flex-direction: column;

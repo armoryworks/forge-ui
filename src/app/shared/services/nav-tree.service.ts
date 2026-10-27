@@ -108,13 +108,13 @@ export class NavTreeService {
     {
       icon: 'precision_manufacturing', label: 'Production', i18nKey: 'navGroups.production',
       children: [
-        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'] },
+        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager', 'Production Planner'] },
         { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
-        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Production Planner'] },
+        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager', 'Production Planner'] },
         { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
-        { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager'] },
-        { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', capability: 'CAP-PLAN-MRP', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager', 'Production Planner'] },
+        { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', capability: 'CAP-PLAN-MRP', allowedRoles: ['Admin', 'Manager', 'Production Planner'] },
         { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', capability: 'CAP-INV-LOTS', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         {
           icon: 'account_tree', label: 'Sequences', i18nKey: 'nav.sequences',
@@ -143,7 +143,7 @@ export class NavTreeService {
     {
       icon: 'inventory_2', label: 'Inventory', i18nKey: 'navGroups.inventory',
       children: [
-        { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager', 'Production Planner'] },
         { icon: 'fact_check', label: 'Physical Inventory', i18nKey: 'nav.physicalInventory', route: '/inventory/physical-inventory', capability: 'CAP-INV-PHYSICAL', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
       ],
     },

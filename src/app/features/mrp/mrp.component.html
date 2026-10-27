@@ -110,12 +110,47 @@
     <app-toolbar>
       <app-select [label]="'mrp.status' | translate" [formControl]="orderStatusControl" [options]="orderStatusOptions" />
       <span appSpacer></span>
+      <button class="action-btn action-btn--primary" type="button"
+        [disabled]="releasableSelection().length === 0 || releasingSelection()"
+        (click)="releaseSelected()" data-testid="mrp-release-selected-btn">
+        <span class="material-icons-outlined">send</span>
+        {{ 'mrp.bulkRelease.button' | translate: { count: releasableSelection().length } }}
+      </button>
     </app-toolbar>
 
+    @if (releaseResultRows().length > 0) {
+      <section class="mrp__release-results" data-testid="mrp-release-results">
+        <div class="mrp__release-results-header">
+          <h3 class="mrp__section-title">{{ 'mrp.bulkRelease.resultsTitle' | translate }}</h3>
+          <button class="icon-btn" type="button" [attr.aria-label]="'common.close' | translate" [title]="'common.close' | translate"
+            (click)="dismissReleaseResults()" data-testid="mrp-release-results-close">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <ul class="mrp__release-results-list">
+          @for (row of releaseResultRows(); track row.plannedOrderId) {
+            <li class="mrp__release-results-item">
+              <span class="mrp__release-results-part">{{ row.partNumber }}</span>
+              @if (row.route) {
+                <a [routerLink]="row.route" [queryParams]="row.queryParams" [attr.data-testid]="'mrp-release-result-link-' + row.plannedOrderId">
+                  {{ row.labelKey | translate: { id: row.createdId } }}
+                </a>
+              } @else {
+                <span>{{ row.labelKey | translate: { id: row.createdId } }}</span>
+              }
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <app-data-table
+      #ordersTable
       tableId="mrp-planned-orders"
       [columns]="orderColumns"
       [data]="visiblePlannedOrders()"
+      [selectable]="true"
+      (selectionChange)="onOrderSelectionChange($event)"
       emptyIcon="assignment"
       [emptyMessage]="'mrp.noPlannedOrders' | translate"
       [clickableRows]="false">

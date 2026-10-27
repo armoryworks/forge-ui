@@ -219,6 +219,11 @@ describe('LayoutService', () => {
         expect(service.getDefaultRoute()).toBe('/kanban');
       });
 
+      it('lands a Production Planner on MRP', () => {
+        signIn(['Production Planner']);
+        expect(service.getDefaultRoute()).toBe('/mrp');
+      });
+
       it('falls back to the dashboard when the mapped screen is switched off', () => {
         signIn(['Controller']);
         vi.spyOn(TestBed.inject(CapabilityService), 'isEnabled').mockReturnValue(false);

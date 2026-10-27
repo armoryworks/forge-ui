@@ -59,6 +59,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { PartPricingClusterComponent } from '../part-clusters/part-pricing-cluster/part-pricing-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
 import { AuthService } from '../../../../shared/services/auth.service';
+import { PART_EDIT_ROLES } from '../../part-roles';
 // S3 — Part-scope terms & conditions, stacked in the Files tab (the panel's
 // documents area). Reuses the shared terms section from the terms feature.
 import { TermsSectionComponent } from '../../../terms/components/terms-section/terms-section.component';
@@ -80,6 +81,8 @@ import { defaultBomSourceFor } from './bom-source-default.util';
 import { PO_STATUSES, PO_STATUS_LABEL_KEYS } from '../../../purchase-orders/models/po-status.const';
 
 type BomViewMode = 'table' | 'tree';
+
+const PRICE_TABS: ReadonlySet<PartDetailTabId> = new Set<PartDetailTabId>(['sourcing', 'purchaseHistory', 'cost', 'pricing']);
 
 /**
  * Pillar 4 — Part detail panel.
@@ -131,6 +134,7 @@ export class PartDetailPanelComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
   protected readonly canViewTerms = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
+  protected readonly canEditParts = this.auth.hasAnyRole(PART_EDIT_ROLES);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -168,7 +172,8 @@ export class PartDetailPanelComponent {
   protected readonly tabLayout = computed<TabLayoutEntry[]>(() => {
     const p = this.part();
     if (!p) return [];
-    return this.layoutResolver.resolve(p.procurementSource, p.inventoryClass);
+    const layout = this.layoutResolver.resolve(p.procurementSource, p.inventoryClass);
+    return this.canEditParts ? layout : layout.filter(tab => !PRICE_TABS.has(tab.id));
   });
 
   // ── Sources Tab ──
