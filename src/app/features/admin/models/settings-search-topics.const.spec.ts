@@ -14,6 +14,12 @@ describe('matchSettingsTopics', () => {
     expect(highlights('company')).toContain('company-profile');
   });
 
+  it('offers the company profile for time zone searches in English and Spanish', () => {
+    expect(highlights('time zone')).toContain('company-profile');
+    expect(highlights('timezone')).toContain('company-profile');
+    expect(highlights('zona horaria')).toContain('company-profile');
+  });
+
   it('offers the default job priority setting for priority searches', () => {
     expect(highlights('priority')).toEqual(['jobs.default_priority']);
   });

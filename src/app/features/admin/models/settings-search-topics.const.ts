@@ -11,7 +11,7 @@ export const SETTINGS_SEARCH_TOPICS: SettingsSearchTopic[] = [
     highlight: 'company-profile',
     titleKey: 'capabilityAreas.settingsSearch.companyTitle',
     descKey: 'capabilityAreas.settingsSearch.companyDesc',
-    keywords: ['company', 'business', 'profile', 'phone', 'fax', 'email', 'ein', 'tax id', 'website'],
+    keywords: ['company', 'business', 'profile', 'phone', 'fax', 'email', 'ein', 'tax id', 'website', 'time zone', 'timezone', 'zona horaria'],
   },
   {
     highlight: 'company-locations',

@@ -182,6 +182,13 @@ export const ACCOUNTING_ROUTES: Routes = [
       import('./components/exports/exports.component').then((m) => m.ExportsComponent),
   },
   {
+    path: 'pay-runs',
+    data: { titleKey: 'nav.payRuns' },
+    canActivate: [capabilityGuard('CAP-PAYROLL-RUN')],
+    loadComponent: () =>
+      import('./components/pay-runs/pay-runs.component').then((m) => m.PayRunsComponent),
+  },
+  {
     path: 'bank-statements',
     data: { titleKey: 'nav.bankStatements' },
     loadComponent: () =>

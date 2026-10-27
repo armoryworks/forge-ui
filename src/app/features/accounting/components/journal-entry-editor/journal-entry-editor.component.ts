@@ -13,17 +13,21 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { parseDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { HasDirtyForm } from '../../../../shared/guards/unsaved-changes.guard';
-import { GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
+import { FiscalPeriodModel, FiscalYearModel, GlAccount, LedgerRegisterEntry, LedgerRegisterPage, ManualJournalEntryInput } from '../../models/accounting.models';
 import { DeterminationRule } from '../../models/determination-rule.model';
 import { JournalPartyType, JournalTemplate } from '../../models/journal-template.model';
 import { JournalTemplateService } from '../../services/journal-template.service';
 import { balancedValidator, lineValidator } from '../../utils/journal-line.validators';
+import { fiscalPeriodForDate } from '../../utils/fiscal-period-for-date';
+import { softCloseOverrideValidator } from '../../utils/soft-close-override.validator';
 
 const DEFAULT_BOOK_ID = 1; // overridable via ?bookId= (training sandbox, §5A.4)
 const DEFAULT_CURRENCY_ID = 1;
@@ -46,6 +50,8 @@ const DEFAULT_CURRENCY_ID = 1;
     DatepickerComponent,
     CurrencyInputComponent,
     CurrencyDisplayComponent,
+    ToggleComponent,
+    TextareaComponent,
     ValidationButtonComponent,
   ],
   templateUrl: './journal-entry-editor.component.html',
@@ -71,16 +77,34 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   /** The template this entry was pre-filled from (`?fromTemplate=<id>`); posting still goes through this editor. */
   protected readonly fromTemplate = signal<JournalTemplate | null>(null);
 
+  private readonly fiscalYears = signal<FiscalYearModel[]>([]);
+  private readonly entryDateControl = new FormControl<Date | null>(this.today(), [Validators.required]);
+  private readonly entryDateValue = toSignal(this.entryDateControl.valueChanges, { initialValue: this.entryDateControl.value });
+  protected readonly entryPeriod = computed<FiscalPeriodModel | null>(() =>
+    fiscalPeriodForDate(this.fiscalYears(), toIsoDate(this.entryDateValue()) ?? null));
+
   protected readonly form = new FormGroup(
     {
-      entryDate: new FormControl<Date | null>(this.today(), [Validators.required]),
+      entryDate: this.entryDateControl,
       memo: new FormControl<string>('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] }),
+      overrideSoftClose: new FormControl<boolean>(false, { nonNullable: true }),
+      overrideReason: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
       lines: new FormArray<FormGroup>([this.buildLine(), this.buildLine()]),
     },
-    { validators: [balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation'))] },
+    {
+      validators: [
+        balancedValidator(() => this.translate.instant('accounting.journalEditor.outOfBalanceViolation')),
+        softCloseOverrideValidator(() => this.entryPeriod()?.status ?? null, {
+          hardClosed: () => this.translate.instant('accounting.journalEditor.hardClosedViolation'),
+          overrideRequired: () => this.translate.instant('accounting.journalEditor.softClosedViolation'),
+        }),
+      ],
+    },
   );
 
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  protected readonly softClosed = computed(() => this.entryPeriod()?.status === 'SoftClosed');
+  protected readonly hardClosed = computed(() => this.entryPeriod()?.status === 'HardClosed');
   protected readonly totalDebit = computed(() => this.sideTotal('debit'));
   protected readonly totalCredit = computed(() => this.sideTotal('credit'));
   protected readonly balanced = computed(() => {
@@ -100,6 +124,15 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
   ngOnInit(): void {
     const book = Number(this.route.snapshot.queryParamMap.get('bookId'));
     this.bookId = book > 0 ? book : DEFAULT_BOOK_ID;
+    this.gl.getFiscalCalendar(this.bookId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (years) => {
+          this.fiscalYears.set(years);
+          this.form.updateValueAndValidity();
+        },
+        error: () => this.fiscalYears.set([]),
+      });
     const accounts$ = this.gl.getChartOfAccounts(this.bookId, true);
 
     // §5A "Reverse / correct": ?correctionOf=<entryId> pre-seeds the form from the original entry
@@ -227,7 +260,8 @@ export class JournalEntryEditorComponent implements OnInit, HasDirtyForm {
       currencyId: DEFAULT_CURRENCY_ID,
       entryDate: (toIsoDate(raw.entryDate) ?? '').slice(0, 10),
       memo: raw.memo.trim(),
-      allowSoftClosedOverride: false,
+      allowSoftClosedOverride: this.softClosed() && raw.overrideSoftClose,
+      overrideReason: this.softClosed() && raw.overrideSoftClose ? raw.overrideReason.trim() : null,
       ...(this.fromTemplate()?.autoReverseNextPeriod ? { autoReverseNextPeriod: true } : {}),
       lines: this.lines.controls.map((control) => {
         const line = control.getRawValue() as {

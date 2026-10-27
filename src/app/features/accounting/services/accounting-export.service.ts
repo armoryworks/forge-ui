@@ -1,8 +1,9 @@
-import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpContext, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 import { QboAccountMapping } from '../models/qbo-account-mapping.model';
 import { QboPushResult } from '../models/qbo-push-result.model';
 
@@ -53,9 +54,13 @@ export class AccountingExportService {
     return this.http.delete<void>(`${this.base}/qbo-export/mappings/${glAccountId}`);
   }
 
-  pushToQbo(bookId: number, fromDate: string, toDate: string): Observable<QboPushResult> {
-    const params = this.range(bookId, fromDate, toDate);
-    return this.http.post<QboPushResult>(`${this.base}/qbo-export/push`, {}, { params });
+  pushToQbo(bookId: number, fromDate: string, toDate: string, force = false): Observable<QboPushResult> {
+    let params = this.range(bookId, fromDate, toDate);
+    if (force) params = params.set('force', 'true');
+    return this.http.post<QboPushResult>(`${this.base}/qbo-export/push`, {}, {
+      params,
+      context: new HttpContext().set(SILENT_HTTP_ERRORS, true),
+    });
   }
 
   private range(bookId: number, fromDate?: string | null, toDate?: string | null): HttpParams {

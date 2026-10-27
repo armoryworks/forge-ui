@@ -186,6 +186,7 @@ export class NavTreeService {
         { icon: 'calculate', label: 'Costing', i18nKey: 'nav.costing', route: '/costing', capability: 'CAP-COSTING-TIER3-ABC', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
+        { icon: 'request_quote', label: 'Opening Receivables & Payables', i18nKey: 'nav.openingOpenItems', route: '/accounting/opening-open-items', capability: 'CAP-ACCT-MIGRATION', hiddenWithCapability: 'CAP-ACCT-FULLGL', allowedRoles: ['Controller'] },
         {
           // Dark GL accounting suite — hidden unless CAP-ACCT-FULLGL is enabled.
           icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
@@ -197,6 +198,7 @@ export class NavTreeService {
             { icon: 'account_tree', label: 'Chart of Accounts', i18nKey: 'nav.chartOfAccounts', route: '/accounting/chart-of-accounts' },
             { icon: 'input', label: 'Opening Journal', i18nKey: 'nav.openingJournal', route: '/accounting/opening-journal', capability: 'CAP-ACCT-MIGRATION' },
             { icon: 'inventory', label: 'Opening Stock', i18nKey: 'nav.openingStock', route: '/accounting/opening-stock' },
+            { icon: 'request_quote', label: 'Opening Receivables & Payables', i18nKey: 'nav.openingOpenItems', route: '/accounting/opening-open-items' },
             { icon: 'post_add', label: 'Journal Entries', i18nKey: 'nav.journalEntries', route: '/accounting/journal-entries/new' },
             { icon: 'fact_check', label: 'Journal Approvals', i18nKey: 'nav.journalApprovals', route: '/accounting/journal-approvals' },
             { icon: 'content_copy', label: 'Journal Templates', i18nKey: 'nav.journalTemplates', route: '/accounting/journal-templates' },
@@ -220,6 +222,7 @@ export class NavTreeService {
             { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec' },
             { icon: 'receipt_long', label: 'Bank Statements', i18nKey: 'nav.bankStatements', route: '/accounting/bank-statements' },
             { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close' },
+            { icon: 'payments', label: 'Pay Runs', i18nKey: 'nav.payRuns', route: '/accounting/pay-runs', capability: 'CAP-PAYROLL-RUN' },
             { icon: 'currency_exchange', label: 'Exchange Rates', i18nKey: 'nav.exchangeRates', route: '/accounting/exchange-rates', capability: 'CAP-MD-CURRENCIES' },
             { icon: 'sync_alt', label: 'CPA Exports', i18nKey: 'nav.exports', route: '/accounting/exports' },
             { icon: 'school', label: 'Accounting Training', i18nKey: 'nav.accountingTraining', route: '/accounting/training' },

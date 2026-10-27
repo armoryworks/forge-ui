@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,6 +25,18 @@ import { QboAccountMapping } from '../../models/qbo-account-mapping.model';
 
 /** Default book — single-book Phase 2/3; a book selector arrives with multi-book support. */
 const DEFAULT_BOOK_ID = 1;
+
+const QBO_PUSH_OVERLAP = 'qbo-push-overlap';
+
+function isQboOverlap(err: unknown): boolean {
+  return err instanceof HttpErrorResponse && err.status === 409
+    && (err.error as { code?: unknown } | null)?.code === QBO_PUSH_OVERLAP;
+}
+
+function problemDetail(err: unknown): string | null {
+  const detail = err instanceof HttpErrorResponse ? (err.error as { detail?: unknown } | null)?.detail : null;
+  return typeof detail === 'string' && detail.length > 0 ? detail : null;
+}
 
 /** One QBO mapping-editor row: the server row plus its per-row edit control. */
 interface QboMappingRow {
@@ -159,7 +172,7 @@ export class ExportsComponent implements OnInit {
       });
   }
 
-  private push(): void {
+  private push(force = false): void {
     const from = this.fromParam();
     const to = this.toParam();
     if (!from || !to) {
@@ -170,7 +183,7 @@ export class ExportsComponent implements OnInit {
     this.pushBusy.set(true);
     this.error.set(null);
     this.exportService
-      .pushToQbo(DEFAULT_BOOK_ID, from, to)
+      .pushToQbo(DEFAULT_BOOK_ID, from, to, force)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -179,9 +192,33 @@ export class ExportsComponent implements OnInit {
             this.translate.instant('accounting.exports.pushSuccess', { docId: result.qboDocId }),
           );
         },
-        // 409s (unmapped accounts / overlapping prior push) surface through the
-        // global HTTP error interceptor's toast — only the busy state is local.
-        error: () => this.pushBusy.set(false),
+        error: (err: unknown) => {
+          this.pushBusy.set(false);
+          if (!force && isQboOverlap(err)) {
+            this.confirmForcedPush(from, to, problemDetail(err));
+            return;
+          }
+          this.snackbar.errorFrom(err, 'accounting.exports.pushFailed');
+        },
+      });
+  }
+
+  private confirmForcedPush(from: string, to: string, detail: string | null): void {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        width: '460px',
+        data: {
+          title: this.translate.instant('accounting.exports.overlapTitle'),
+          message: this.translate.instant('accounting.exports.overlapMessage', { from, to }),
+          details: detail ? [detail] : undefined,
+          confirmLabel: this.translate.instant('accounting.exports.overlapConfirm'),
+          severity: 'danger',
+        } satisfies ConfirmDialogData,
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (confirmed) this.push(true);
       });
   }
 

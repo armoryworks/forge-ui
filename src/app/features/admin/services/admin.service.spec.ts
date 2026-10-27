@@ -181,4 +181,23 @@ describe('AdminService', () => {
       expect(result.length).toBe(1);
     });
   });
+
+  describe('company time zone', () => {
+    it('sends the time zone with the company profile', () => {
+      service.updateCompanyProfile({ name: 'Co', timeZone: 'America/Denver' }).subscribe();
+      const req = httpMock.expectOne(`${apiUrl}/admin/company-profile`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body.timeZone).toBe('America/Denver');
+      req.flush({ name: 'Co', phone: '', email: '', ein: '', website: '', timeZone: 'America/Denver', booksAwaitingTimeZone: 1 });
+    });
+
+    it('applies the company time zone to the unposted books', () => {
+      let updated = -1;
+      service.applyCompanyTimeZoneToBooks().subscribe((r) => (updated = r.booksUpdated));
+      const req = httpMock.expectOne(`${apiUrl}/admin/company-profile/apply-time-zone-to-books`);
+      expect(req.request.method).toBe('POST');
+      req.flush({ timeZone: 'America/Denver', booksUpdated: 1, booksLocked: 0 });
+      expect(updated).toBe(1);
+    });
+  });
 });

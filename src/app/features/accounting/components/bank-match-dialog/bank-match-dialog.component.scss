@@ -1,0 +1,36 @@
+@use 'styles/variables' as *;
+
+.bank-match {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__line {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+  }
+
+  &__description {
+    flex: 1;
+  }
+
+  &__amount {
+    font-weight: 600;
+  }
+
+  &__widen {
+    align-self: flex-start;
+  }
+
+  &__selected {
+    font-size: $font-size-sm;
+  }
+}
+
+.row--selected {
+  background: var(--primary-light);
+}

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { BankMatchCandidate } from '../models/bank-match-candidate.model';
 import {
   BankStatementImportModel,
   BankStatementLineModel,
@@ -41,6 +42,17 @@ export class BankStatementService {
 
   confirm(lineId: number): Observable<BankStatementLineModel> {
     return this.http.post<BankStatementLineModel>(`${this.base}/lines/${lineId}/confirm`, {});
+  }
+
+  getCandidates(lineId: number, days?: number | null, amountTolerance?: number | null): Observable<BankMatchCandidate[]> {
+    let params = new HttpParams();
+    if (days !== null && days !== undefined) params = params.set('days', String(days));
+    if (amountTolerance !== null && amountTolerance !== undefined) params = params.set('amountTolerance', String(amountTolerance));
+    return this.http.get<BankMatchCandidate[]>(`${this.base}/lines/${lineId}/candidates`, { params });
+  }
+
+  match(lineId: number, journalLineId: number): Observable<BankStatementLineModel> {
+    return this.http.post<BankStatementLineModel>(`${this.base}/lines/${lineId}/match/${journalLineId}`, {});
   }
 
   ignore(lineId: number): Observable<BankStatementLineModel> {

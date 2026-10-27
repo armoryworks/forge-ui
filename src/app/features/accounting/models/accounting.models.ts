@@ -489,6 +489,7 @@ export interface ManualJournalEntryInput {
   memo?: string | null;
   allowSoftClosedOverride?: boolean;
   autoReverseNextPeriod?: boolean;
+  overrideReason?: string | null;
   lines: ManualJournalLineInput[];
 }
 

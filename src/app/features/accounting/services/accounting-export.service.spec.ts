@@ -5,6 +5,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { AccountingExportService } from './accounting-export.service';
 import { environment } from '../../../../environments/environment';
+import { SILENT_HTTP_ERRORS } from '../../../shared/interceptors/silent-http-errors.token';
 
 describe('AccountingExportService', () => {
   let service: AccountingExportService;
@@ -59,6 +60,15 @@ describe('AccountingExportService', () => {
     expect(req.request.method).toBe('POST');
     expect(req.request.params.get('fromDate')).toBe('2026-06-01');
     expect(req.request.params.get('toDate')).toBe('2026-06-30');
+    expect(req.request.params.has('force')).toBe(false);
+    expect(req.request.context.get(SILENT_HTTP_ERRORS)).toBe(true);
     req.flush({ qboDocId: 'QBO-1', fromDate: '2026-06-01', toDate: '2026-06-30', totalDebit: 100, lineCount: 2 });
+  });
+
+  it('pushToQbo sends force=true for a confirmed re-push', () => {
+    service.pushToQbo(1, '2026-06-01', '2026-06-30', true).subscribe();
+    const req = httpMock.expectOne((r) => r.url === `${base}/qbo-export/push`);
+    expect(req.request.params.get('force')).toBe('true');
+    req.flush({ qboDocId: 'QBO-2', fromDate: '2026-06-01', toDate: '2026-06-30', totalDebit: 100, lineCount: 2 });
   });
 });

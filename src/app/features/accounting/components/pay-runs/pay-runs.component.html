@@ -1,0 +1,44 @@
+<app-page-header [title]="'accounting.payRuns.title' | translate" [subtitle]="'accounting.payRuns.subtitle' | translate">
+  <button type="button" class="action-btn" data-testid="pay-runs-template" (click)="downloadTemplate()">
+    <span class="material-icons-outlined" aria-hidden="true">download</span>
+    {{ 'accounting.payRuns.template' | translate }}
+  </button>
+  @if (canImport()) {
+    <button type="button" class="action-btn action-btn--create" data-testid="pay-runs-import" (click)="openImport()">
+      <span class="material-icons-outlined" aria-hidden="true">upload_file</span>
+      {{ 'accounting.payRuns.import' | translate }}
+    </button>
+  }
+</app-page-header>
+
+<div class="pay-runs" [appLoadingBlock]="loading()">
+  <app-data-table tableId="pay-runs" [columns]="columns" [data]="payRuns()"
+    emptyIcon="payments" [emptyMessage]="'accounting.payRuns.empty' | translate">
+    <ng-template appColumnCell="period" let-row>
+      <span class="text-muted">{{ row.periodStart }} – {{ row.periodEnd }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class.chip--success]="row.status === 'Posted'" [class.chip--info]="row.status === 'Draft'">
+        {{ ('accounting.payRuns.statuses.' + row.status) | translate }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="grossWages" let-row>{{ row.grossWages | currency }}</ng-template>
+    <ng-template appColumnCell="netPay" let-row>{{ row.netPay | currency }}</ng-template>
+    <ng-template appColumnCell="employerTax" let-row>{{ row.employerTax | currency }}</ng-template>
+    <ng-template appColumnCell="journal" let-row>
+      @if (row.journalEntryNumber ?? row.journalEntryId; as number) {
+        <span class="doc-number">#{{ number }}</span>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.status === 'Draft') {
+        <button type="button" class="action-btn action-btn--sm action-btn--primary" [attr.data-testid]="'pay-run-post-' + row.id"
+          (click)="openPost(row); $event.stopPropagation()">
+          {{ 'accounting.payRuns.post' | translate }}
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

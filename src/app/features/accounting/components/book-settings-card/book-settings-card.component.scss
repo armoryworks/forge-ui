@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.book-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__title {
+    font-weight: 600;
+  }
+
+  &__fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 320px));
+    gap: $sp-lg;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__use-company {
+    align-self: flex-start;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-sm;
+  }
+}

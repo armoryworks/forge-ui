@@ -1,0 +1,74 @@
+<app-dialog [title]="'accounting.payRuns.importTitle' | translate" width="800px" [dirty]="form.dirty || !!file()" (closed)="close()">
+  <div class="payroll-import" [formGroup]="form" [appLoadingBlock]="previewing()">
+    <div class="dialog-row payroll-import__dates">
+      <app-datepicker [label]="'accounting.payRuns.payDate' | translate" formControlName="payDate" [required]="true" data-testid="payroll-pay-date" />
+      <app-datepicker [label]="'accounting.payRuns.periodStart' | translate" formControlName="periodStart" [required]="true" data-testid="payroll-period-start" />
+      <app-datepicker [label]="'accounting.payRuns.periodEnd' | translate" formControlName="periodEnd" [required]="true" data-testid="payroll-period-end" />
+    </div>
+
+    <div class="payroll-import__file">
+      <button type="button" class="action-btn action-btn--sm" data-testid="payroll-choose-file" (click)="chooseFile()">
+        <span class="material-icons-outlined" aria-hidden="true">upload_file</span>
+        {{ 'accounting.payRuns.chooseFile' | translate }}
+      </button>
+      <span class="text-muted">{{ file()?.name ?? ('accounting.payRuns.noFile' | translate) }}</span>
+    </div>
+
+    @if (preview(); as p) {
+      @if (problems().length > 0) {
+        <ul class="payroll-import__problems" role="alert" data-testid="payroll-import-problems">
+          @for (problem of problems(); track problem) {
+            <li>{{ problem }}</li>
+          }
+        </ul>
+      }
+
+      <section class="payroll-import__section">
+        <h4 class="payroll-import__heading">{{ 'accounting.payRuns.mapping' | translate }}</h4>
+        <dl class="payroll-import__mapping" data-testid="payroll-import-mapping">
+          @for (row of mapping(); track row.category) {
+            <dt>{{ ('accounting.payRuns.categories.' + row.category) | translate }}</dt>
+            <dd [class.text-muted]="!row.headers">{{ row.headers || ('accounting.payRuns.unmapped' | translate) }}</dd>
+          }
+        </dl>
+      </section>
+
+      @if (p.rows.length > 0) {
+        <section class="payroll-import__section">
+          <h4 class="payroll-import__heading">
+            {{ 'accounting.payRuns.rows' | translate: { count: p.rows.length } }}
+            @if (mismatchCount() > 0) {
+              <span class="chip chip--warning" data-testid="payroll-import-mismatches">{{ 'accounting.payRuns.mismatches' | translate: { count: mismatchCount() } }}</span>
+            }
+          </h4>
+          <app-data-table tableId="payroll-import-rows" [columns]="rowColumns" [data]="p.rows" trackByField="employeeName"
+            [rowClass]="rowClass" emptyIcon="group" [emptyMessage]="'accounting.payRuns.noRows' | translate">
+            <ng-template appColumnCell="gross" let-row>{{ row.gross | currency }}</ng-template>
+            <ng-template appColumnCell="withholdings" let-row>{{ row.withholdings | currency }}</ng-template>
+            <ng-template appColumnCell="employerTax" let-row>{{ row.employerTax | currency }}</ng-template>
+            <ng-template appColumnCell="reportedNet" let-row>
+              {{ row.reportedNet | currency }}
+              @if (row.netMismatch) {
+                <span class="text-warning">{{ 'accounting.payRuns.computedNet' | translate: { amount: (row.computedNet | currency) } }}</span>
+              }
+            </ng-template>
+          </app-data-table>
+          <p class="payroll-import__totals" data-testid="payroll-import-totals">
+            {{ 'accounting.payRuns.runTotals' | translate: { gross: (p.grossWages | currency), withheld: (p.employeeTaxWithheld | currency), employer: (p.employerTax | currency), net: (p.netPay | currency) } }}
+          </p>
+        </section>
+      }
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="importing()">
+      <button type="button" class="action-btn action-btn--primary" data-testid="payroll-import-confirm"
+        [disabled]="form.invalid || !canImport()" (click)="import()">
+        <span class="material-icons-outlined" aria-hidden="true">input</span>
+        {{ 'accounting.payRuns.importConfirm' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

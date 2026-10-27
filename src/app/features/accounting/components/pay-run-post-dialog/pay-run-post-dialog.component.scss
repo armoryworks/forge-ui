@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+
+.pay-run-post {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__totals {
+    margin: 0;
+    text-align: right;
+    font-family: $font-family-mono;
+  }
+
+  &__blocked {
+    margin: 0;
+    padding: $sp-sm $sp-md;
+    background: var(--error-light);
+  }
+}

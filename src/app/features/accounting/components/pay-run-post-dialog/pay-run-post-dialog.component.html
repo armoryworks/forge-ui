@@ -1,0 +1,34 @@
+<app-dialog [title]="'accounting.payRuns.postTitle' | translate: { date: data.payRun.payDate }" width="640px" (closed)="close()">
+  <div class="pay-run-post" [appLoadingBlock]="loading()">
+    <p>{{ 'accounting.payRuns.postNote' | translate: { start: data.payRun.periodStart, end: data.payRun.periodEnd } }}</p>
+    <app-data-table tableId="pay-run-post-lines" [columns]="columns" [data]="lines()" trackByField="accountKey"
+      emptyIcon="receipt_long" [emptyMessage]="'accounting.payRuns.noLines' | translate" data-testid="pay-run-post-lines">
+      <ng-template appColumnCell="account" let-row>
+        @if (row.accountNumber) {
+          <span>{{ row.accountNumber }} — {{ row.accountName }}</span>
+        } @else {
+          <span class="text-warning">{{ 'accounting.payRuns.unmappedKey' | translate: { key: row.accountKey } }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="debit" let-row>@if (row.debit) { {{ row.debit | currency }} }</ng-template>
+      <ng-template appColumnCell="credit" let-row>@if (row.credit) { {{ row.credit | currency }} }</ng-template>
+    </app-data-table>
+    <p class="pay-run-post__totals" data-testid="pay-run-post-totals">
+      {{ 'accounting.payRuns.totals' | translate: { debit: (totalDebit() | currency), credit: (totalCredit() | currency) } }}
+    </p>
+    @if (unmapped().length > 0) {
+      <p class="pay-run-post__blocked" role="alert" data-testid="pay-run-post-unmapped">
+        {{ 'accounting.payRuns.unmappedBlocked' | translate: { keys: unmappedText() } }}
+      </p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button type="button" class="action-btn action-btn--primary" data-testid="pay-run-post-confirm"
+      [disabled]="!canPost()" (click)="post()">
+      <span class="material-icons-outlined" aria-hidden="true">publish</span>
+      {{ 'accounting.payRuns.postConfirm' | translate }}
+    </button>
+  </div>
+</app-dialog>

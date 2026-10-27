@@ -27,6 +27,7 @@ import { AiAssistant } from '../models/ai-assistant.model';
 import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model';
 import { ComplianceFormTemplate, ComplianceFormSubmission, UserComplianceDetail } from '../../account/models/compliance-form.model';
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
+import { ApplyCompanyTimeZoneResult } from '../models/apply-company-time-zone-result.model';
 import { IntegrationSettingsResult, IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 import { DomainEventFailure } from '../models/domain-event-failure.model';
 import { OutboxEntry, OutboxProvider, OutboxStatus } from '../models/outbox-entry.model';
@@ -440,6 +441,10 @@ export class AdminService {
 
   updateCompanyProfile(data: Partial<CompanyProfile>): Observable<CompanyProfile> {
     return this.http.patch<CompanyProfile>(`${environment.apiUrl}/admin/company-profile`, data);
+  }
+
+  applyCompanyTimeZoneToBooks(): Observable<ApplyCompanyTimeZoneResult> {
+    return this.http.post<ApplyCompanyTimeZoneResult>(`${environment.apiUrl}/admin/company-profile/apply-time-zone-to-books`, {});
   }
 
   // User Work Location

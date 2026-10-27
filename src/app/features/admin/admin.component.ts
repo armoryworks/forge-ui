@@ -83,6 +83,7 @@ import { EnumLabelPipe } from '../../shared/pipes/enum-label.pipe';
 import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
 import { DateTimePipe } from '../../shared/pipes/date-time.pipe';
 import { formatDate } from '../../shared/utils/date.utils';
+import { timeZoneOptions } from '../../shared/utils/time-zone-options';
 
 @Component({
   selector: 'app-admin',
@@ -294,8 +295,10 @@ export class AdminComponent implements OnInit {
     email: new FormControl('', [Validators.email]),
     ein: new FormControl(''),
     website: new FormControl(''),
+    timeZone: new FormControl(''),
   });
   protected readonly profileSaving = signal(false);
+  protected readonly timeZoneOptions = signal<SelectOption[]>(timeZoneOptions());
 
   // Company Locations
   private readonly locationsLoaded = signal(false);
@@ -1019,6 +1022,7 @@ export class AdminComponent implements OnInit {
     this.adminService.getCompanyProfile().subscribe({
       next: (profile) => {
         this.companyProfile.set(profile);
+        this.timeZoneOptions.set(timeZoneOptions(profile.timeZone));
         this.profileForm.patchValue(profile, { emitEvent: false });
       },
       error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.companyProfileLoadFailed'),
@@ -1113,13 +1117,36 @@ export class AdminComponent implements OnInit {
       email: v.email ?? '',
       ein: v.ein ?? '',
       website: v.website ?? '',
+      timeZone: v.timeZone ?? '',
     }).subscribe({
       next: (profile) => {
         this.companyProfile.set(profile);
         this.profileSaving.set(false);
         this.snackbar.success(this.translate.instant('admin.companyProfileSaved'));
+        if (profile.booksAwaitingTimeZone > 0) this.offerTimeZoneForBooks(profile);
       },
       error: (err: unknown) => { this.profileSaving.set(false); this.snackbar.errorFrom(err, 'admin.companyProfileSaveFailed'); },
+    });
+  }
+
+  private offerTimeZoneForBooks(profile: CompanyProfile): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('admin.companyTimeZoneApplyTitle'),
+        message: this.translate.instant('admin.companyTimeZoneApplyMessage', { zone: profile.timeZone, count: profile.booksAwaitingTimeZone }),
+        confirmLabel: this.translate.instant('admin.companyTimeZoneApplyConfirm'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.adminService.applyCompanyTimeZoneToBooks().subscribe({
+        next: (result) => {
+          this.companyProfile.set({ ...profile, booksAwaitingTimeZone: 0 });
+          this.snackbar.success(this.translate.instant('admin.companyTimeZoneApplied', { count: result.booksUpdated }));
+        },
+        error: (err: unknown) => this.snackbar.errorFrom(err, 'admin.companyTimeZoneApplyFailed'),
+      });
     });
   }
 

@@ -47,6 +47,31 @@
           data-testid="je-memo" />
       </div>
 
+      @if (softClosed()) {
+        <div class="je-period je-period--soft" data-testid="je-soft-closed">
+          <span class="je-period__note">
+            <span class="material-icons-outlined" aria-hidden="true">lock_clock</span>
+            {{ 'accounting.journalEditor.softClosedNote' | translate: { period: entryPeriod()?.name ?? '' } }}
+          </span>
+          <app-toggle
+            [label]="'accounting.journalEditor.overrideSoftClose' | translate"
+            formControlName="overrideSoftClose"
+            data-testid="je-override-soft-close" />
+          <app-textarea
+            [label]="'accounting.journalEditor.overrideReason' | translate"
+            formControlName="overrideReason"
+            [rows]="2"
+            [maxlength]="500"
+            data-testid="je-override-reason" />
+        </div>
+      }
+      @if (hardClosed()) {
+        <p class="je-period je-period--hard" role="alert" data-testid="je-hard-closed">
+          <span class="material-icons-outlined" aria-hidden="true">lock</span>
+          {{ 'accounting.journalEditor.hardClosedNote' | translate: { period: entryPeriod()?.name ?? '' } }}
+        </p>
+      }
+
       <div class="je-lines" formArrayName="lines">
         <div class="je-lines__head">
           <span class="je-lines__title">{{ 'accounting.journalEditor.lines' | translate }}</span>

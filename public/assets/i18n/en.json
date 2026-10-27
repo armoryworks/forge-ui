@@ -93,7 +93,9 @@
     "creditMemos": "Credit Memos",
     "fixedAssets": "Fixed Assets",
     "journalTemplates": "Journal Templates",
-    "overheadPool": "Overhead Pool"
+    "overheadPool": "Overhead Pool",
+    "payRuns": "Pay Runs",
+    "openingOpenItems": "Opening Receivables & Payables"
   },
   "navGroups": {
     "operations": "Operations",
@@ -4478,7 +4480,13 @@
       "missing": "Cannot enable {{name}} — enable these dependencies first: {{list}}.",
       "conflicts": "{{name}} conflicts with: {{list}}. Disable the peer first.",
       "concurrency": "{{name}} was modified by another admin. The page has been refreshed; try again."
-    }
+    },
+    "companyTimeZone": "Company time zone",
+    "companyTimeZoneApplyTitle": "Use this time zone for the books?",
+    "companyTimeZoneApplyMessage": "{{count}} book(s) with no posted entries use a different time zone. Set them to {{zone}}? Books with posted entries keep their zone.",
+    "companyTimeZoneApplyConfirm": "Apply to books",
+    "companyTimeZoneApplied": "Time zone applied to {{count}} book(s).",
+    "companyTimeZoneApplyFailed": "Could not apply the time zone to the books."
   },
   "teamsPanel": {
     "teams": "teams",
@@ -11432,7 +11440,13 @@
       "pendingApproval": "Entry {{number}} is waiting for a second approver",
       "resubmitting": "Resubmitting rejected entry #{{number}}",
       "fromTemplate": "Pre-filled from template “{{name}}”. Enter amounts on any empty line, check the date, then post.",
-      "fromTemplateAutoReverse": "This entry reverses automatically into the next period when its period closes."
+      "fromTemplateAutoReverse": "This entry reverses automatically into the next period when its period closes.",
+      "softClosedNote": "{{period}} is soft-closed. Posting into it needs an override with a reason.",
+      "overrideSoftClose": "Post into soft-closed period (override)",
+      "overrideReason": "Override reason",
+      "softClosedViolation": "The period is soft-closed: tick the override and give a reason",
+      "hardClosedNote": "{{period}} is hard-closed. Choose a date in an open period.",
+      "hardClosedViolation": "The entry date falls in a hard-closed period"
     },
     "training": {
       "title": "GL Training",
@@ -11627,7 +11641,11 @@
       "journalTemplates": "Journal Templates",
       "journalTemplatesDesc": "Reusable entries for rent, accruals and allocations.",
       "overhead": "Overhead Pool",
-      "overheadDesc": "Record actual overhead, close the period and review variances."
+      "overheadDesc": "Record actual overhead, close the period and review variances.",
+      "payRuns": "Pay Runs",
+      "payRunsDesc": "Import payroll registers and post pay runs to the ledger",
+      "openingOpenItems": "Opening Receivables & Payables",
+      "openingOpenItemsDesc": "Load the customer invoices and vendor bills open at cutover"
     },
     "exports": {
       "title": "CPA Exports",
@@ -11655,7 +11673,11 @@
       "pushConfirmMessage": "This sends one balanced journal-summary entry for {{from}} – {{to}} to QuickBooks Online. QuickBooks stays a downstream copy — nothing syncs back.",
       "pushConfirmLabel": "Push",
       "pushSuccess": "Pushed to QuickBooks — journal entry {{docId}}",
-      "rangeRequired": "Pick a full from/to period before pushing."
+      "rangeRequired": "Pick a full from/to period before pushing.",
+      "overlapTitle": "Range already pushed",
+      "overlapMessage": "{{from}} to {{to}} overlaps an earlier push to QuickBooks. Push again anyway? Remove the earlier entry in QuickBooks first or it will be booked twice.",
+      "overlapConfirm": "Push again",
+      "pushFailed": "The push to QuickBooks failed."
     },
     "trialBalance": {
       "title": "Trial Balance",
@@ -11926,7 +11948,8 @@
       "statusIgnored": "Ignored",
       "confirm": "Confirm match",
       "ignore": "Ignore",
-      "unmatch": "Unmatch"
+      "unmatch": "Unmatch",
+      "matchManually": "Match…"
     },
     "coa": {
       "title": "Chart of Accounts",
@@ -12331,6 +12354,135 @@
       "unfavorable": "Unfavorable",
       "noVariances": "No variances posted this month.",
       "loadFailed": "Couldn't load the overhead pool."
+    },
+    "bankMatch": {
+      "title": "Match statement line",
+      "hint": "Posted cash entries in the same direction, closest fit first. Pick one to match.",
+      "entry": "Entry",
+      "memo": "Memo",
+      "source": "Source",
+      "fit": "Fit",
+      "exact": "Exact amount · {{days}} day(s)",
+      "off": "Off by {{amount}} · {{days}} day(s)",
+      "none": "No unreconciled entries fit this line",
+      "widen": "Search a wider date range",
+      "selected": "Selected entry #{{number}} of {{date}}",
+      "confirm": "Match",
+      "matched": "Matched to entry #{{number}}",
+      "loadFailed": "Could not load the candidate entries."
+    },
+    "bookSettings": {
+      "title": "Book settings — {{book}}",
+      "threshold": "Maker-checker threshold",
+      "thresholdHint": "Manual entries above this amount wait for a second approver. Leave blank to turn the check off.",
+      "timeZone": "Reporting time zone",
+      "lockedHint": "Locked: the book has posted entries.",
+      "useCompanyZone": "Use the company time zone ({{zone}})",
+      "saved": "Book settings saved.",
+      "lockedError": "The book has posted entries, so its time zone can no longer change.",
+      "loadFailed": "Could not load the book settings."
+    },
+    "payRuns": {
+      "title": "Pay Runs",
+      "subtitle": "Payroll registers imported as draft pay runs and posted to the ledger",
+      "template": "Download template",
+      "import": "Import payroll register",
+      "importTitle": "Import payroll register",
+      "payDate": "Pay date",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "period": "Period",
+      "gross": "Gross",
+      "net": "Net",
+      "employerTax": "Employer taxes",
+      "withholdings": "Withholdings",
+      "employee": "Employee",
+      "journal": "Journal",
+      "post": "Post",
+      "empty": "No pay runs yet",
+      "chooseFile": "Choose register file",
+      "noFile": "No file chosen",
+      "mapping": "Column mapping",
+      "unmapped": "Not found",
+      "rows": "{{count}} employee row(s)",
+      "mismatches": "{{count}} net mismatch(es)",
+      "computedNet": "computed {{amount}}",
+      "importConfirm": "Import as draft",
+      "imported": "Pay run imported for {{count}} employee(s).",
+      "importWarnings": "{{count}} warning(s): check the net pay on the run.",
+      "previewFailed": "Could not read the payroll register.",
+      "loadFailed": "Could not load the pay runs.",
+      "postTitle": "Post pay run of {{date}}",
+      "postNote": "Period {{start}} to {{end}}. These lines will post to the ledger:",
+      "unmappedKey": "{{key}} is not mapped",
+      "unmappedBlocked": "Map these accounts before posting: {{keys}}",
+      "postConfirm": "Post to ledger",
+      "posted": "Pay run posted as journal entry #{{number}}.",
+      "statuses": {
+        "Draft": "Draft",
+        "Posted": "Posted"
+      },
+      "categories": {
+        "employee": "Employee",
+        "gross": "Gross pay",
+        "federal": "Federal withholding",
+        "state": "State withholding",
+        "ficaEmployee": "Employee FICA",
+        "otherDeductions": "Other deductions",
+        "employerTax": "Employer taxes",
+        "net": "Net pay"
+      },
+      "errors": {
+        "missing-required-columns": "The register needs an employee column and a gross pay column. Set the column names under Admin > Settings > Payroll if the provider uses other headers.",
+        "no-employee-rows": "The register has no employee rows."
+      },
+      "noLines": "No journal lines",
+      "noRows": "No employee rows",
+      "totals": "Debits {{debit}} · Credits {{credit}}",
+      "runTotals": "Gross {{gross}} · Withheld {{withheld}} · Employer taxes {{employer}} · Net {{net}}"
+    },
+    "openItems": {
+      "title": "Opening Receivables & Payables",
+      "intro": "Enter the customer invoices and vendor bills open at cutover, check them, tie them to the legacy AR and AP control balances, then post. Amounts are in the book's functional currency.",
+      "asOfDate": "Cutover date",
+      "receivablesControl": "Legacy AR control balance",
+      "payablesControl": "Legacy AP control balance",
+      "items": "Open items",
+      "template": "Download template",
+      "importCsv": "Import CSV",
+      "addRow": "Add item",
+      "removeRow": "Remove item",
+      "type": "Type",
+      "receivable": "Receivable (customer)",
+      "payable": "Payable (vendor)",
+      "party": "Customer or vendor (number or name)",
+      "documentNumber": "Document number",
+      "documentDate": "Document date",
+      "dueDate": "Due date",
+      "amount": "Open amount",
+      "receivablesTotal": "Receivables",
+      "payablesTotal": "Payables",
+      "difference": "Difference {{amount}}",
+      "offsetNote": "The net of receivables less payables posts to Opening Balance Equity, where the opening journal holds the AR and AP balances.",
+      "check": "Check",
+      "post": "Post open items",
+      "posted": "Opening open items posted as journal entry #{{number}}.",
+      "alreadyPosted": "This book's opening receivables and payables are already posted.",
+      "checkFailed": "Could not check the open items.",
+      "postFailed": "The open items were not posted. Check them again and fix any problems.",
+      "csvBadRows": "These CSV lines could not be read: {{rows}}",
+      "csvEmpty": "The CSV has no open items.",
+      "csvLoaded": "{{count}} open item(s) loaded. Check them before posting.",
+      "errors": {
+        "party-not-found": "Customer or vendor not found",
+        "party-ambiguous": "More than one match: use the number",
+        "party-type-invalid": "Unknown type",
+        "amount-not-positive": "Amount must be more than zero",
+        "due-before-document": "Due date is before the document date",
+        "document-number-duplicate": "Document number repeats in this list",
+        "document-number-in-use": "Document number already in use",
+        "document-number-too-long": "Document number is too long"
+      }
     }
   },
   "subcontractUi": {

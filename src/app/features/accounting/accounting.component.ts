@@ -55,6 +55,8 @@ export class AccountingComponent {
     { route: '1099-report', label: this.translate.instant('accounting.dashboard.form1099'), icon: 'badge', description: this.translate.instant('accounting.dashboard.form1099Desc') },
     { route: 'period-close', label: this.translate.instant('accounting.dashboard.periodClose'), icon: 'event_available', description: this.translate.instant('accounting.dashboard.periodCloseDesc') },
     { route: 'bank-rec', label: this.translate.instant('accounting.dashboard.bankRec'), icon: 'account_balance_wallet', description: this.translate.instant('accounting.dashboard.bankRecDesc') },
+    { route: 'pay-runs', label: this.translate.instant('accounting.dashboard.payRuns'), icon: 'payments', description: this.translate.instant('accounting.dashboard.payRunsDesc'), capability: 'CAP-PAYROLL-RUN' },
+    { route: 'opening-open-items', label: this.translate.instant('accounting.dashboard.openingOpenItems'), icon: 'request_quote', description: this.translate.instant('accounting.dashboard.openingOpenItemsDesc'), capability: 'CAP-ACCT-FULLGL' },
     { route: 'bank-statements', label: this.translate.instant('accounting.dashboard.bankStatements'), icon: 'upload_file', description: this.translate.instant('accounting.dashboard.bankStatementsDesc') },
     { route: 'exports', label: this.translate.instant('accounting.dashboard.exports'), icon: 'download', description: this.translate.instant('accounting.dashboard.exportsDesc') },
   ];
