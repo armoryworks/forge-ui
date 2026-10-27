@@ -1,0 +1,32 @@
+<app-dialog [title]="(isEdit ? 'productionRuns.editTitle' : 'productionRuns.newTitle') | translate: { run: data.run?.runNumber ?? '' }" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    @if (showWorkCenter) {
+      <app-select [label]="'productionRuns.workCenter' | translate" formControlName="workCenterId" [options]="workCenterOptions()" data-testid="production-run-work-center" />
+    }
+    @if (showTooling) {
+      <app-select [label]="'productionRuns.tooling' | translate" formControlName="toolingAssetId" [options]="toolingOptions()" data-testid="production-run-tooling" />
+    }
+    <app-input [label]="'productionRuns.targetQuantity' | translate" type="number" formControlName="targetQuantity" [min]="1" [step]="1" [required]="true" data-testid="production-run-target" />
+    @if (isEdit) {
+      <div class="dialog-row">
+        <app-input [label]="'productionRuns.goodQuantity' | translate" type="number" formControlName="completedQuantity" [min]="0" [step]="1" data-testid="production-run-good" />
+        <app-input [label]="'productionRuns.scrapQuantity' | translate" type="number" formControlName="scrapQuantity" [min]="0" [step]="1" data-testid="production-run-scrap" />
+      </div>
+      <div class="dialog-row">
+        <app-input [label]="'productionRuns.setupMinutes' | translate" type="number" formControlName="setupTimeMinutes" [min]="0" data-testid="production-run-setup" />
+        <app-input [label]="'productionRuns.runMinutes' | translate" type="number" formControlName="runTimeMinutes" [min]="0" data-testid="production-run-run-time" />
+      </div>
+      <p class="production-run-dialog__hint">{{ (data.run?.runTimeManual ? 'productionRuns.runTimeManualHint' : 'productionRuns.runTimeDerivedHint') | translate }}</p>
+    }
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" [maxlength]="2000" data-testid="production-run-notes" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="production-run-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="production-run-save">
+        {{ (isEdit ? 'common.save' : 'common.create') | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

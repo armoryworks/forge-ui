@@ -70,6 +70,24 @@ describe('AssetsService', () => {
 
       expect(result).toEqual(mockResponse);
     });
+
+    it('should send the reading date when given', () => {
+      service.updateMachineHours(1, 510, '2026-10-25T00:00:00Z').subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/1/hours`);
+      expect(req.request.body).toEqual({ currentHours: 510, readingAt: '2026-10-25T00:00:00Z' });
+      req.flush({});
+    });
+  });
+
+  describe('endDowntimeLog', () => {
+    it('should PATCH the downtime end', () => {
+      service.endDowntimeLog(21).subscribe();
+
+      const req = httpMock.expectOne(`${baseUrl}/downtime/21/end`);
+      expect(req.request.method).toBe('PATCH');
+      req.flush({});
+    });
   });
 
   // ── updateAsset ───────────────────────────────────────────────────────────
@@ -117,7 +135,7 @@ describe('AssetsService', () => {
 
       const req = httpMock.expectOne(`${baseUrl}/1/hours`);
       expect(req.request.method).toBe('PATCH');
-      expect(req.request.body).toEqual({ currentHours: 500 });
+      expect(req.request.body).toEqual({ currentHours: 500, readingAt: null });
       req.flush(mockResponse);
 
       expect(result).toEqual(mockResponse);

@@ -384,6 +384,8 @@
         <app-operation-time-tab [jobId]="j.id" (allOperationsComplete)="onAllOperationsComplete()" />
       </div>
 
+      <app-production-runs-section [jobId]="j.id" [partId]="j.partId" [jobQuantity]="j.quantity" />
+
       <!-- Activity + Comments + Notes + History (shared component) -->
       <app-entity-activity-section entityType="Job" [entityId]="j.id" [refreshKey]="j" />
 

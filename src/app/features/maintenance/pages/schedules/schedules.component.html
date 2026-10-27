@@ -1,4 +1,10 @@
 <app-page-header [title]="'maintenanceSchedules.pageTitle' | translate" [subtitle]="'maintenanceSchedules.subtitle' | translate">
+  @if (canReportDowntime) {
+    <button class="action-btn action-btn--warn" data-testid="machine-down-btn" (click)="openMachineDown()">
+      <span class="material-icons-outlined">report</span>
+      {{ 'downtime.machineDown' | translate }}
+    </button>
+  }
   <button class="action-btn action-btn--create" data-testid="new-pm-schedule-btn" (click)="openCreate()">
     <span class="material-icons-outlined">add</span>
     {{ 'maintenanceSchedules.newSchedule' | translate }}

@@ -23,6 +23,9 @@ export interface MaintenancePrediction {
   resolutionNotes: string | null;
   wasAccurate: boolean;
   inputFeaturesJson: string;
+  assetId?: number | null;
+  assetName?: string | null;
+  ruleKey?: string | null;
 }
 
 export interface PredictiveMaintenanceDashboard {

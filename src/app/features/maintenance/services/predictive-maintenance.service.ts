@@ -32,6 +32,10 @@ export class PredictiveMaintenanceService {
     return this.http.get<PredictiveMaintenanceDashboard>(`${this.base}/dashboard`);
   }
 
+  runAll(): Observable<{ workCenters: number }> {
+    return this.http.post<{ workCenters: number }>(`${this.base}/run`, {});
+  }
+
   acknowledge(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/acknowledge`, {});
   }

@@ -28,6 +28,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 /**
  * Predictive maintenance alerts page. Top strip shows the dashboard KPIs
@@ -59,6 +60,10 @@ export class PredictionsComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+
+  protected readonly canRunNow = this.auth.hasAnyRole(['Admin', 'Manager']);
+  protected readonly running = signal(false);
 
   protected readonly predictions = signal<MaintenancePrediction[]>([]);
   protected readonly dashboard = signal<PredictiveMaintenanceDashboard | null>(null);
@@ -89,6 +94,7 @@ export class PredictionsComponent {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'workCenterName', header: this.translate.instant('maintenance.colWorkCenter'), sortable: true },
+    { field: 'assetName', header: this.translate.instant('maintenance.colAsset'), sortable: true, width: '160px' },
     { field: 'predictionType', header: this.translate.instant('maintenance.colType'), sortable: true, width: '160px' },
     { field: 'severity', header: this.translate.instant('maintenance.colSeverity'), sortable: true, width: '110px' },
     { field: 'confidencePercent', header: this.translate.instant('maintenance.colConfidence'), sortable: true, type: 'number', align: 'right', width: '110px' },
@@ -123,6 +129,22 @@ export class PredictionsComponent {
 
   constructor() {
     this.load();
+  }
+
+  protected runNow(): void {
+    if (this.running()) return;
+    this.running.set(true);
+    this.service.runAll().subscribe({
+      next: result => {
+        this.running.set(false);
+        this.snackbar.success(this.translate.instant('maintenance.runComplete', { count: result.workCenters }));
+        this.load();
+      },
+      error: (err: unknown) => {
+        this.running.set(false);
+        this.snackbar.errorFrom(err, 'maintenance.runFailed');
+      },
+    });
   }
 
   protected load(): void {

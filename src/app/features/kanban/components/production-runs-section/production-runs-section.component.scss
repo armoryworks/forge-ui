@@ -1,0 +1,76 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.prs {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.prs__header {
+  @include flex-between;
+  align-items: center;
+}
+
+.prs__title {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.prs__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.prs__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prs__item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.prs__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.prs__number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.prs__qty {
+  font-size: $font-size-sm;
+}
+
+.prs__actions {
+  display: flex;
+  gap: $sp-sm;
+  margin-left: auto;
+}
+
+.prs__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+}
+
+.prs__received {
+  color: var(--success);
+}

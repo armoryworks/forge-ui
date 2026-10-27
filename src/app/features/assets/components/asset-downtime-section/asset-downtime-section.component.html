@@ -1,0 +1,43 @@
+@if (visible()) {
+  <div class="downtime" data-testid="asset-downtime-section" [appLoadingBlock]="loading()">
+    <div class="downtime__header">
+      <h4 class="downtime__title">{{ 'downtime.sectionTitle' | translate }}</h4>
+      <button type="button" class="action-btn action-btn--sm action-btn--warn" [disabled]="hasOpen()"
+        data-testid="asset-downtime-start" (click)="start()">
+        <span class="material-icons-outlined">report</span>{{ 'downtime.startDowntime' | translate }}
+      </button>
+    </div>
+    @if (logs().length === 0) {
+      <p class="downtime__empty" data-testid="asset-downtime-empty">{{ 'downtime.empty' | translate }}</p>
+    } @else {
+      <ul class="downtime__list" [attr.aria-label]="'downtime.sectionTitle' | translate">
+        @for (log of logs(); track log.id) {
+          <li class="downtime__item" [attr.data-testid]="'asset-downtime-' + log.id">
+            <div class="downtime__line">
+              <span class="downtime__reason">{{ log.reason }}</span>
+              @if (log.category) {
+                <span class="chip chip--muted">{{ ('downtime.categories.' + log.category) | translate }}</span>
+              }
+              @if (log.isPlanned) {
+                <span class="chip chip--info">{{ 'downtime.plannedChip' | translate }}</span>
+              }
+              @if (!log.endedAt) {
+                <span class="chip chip--error">{{ 'downtime.openChip' | translate }}</span>
+                <button type="button" class="action-btn action-btn--sm downtime__end" [disabled]="endingId() === log.id"
+                  [attr.data-testid]="'asset-downtime-end-' + log.id" (click)="end(log)">
+                  <span class="material-icons-outlined">check</span>{{ 'downtime.end' | translate }}
+                </button>
+              }
+            </div>
+            <div class="downtime__meta">
+              <span>{{ log.startedAt | dateTime: 'compact' }}</span>
+              @if (log.endedAt) {
+                <span>{{ 'downtime.lasted' | translate: { hours: (log.durationHours | number: '1.0-2') } }}</span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+}

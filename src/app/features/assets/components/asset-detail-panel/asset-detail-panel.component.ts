@@ -1,8 +1,9 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -16,11 +17,17 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { ASSET_ROLES } from '../../asset-roles';
+import { RecordHoursDialogData } from '../../models/record-hours-dialog-data.model';
+import { AssetDowntimeSectionComponent } from '../asset-downtime-section/asset-downtime-section.component';
+import { RecordHoursDialogComponent } from '../record-hours-dialog/record-hours-dialog.component';
 
 @Component({
   selector: 'app-asset-detail-panel',
   standalone: true,
-  imports: [CurrencyDisplayComponent, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent],
+  imports: [CurrencyDisplayComponent, DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent, DetailLoadErrorComponent, AssetDowntimeSectionComponent],
   templateUrl: './asset-detail-panel.component.html',
   styleUrl: './asset-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +37,9 @@ export class AssetDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
 
   readonly assetId = input.required<number>();
   readonly closed = output<void>();
@@ -40,6 +50,9 @@ export class AssetDetailPanelComponent {
   protected readonly loadError = signal<unknown>(null);
   protected readonly maintenanceLogs = signal<MaintenanceLogListItem[]>([]);
   protected readonly maintenanceLogsLoading = signal(false);
+
+  protected readonly canRecordHours = computed(() =>
+    this.capabilities.isEnabled('CAP-MAINT-PM') && this.auth.hasAnyRole([...ASSET_ROLES]));
 
   protected readonly assetStatuses: AssetStatus[] = ['Active', 'Maintenance', 'Retired', 'OutOfService'];
 
@@ -81,6 +94,16 @@ export class AssetDetailPanelComponent {
   protected edit(): void {
     const asset = this.asset();
     if (asset) this.editRequested.emit(asset);
+  }
+
+  protected recordHours(): void {
+    const asset = this.asset();
+    if (!asset) return;
+    this.dialog.open<RecordHoursDialogComponent, RecordHoursDialogData, AssetItem | undefined>(
+      RecordHoursDialogComponent, { width: '420px', data: { asset } },
+    ).afterClosed().subscribe(updated => {
+      if (updated) this.asset.set({ ...asset, currentHours: updated.currentHours });
+    });
   }
 
   protected updateStatus(status: AssetStatus): void {
