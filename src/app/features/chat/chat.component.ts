@@ -16,6 +16,7 @@ import { matchesSearch } from '../../shared/utils/fold-for-search';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ChatHubService } from '../../shared/services/chat-hub.service';
 import { FileLinkDirective } from '../../shared/directives/file-link.directive';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { ChatService } from './services/chat.service';
 import { ChatBroadcastService } from './services/chat-broadcast.service';
 import { ChatConversation } from './models/chat-conversation.model';
@@ -56,6 +57,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly chatBroadcast = inject(ChatBroadcastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly capabilities = inject(CapabilityService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -66,6 +68,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   protected readonly channels = signal<ChatRoom[]>([]);
   protected readonly selectedConversation = signal<ChatConversation | null>(null);
   protected readonly selectedChannel = signal<ChatRoom | null>(null);
+  protected readonly canAttachFile = computed(() =>
+    this.selectedChannel() !== null
+    || (this.selectedConversation() !== null && this.capabilities.isEnabled('CAP-CROSS-ATTACHMENTS', true)));
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly messageControl = new FormControl('');
   readonly totalUnread = signal(0);
@@ -340,11 +345,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.pendingFile.set(file);
     input.value = '';
 
-    // Upload immediately
     const channel = this.selectedChannel();
-    if (channel) {
+    const conv = this.selectedConversation();
+    const upload = channel
+      ? this.chatService.uploadChatFile(channel.id, file)
+      : conv ? this.chatService.uploadDirectMessageFile(conv.userId, file) : null;
+    if (upload) {
       this.isUploading.set(true);
-      this.chatService.uploadChatFile(channel.id, file).subscribe({
+      upload.subscribe({
         next: (attachment) => {
           this.pendingFileAttachmentId.set(attachment.id);
           this.isUploading.set(false);

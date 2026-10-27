@@ -13,6 +13,7 @@ import { ChatService } from './services/chat.service';
 import { ChatBroadcastService } from './services/chat-broadcast.service';
 import { ChatHubService } from '../../shared/services/chat-hub.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { ChatRoom } from './models/chat-room.model';
 
 const ROOM: ChatRoom = {
@@ -86,13 +87,23 @@ describe('ChatComponent channel rows', () => {
     expect(el.querySelector('[data-testid="chat-attach-btn"]')).not.toBeNull();
   });
 
-  it('hides the paperclip in a direct message, where uploads are not supported', () => {
+  it('offers the paperclip in a direct message while attachments are on', () => {
     fixture.componentInstance.selectConversation({
       userId: 2, userName: 'Ana', userInitials: 'A', userColor: '#000', lastMessage: null, lastMessageAt: null, unreadCount: 0,
     });
     fixture.detectChanges();
 
     expect(el.querySelector('[data-testid="chat-message-input"]')).not.toBeNull();
+    expect(el.querySelector('[data-testid="chat-attach-btn"]')).not.toBeNull();
+  });
+
+  it('hides the paperclip in a direct message while attachments are off', () => {
+    vi.spyOn(TestBed.inject(CapabilityService), 'isEnabled').mockImplementation((code: string) => code !== 'CAP-CROSS-ATTACHMENTS');
+    fixture.componentInstance.selectConversation({
+      userId: 2, userName: 'Ana', userInitials: 'A', userColor: '#000', lastMessage: null, lastMessageAt: null, unreadCount: 0,
+    });
+    fixture.detectChanges();
+
     expect(el.querySelector('[data-testid="chat-attach-btn"]')).toBeNull();
   });
 

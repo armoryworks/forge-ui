@@ -1,0 +1,58 @@
+<app-page-layout [pageTitle]="'admin.scanners.title' | translate">
+  <ng-container content>
+    <section class="section">
+      <header class="section__header">
+        <p class="section__hint">{{ 'admin.scanners.hint' | translate }}</p>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--create" (click)="openPair()" data-testid="scanners-pair-btn">
+          <span class="material-icons-outlined">add_link</span>
+          {{ 'admin.scanners.pairScanner' | translate }}
+        </button>
+      </header>
+      <div [appLoadingBlock]="loading()">
+        <app-data-table
+          tableId="admin-scanners"
+          [columns]="columns"
+          [data]="devices()"
+          [clickableRows]="true"
+          (rowClick)="openEdit($any($event))"
+          emptyIcon="qr_code_scanner"
+          [emptyMessage]="'admin.scanners.empty' | translate">
+          <ng-template appColumnCell="deviceName" let-row>
+            {{ row.deviceName ?? '—' }}
+          </ng-template>
+          <ng-template appColumnCell="assignedUserName" let-row>
+            @if (row.assignedUserName) {
+              {{ row.assignedUserName }}
+            } @else {
+              <span class="text-muted">{{ 'admin.scanners.unassigned' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="lastSeenAt" let-row>
+            @if (row.lastSeenAt) {
+              {{ row.lastSeenAt | dateTime }}
+            } @else {
+              <span class="text-muted">{{ 'admin.scanners.neverSeen' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="pairedAt" let-row>
+            {{ row.pairedAt | dateTime }}
+          </ng-template>
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="actions" let-row>
+            <button class="icon-btn icon-btn--danger" (click)="unpair(row); $event.stopPropagation()"
+              [attr.aria-label]="'admin.scanners.unpair' | translate" data-testid="scanner-unpair-btn">
+              <span class="material-icons-outlined">link_off</span>
+            </button>
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+  </ng-container>
+</app-page-layout>

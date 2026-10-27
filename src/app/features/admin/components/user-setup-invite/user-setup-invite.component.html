@@ -1,0 +1,21 @@
+@if (visible()) {
+  @if (compact()) {
+    <button class="icon-btn" type="button" data-testid="admin-user-send-invite"
+      [disabled]="sending()"
+      [attr.aria-label]="labelKey() | translate"
+      [matTooltip]="tooltip()" matTooltipPosition="above"
+      (click)="send(); $event.stopPropagation()">
+      <span class="material-icons-outlined">forward_to_inbox</span>
+    </button>
+  } @else {
+    <div class="invite">
+      <button class="action-btn action-btn--sm" type="button" data-testid="user-dialog-send-invite" [disabled]="sending()" (click)="send()">
+        <span class="material-icons-outlined">forward_to_inbox</span>
+        {{ labelKey() | translate }}
+      </button>
+      @if (lastSentAt(); as last) {
+        <span class="invite__last" data-testid="user-invite-last-sent">{{ 'admin.invite.lastSentLabel' | translate }} {{ last | dateTime }}</span>
+      }
+    </div>
+  }
+}

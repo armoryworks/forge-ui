@@ -88,4 +88,18 @@ describe('NotificationsComponent', () => {
   it('shows a saved digest opt-out', () => {
     expect(create({}, { 'notif:email_digest': false }).emailDigestEnabled()).toBe(false);
   });
+
+  it('emails critical alerts, assignments and mentions by default', () => {
+    expect(create().emailEvents()).toEqual({ email_critical: true, email_assignment: true, email_mention: true });
+  });
+
+  it('lets the user turn each per-event email off and shows a saved opt-out', () => {
+    const page = create({}, { 'notif:email_mention': false });
+    expect(page.emailEvents().email_mention).toBe(false);
+
+    page.togglePref('email_assignment', page.emailEvents().email_assignment);
+
+    expect(setPref).toHaveBeenCalledWith('notif:email_assignment', false);
+    expect(page.emailEvents()).toEqual({ email_critical: true, email_assignment: false, email_mention: false });
+  });
 });

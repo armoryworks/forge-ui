@@ -98,6 +98,7 @@
 
       <!-- Gated sequences driving this job (CAP-CROSS-SEQUENCES) — self-hides when none -->
       <app-job-gates-section [jobId]="j.id" *appCap="'CAP-CROSS-SEQUENCES'" />
+      <app-job-custom-fields-section [jobId]="j.id" [trackTypeId]="j.trackTypeId" />
 
       <!-- R&D Iteration badge (if applicable) -->
       @if (j.iterationCount > 0 || j.trackTypeName === 'R&D/Tooling') {

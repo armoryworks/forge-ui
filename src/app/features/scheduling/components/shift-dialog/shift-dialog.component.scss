@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+
+.shift-wc {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-sm;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: center;
+    gap: $sp-sm;
+  }
+}

@@ -30,6 +30,8 @@ export function resolveEntityRoute(entityType: string, entityId: number): Entity
     case 'leaveapproval': return { path: ['/leave', 'team'] };
     case 'events': return { path: ['/calendar'] };
     case 'performancereview': return { path: ['/reviews', 'review', entityId] };
+    case 'chatroom':
+    case 'chatmessage': return { path: ['/chat'] };
     default: return null;
   }
 }

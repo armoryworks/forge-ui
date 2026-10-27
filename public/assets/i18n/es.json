@@ -179,7 +179,9 @@
       "runDiscoveryToGetATailored": "Ejecute el descubrimiento para obtener un preajuste a su medida, explore los preajustes seleccionados u omita este paso y configure las capacidades manualmente.",
       "searchByNameCodeDescription": "Buscar por nombre, código o descripción",
       "toggleConsultantMode": "Activar o desactivar el modo consultor",
-      "welcomeLetSSetUpForge": "Bienvenido. Configuremos Forge para su negocio."
+      "welcomeLetSSetUpForge": "Bienvenido. Configuremos Forge para su negocio.",
+      "bankingTitle": "Banca",
+      "bankingDesc": "Cuenta bancaria de la empresa, ACH y configuración de archivos de pago"
     },
     "systemSettings": {
       "defaultValue": "Predeterminado: {{value}}",
@@ -825,7 +827,12 @@
     "dispositionWriteOffAccount": "Cuenta de cancelación",
     "dispositionWriteOffDefault": "Variación de producción (predeterminada)",
     "dispositionWriteOffHint": "El trabajo en proceso de la orden se cancela contra esta cuenta.",
-    "dispositionShipHint": "El trabajo en proceso de la orden se cierra contra el costo de ventas."
+    "dispositionShipHint": "El trabajo en proceso de la orden se cierra contra el costo de ventas.",
+    "customFields": {
+      "title": "Campos personalizados",
+      "saved": "Campos personalizados guardados",
+      "saveFailed": "No se pudieron guardar los campos personalizados"
+    }
   },
   "jobDetailExtras": {
     "archive": "Archivar orden de trabajo",
@@ -3762,7 +3769,10 @@
       "workingCalendars": "Calendarios laborales",
       "database": "Transferencia de base de datos",
       "paymentTerms": "Condiciones de pago",
-      "leavePolicies": "Políticas de ausencias"
+      "leavePolicies": "Políticas de ausencias",
+      "plants": "Plantas",
+      "scanners": "Escáneres",
+      "languages": "Idiomas"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -4572,7 +4582,103 @@
     "companyTimeZoneApplied": "Zona horaria aplicada a {{count}} libro(s).",
     "companyTimeZoneApplyFailed": "No se pudo aplicar la zona horaria a los libros.",
     "hireDate": "Fecha de contratación",
-    "hireDateMissing": "Sin fecha de contratación: las ausencias se acumulan desde la fecha de creación de la cuenta hasta que se ingrese una."
+    "hireDateMissing": "Sin fecha de contratación: las ausencias se acumulan desde la fecha de creación de la cuenta hasta que se ingrese una.",
+    "plants": {
+      "title": "Plantas",
+      "hint": "Los sitios donde opera la empresa. Cada planta está en una ubicación de la empresa, que guarda su dirección.",
+      "newPlant": "Nueva planta",
+      "editPlant": "Editar planta",
+      "code": "Código",
+      "name": "Nombre",
+      "location": "Ubicación (dirección)",
+      "timeZone": "Zona horaria",
+      "noTimeZone": "Zona horaria de la empresa",
+      "currency": "Moneda",
+      "isDefault": "Planta predeterminada",
+      "noLocations": "Primero agregue una ubicación de la empresa en Administración > Configuración; una planta necesita una dirección.",
+      "empty": "Aún no hay plantas",
+      "saved": "Planta guardada",
+      "saveFailed": "No se pudo guardar la planta"
+    },
+    "scanners": {
+      "title": "Escáneres",
+      "hint": "Escáneres de códigos de barras emparejados y a quién está asignado cada uno. Escanear no requiere un dispositivo emparejado.",
+      "pairScanner": "Emparejar escáner",
+      "editScanner": "Editar escáner",
+      "pairHint": "Escanee el código de barras de la etiqueta del dispositivo en el campo de ID, o escríbalo.",
+      "deviceId": "ID del dispositivo",
+      "deviceName": "Nombre",
+      "assignedUser": "Asignado a",
+      "unassigned": "Sin asignar",
+      "lastSeen": "Último escaneo",
+      "neverSeen": "Todavía no",
+      "pairedAt": "Emparejado",
+      "pair": "Emparejar",
+      "unpair": "Desemparejar",
+      "unpairTitle": "¿Desemparejar el escáner?",
+      "unpairMessage": "{{name}} se quitará del registro de escáneres.",
+      "unpaired": "Escáner desemparejado",
+      "saved": "Escáner guardado",
+      "saveFailed": "No se pudo guardar el escáner",
+      "empty": "Aún no hay escáneres emparejados"
+    },
+    "languages": {
+      "title": "Idiomas",
+      "language": "Idioma",
+      "exportTitle": "Exportar traducciones",
+      "exportHint": "Todas las etiquetas de este idioma ({{keys}} claves), con las {{overrides}} etiquetas personalizadas de esta instalación en lugar del texto original.",
+      "exportCsv": "Exportar CSV",
+      "exportJson": "Exportar JSON",
+      "importTitle": "Importar traducciones",
+      "importHint": "Elija un archivo CSV (columnas key y value) o JSON editado. Verá las etiquetas que cambian antes de guardar; el texto igual a la etiqueta original vuelve a ella.",
+      "chooseFile": "Elegir archivo",
+      "noFile": "Ningún archivo elegido",
+      "unreadable": "No se pudo leer el archivo. Use el formato CSV o JSON que genera la exportación.",
+      "planSummary": "{{changed}} etiquetas cambian, {{unchanged}} no cambian y {{unknown}} claves no están en el catálogo y se omitirán.",
+      "noChanges": "Nada que cambiar",
+      "revertsToShipped": "vuelve al texto original",
+      "apply": "Aplicar {{count}} cambios",
+      "imported": "Importado: {{created}} agregadas, {{updated}} actualizadas, {{reverted}} vueltas al texto original",
+      "importFailed": "No se pudieron importar las traducciones",
+      "loadFailed": "No se pudieron cargar las etiquetas de este idioma",
+      "key": "Clave",
+      "currentValue": "Actual",
+      "newValue": "Nuevo"
+    },
+    "customFields": {
+      "title": "Campos personalizados",
+      "dialogTitle": "Campos personalizados: {{name}}",
+      "hint": "Campos que lleva cada orden de trabajo de este tipo de seguimiento, en el orden mostrado.",
+      "empty": "Aún no hay campos personalizados.",
+      "label": "Etiqueta",
+      "key": "Clave",
+      "type": "Tipo",
+      "options": "Opciones (separadas por comas)",
+      "required": "Obligatorio",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "remove": "Quitar campo",
+      "add": "Agregar campo",
+      "saved": "Campos personalizados guardados",
+      "saveFailed": "No se pudieron guardar los campos personalizados",
+      "optionsRequired": "Un campo de lista necesita al menos una opción",
+      "duplicateKey": "Cada campo necesita su propia clave",
+      "types": {
+        "text": "Texto",
+        "number": "Número",
+        "date": "Fecha",
+        "select": "Lista",
+        "toggle": "Sí / No"
+      }
+    },
+    "invite": {
+      "send": "Enviar invitación de configuración",
+      "resend": "Reenviar invitación",
+      "lastSent": "último envío {{date}}",
+      "lastSentLabel": "Último envío",
+      "sent": "Invitación de configuración enviada a {{email}}",
+      "failed": "No se pudo enviar la invitación de configuración"
+    }
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -6134,8 +6240,19 @@
       "sales_orders": "Órdenes de venta",
       "scanner": "Escáner",
       "shipments": "Envíos",
-      "time_tracking": "Control de tiempo"
-    }
+      "time_tracking": "Control de tiempo",
+      "assignments": "Asignaciones"
+    },
+    "emailCritical": "Alertas críticas",
+    "emailCriticalDesc": "Enviarme un correo de inmediato cuando se genere una alerta crítica para mí",
+    "toggleEmailCritical": "Activar o desactivar correos de alertas críticas",
+    "emailAssignment": "Asignaciones",
+    "emailAssignmentDesc": "Enviarme un correo cuando se me asigne una orden de trabajo, tarea, aprobación o prospecto",
+    "toggleEmailAssignment": "Activar o desactivar correos de asignaciones",
+    "emailMention": "Menciones",
+    "emailMentionDesc": "Enviarme un correo cuando alguien me @mencione en el chat o en un comentario",
+    "toggleEmailMention": "Activar o desactivar correos de menciones",
+    "emailEventsNote": "Los correos solo se envían mientras su empresa tenga activadas las notificaciones por correo. Las repeticiones sobre el mismo registro en cinco minutos se envían una vez."
   },
   "auth": {
     "appName": "Armory Works Forge",
@@ -9858,7 +9975,8 @@
       "dueDate": "Fecha Venc.",
       "endTime": "Hora de fin",
       "startTime": "Hora de inicio",
-      "mode": "Modo"
+      "mode": "Modo",
+      "workCenters": "Centros de trabajo"
     },
     "statuses": {
       "scheduled": "Programado",
@@ -9882,7 +10000,10 @@
       "unlocked": "Programa desbloqueado",
       "workCenterCreated": "Centro de trabajo creado",
       "workCenterUpdated": "Centro de trabajo actualizado",
-      "workCenterDeleted": "Centro de trabajo eliminado"
+      "workCenterDeleted": "Centro de trabajo eliminado",
+      "shiftCreated": "Turno creado",
+      "shiftUpdated": "Turno actualizado",
+      "shiftSaveFailed": "No se pudo guardar el turno"
     },
     "priorityRules": {
       "dueDate": "Fecha de vencimiento",
@@ -9934,6 +10055,32 @@
       "priorityRule": "Regla de prioridad",
       "toBeforeFrom": "La fecha de fin debe ser igual o posterior a la fecha de inicio.",
       "run": "Ejecutar"
+    },
+    "newShift": "Nuevo turno",
+    "shiftDialog": {
+      "newTitle": "Nuevo turno",
+      "editTitle": "Editar turno",
+      "name": "Nombre",
+      "startTime": "Inicio",
+      "endTime": "Fin",
+      "breakMinutes": "Descanso (minutos)",
+      "workCenters": "Centros de trabajo",
+      "addWorkCenter": "Agregar centro de trabajo",
+      "noWorkCenters": "No asignado a un centro de trabajo.",
+      "workCenter": "Centro de trabajo",
+      "daysLabel": "Días",
+      "removeWorkCenter": "Quitar centro de trabajo",
+      "breakTooLong": "El descanso debe ser más corto que el turno",
+      "duplicateWorkCenter": "Cada centro de trabajo puede aparecer una sola vez",
+      "days": {
+        "mon": "lun",
+        "tue": "mar",
+        "wed": "mié",
+        "thu": "jue",
+        "fri": "vie",
+        "sat": "sáb",
+        "sun": "dom"
+      }
     }
   },
   "routingTools": {

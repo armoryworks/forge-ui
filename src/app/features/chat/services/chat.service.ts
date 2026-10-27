@@ -107,6 +107,12 @@ export class ChatService {
     return this.http.post<ChatFileAttachment>(`${this.baseUrl}/channels/${channelId}/upload`, formData);
   }
 
+  uploadDirectMessageFile(otherUserId: number, file: File): Observable<ChatFileAttachment> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ChatFileAttachment>(`${this.baseUrl}/messages/${otherUserId}/upload`, formData);
+  }
+
   addRoomMember(roomId: number, userId: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/rooms/${roomId}/members/${userId}`, {});
   }

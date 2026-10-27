@@ -786,6 +786,13 @@
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
   }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    flex-wrap: wrap;
+  }
 }
 
 .compliance-section-divider {

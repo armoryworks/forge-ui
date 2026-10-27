@@ -61,6 +61,9 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'oee': { roles: ['Admin', 'Manager'] },
   'andon': { capabilities: ['CAP-EXT-ANDON'] },
   'scheduling': { roles: ['Admin', 'Manager', 'Production Planner'] },
+  'admin/plants': { roles: ['Admin'], capabilities: ['CAP-MD-LOCATIONS'] },
+  'admin/scanners': { roles: ['Admin', 'Manager'], capabilities: ['CAP-MFG-SHOPFLOOR'] },
+  'admin/languages': { roles: ['Admin'], capabilities: ['CAP-ADMIN-I18N'] },
   'admin': { roles: ['Admin', 'Manager', 'OfficeManager'] },
 };
 

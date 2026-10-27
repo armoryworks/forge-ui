@@ -140,3 +140,75 @@ describe('SchedulingComponent · run scheduler', () => {
     expect(runScheduler).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('SchedulingComponent · shifts tab', () => {
+  interface ShiftsApi {
+    shiftAssignmentsEnabled(): boolean;
+    shifts(): { id: number; workCenterNames: string }[];
+    openCreateShift(): void;
+    openEditShift(shift: unknown): void;
+  }
+
+  function shiftsSetup(shiftsOn: boolean, dialogResult: unknown) {
+    const shift = {
+      id: 5, name: 'Day', startTime: '07:00:00', endTime: '15:30:00', breakMinutes: 30, netHours: 8, isActive: true,
+      workCenters: [{ workCenterId: 2, daysOfWeek: 31, workCenterName: 'Mill' }, { workCenterId: 3, daysOfWeek: 32, workCenterName: 'Lathe' }],
+    };
+    const scheduling = {
+      getGanttData: vi.fn(() => of([])),
+      getWorkCenters: vi.fn(() => of([])),
+      getShifts: vi.fn(() => of([shift])),
+      getScheduleRuns: vi.fn(() => of([])),
+      createShift: vi.fn(() => of(shift)),
+      updateShift: vi.fn(() => of(shift)),
+    };
+    const dialog = { open: vi.fn(() => ({ afterClosed: () => of(dialogResult) })) };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ tab: 'shifts' })), queryParamMap: of(convertToParamMap({})) } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        { provide: SchedulingService, useValue: scheduling },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+        { provide: MatDialog, useValue: dialog },
+        { provide: DraftResumeService, useValue: { consume: () => false } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => shiftsOn && code === 'CAP-HR-SHIFTS' } },
+      ],
+    });
+    const page = TestBed.runInInjectionContext(() => new SchedulingComponent()) as unknown as ShiftsApi;
+    TestBed.flushEffects();
+    return { page, scheduling, dialog, shift };
+  }
+
+  it('lists each shift with the work centers it runs on', () => {
+    const { page } = shiftsSetup(true, undefined);
+
+    expect(page.shifts()[0].workCenterNames).toBe('Mill, Lathe');
+  });
+
+  it('hides shift editing while shift management is off', () => {
+    const { page } = shiftsSetup(false, undefined);
+
+    expect(page.shiftAssignmentsEnabled()).toBe(false);
+  });
+
+  it('creates a shift from the dialog and reloads the list', () => {
+    const request = { name: 'Night', startTime: '22:00:00', endTime: '06:00:00', breakMinutes: 30, isActive: true, workCenters: [] };
+    const { page, scheduling } = shiftsSetup(true, request);
+
+    page.openCreateShift();
+
+    expect(scheduling.createShift).toHaveBeenCalledWith(request);
+    expect(scheduling.getShifts).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates (or deactivates) the shift being edited', () => {
+    const request = { name: 'Day', startTime: '07:00:00', endTime: '15:30:00', breakMinutes: 30, isActive: false, workCenters: [] };
+    const { page, scheduling, shift } = shiftsSetup(true, request);
+
+    page.openEditShift(shift);
+
+    expect(scheduling.updateShift).toHaveBeenCalledWith(5, request);
+  });
+});

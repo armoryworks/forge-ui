@@ -33,6 +33,14 @@ describe('matchSettingsTopics', () => {
     expect(highlights('being')).not.toContain('company-profile');
   });
 
+  it('offers Admin > Banking for bank and payment searches, linking to its own page', () => {
+    for (const search of ['bank', 'Banking', 'ACH', 'routing number', 'account number', 'payments', 'banco']) {
+      expect(highlights(search)).toContain('banking');
+    }
+    expect(matchSettingsTopics('banking').find((t) => t.highlight === 'banking')?.route).toBe('/admin/banking');
+    expect(matchSettingsTopics('number').find((t) => t.highlight === 'numbering')?.route).toBeUndefined();
+  });
+
   it('returns nothing for capability-only searches', () => {
     expect(matchSettingsTopics('kanban')).toEqual([]);
   });

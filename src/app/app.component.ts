@@ -151,6 +151,7 @@ export class AppComponent implements OnInit, OnDestroy {
           void this.workflowResume.checkAfterLogin();
         }
         this.userPreferences.load();
+        this.rememberLanguageForEmail();
         this.terminology.load();
 
         // Capability descriptor MUST resolve before any capability-gated
@@ -188,6 +189,13 @@ export class AppComponent implements OnInit, OnDestroy {
         this.openConflictDialog(conflict);
       }
     });
+  }
+
+  private rememberLanguageForEmail(): void {
+    const language = this.languageService.currentLanguage();
+    if (this.userPreferences.get<string>('ui:language') !== language) {
+      this.userPreferences.set('ui:language', language);
+    }
   }
 
   private loadCapabilityGatedState(): void {

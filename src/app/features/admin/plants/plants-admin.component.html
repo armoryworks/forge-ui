@@ -1,0 +1,43 @@
+<app-page-layout [pageTitle]="'admin.plants.title' | translate">
+  <ng-container content>
+    <section class="section">
+      <header class="section__header">
+        <p class="section__hint">{{ 'admin.plants.hint' | translate }}</p>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--create" (click)="openNew()" data-testid="plants-new-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'admin.plants.newPlant' | translate }}
+        </button>
+      </header>
+      <div [appLoadingBlock]="loading()">
+        <app-data-table
+          tableId="admin-plants"
+          [columns]="columns"
+          [data]="plants()"
+          [clickableRows]="true"
+          (rowClick)="openEdit($any($event))"
+          emptyIcon="factory"
+          [emptyMessage]="'admin.plants.empty' | translate">
+          <ng-template appColumnCell="timeZone" let-row>
+            {{ row.timeZone ?? '—' }}
+          </ng-template>
+          <ng-template appColumnCell="currencyCode" let-row>
+            {{ row.currencyCode ?? '—' }}
+          </ng-template>
+          <ng-template appColumnCell="isDefault" let-row>
+            @if (row.isDefault) {
+              <span class="chip chip--info" data-testid="plant-default-chip">{{ 'common.default' | translate }}</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+  </ng-container>
+</app-page-layout>

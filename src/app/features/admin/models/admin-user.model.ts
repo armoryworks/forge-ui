@@ -22,6 +22,7 @@ export interface AdminUser {
   isNonEmployee: boolean;
   isServiceAccount: boolean;
   hireDate?: string | null;
+  lastInviteSentAt?: string | null;
 }
 
 export type I9ComplianceStatus =

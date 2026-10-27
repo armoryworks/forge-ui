@@ -88,8 +88,8 @@
           @for (topic of settingsResults(); track topic.highlight) {
             <li role="listitem">
               <a class="settings-result"
-                [routerLink]="['/admin/settings']"
-                [queryParams]="{ highlight: topic.highlight }"
+                [routerLink]="[topic.route ?? '/admin/settings']"
+                [queryParams]="topic.route ? null : { highlight: topic.highlight }"
                 [attr.data-testid]="'capability-settings-result-' + topic.highlight">
                 <span class="material-icons-outlined settings-result__icon">tune</span>
                 <span class="settings-result__tag">{{ 'capabilityAreas.settingsSearch.tag' | translate }}</span>

@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.section {
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-lg;
+    background: var(--surface);
+    border-bottom: $border-width-thin solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}

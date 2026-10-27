@@ -30,6 +30,14 @@ export interface Shift {
   breakMinutes: number;
   netHours: number;
   isActive: boolean;
+  workCenters?: ShiftWorkCenter[];
+  workingCalendarId?: number | null;
+}
+
+export interface ShiftWorkCenter {
+  workCenterId: number;
+  daysOfWeek: number;
+  workCenterName?: string | null;
 }
 
 export interface ScheduledOperation {
@@ -124,4 +132,9 @@ export interface CreateShiftRequest {
   startTime: string;
   endTime: string;
   breakMinutes: number;
+  workCenters?: ShiftWorkCenter[];
+}
+
+export interface UpdateShiftRequest extends CreateShiftRequest {
+  isActive: boolean;
 }

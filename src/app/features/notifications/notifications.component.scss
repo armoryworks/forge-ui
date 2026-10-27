@@ -20,6 +20,12 @@
     padding-bottom: $sp-sm;
     border-bottom: $border-width-thin solid var(--border);
   }
+
+  &__note {
+    margin: $sp-sm $sp-lg 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+  }
 }
 
 .pref-row {

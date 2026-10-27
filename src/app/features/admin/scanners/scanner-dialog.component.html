@@ -1,0 +1,26 @@
+<app-dialog
+  [title]="(isEdit ? 'admin.scanners.editScanner' : 'admin.scanners.pairScanner') | translate"
+  width="480px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    @if (!isEdit) {
+      <p class="dialog-hint">{{ 'admin.scanners.pairHint' | translate }}</p>
+    }
+    <app-input [label]="'admin.scanners.deviceId' | translate" formControlName="deviceId" [required]="!isEdit" [maxlength]="200" data-testid="scanner-device-id" />
+    <app-input [label]="'admin.scanners.deviceName' | translate" formControlName="deviceName" [maxlength]="200" data-testid="scanner-device-name" />
+    <app-select [label]="'admin.scanners.assignedUser' | translate" formControlName="assignedUserId" [options]="userOptions" data-testid="scanner-assigned-user" />
+    @if (isEdit) {
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" data-testid="scanner-active" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="scanner-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid" (click)="save()" data-testid="scanner-save-btn">
+        <span class="material-icons-outlined">{{ isEdit ? 'save' : 'link' }}</span>
+        {{ (isEdit ? 'common.save' : 'admin.scanners.pair') | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

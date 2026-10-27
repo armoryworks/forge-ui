@@ -1,0 +1,79 @@
+<app-page-layout [pageTitle]="'admin.languages.title' | translate">
+  <ng-container toolbar>
+    <app-select [label]="'admin.languages.language' | translate" [formControl]="languageControl" [options]="languageOptions" data-testid="languages-language" />
+    <span appSpacer></span>
+  </ng-container>
+
+  <ng-container content>
+    <div class="languages" [appLoadingBlock]="loading()">
+      <section class="languages__card">
+        <h3 class="languages__title">{{ 'admin.languages.exportTitle' | translate }}</h3>
+        <p class="languages__hint" data-testid="languages-summary">
+          {{ 'admin.languages.exportHint' | translate: { keys: keyCount(), overrides: overrideCount() } }}
+        </p>
+        <div class="languages__actions">
+          <button class="action-btn" (click)="exportCsv()" [disabled]="loading() || keyCount() === 0" data-testid="languages-export-csv">
+            <span class="material-icons-outlined">download</span>
+            {{ 'admin.languages.exportCsv' | translate }}
+          </button>
+          <button class="action-btn" (click)="exportJson()" [disabled]="loading() || keyCount() === 0" data-testid="languages-export-json">
+            <span class="material-icons-outlined">data_object</span>
+            {{ 'admin.languages.exportJson' | translate }}
+          </button>
+        </div>
+      </section>
+
+      <section class="languages__card">
+        <h3 class="languages__title">{{ 'admin.languages.importTitle' | translate }}</h3>
+        <p class="languages__hint">{{ 'admin.languages.importHint' | translate }}</p>
+        <div class="languages__actions">
+          <label class="action-btn" for="languages-import-file">
+            <span class="material-icons-outlined">upload_file</span>
+            {{ 'admin.languages.chooseFile' | translate }}
+          </label>
+          <input
+            id="languages-import-file"
+            class="languages__file-input"
+            type="file"
+            accept=".csv,.json,text/csv,application/json"
+            [attr.aria-label]="'admin.languages.chooseFile' | translate"
+            data-testid="languages-import-file"
+            (change)="onFileChosen($event)" />
+          <span class="languages__file-name">{{ fileName() ?? ('admin.languages.noFile' | translate) }}</span>
+        </div>
+
+        @if (unreadable()) {
+          <p class="languages__error" data-testid="languages-unreadable">{{ 'admin.languages.unreadable' | translate }}</p>
+        }
+
+        @if (plan(); as p) {
+          <p class="languages__hint" data-testid="languages-plan-summary">
+            {{ 'admin.languages.planSummary' | translate: { changed: p.changes.length, unchanged: p.unchangedCount, unknown: p.unknownKeys.length } }}
+          </p>
+          @if (p.changes.length > 0) {
+            <app-data-table
+              tableId="admin-languages-preview"
+              [columns]="previewColumns"
+              [data]="changes()"
+              emptyIcon="translate"
+              [emptyMessage]="'admin.languages.noChanges' | translate">
+              <ng-template appColumnCell="newValue" let-row>
+                {{ row.newValue }}
+                @if (row.revertsToShipped) {
+                  <span class="chip chip--muted">{{ 'admin.languages.revertsToShipped' | translate }}</span>
+                }
+              </ng-template>
+            </app-data-table>
+          }
+          <div class="languages__actions">
+            <button class="action-btn" (click)="clearImport()" data-testid="languages-import-cancel">{{ 'common.cancel' | translate }}</button>
+            <button class="action-btn action-btn--primary" (click)="applyImport()" [disabled]="p.changes.length === 0 || busy()" data-testid="languages-import-apply">
+              <span class="material-icons-outlined">check</span>
+              {{ 'admin.languages.apply' | translate: { count: p.changes.length } }}
+            </button>
+          </div>
+        }
+      </section>
+    </div>
+  </ng-container>
+</app-page-layout>

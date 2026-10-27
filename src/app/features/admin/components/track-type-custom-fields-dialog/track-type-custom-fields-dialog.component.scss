@@ -1,0 +1,33 @@
+@use 'styles/variables' as *;
+
+.cf {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__rows {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.4fr auto auto;
+    align-items: center;
+    gap: $sp-sm;
+    padding-bottom: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__row-actions {
+    display: flex;
+    gap: $sp-xs;
+  }
+}

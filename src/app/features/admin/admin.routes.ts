@@ -230,6 +230,27 @@ export const ADMIN_ROUTES: Routes = [
   // Admin-only via [Authorize(Roles="Admin")] on the API endpoints. Routed
   // before the `:tab` catch-all so the literal segment wins.
   {
+    path: 'plants',
+    data: { titleKey: 'admin.tabs.plants' },
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-MD-LOCATIONS')],
+    loadComponent: () =>
+      import('./plants/plants-admin.component').then((m) => m.PlantsAdminComponent),
+  },
+  {
+    path: 'scanners',
+    data: { titleKey: 'admin.tabs.scanners' },
+    canActivate: [roleGuard('Admin', 'Manager'), capabilityGuard('CAP-MFG-SHOPFLOOR')],
+    loadComponent: () =>
+      import('./scanners/scanners-admin.component').then((m) => m.ScannersAdminComponent),
+  },
+  {
+    path: 'languages',
+    data: { titleKey: 'admin.tabs.languages' },
+    canActivate: [roleGuard('Admin'), capabilityGuard('CAP-ADMIN-I18N')],
+    loadComponent: () =>
+      import('./languages/languages-admin.component').then((m) => m.LanguagesAdminComponent),
+  },
+  {
     path: 'database',
     data: { titleKey: 'adminDatabase.title' },
     canActivate: [roleGuard('Admin')],

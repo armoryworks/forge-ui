@@ -3,4 +3,5 @@ export interface SettingsSearchTopic {
   titleKey: string;
   descKey: string;
   keywords: string[];
+  route?: string;
 }

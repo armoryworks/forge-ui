@@ -82,6 +82,7 @@
                   <span class="material-icons-outlined">qr_code_scanner</span>
                 </span>
               }
+              <app-user-setup-invite [user]="user" [compact]="true" (sent)="onInviteSent(user, $event)" />
               @if (!user.hasPassword && !user.isServiceAccount) {
                 <button class="icon-btn" [attr.aria-label]="'admin.getSetupCode' | translate" [matTooltip]="'admin.getSetupCode' | translate" matTooltipPosition="above" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
                   <span class="material-icons-outlined">vpn_key</span>
@@ -132,6 +133,9 @@
                 }
                 <span class="stage-count">{{ track.stages.length }} {{ 'admin.stages' | translate }}</span>
                 <span class="accordion-actions">
+                  <button class="icon-btn" data-testid="track-type-custom-fields-btn" [attr.aria-label]="'admin.customFields.title' | translate" [matTooltip]="'admin.customFields.title' | translate" matTooltipPosition="above" (click)="openCustomFields(track); $event.stopPropagation()">
+                    <span class="material-icons-outlined">dynamic_form</span>
+                  </button>
                   <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditTrackType(track); $event.stopPropagation()">
                     <span class="material-icons-outlined">edit</span>
                   </button>
@@ -1019,10 +1023,13 @@
             <span class="setup-code-banner__label">{{ 'admin.accountNotSetUp' | translate }}</span>
             <span class="setup-code-banner__hint">{{ 'admin.accountNotSetUpHint' | translate }}</span>
           </div>
-          <button class="action-btn action-btn--sm action-btn--primary" (click)="regenerateSetupToken(user)">
-            <span class="material-icons-outlined">vpn_key</span>
-            {{ 'admin.getSetupCode' | translate }}
-          </button>
+          <div class="setup-code-banner__actions">
+            <app-user-setup-invite [user]="user" (sent)="onInviteSent(user, $event)" />
+            <button class="action-btn action-btn--sm action-btn--primary" (click)="regenerateSetupToken(user)">
+              <span class="material-icons-outlined">vpn_key</span>
+              {{ 'admin.getSetupCode' | translate }}
+            </button>
+          </div>
         </div>
       }
     }

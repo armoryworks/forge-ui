@@ -118,6 +118,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'events', capability: 'CAP-MD-EMPLOYEES' },
   { prefix: 'expenses', capability: 'CAP-ACCT-EXPENSES' },
   { prefix: 'fmeas', capability: 'CAP-QC-FMEA' },
+  { prefix: 'i18n/overrides', capability: 'CAP-ADMIN-I18N' },
   { prefix: 'identity-documents', capability: 'CAP-QC-COMPLIANCE-FORMS' },
   { prefix: 'inventory', capability: 'CAP-INV-CORE' },
   { prefix: 'credit-memos', capability: 'CAP-O2C-CREDITMEMO', anyOf: ['CAP-O2C-CREDITMEMO', 'CAP-O2C-RMA'] },

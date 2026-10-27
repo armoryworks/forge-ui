@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.jd-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__header {
+    @include flex-between;
+    align-items: center;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+}
+
+.custom-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: $sp-sm $sp-md;
+
+  &__actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
