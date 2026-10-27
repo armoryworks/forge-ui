@@ -38,6 +38,14 @@ import { DetailLoadErrorComponent } from '../../../../shared/components/detail-l
 import { TabListDirective, TabDirective } from '../../../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
 import { PO_STATUS_CHIP_CLASSES } from '../../../purchase-orders/models/po-status.const';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AutoPoMode } from '../../../purchase-orders/models/auto-po-settings.model';
+
+const AUTO_PO_MODE_LABEL_KEYS: Record<AutoPoMode, string> = {
+  Suggest: 'autoPo.modeSuggest',
+  Draft: 'autoPo.modeDraft',
+  Automatic: 'autoPo.modeAutomatic',
+};
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -68,6 +76,7 @@ export class VendorDetailPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly labels = inject(DisplayLabelService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly vendorId = input.required<number>();
   readonly closed = output<void>();
@@ -87,6 +96,11 @@ export class VendorDetailPanelComponent {
   protected readonly showEditDialog = signal(false);
 
   protected readonly vendorName = computed(() => this.vendor()?.companyName ?? '');
+  protected readonly autoPoModeLabelKey = computed(() => {
+    if (!this.capabilities.isEnabled('CAP-P2P-AUTOPO')) return null;
+    const mode = this.vendor()?.autoPoMode;
+    return mode ? AUTO_PO_MODE_LABEL_KEYS[mode] : 'vendors.autoPoModeDefault';
+  });
 
   protected readonly poColumns: ColumnDef[] = [
     { field: 'poNumber', header: this.translate.instant('vendors.poNumber'), sortable: true, width: '120px' },

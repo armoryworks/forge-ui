@@ -5,6 +5,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { CheckTierVarianceResult } from '../../models/tier-variance-check.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { PoPriceReviewPanelComponent } from '../po-price-review-panel/po-price-review-panel.component';
 
 /**
  * Bought-parts effort PR4 — Off-tier price prompt at PO save time.
@@ -36,7 +37,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
   standalone: true,
   imports: [
     DecimalPipe, TranslatePipe,
-    DialogComponent, CurrencyDisplayComponent,
+    DialogComponent, CurrencyDisplayComponent, PoPriceReviewPanelComponent,
   ],
   templateUrl: './off-tier-prompt-dialog.component.html',
   styleUrl: './off-tier-prompt-dialog.component.scss',
@@ -49,6 +50,10 @@ export class OffTierPromptDialogComponent {
   readonly partLookup = input<Map<number, { partNumber: string; description: string }>>(new Map());
   /** Lines with no price on file for this vendor; each can opt in to saving its entered price. */
   readonly noTierLines = input<CheckTierVarianceResult[]>([]);
+  /** The PO's vendor, for the per-line price review. */
+  readonly vendorId = input<number | null>(null);
+  /** Purchase option of each part line (key: partId), so the price review matches the right tier. */
+  readonly purchaseUnitLookup = input<Map<number, number | null>>(new Map());
 
   /** User clicked Cancel — returns to the PO dialog without submitting. */
   readonly cancelled = output<void>();
@@ -60,6 +65,17 @@ export class OffTierPromptDialogComponent {
 
   /** Per-line "save price" choice for the no-tier lines. Default false. */
   protected readonly savePriceByPart = signal<Record<number, boolean>>({});
+
+  /** The off-tier line whose price review is open, if any. */
+  protected readonly reviewingPartId = signal<number | null>(null);
+
+  /** Per-line justification chosen in the price review (key: partId). */
+  protected readonly reasonByPart = signal<Record<number, string>>({});
+
+  protected readonly reviewingLine = computed(() => {
+    const partId = this.reviewingPartId();
+    return partId === null ? null : this.lines().find(l => l.partId === partId) ?? null;
+  });
 
   protected readonly tierUpdateCount = computed(() =>
     Object.values(this.updateTierByPart()).filter(Boolean).length);
@@ -78,6 +94,19 @@ export class OffTierPromptDialogComponent {
     }));
   }
 
+  protected openReview(partId: number): void {
+    this.reviewingPartId.set(this.reviewingPartId() === partId ? null : partId);
+  }
+
+  protected closeReview(): void {
+    this.reviewingPartId.set(null);
+  }
+
+  protected chooseReason(partId: number, reason: string): void {
+    this.reasonByPart.update(current => ({ ...current, [partId]: reason }));
+    this.reviewingPartId.set(null);
+  }
+
   protected partInfo(partId: number): { partNumber: string; description: string } {
     return this.partLookup().get(partId) ?? { partNumber: `#${partId}`, description: '' };
   }
@@ -91,12 +120,16 @@ export class OffTierPromptDialogComponent {
     const updateTierLines = this.lines().filter(l => map[l.partId]);
     const saveMap = this.savePriceByPart();
     const savePriceLines = this.noTierLines().filter(l => saveMap[l.partId]);
-    this.confirmed.emit({ updateTierLines, savePriceLines });
+    this.confirmed.emit({ updateTierLines, savePriceLines, reasonsByPart: this.reasonByPart() });
   }
 }
 
-/** Emitted by Continue. Lines whose tier should be updated, and no-tier lines whose price should be saved. */
+/**
+ * Emitted by Continue. Lines whose tier should be updated, no-tier lines whose price should be saved, and the
+ * justification recorded for each reviewed off-tier line (key: partId).
+ */
 export interface OffTierPromptResult {
   updateTierLines: CheckTierVarianceResult[];
   savePriceLines: CheckTierVarianceResult[];
+  reasonsByPart: Record<number, string>;
 }

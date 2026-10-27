@@ -49,11 +49,33 @@
                   (change)="toggleUpdateTier(line.partId)" />
                 {{ 'purchaseOrders.offTier.updateTier' | translate }}
               </label>
+              @if (vendorId() !== null) {
+                <button class="action-btn action-btn--sm" type="button"
+                  [attr.data-testid]="'off-tier-review-' + line.partId"
+                  (click)="openReview(line.partId)">
+                  {{ 'purchaseOrders.priceReview.open' | translate }}
+                </button>
+              }
+              @if ($any(reasonByPart())[line.partId]; as reason) {
+                <div class="off-tier__reason" [attr.data-testid]="'off-tier-reason-' + line.partId" [title]="reason">
+                  {{ 'purchaseOrders.priceReview.reasonRecorded' | translate }}
+                </div>
+              }
             </td>
           </tr>
         }
       </tbody>
     </table>
+
+    @if (reviewingLine(); as reviewLine) {
+      <app-po-price-review-panel
+        [vendorId]="vendorId()!"
+        [line]="reviewLine"
+        [purchaseUnitId]="purchaseUnitLookup().get(reviewLine.partId) ?? null"
+        [partNumber]="partInfo(reviewLine.partId).partNumber"
+        (reasonChosen)="chooseReason(reviewLine.partId, $event)"
+        (closed)="closeReview()" />
+    }
 
     @if (noTierLines().length > 0) {
       <div class="off-tier__no-tier" data-testid="off-tier-no-tier">

@@ -5,6 +5,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { VendorDetail } from '../../models/vendor-detail.model';
 import { VendorService } from '../../services/vendor.service';
@@ -49,13 +50,14 @@ describe('VendorDialogComponent', () => {
     createVendor: vi.fn(() => of({ id: 1 })),
   };
 
-  function setup(vendor: VendorDetail | null): VendorDialogComponent {
+  function setup(vendor: VendorDetail | null, autoPoOn = false): VendorDialogComponent {
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: VendorService, useValue: vendorService },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => autoPoOn && code === 'CAP-P2P-AUTOPO' } },
       ],
     });
     const component = TestBed.runInInjectionContext(() => new VendorDialogComponent());
@@ -137,5 +139,48 @@ describe('VendorDialogComponent', () => {
     expect(body['email']).toBeUndefined();
     expect(body['phone']).toBeUndefined();
     expect(body['fax']).toBeUndefined();
+  });
+
+  describe('automatic purchasing', () => {
+    type Api = { showAutoPoMode(): boolean; save(): void };
+
+    it('shows the per-vendor mode on an edited vendor when auto-PO is on', () => {
+      const component = setup(vendorDetail({ autoPoMode: 'Draft' }), true);
+      component.ngOnInit();
+
+      expect((component as unknown as Api).showAutoPoMode()).toBe(true);
+      expect(component.form.controls.autoPoMode.value).toBe('Draft');
+    });
+
+    it('hides the mode when auto-PO is off or the vendor is new', () => {
+      expect((setup(vendorDetail()) as unknown as Api).showAutoPoMode()).toBe(false);
+      TestBed.resetTestingModule();
+      expect((setup(null, true) as unknown as Api).showAutoPoMode()).toBe(false);
+    });
+
+    it('sends a chosen mode, and clears it when set back to the default', () => {
+      const component = setup(vendorDetail({ autoPoMode: 'Draft' }), true);
+      component.ngOnInit();
+      component.form.controls.autoPoMode.setValue('Automatic');
+      component.form.controls.autoPoMode.markAsDirty();
+
+      (component as unknown as Api).save();
+      expect(vendorService.updateVendor).toHaveBeenLastCalledWith(7, expect.objectContaining({ autoPoMode: 'Automatic' }));
+
+      component.form.controls.autoPoMode.setValue('default');
+      (component as unknown as Api).save();
+      expect(vendorService.updateVendor).toHaveBeenLastCalledWith(7, expect.objectContaining({ clearAutoPoMode: true }));
+    });
+
+    it('leaves the mode out of the save when it was not touched', () => {
+      const component = setup(vendorDetail({ autoPoMode: 'Suggest' }), true);
+      component.ngOnInit();
+
+      (component as unknown as Api).save();
+
+      const payload = (vendorService.updateVendor.mock.calls[0] as unknown[])[1] as Record<string, unknown>;
+      expect(payload).not.toHaveProperty('autoPoMode');
+      expect(payload).not.toHaveProperty('clearAutoPoMode');
+    });
   });
 });

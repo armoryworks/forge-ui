@@ -1,0 +1,45 @@
+<app-dialog [title]="'scheduling.runDialog.title' | translate" width="480px" (closed)="close()">
+  <div [formGroup]="form" class="run-schedule-dialog">
+    <p class="run-schedule-dialog__hint">{{ 'scheduling.runDialog.hint' | translate }}</p>
+
+    <app-select
+      [label]="'scheduling.runDialog.direction' | translate"
+      formControlName="direction"
+      [options]="directionOptions"
+      [required]="true"
+      data-testid="schedule-run-direction" />
+
+    <div class="run-schedule-dialog__range">
+      <app-datepicker
+        [label]="'scheduling.runDialog.from' | translate"
+        formControlName="scheduleFrom"
+        [required]="true"
+        data-testid="schedule-run-from" />
+      <app-datepicker
+        [label]="'scheduling.runDialog.to' | translate"
+        formControlName="scheduleTo"
+        [required]="true"
+        data-testid="schedule-run-to" />
+    </div>
+
+    <app-select
+      [label]="'scheduling.runDialog.priorityRule' | translate"
+      formControlName="priorityRule"
+      [options]="priorityRuleOptions"
+      [required]="true"
+      data-testid="schedule-run-priority-rule" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="schedule-run-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary" type="button"
+        data-testid="schedule-run-confirm-btn"
+        [disabled]="form.invalid"
+        (click)="confirm()">
+        <span class="material-icons-outlined">play_arrow</span>
+        {{ 'scheduling.runDialog.run' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

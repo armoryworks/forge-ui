@@ -462,17 +462,27 @@ describe('PoDialogComponent — off-tier prompt', () => {
   it('creates the vendor part when needed and saves the entered price as its first tier', () => {
     const { internals, createVendorPart, addPriceTier, createPurchaseOrder } = readyToSave([]);
 
-    internals.onOffTierConfirm({ updateTierLines: [], savePriceLines: [tierResult(2, { hasTier: false })] });
+    internals.onOffTierConfirm({ updateTierLines: [], savePriceLines: [tierResult(2, { hasTier: false })], reasonsByPart: {} });
 
     expect(createVendorPart).toHaveBeenCalledWith(expect.objectContaining({ vendorId: 5, partId: 2, isApproved: false }));
     expect(addPriceTier).toHaveBeenCalledWith(77, expect.objectContaining({ minQuantity: 1, unitPrice: 4, purchaseUnitId: 9 }));
     expect(createPurchaseOrder).toHaveBeenCalledOnce();
   });
 
+  it('records the justification chosen in the price review on its line', () => {
+    const { internals, createPurchaseOrder } = readyToSave([]);
+
+    internals.onOffTierConfirm({ updateTierLines: [], savePriceLines: [], reasonsByPart: { 2: 'Spot buy after a shortage.' } });
+
+    const request = (createPurchaseOrder.mock.calls[0] as unknown[])[0] as { lines: { partId: number | null; manualOverrideReason?: string }[] };
+    expect(request.lines.find(l => l.partId === 2)?.manualOverrideReason).toBe('Spot buy after a shortage.');
+    expect(request.lines.find(l => l.partId === 1)?.manualOverrideReason).toBeUndefined();
+  });
+
   it('adds the price to an existing vendor part without creating another', () => {
     const { internals, createVendorPart, addPriceTier } = readyToSave([]);
 
-    internals.onOffTierConfirm({ updateTierLines: [], savePriceLines: [tierResult(1, { hasTier: false, vendorPartId: 40 })] });
+    internals.onOffTierConfirm({ updateTierLines: [], savePriceLines: [tierResult(1, { hasTier: false, vendorPartId: 40 })], reasonsByPart: {} });
 
     expect(createVendorPart).not.toHaveBeenCalled();
     expect(addPriceTier).toHaveBeenCalledWith(40, expect.objectContaining({ unitPrice: 4, purchaseUnitId: null }));

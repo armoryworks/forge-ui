@@ -45,6 +45,25 @@ function setup(roles: string[], enabledCapabilities: string[]) {
 
 const actionIds = (internals: HomeInternals) => internals.kioskActions().map(a => a.id);
 
+describe('InventoryHomeComponent read-only planner', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('offers the Production Planner only Find, since the stock writes refuse that role', () => {
+    const internals = setup(['Production Planner'], ['CAP-INV-ADJUST']);
+
+    expect(actionIds(internals)).toEqual(['find']);
+  });
+
+  it('does not open a receive or use dialog for the Production Planner', () => {
+    const internals = setup(['Production Planner'], []);
+
+    internals.openVerb('receive');
+    internals.openVerb('use');
+
+    expect(internals.verbDialog()).toBeNull();
+  });
+});
+
 describe('InventoryHomeComponent count verb', () => {
   beforeEach(() => TestBed.resetTestingModule());
 

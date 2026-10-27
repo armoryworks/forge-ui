@@ -6524,7 +6524,9 @@
     },
     "messages": {
       "removedFromCatalog": "Removed from catalog"
-    }
+    },
+    "autoPoMode": "Automatic purchasing",
+    "autoPoModeDefault": "Use default"
   },
   "poCreate": {
     "vendorContact": "Vendor contact",
@@ -6697,7 +6699,27 @@
     "noReleasesYet": "No releases yet",
     "purchaseOrderLineItems": "Purchase order line items",
     "releasesCount": "Releases ({{count}})",
-    "requestedDeliveryDate": "Requested Delivery Date"
+    "requestedDeliveryDate": "Requested Delivery Date",
+    "priceReview": {
+      "open": "Review price",
+      "title": "Price review",
+      "titleFor": "Price review: {{part}}",
+      "loading": "Reviewing the price…",
+      "risk": "Risk",
+      "riskLow": "Low",
+      "riskMedium": "Medium",
+      "riskHigh": "High",
+      "aiOff": "The AI assistant is off, so this is the standard review.",
+      "aiOffline": "The AI assistant did not answer, so this is the standard review.",
+      "cannedMedium": "Moderately off the expected tier price. Confirm the reason is sufficient.",
+      "cannedHigh": "Well off the expected tier price. A supervisor review is recommended.",
+      "cannedJustification": "Entered {{entered}} vs tier {{tier}} ({{variance}}% variance) for qty {{qty}}.",
+      "suggested": "Suggested justification",
+      "accept": "Use this justification",
+      "ownReason": "Or give your own reason",
+      "useReason": "Use my reason",
+      "reasonRecorded": "Reason recorded"
+    }
   },
   "poManage": {
     "packingSlipNumber": "Packing slip #",
@@ -9319,7 +9341,6 @@
       "simulationComplete": "MRP simulation complete",
       "runComplete": "MRP run complete",
       "orderFirmed": "Order firmed",
-      "releasedAs": "Released as",
       "exceptionResolved": "Exception resolved",
       "scheduleActivated": "Schedule activated",
       "forecastApproved": "Forecast approved",
@@ -9438,6 +9459,19 @@
       "apply": "Apply to schedule",
       "overridesSaved": "Overrides saved",
       "applied": "Forecast applied to the master schedule"
+    },
+    "bulkRelease": {
+      "button": "Release selected ({{count}})",
+      "confirmTitle": "Release planned orders",
+      "confirmMessage": "Release {{count}} planned order(s)? Each becomes a purchase order or a job.",
+      "purchaseOrders": "Purchase orders to create: {{count}}",
+      "jobs": "Jobs to create: {{count}}",
+      "skipped": "Already released or cancelled, left as is: {{count}}",
+      "confirm": "Release",
+      "released": "Released {{count}} planned order(s)",
+      "resultsTitle": "Created from the release",
+      "createdPurchaseOrder": "Purchase order #{{id}}",
+      "createdJob": "Job #{{id}}"
     }
   },
   "portal": {
@@ -9687,6 +9721,18 @@
     "runModes": {
       "simulation": "Simulation",
       "live": "Live"
+    },
+    "runDialog": {
+      "title": "Run the scheduler",
+      "hint": "Forward places each job's routing as early as capacity allows from the start date; backward works back from the end date. Locked operations stay where they are.",
+      "direction": "Direction",
+      "forward": "Forward",
+      "backward": "Backward",
+      "from": "From",
+      "to": "To",
+      "priorityRule": "Priority rule",
+      "toBeforeFrom": "The end date must be on or after the start date.",
+      "run": "Run"
     }
   },
   "routingTools": {

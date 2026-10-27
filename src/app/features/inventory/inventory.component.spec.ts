@@ -39,6 +39,7 @@ interface InventoryInternals {
   transferForm: FormGroup<{ partId: FormControl<number | null>; sourceBinContentId: FormControl<number | null> }>;
   adjustForm: FormGroup<{ partId: FormControl<number | null>; binContentId: FormControl<number | null> }>;
   showNoBinsHint(partId: number | null, options: { value: unknown; label: string }[]): boolean;
+  canEditStock: boolean;
 }
 
 type Overrides = Record<string, (...args: never[]) => unknown>;
@@ -135,6 +136,18 @@ describe('InventoryComponent inspection tab', () => {
 
     expect(internals.activeTab()).toBe('movements');
     expect(redirectsToStock(router)).toBe(false);
+  });
+});
+
+describe('InventoryComponent stock writes', () => {
+  it('lets the roles the stock endpoints admit receive, move and reserve', () => {
+    for (const role of ['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker']) {
+      expect(setup('stock', { loaded: true, enabled: false }, {}, [role]).internals.canEditStock).toBe(true);
+    }
+  });
+
+  it('keeps the Production Planner read-only', () => {
+    expect(setup('stock', { loaded: true, enabled: false }, {}, ['Production Planner']).internals.canEditStock).toBe(false);
   });
 });
 

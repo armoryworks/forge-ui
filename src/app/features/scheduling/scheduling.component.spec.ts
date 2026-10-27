@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 
+import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -15,7 +16,7 @@ interface SchedulingApi {
   totalScheduled(): number;
 }
 
-function setup(tab: string) {
+function setup(tab: string, roles: string[] = ['Manager']) {
   const scheduling = {
     getGanttData: vi.fn(() => of([
       { id: 1, status: 'Scheduled' }, { id: 2, status: 'Scheduled' }, { id: 3, status: 'InProgress' },
@@ -35,6 +36,7 @@ function setup(tab: string) {
       { provide: MatDialog, useValue: { open: vi.fn() } },
       { provide: DraftResumeService, useValue: { consume: () => false } },
       { provide: CapabilityService, useValue: { isEnabled: () => false } },
+      { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
     ],
   });
   const page = TestBed.runInInjectionContext(() => new SchedulingComponent()) as unknown as SchedulingApi;
@@ -58,13 +60,33 @@ describe('SchedulingComponent · header KPIs', () => {
   });
 });
 
+describe('SchedulingComponent · production planner', () => {
+  it('lets a manager manage work centers and shift assignments', () => {
+    const { page } = setup('work-centers', ['Manager']);
+
+    expect((page as unknown as { canManageWorkCenters: boolean }).canManageWorkCenters).toBe(true);
+  });
+
+  it('keeps the planner to running and reading the schedule', () => {
+    const { page } = setup('work-centers', ['Production Planner']);
+
+    expect((page as unknown as { canManageWorkCenters: boolean }).canManageWorkCenters).toBe(false);
+    expect((page as unknown as { shiftAssignmentsEnabled(): boolean }).shiftAssignmentsEnabled()).toBe(false);
+  });
+});
+
 describe('SchedulingComponent · run scheduler', () => {
+  const request = { direction: 'Backward', scheduleFrom: '2026-11-23', scheduleTo: '2026-12-23', priorityRule: 'Priority' };
   let runScheduler: ReturnType<typeof vi.fn>;
+  let dialogOpen: ReturnType<typeof vi.fn>;
+  let dialogResult: unknown;
   let view: { executeSchedule(): void };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     runScheduler = vi.fn(() => new Subject());
+    dialogResult = request;
+    dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
     const service = new Proxy({ runScheduler } as Record<string, unknown>, {
       get: (target, key: string) => target[key] ?? (() => of([])),
     });
@@ -76,10 +98,11 @@ describe('SchedulingComponent · run scheduler', () => {
           queryParamMap: new BehaviorSubject(convertToParamMap({})),
         } },
         { provide: Router, useValue: { navigate: vi.fn() } },
-        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatDialog, useValue: { open: dialogOpen } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
         { provide: DraftResumeService, useValue: { consume: vi.fn(() => false) } },
         { provide: CapabilityService, useValue: { isEnabled: () => false } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
         { provide: TranslateService, useValue: { instant: (key: string) => key } },
       ],
     });
@@ -91,6 +114,21 @@ describe('SchedulingComponent · run scheduler', () => {
     view.executeSchedule();
 
     expect(runScheduler).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs with the direction, range and priority rule chosen in the dialog', () => {
+    view.executeSchedule();
+
+    expect(dialogOpen).toHaveBeenCalledTimes(1);
+    expect(runScheduler).toHaveBeenCalledWith(request);
+  });
+
+  it('does not run when the dialog is cancelled', () => {
+    dialogResult = undefined;
+
+    view.executeSchedule();
+
+    expect(runScheduler).not.toHaveBeenCalled();
   });
 
   it('lets Run be pressed again after the server rejects the first run', () => {

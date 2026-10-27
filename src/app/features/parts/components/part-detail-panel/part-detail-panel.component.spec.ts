@@ -6,6 +6,7 @@ import { FormGroup } from '@angular/forms';
 import { Observable, of, Subject, throwError } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
@@ -99,5 +100,53 @@ describe('PartDetailPanelComponent', () => {
     c.saveBomLine();
 
     expect(createBOMLine).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('PartDetailPanelComponent · read-only roles', () => {
+  const tabs = ['identity', 'sourcing', 'purchaseHistory', 'inventory', 'cost', 'pricing', 'bom', 'routing', 'files']
+    .map(id => ({ id, labelKey: id, iconName: 'x' }));
+
+  function setup(roles: string[]) {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        {
+          provide: PartsService,
+          useValue: {
+            getPartById: vi.fn().mockReturnValue(of({ id: 7, revision: 'A' } as PartDetail)),
+            getPartFiles: vi.fn().mockReturnValue(of([])),
+            getPartInventorySummary: vi.fn().mockReturnValue(of(null)),
+          },
+        },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
+        { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: WorkflowService, useValue: {} },
+        { provide: PartDetailLayoutResolverService, useValue: { resolve: () => tabs } },
+        { provide: VendorPartsService, useValue: {} },
+        { provide: InventoryService, useValue: { getUnitsOfMeasure: () => of([]) } },
+      ],
+    });
+    const component = TestBed.runInInjectionContext(() => new PartDetailPanelComponent());
+    mockSignalInputs(component, { partId: 7 });
+    TestBed.flushEffects();
+    return component as unknown as { canEditParts: boolean; tabLayout(): { id: string }[] };
+  }
+
+  it('shows the Production Planner the part, BOM and routing without the price tabs or edit controls', () => {
+    const panel = setup(['Production Planner']);
+
+    expect(panel.canEditParts).toBe(false);
+    expect(panel.tabLayout().map(t => t.id)).toEqual(['identity', 'inventory', 'bom', 'routing', 'files']);
+  });
+
+  it('keeps every tab and the edit controls for an engineer', () => {
+    const panel = setup(['Engineer']);
+
+    expect(panel.canEditParts).toBe(true);
+    expect(panel.tabLayout()).toHaveLength(tabs.length);
   });
 });

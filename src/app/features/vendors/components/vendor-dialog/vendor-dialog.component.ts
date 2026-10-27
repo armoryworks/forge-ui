@@ -7,7 +7,7 @@ import { VendorService } from '../../services/vendor.service';
 import { VendorDetail } from '../../models/vendor-detail.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
@@ -20,6 +20,10 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AutoPoMode } from '../../../purchase-orders/models/auto-po-settings.model';
+
+const USE_DEFAULT_AUTO_PO_MODE = 'default';
 
 @Component({
   selector: 'app-vendor-dialog',
@@ -41,6 +45,7 @@ export class VendorDialogComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly capabilities = inject(CapabilityService);
 
   readonly vendor = input<VendorDetail | null>(null);
   readonly closed = output<void>();
@@ -48,6 +53,13 @@ export class VendorDialogComponent implements OnInit {
 
   protected readonly saving = signal(false);
   protected readonly allowManualVendorNumbers = computed(() => this.manualNumberSettings.isEnabled('vendors'));
+  protected readonly showAutoPoMode = computed(() => this.vendor() !== null && this.capabilities.isEnabled('CAP-P2P-AUTOPO'));
+  protected readonly autoPoModeOptions: SelectOption[] = [
+    { value: USE_DEFAULT_AUTO_PO_MODE, label: this.translate.instant('vendors.autoPoModeDefault') },
+    { value: 'Suggest', label: this.translate.instant('autoPo.modeSuggest') },
+    { value: 'Draft', label: this.translate.instant('autoPo.modeDraft') },
+    { value: 'Automatic', label: this.translate.instant('autoPo.modeAutomatic') },
+  ];
 
   protected get draftConfig(): DraftConfig {
     return {
@@ -73,6 +85,7 @@ export class VendorDialogComponent implements OnInit {
     // Bought-parts effort PR4 — per-vendor variance threshold override.
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0)]),
     currencyId: new FormControl<number | null>(null),
+    autoPoMode: new FormControl<string>(USE_DEFAULT_AUTO_PO_MODE, { nonNullable: true }),
   });
 
   protected readonly vendorCurrencyId = computed(() => this.vendor()?.currencyId ?? null);
@@ -116,6 +129,7 @@ export class VendorDialogComponent implements OnInit {
         taxId: v.taxId ?? '',
         offTierVariancePct: v.offTierVariancePct ?? null,
         currencyId: v.currencyId ?? null,
+        autoPoMode: v.autoPoMode ?? USE_DEFAULT_AUTO_PO_MODE,
       });
     }
   }
@@ -123,6 +137,12 @@ export class VendorDialogComponent implements OnInit {
   private termsPayload(paymentTermsId: number | null): { paymentTermsId?: number; paymentTerms?: string } {
     if (paymentTermsId != null) return { paymentTermsId };
     return this.vendor() && this.form.controls.paymentTermsId.dirty ? { paymentTerms: '' } : {};
+  }
+
+  private autoPoModePayload(): { autoPoMode?: AutoPoMode; clearAutoPoMode?: boolean } {
+    if (!this.showAutoPoMode() || !this.form.controls.autoPoMode.dirty) return {};
+    const mode = this.form.controls.autoPoMode.value;
+    return mode === USE_DEFAULT_AUTO_PO_MODE ? { clearAutoPoMode: true } : { autoPoMode: mode as AutoPoMode };
   }
 
   protected get isEditing(): boolean {
@@ -162,6 +182,7 @@ export class VendorDialogComponent implements OnInit {
         ...payload,
         vendorNumber: this.allowManualVendorNumbers() ? (f.vendorNumber?.trim() || undefined) : undefined,
         isActive: f.isActive ?? true,
+        ...this.autoPoModePayload(),
       }).subscribe({
         next: () => {
           this.saving.set(false);

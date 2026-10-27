@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScanEvent } from '../../shared/models/scan-event.model';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { EntityCompletenessService } from '../../shared/services/entity-completeness.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { ManualNumberSettingsService } from '../../shared/services/manual-number-settings.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -90,6 +91,7 @@ describe('PartsComponent search and Duplicate', () => {
         { provide: DetailDialogService, useValue: detailDialog },
         { provide: WorkflowService, useValue: { listActive: vi.fn(() => of([])) } },
         { provide: EntityCompletenessService, useValue: { prime: vi.fn() } },
+        { provide: AuthService, useValue: { hasAnyRole: () => true } },
         {
           provide: DestroyRef,
           useValue: { onDestroy: (callback: () => void) => { destroyCallbacks.push(callback); return () => undefined; } },

@@ -50,6 +50,7 @@ import { CapabilityService } from '../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent, LinkableEntityType } from '../../shared/components/entity-link/entity-link.component';
 import { INVENTORY_TAB_ROLES } from './models/inventory-tab-roles.model';
+import { INVENTORY_EDIT_ROLES } from './models/inventory-edit-roles.model';
 import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
@@ -90,6 +91,7 @@ export class InventoryComponent {
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
 
   protected readonly canReplenish = this.auth.hasAnyRole([...INVENTORY_TAB_ROLES['replenishment']]);
+  protected readonly canEditStock = this.auth.hasAnyRole([...INVENTORY_EDIT_ROLES]);
   protected readonly canAdjustStock = this.auth.hasAnyRole(['Admin', 'Manager']);
 
   protected readonly activeTab = computed<InventoryTab>(() => {

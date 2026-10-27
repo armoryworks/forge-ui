@@ -87,6 +87,12 @@
               <span class="info-value">{{ vendor.paymentTerms }}</span>
             </div>
           }
+          @if (autoPoModeLabelKey(); as modeKey) {
+            <div class="info-item">
+              <span class="info-label">{{ 'vendors.autoPoMode' | translate }}</span>
+              <span class="info-value" data-testid="vendor-detail-auto-po-mode">{{ modeKey | translate }}</span>
+            </div>
+          }
         </div>
 
         @if (vendor.address || vendor.city || vendor.state || vendor.zipCode || vendor.country) {

@@ -1,0 +1,80 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.price-review {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: $sp-xs $sp-md;
+    margin: 0;
+    font-size: var(--font-size-sm);
+
+    dt {
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+    }
+  }
+
+  &__risk--high {
+    color: var(--error);
+    font-weight: 600;
+  }
+
+  &__assessment {
+    margin: 0;
+    font-size: var(--font-size-sm);
+  }
+
+  &__muted {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__suggestion,
+  &__override {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $sp-xs;
+  }
+
+  &__override {
+    align-items: stretch;
+  }
+
+  &__suggestion-text {
+    margin: 0;
+    font-size: var(--font-size-sm);
+  }
+}

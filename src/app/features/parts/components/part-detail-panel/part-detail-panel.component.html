@@ -15,23 +15,25 @@
         </div>
       </div>
       <div class="detail-header__actions">
-        <button class="icon-btn"
-          [class.icon-btn--active]="editing()"
-          [matTooltip]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)"
-          matTooltipPosition="above"
-          data-testid="part-detail-edit-toggle"
-          (click)="editing() ? cancelEdit() : toggleEdit()"
-          [attr.aria-label]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)">
-          <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
-        </button>
-        <button class="icon-btn"
-          [matTooltip]="'parts.duplicatePart' | translate"
-          matTooltipPosition="above"
-          data-testid="part-detail-duplicate"
-          (click)="openDuplicatePart()"
-          [attr.aria-label]="'parts.duplicatePart' | translate">
-          <span class="material-icons-outlined">content_copy</span>
-        </button>
+        @if (canEditParts) {
+          <button class="icon-btn"
+            [class.icon-btn--active]="editing()"
+            [matTooltip]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)"
+            matTooltipPosition="above"
+            data-testid="part-detail-edit-toggle"
+            (click)="editing() ? cancelEdit() : toggleEdit()"
+            [attr.aria-label]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)">
+            <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
+          </button>
+          <button class="icon-btn"
+            [matTooltip]="'parts.duplicatePart' | translate"
+            matTooltipPosition="above"
+            data-testid="part-detail-duplicate"
+            (click)="openDuplicatePart()"
+            [attr.aria-label]="'parts.duplicatePart' | translate">
+            <span class="material-icons-outlined">content_copy</span>
+          </button>
+        }
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closePanel()" aria-label="Close panel">
           <span class="material-icons-outlined">close</span>
         </button>
@@ -110,7 +112,7 @@
           <app-part-barcodes-section [part]="part" />
 
           <!-- Phase 5: Promote to Active (Draft-only, runs readiness validators) -->
-          @if (part.status === 'Draft') {
+          @if (part.status === 'Draft' && canEditParts) {
             <div class="promote-section">
               <button class="action-btn action-btn--primary"
                 type="button"
@@ -268,10 +270,12 @@
                   <span class="material-icons-outlined">account_tree</span>
                 </button>
               </div>
-              <button class="action-btn action-btn--create action-btn--sm" data-testid="add-bom-btn" (click)="openAddBom()">
-                <span class="material-icons-outlined">add</span>
-                {{ 'common.add' | translate }}
-              </button>
+              @if (canEditParts) {
+                <button class="action-btn action-btn--create action-btn--sm" data-testid="add-bom-btn" (click)="openAddBom()">
+                  <span class="material-icons-outlined">add</span>
+                  {{ 'common.add' | translate }}
+                </button>
+              }
             </div>
           </div>
 
@@ -333,28 +337,30 @@
                 }
               </ng-template>
               <ng-template appColumnCell="actions" let-row>
-                <div class="bom-row-actions">
-                  @if (editingBomLineId() === $any(row).id) {
-                    <button class="icon-btn" type="button"
-                      [attr.data-testid]="'bom-line-done-' + $any(row).id"
-                      [matTooltip]="'partBom.doneEditing' | translate" matTooltipPosition="above"
-                      [attr.aria-label]="'partBom.doneEditing' | translate"
-                      (click)="commitBomLineEdit(true)">
-                      <span class="material-icons-outlined">check</span>
+                @if (canEditParts) {
+                  <div class="bom-row-actions">
+                    @if (editingBomLineId() === $any(row).id) {
+                      <button class="icon-btn" type="button"
+                        [attr.data-testid]="'bom-line-done-' + $any(row).id"
+                        [matTooltip]="'partBom.doneEditing' | translate" matTooltipPosition="above"
+                        [attr.aria-label]="'partBom.doneEditing' | translate"
+                        (click)="commitBomLineEdit(true)">
+                        <span class="material-icons-outlined">check</span>
+                      </button>
+                    } @else {
+                      <button class="icon-btn" type="button"
+                        [attr.data-testid]="'bom-line-edit-' + $any(row).id"
+                        [matTooltip]="'partBom.editLine' | translate" matTooltipPosition="above"
+                        [attr.aria-label]="'partBom.editLine' | translate"
+                        (click)="startBomLineEdit($any(row))">
+                        <span class="material-icons-outlined">edit</span>
+                      </button>
+                    }
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomLine($any(row))" [attr.aria-label]="'common.remove' | translate">
+                      <span class="material-icons-outlined">delete</span>
                     </button>
-                  } @else {
-                    <button class="icon-btn" type="button"
-                      [attr.data-testid]="'bom-line-edit-' + $any(row).id"
-                      [matTooltip]="'partBom.editLine' | translate" matTooltipPosition="above"
-                      [attr.aria-label]="'partBom.editLine' | translate"
-                      (click)="startBomLineEdit($any(row))">
-                      <span class="material-icons-outlined">edit</span>
-                    </button>
-                  }
-                  <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomLine($any(row))" [attr.aria-label]="'common.remove' | translate">
-                    <span class="material-icons-outlined">delete</span>
-                  </button>
-                </div>
+                  </div>
+                }
               </ng-template>
             </app-data-table>
             <app-bom-revision-history [partId]="part.id" [refreshToken]="bomRefreshToken()" />

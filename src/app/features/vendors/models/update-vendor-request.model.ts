@@ -1,3 +1,5 @@
+import { AutoPoMode } from '../../purchase-orders/models/auto-po-settings.model';
+
 export interface UpdateVendorRequest {
   companyName?: string;
   /**
@@ -30,4 +32,8 @@ export interface UpdateVendorRequest {
   offTierVariancePct?: number | null;
   currencyId?: number;
   clearCurrency?: boolean;
+  /** Per-vendor auto-PO mode; omit to leave it untouched. */
+  autoPoMode?: AutoPoMode;
+  /** True returns the vendor to the global auto-PO mode. */
+  clearAutoPoMode?: boolean;
 }

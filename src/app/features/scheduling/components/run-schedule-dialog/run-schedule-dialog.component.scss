@@ -1,0 +1,20 @@
+@use 'styles/variables' as *;
+
+.run-schedule-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+  }
+}

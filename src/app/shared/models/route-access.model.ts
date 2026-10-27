@@ -14,14 +14,14 @@ export interface RouteAccess {
  * target against it, so a user is never sent home to a page their guard would refuse.
  */
 export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
-  'kanban': { roles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager'] },
-  'parts': { roles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager'] },
+  'kanban': { roles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager', 'Production Planner'] },
+  'parts': { roles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager', 'Production Planner'] },
   'costing': { roles: ['Admin', 'Manager'] },
   'sequences': { roles: ['Admin', 'Manager'], capabilities: ['CAP-CROSS-SEQUENCES'] },
   'compliance': { roles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'], capabilities: ['CAP-EXT-WATCHTOWER'] },
   'watchtower': { roles: ['Admin', 'Manager'], capabilities: ['CAP-EXT-WATCHTOWER'] },
   'shipping': { roles: ['Admin', 'Manager', 'OfficeManager'], capabilities: ['CAP-O2C-SHIP'] },
-  'inventory': { roles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+  'inventory': { roles: ['Admin', 'Manager', 'Engineer', 'OfficeManager', 'Production Planner'] },
   'customers': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
   'communications': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
   'sales-channels': { roles: ['Admin', 'Manager', 'PM', 'OfficeManager'], capabilities: ['CAP-O2C-CHANNELS'] },
@@ -34,7 +34,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'maintenance': { roles: ['Admin', 'Manager'] },
   'piece-rates': { roles: ['Admin', 'Manager', 'OfficeManager'], capabilities: ['CAP-HR-PIECE-RATES'] },
   'employees': { roles: ['Admin', 'Manager'] },
-  'planning': { roles: ['Admin', 'Manager', 'PM'] },
+  'planning': { roles: ['Admin', 'Manager', 'PM', 'Production Planner'] },
   'vendors': { roles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
   'purchasing': { roles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
   'purchase-orders': { roles: ['Admin', 'Manager', 'OfficeManager', 'Procurement'] },
@@ -49,9 +49,9 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'quality': { roles: ['Admin', 'Manager', 'Engineer'] },
   'customer-returns': { roles: ['Admin', 'Manager', 'OfficeManager'] },
   'lots': { roles: ['Admin', 'Manager', 'Engineer'] },
-  'mrp': { roles: ['Admin', 'Manager'] },
+  'mrp': { roles: ['Admin', 'Manager', 'Production Planner'] },
   'oee': { roles: ['Admin', 'Manager'] },
-  'scheduling': { roles: ['Admin', 'Manager'] },
+  'scheduling': { roles: ['Admin', 'Manager', 'Production Planner'] },
   'admin': { roles: ['Admin', 'Manager', 'OfficeManager'] },
 };
 

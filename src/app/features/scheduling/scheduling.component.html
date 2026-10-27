@@ -88,9 +88,11 @@
     <div class="tab-panel" [appLoadingBlock]="loading()">
       <app-toolbar>
         <span appSpacer></span>
-        <button class="action-btn action-btn--create" (click)="openCreateWorkCenter()" data-testid="work-center-create-btn" aria-label="New work center">
-          <span class="material-icons-outlined">add</span> {{ 'scheduling.newWorkCenter' | translate }}
-        </button>
+        @if (canManageWorkCenters) {
+          <button class="action-btn action-btn--create" (click)="openCreateWorkCenter()" data-testid="work-center-create-btn" aria-label="New work center">
+            <span class="material-icons-outlined">add</span> {{ 'scheduling.newWorkCenter' | translate }}
+          </button>
+        }
       </app-toolbar>
 
       @if (workCenters().length === 0 && !loading()) {
@@ -106,14 +108,16 @@
             <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ (row.isActive ? 'scheduling.active' : 'scheduling.inactive') | translate }}</span>
           </ng-template>
           <ng-template appColumnCell="actions" let-row>
-            <div class="row-actions">
-              <button class="icon-btn" (click)="openEditWorkCenter(row)" [attr.aria-label]="'common.edit' | translate">
-                <span class="material-icons-outlined">edit</span>
-              </button>
-              <button class="icon-btn icon-btn--danger" (click)="deleteWorkCenter(row)" [attr.aria-label]="'common.delete' | translate">
-                <span class="material-icons-outlined">delete</span>
-              </button>
-            </div>
+            @if (canManageWorkCenters) {
+              <div class="row-actions">
+                <button class="icon-btn" (click)="openEditWorkCenter(row)" [attr.aria-label]="'common.edit' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+                <button class="icon-btn icon-btn--danger" (click)="deleteWorkCenter(row)" [attr.aria-label]="'common.delete' | translate">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </div>
+            }
           </ng-template>
         </app-data-table>
       }

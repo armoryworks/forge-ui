@@ -27,6 +27,7 @@ import { FormValidationService } from '../../../shared/services/form-validation.
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../shared/services/capability.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { INVENTORY_EDIT_ROLES } from '../models/inventory-edit-roles.model';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { InventoryHomeTab } from '../models/inventory-home-tab.model';
 import { TabListDirective, TabDirective } from '../../../shared/directives/tab-list.directive';
@@ -79,6 +80,7 @@ export class InventoryHomeComponent {
   );
 
   protected readonly locationsEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-MULTILOC'));
+  protected readonly canEditStock = computed(() => this.auth.hasAnyRole([...INVENTORY_EDIT_ROLES]));
   protected readonly canCount = computed(() =>
     this.auth.hasAnyRole(['Admin', 'Manager']) && this.capabilities.isEnabled('CAP-INV-ADJUST'));
 
@@ -112,10 +114,10 @@ export class InventoryHomeComponent {
 
   // ── Kiosk actions ──
   protected readonly kioskActions = computed<QuickAction[]>(() => {
-    const actions: QuickAction[] = [
+    const actions: QuickAction[] = this.canEditStock() ? [
       { id: 'receive', label: this.translate.instant('inventory.home.verbs.receive'), icon: 'add_box', color: 'var(--success)' },
       { id: 'use', label: this.translate.instant('inventory.home.verbs.use'), icon: 'remove_circle_outline', color: 'var(--warning)' },
-    ];
+    ] : [];
     if (this.canCount()) {
       actions.push({ id: 'count', label: this.translate.instant('inventory.home.verbs.count'), icon: 'fact_check', color: 'var(--primary)' });
     }
@@ -184,7 +186,7 @@ export class InventoryHomeComponent {
   }
 
   protected openVerb(mode: StockVerb, part?: InventoryPartSummary): void {
-    if (mode === 'count' && !this.canCount()) return;
+    if (!this.canEditStock() || (mode === 'count' && !this.canCount())) return;
     this.verbForm.controls.quantity.setValidators(
       [Validators.required, mode === 'count' ? Validators.min(0) : Validators.min(0.0001)]);
     this.verbForm.reset({ partId: part?.partId ?? null, quantity: null, locationId: null, reason: '', notes: '', lotNumber: '' });
