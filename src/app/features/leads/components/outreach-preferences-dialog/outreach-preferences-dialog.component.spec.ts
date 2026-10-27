@@ -86,4 +86,19 @@ describe('OutreachPreferencesDialogComponent', () => {
     });
     expect(close).toHaveBeenCalledWith(expect.objectContaining({ emailOptOut: true }));
   });
+
+  it('loads and saves through a supplied source instead of the lead endpoints', () => {
+    const load = vi.fn(() => of(prefs({ smsOptOut: true, smsOptOutSource: 'Text STOP' })));
+    const saveToSource = vi.fn(() => of(prefs({ smsOptOut: true, emailOptOut: true })));
+    const c = open({ leadName: 'Lovelace, Ada', source: { load, save: saveToSource } });
+
+    expect(load).toHaveBeenCalled();
+    expect(c.form.getRawValue()).toMatchObject({ smsOptOut: true, source: 'Text STOP' });
+    c.form.patchValue({ emailOptOut: true });
+    c.save();
+
+    expect(saveToSource).toHaveBeenCalledWith(expect.objectContaining({ emailOptOut: true, smsOptOut: true }));
+    expect(update).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalled();
+  });
 });
