@@ -1,0 +1,22 @@
+@if (visible()) {
+  <div class="atp-check" data-testid="so-line-atp">
+    <button type="button" class="action-btn action-btn--sm" data-testid="so-line-atp-btn" [disabled]="!canCheck() || checking()" (click)="check()">
+      <span class="material-icons-outlined">event_available</span>
+      {{ 'inventoryScreens.atp.checkLine' | translate }}
+    </button>
+    @if (result(); as r) {
+      <span class="atp-check__result" data-testid="so-line-atp-result"
+        [class.atp-check__result--ok]="verdict() === 'onTime' || verdict() === 'available'"
+        [class.atp-check__result--late]="verdict() === 'late' || verdict() === 'short'">
+        {{ 'inventoryScreens.atp.availableNow' | translate: { qty: (r.availableToPromise | number:'1.0-4') } }}
+        ·
+        @switch (verdict()) {
+          @case ('short') { {{ 'inventoryScreens.atp.notWithinHorizon' | translate: { qty: (r.requestedQuantity | number:'1.0-4') } }} }
+          @case ('onTime') { {{ 'inventoryScreens.atp.onTime' | translate: { date: (r.earliestAvailableDate | dateOnly) } }} }
+          @case ('late') { {{ 'inventoryScreens.atp.late' | translate: { date: (r.earliestAvailableDate | dateOnly), requested: (requestedDate() | dateOnly) } }} }
+          @default { {{ 'inventoryScreens.atp.earliest' | translate: { qty: (r.requestedQuantity | number:'1.0-4'), date: (r.earliestAvailableDate | dateOnly) } }} }
+        }
+      </span>
+    }
+  </div>
+}

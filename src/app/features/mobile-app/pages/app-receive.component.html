@@ -98,6 +98,14 @@
                   [label]="'mobileReceive.lot' | translate"
                   [attr.data-testid]="'receive-lot-' + line.id"
                 />
+                @if (line.lotTracked) {
+                  <app-datepicker
+                    formControlName="expiry"
+                    [label]="'inventoryScreens.lots.expires' | translate"
+                    [required]="!!line.shelfLifeDays"
+                    [attr.data-testid]="'receive-expiry-' + line.id"
+                  />
+                }
               }
             </section>
           }

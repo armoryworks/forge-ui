@@ -1,0 +1,158 @@
+<div class="transfers" [appLoadingBlock]="loading()">
+  <div class="transfers__toolbar">
+    <app-select class="transfers__filter" data-testid="transfers-status-filter" [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" />
+    <span class="transfers__in-transit" data-testid="transfers-in-transit">
+      <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+      {{ 'inventoryScreens.transfers.inTransitSummary' | translate: { count: inTransit().transfers, qty: (inTransit().quantity | number:'1.0-4') } }}
+    </span>
+    <span class="transfers__spacer"></span>
+    @if (canManage) {
+      <button class="action-btn action-btn--create" data-testid="transfers-new-btn" (click)="openCreate()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'inventoryScreens.transfers.new' | translate }}
+      </button>
+    }
+  </div>
+
+  <app-data-table tableId="inventory-inter-plant-transfers" [columns]="columns" [data]="transfers()"
+    emptyIcon="local_shipping" [emptyMessage]="'inventoryScreens.transfers.empty' | translate"
+    [clickableRows]="true" (rowClick)="openDetail($any($event))">
+    <ng-template appColumnCell="transferNumber" let-row>
+      <span class="transfers__number">{{ row.transferNumber }}</span>
+    </ng-template>
+    <ng-template appColumnCell="route" let-row>
+      {{ row.fromPlantName }} <span class="material-icons-outlined transfers__arrow" aria-hidden="true">arrow_forward</span> {{ row.toPlantName }}
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="statusClass(row.status)">{{ ('inventoryScreens.transfers.status.' + row.status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="shippedAt" let-row>
+      <span class="text-muted">{{ row.shippedAt ? (row.shippedAt | dateTime) : '—' }}</span>
+    </ng-template>
+    <ng-template appColumnCell="receivedAt" let-row>
+      <span class="text-muted">{{ row.receivedAt ? (row.receivedAt | dateTime) : '—' }}</span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <div class="transfers__actions">
+        @if (canShip(row)) {
+          <button class="icon-btn" [attr.data-testid]="'transfer-ship-' + row.id" [attr.aria-label]="'inventoryScreens.transfers.ship' | translate"
+            [matTooltip]="'inventoryScreens.transfers.ship' | translate" (click)="openShip(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">local_shipping</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.data-testid]="'transfer-cancel-' + row.id" [attr.aria-label]="'inventoryScreens.transfers.cancel' | translate"
+            [matTooltip]="'inventoryScreens.transfers.cancel' | translate" (click)="cancel(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">block</span>
+          </button>
+        }
+        @if (canReceive(row)) {
+          <button class="icon-btn" [attr.data-testid]="'transfer-receive-' + row.id" [attr.aria-label]="'inventoryScreens.transfers.receive' | translate"
+            [matTooltip]="'inventoryScreens.transfers.receive' | translate" (click)="openReceive(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">move_to_inbox</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (selected(); as transfer) {
+  <app-dialog [title]="transfer.transferNumber" width="760px" (closed)="closeDetail()">
+    <div class="transfer-detail" data-testid="transfer-detail">
+      <div class="transfer-detail__meta">
+        <span [class]="statusClass(transfer.status)">{{ ('inventoryScreens.transfers.status.' + transfer.status) | translate }}</span>
+        <span>{{ transfer.fromPlantName }} → {{ transfer.toPlantName }}</span>
+        @if (transfer.trackingNumber) {
+          <span>{{ 'inventoryScreens.transfers.tracking' | translate }}: {{ transfer.trackingNumber }}</span>
+        }
+      </div>
+      @if (transfer.notes) {
+        <p class="transfer-detail__notes">{{ transfer.notes }}</p>
+      }
+      <app-data-table tableId="inventory-transfer-lines" [columns]="lineColumns" [data]="transfer.lines" data-testid="transfer-detail-lines">
+        <ng-template appColumnCell="partNumber" let-row><span class="transfers__number">{{ row.partNumber }}</span></ng-template>
+        <ng-template appColumnCell="fromLocationPath" let-row>{{ row.fromLocationPath ?? '—' }}</ng-template>
+        <ng-template appColumnCell="toLocationPath" let-row>{{ row.toLocationPath ?? '—' }}</ng-template>
+        <ng-template appColumnCell="lotNumber" let-row>{{ row.lotNumber ?? '—' }}</ng-template>
+        <ng-template appColumnCell="quantity" let-row>{{ row.quantity | number:'1.0-4' }}</ng-template>
+        <ng-template appColumnCell="receivedQuantity" let-row>{{ row.receivedQuantity === null ? '—' : (row.receivedQuantity | number:'1.0-4') }}</ng-template>
+      </app-data-table>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDetail()">{{ 'common.close' | translate }}</button>
+    </div>
+  </app-dialog>
+}
+
+@if (showCreate()) {
+  <app-dialog [title]="'inventoryScreens.transfers.new' | translate" width="900px" (closed)="closeCreate()">
+    <div class="transfer-form" [formGroup]="createForm">
+      <div class="transfer-form__row">
+        <app-select data-testid="transfer-from-plant" [label]="'inventoryScreens.transfers.fromPlant' | translate" formControlName="fromPlantId" [options]="plantOptions()" [required]="true" />
+        <app-select data-testid="transfer-to-plant" [label]="'inventoryScreens.transfers.toPlant' | translate" formControlName="toPlantId" [options]="plantOptions()" [required]="true" />
+      </div>
+      @if (samePlant()) {
+        <p class="transfer-form__warning" data-testid="transfer-same-plant">{{ 'inventoryScreens.transfers.samePlant' | translate }}</p>
+      }
+      <div formArrayName="lines" class="transfer-form__lines">
+        @for (line of lineGroups; track line.controls.key.value; let i = $index) {
+          <div class="transfer-form__line" [formGroupName]="i" [attr.data-testid]="'transfer-line-' + i">
+            <app-entity-picker [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" [required]="true" [attr.data-testid]="'transfer-line-part-' + i" />
+            <app-select [label]="'inventoryScreens.transfers.fromBin' | translate" formControlName="sourceBinContentId" [options]="lineBinOptions()[line.controls.key.value]" [required]="true"
+              [placeholder]="(line.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" [attr.data-testid]="'transfer-line-from-' + i" />
+            <app-entity-picker [label]="'inventoryScreens.transfers.toBin' | translate" entityType="inventory/locations/bins" displayField="locationPath" formControlName="toLocationId" [required]="true" [attr.data-testid]="'transfer-line-to-' + i" />
+            <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" [required]="true" [attr.data-testid]="'transfer-line-qty-' + i" />
+            <button type="button" class="icon-btn icon-btn--danger" [disabled]="lineGroups.length === 1" [attr.aria-label]="'inventoryScreens.transfers.removeLine' | translate"
+              [attr.data-testid]="'transfer-line-remove-' + i" (click)="removeLine(i)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="action-btn action-btn--sm transfer-form__add" data-testid="transfer-add-line" (click)="addLine()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'inventoryScreens.transfers.addLine' | translate }}
+      </button>
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" data-testid="transfer-notes" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="transfer-save"
+          [disabled]="createForm.invalid || samePlant() || saving()" (click)="saveCreate()">{{ 'inventoryScreens.transfers.create' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (shipping(); as transfer) {
+  <app-dialog [title]="'inventoryScreens.transfers.shipTitle' | translate: { number: transfer.transferNumber }" width="440px" (closed)="closeShip()">
+    <p class="transfer-form__hint">{{ 'inventoryScreens.transfers.shipHint' | translate }}</p>
+    <app-input [label]="'inventoryScreens.transfers.tracking' | translate" [formControl]="trackingControl" [maxlength]="100" data-testid="transfer-tracking" />
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeShip()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" data-testid="transfer-ship-confirm" [disabled]="saving()" (click)="confirmShip()">{{ 'inventoryScreens.transfers.ship' | translate }}</button>
+    </div>
+  </app-dialog>
+}
+
+@if (receiving(); as transfer) {
+  <app-dialog [title]="'inventoryScreens.transfers.receiveTitle' | translate: { number: transfer.transferNumber }" width="760px" (closed)="closeReceive()">
+    <p class="transfer-form__hint">{{ 'inventoryScreens.transfers.receiveHint' | translate }}</p>
+    <div class="transfer-form__lines">
+      @for (line of transfer.lines; track line.id; let i = $index) {
+        <div class="transfer-form__receive-line" [attr.data-testid]="'transfer-receive-line-' + i">
+          <div class="transfer-form__receive-part">
+            <span class="transfers__number">{{ line.partNumber }}</span>
+            <span class="text-muted">{{ 'inventoryScreens.transfers.plannedBin' | translate: { bin: line.toLocationPath ?? '—' } }}</span>
+          </div>
+          <app-input [label]="'inventoryScreens.transfers.receivedQty' | translate" type="number" [formControl]="receiveLines.at(i).controls.receivedQuantity" [attr.data-testid]="'transfer-receive-qty-' + i" />
+          <app-entity-picker [label]="'inventoryScreens.transfers.otherBin' | translate" entityType="inventory/locations/bins" displayField="locationPath" [formControl]="receiveLines.at(i).controls.toLocationId" [attr.data-testid]="'transfer-receive-bin-' + i" />
+        </div>
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeReceive()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" data-testid="transfer-receive-confirm" [disabled]="receiveLines.invalid || saving()" (click)="confirmReceive()">{{ 'inventoryScreens.transfers.receive' | translate }}</button>
+    </div>
+  </app-dialog>
+}

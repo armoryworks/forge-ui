@@ -2,6 +2,12 @@
   <div class="detail-panel__header">
     <h2 class="detail-panel__title">{{ lotNumber() }}</h2>
     <div class="detail-panel__actions">
+      @if (canEdit && trace() && !loadError()) {
+        <button class="action-btn" data-testid="lot-edit-btn" (click)="openEdit()">
+          <span class="material-icons-outlined">edit</span>
+          {{ 'common.edit' | translate }}
+        </button>
+      }
       @if (canInitiateRecall() && !loadError()) {
         <button class="action-btn action-btn--warn" (click)="openInitiateRecall()" data-testid="lot-initiate-recall-btn">
           <span class="material-icons-outlined">report</span>
@@ -45,6 +51,12 @@
           <div class="trace-meta">
             <span class="trace-label">{{ 'lots.expires' | translate }}</span>
             <span class="trace-value">{{ t.expirationDate | dateOnly }}</span>
+          </div>
+        }
+        @if (t.notes) {
+          <div class="trace-meta" data-testid="lot-notes">
+            <span class="trace-label">{{ 'common.notes' | translate }}</span>
+            <span class="trace-value">{{ t.notes }}</span>
           </div>
         }
         @if (t.producingJob; as job) {
@@ -229,3 +241,14 @@
     }
   </div>
 </div>
+
+@if (editing() && trace(); as t) {
+  <app-lot-edit-dialog
+    [lotId]="lotId()"
+    [lotNumber]="lotNumber()"
+    [expirationDate]="t.expirationDate"
+    [supplierLotNumber]="t.supplierLotNumber"
+    [notes]="t.notes ?? null"
+    (closed)="closeEdit()"
+    (saved)="onLotSaved()" />
+}

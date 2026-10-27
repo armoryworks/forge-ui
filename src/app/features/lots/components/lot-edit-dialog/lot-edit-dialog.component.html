@@ -1,0 +1,13 @@
+<app-dialog [title]="'inventoryScreens.lots.editTitle' | translate: { lot: lotNumber() }" width="460px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-datepicker data-testid="lot-edit-expiry" [label]="'inventoryScreens.lots.expires' | translate" formControlName="expirationDate" />
+    <app-input data-testid="lot-edit-supplier-lot" [label]="'lots.supplierLot' | translate" formControlName="supplierLotNumber" [maxlength]="100" />
+    <app-textarea data-testid="lot-edit-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" data-testid="lot-edit-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="lot-edit-save" [disabled]="form.invalid || saving()" (click)="save()">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

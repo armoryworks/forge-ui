@@ -21,6 +21,7 @@ import { SalesOrderLine } from '../../models/sales-order-line.model';
 import { ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 
 function line(overrides: Partial<SalesOrderLine> = {}): SalesOrderLine {
   return {
@@ -122,6 +123,7 @@ describe('SalesOrderDetailPanelComponent', () => {
   let enabledCaps: Set<string>;
   let standalone: WritableSignal<boolean>;
   let requestPortal: ReturnType<typeof vi.fn>;
+  let getSalesOrderReservations: ReturnType<typeof vi.fn>;
 
   function build(detail: SalesOrderDetail): Panel {
     const panel = TestBed.runInInjectionContext(() => new SalesOrderDetailPanelComponent()) as unknown as Panel;
@@ -151,6 +153,10 @@ describe('SalesOrderDetailPanelComponent', () => {
     };
     snackbar = { success: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() };
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
+    getSalesOrderReservations = vi.fn(() => of([
+      { id: 1, salesOrderLineId: 11, quantity: 4 },
+      { id: 2, salesOrderLineId: 11, quantity: 2 },
+    ]));
 
     TestBed.configureTestingModule({
       providers: [
@@ -167,6 +173,7 @@ describe('SalesOrderDetailPanelComponent', () => {
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => enabledCaps.has(code) } },
         { provide: AuthService, useValue: { hasRole: () => false, hasAnyRole: () => true } },
         { provide: ManualNumberSettingsService, useValue: { isEnabled: () => true } },
+        { provide: InventoryService, useValue: { getSalesOrderReservations, getAtp: vi.fn() } },
       ],
     });
   });
@@ -559,5 +566,48 @@ describe('SalesOrderDetailPanelComponent', () => {
 
     expect(requestPortal.mock.calls[0][1]).toEqual(expect.objectContaining({ recipientEmail: 'buyer@example.com', language: 'es' }));
     expect(snackbar['success']).toHaveBeenCalledWith('salesOrders.acceptance.portalLinkCreated');
+  });
+
+  describe('stock reservations on lines', () => {
+    interface ReservePanel {
+      canReserve: Signal<boolean>;
+      reservedByLine: Signal<ReadonlyMap<number, number>>;
+      canReserveLine(line: SalesOrderLine): boolean;
+      openReserve(line: SalesOrderLine): void;
+      reservingLine: Signal<SalesOrderLine | null>;
+      loadDetail(id: number): void;
+    }
+
+    it('shows each line\'s reserved quantity and offers Reserve while the order is open', () => {
+      enabledCaps = new Set(['CAP-INV-CORE', 'CAP-INV-RESERVE']);
+      soService['getSalesOrderById'] = vi.fn(() => of(order({ status: 'Confirmed' })));
+      const panel = build(order({ status: 'Confirmed' })) as unknown as ReservePanel;
+
+      panel.loadDetail(7);
+
+      expect(getSalesOrderReservations).toHaveBeenCalledWith(7);
+      expect(panel.reservedByLine().get(11)).toBe(6);
+      expect(panel.canReserveLine(line())).toBe(true);
+      expect(panel.canReserveLine(line({ remainingQuantity: 6 }))).toBe(false);
+      panel.openReserve(line());
+      expect(panel.reservingLine()?.id).toBe(11);
+    });
+
+    it('offers no Reserve on a draft order', () => {
+      enabledCaps = new Set(['CAP-INV-CORE', 'CAP-INV-RESERVE']);
+      const panel = build(order({ status: 'Draft' })) as unknown as ReservePanel;
+
+      expect(panel.canReserveLine(line())).toBe(false);
+    });
+
+    it('hides reservations and loads none when CAP-INV-RESERVE is off', () => {
+      enabledCaps = new Set(['CAP-INV-CORE']);
+      const panel = build(order({ status: 'Confirmed' })) as unknown as ReservePanel;
+
+      panel.loadDetail(7);
+
+      expect(panel.canReserve()).toBe(false);
+      expect(getSalesOrderReservations).not.toHaveBeenCalled();
+    });
   });
 });

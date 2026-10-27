@@ -1,0 +1,136 @@
+<div class="cards" [appLoadingBlock]="loading()">
+  <div class="cards__toolbar">
+    <app-select class="cards__filter" data-testid="cards-status-filter" [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" />
+    <form class="cards__scan" (ngSubmit)="scan()">
+      <app-input data-testid="cards-scan" [label]="'inventoryScreens.cards.scan' | translate" [formControl]="scanControl" [placeholder]="'inventoryScreens.cards.scanPlaceholder' | translate" />
+      <button type="submit" class="action-btn" data-testid="cards-scan-btn" [disabled]="saving()">
+        <span class="material-icons-outlined">qr_code_scanner</span>
+        {{ 'inventoryScreens.cards.markEmpty' | translate }}
+      </button>
+    </form>
+    <span class="cards__waiting" data-testid="cards-waiting">{{ 'inventoryScreens.cards.waitingSummary' | translate: { count: waitingCount() } }}</span>
+    <span class="cards__spacer"></span>
+    @if (canEdit) {
+      <button class="action-btn action-btn--create" data-testid="cards-new-btn" (click)="openCreate()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'inventoryScreens.cards.new' | translate }}
+      </button>
+    }
+  </div>
+
+  <app-data-table tableId="inventory-replenishment-cards" [columns]="columns" [data]="cards()" [clickableRows]="true"
+    emptyIcon="style" [emptyMessage]="'inventoryScreens.cards.empty' | translate" (rowClick)="openDetail($any($event))">
+    <ng-template appColumnCell="cardNumber" let-row>
+      <span class="cards__number">{{ row.cardNumber }}</span>
+      @if (!row.isActive) {
+        <span class="chip chip--muted">{{ 'inventoryScreens.cards.inactive' | translate }}</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="storageLocationName" let-row>{{ row.storageLocationName ?? '—' }}</ng-template>
+    <ng-template appColumnCell="binQuantity" let-row>{{ row.binQuantity | number:'1.0-4' }}</ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="statusClass(row.status)">{{ ('inventoryScreens.cards.status.' + row.status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="lastTriggeredAt" let-row>
+      <span class="text-muted">{{ row.lastTriggeredAt ? (row.lastTriggeredAt | dateTime) : '—' }}</span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <div class="cards__actions">
+        @if (canTrigger(row)) {
+          <button class="icon-btn" [attr.data-testid]="'card-trigger-' + row.id" [disabled]="saving()" [attr.aria-label]="'inventoryScreens.cards.markEmpty' | translate"
+            [matTooltip]="'inventoryScreens.cards.markEmpty' | translate" (click)="trigger(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">notifications_active</span>
+          </button>
+        }
+        @if (awaitingRefill(row)) {
+          <button class="icon-btn" [attr.data-testid]="'card-confirm-' + row.id" [attr.aria-label]="'inventoryScreens.cards.confirmRefill' | translate"
+            [matTooltip]="'inventoryScreens.cards.confirmRefill' | translate" (click)="openConfirm(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">inventory</span>
+          </button>
+        }
+        <button class="icon-btn" [attr.data-testid]="'card-print-' + row.id" [attr.aria-label]="'inventoryScreens.cards.print' | translate"
+          [matTooltip]="'inventoryScreens.cards.print' | translate" (click)="print(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">print</span>
+        </button>
+        @if (canEdit) {
+          <button class="icon-btn" [attr.data-testid]="'card-edit-' + row.id" [attr.aria-label]="'common.edit' | translate"
+            [matTooltip]="'common.edit' | translate" (click)="openEdit(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (detail(); as d) {
+  <app-dialog [title]="d.card.cardNumber + ' · ' + d.card.partNumber" width="720px" (closed)="closeDetail()">
+    <div class="card-detail" data-testid="card-detail">
+      <div class="card-detail__meta">
+        <span [class]="statusClass(d.card.status)">{{ ('inventoryScreens.cards.status.' + d.card.status) | translate }}</span>
+        <span>{{ 'inventoryScreens.cards.labelDetail' | translate: { qty: (d.card.binQuantity | number:'1.0-4'), bin: d.card.storageLocationName ?? '—' } }}</span>
+        <span>{{ ('inventoryScreens.cards.supply.' + d.card.supplySource) | translate }}{{ d.card.supplyVendorName ? ' · ' + d.card.supplyVendorName : '' }}</span>
+      </div>
+      <h4 class="card-detail__title">{{ 'inventoryScreens.cards.triggerLog' | translate }}</h4>
+      @if (d.triggerLogs.length === 0) {
+        <p class="text-muted" data-testid="card-log-empty">{{ 'inventoryScreens.cards.noTriggers' | translate }}</p>
+      } @else {
+        <app-data-table tableId="replenishment-card-log" [columns]="logColumns" [data]="d.triggerLogs" data-testid="card-log">
+          <ng-template appColumnCell="triggeredAt" let-row>{{ row.triggeredAt | dateTime }}</ng-template>
+          <ng-template appColumnCell="triggerType" let-row>{{ ('inventoryScreens.cards.triggerType.' + row.triggerType) | translate }}</ng-template>
+          <ng-template appColumnCell="triggeredByName" let-row>{{ row.triggeredByName ?? '—' }}</ng-template>
+          <ng-template appColumnCell="requestedQuantity" let-row>{{ row.requestedQuantity | number:'1.0-4' }}</ng-template>
+          <ng-template appColumnCell="fulfilledAt" let-row>{{ row.fulfilledAt ? (row.fulfilledAt | dateTime) : ('inventoryScreens.cards.open' | translate) }}</ng-template>
+          <ng-template appColumnCell="fulfilledQuantity" let-row>{{ row.fulfilledQuantity === null ? '—' : (row.fulfilledQuantity | number:'1.0-4') }}</ng-template>
+        </app-data-table>
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDetail()">{{ 'common.close' | translate }}</button>
+    </div>
+  </app-dialog>
+}
+
+@if (confirming(); as card) {
+  <app-dialog [title]="'inventoryScreens.cards.confirmTitle' | translate: { card: card.cardNumber }" width="420px" (closed)="closeConfirm()">
+    <app-input data-testid="card-fulfilled-qty" type="number" [label]="'inventoryScreens.cards.refilledQty' | translate" [formControl]="fulfilledControl" [required]="true" />
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeConfirm()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" data-testid="card-confirm-save" [disabled]="fulfilledControl.invalid || saving()" (click)="confirmRefill()">{{ 'inventoryScreens.cards.confirmRefill' | translate }}</button>
+    </div>
+  </app-dialog>
+}
+
+@if (editing()) {
+  <app-dialog [title]="(isNew() ? 'inventoryScreens.cards.new' : 'inventoryScreens.cards.edit') | translate" width="600px" (closed)="closeEdit()">
+    <div class="card-form" [formGroup]="cardForm">
+      @if (isNew()) {
+        <app-entity-picker data-testid="card-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" [required]="true" />
+        <app-select data-testid="card-work-center" [label]="'inventoryScreens.cards.workCenter' | translate" formControlName="workCenterId" [options]="workCenterOptions()" [required]="true" />
+        <app-entity-picker data-testid="card-bin" [label]="'replenishmentUi.bin' | translate" entityType="inventory/locations/bins" displayField="locationPath" formControlName="storageLocationId" />
+      }
+      <div class="card-form__row">
+        <app-input data-testid="card-bin-qty" type="number" [label]="'inventoryScreens.cards.containerQty' | translate" formControlName="binQuantity" [required]="true" />
+        <app-input data-testid="card-bins" type="number" [label]="'inventoryScreens.cards.containers' | translate" formControlName="numberOfBins" [required]="true" />
+      </div>
+      <div class="card-form__row">
+        <app-select data-testid="card-supply" [label]="'inventoryScreens.cards.supplySource' | translate" formControlName="supplySource" [options]="supplyOptions" />
+        <app-input data-testid="card-lead-time" type="number" [label]="'inventoryScreens.cards.leadTimeDays' | translate" formControlName="leadTimeDays" />
+      </div>
+      @if (supplySource() === 'Purchase') {
+        <app-entity-picker data-testid="card-vendor" [label]="'inventoryScreens.cards.vendor' | translate" entityType="vendors/lookup" displayField="name" secondaryDisplayField="code" formControlName="supplyVendorId" />
+      } @else {
+        <app-select data-testid="card-supply-work-center" [label]="'inventoryScreens.cards.supplyWorkCenter' | translate" formControlName="supplyWorkCenterId" [options]="workCenterOptions()" />
+      }
+      @if (!isNew()) {
+        <app-toggle data-testid="card-active" [label]="'inventoryScreens.cards.active' | translate" formControlName="isActive" />
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEdit()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="cardViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="card-save" [disabled]="cardForm.invalid || saving()" (click)="saveCard()">{{ 'common.save' | translate }}</button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

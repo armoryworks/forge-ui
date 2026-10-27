@@ -20,6 +20,7 @@ import { SetOnHandRequest } from '../models/set-on-hand-request.model';
 import { CycleCount } from '../models/cycle-count.model';
 import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
+import { ReservableSalesOrderLine } from '../models/reservable-sales-order-line.model';
 import { LowStockAlert } from '../models/low-stock-alert.model';
 import { PendingInspectionItem } from '../models/pending-inspection.model';
 import { InspectionResultRequest } from '../models/inspection-result-request.model';
@@ -166,6 +167,17 @@ export class InventoryService {
     return this.http.get<Reservation[]>(`${this.base}/reservations`, { params });
   }
 
+  getSalesOrderReservations(salesOrderId: number): Observable<Reservation[]> {
+    const params = new HttpParams().set('salesOrderId', salesOrderId);
+    return this.http.get<Reservation[]>(`${this.base}/reservations`, { params });
+  }
+
+  getReservableSalesOrderLines(partId: number, salesOrderId?: number): Observable<ReservableSalesOrderLine[]> {
+    let params = new HttpParams().set('partId', partId);
+    if (salesOrderId) params = params.set('salesOrderId', salesOrderId);
+    return this.http.get<ReservableSalesOrderLine[]>(`${this.base}/reservations/sales-order-lines`, { params });
+  }
+
   createReservation(request: CreateReservationRequest): Observable<Reservation> {
     return this.http.post<Reservation>(`${this.base}/reservations`, request);
   }
@@ -233,8 +245,9 @@ export class InventoryService {
 
   // ── ATP ──
 
-  getAtp(partId: number, quantity = 1): Observable<AtpResult> {
-    const params = new HttpParams().set('quantity', quantity.toString());
+  getAtp(partId: number, quantity = 1, excludeSalesOrderLineId?: number): Observable<AtpResult> {
+    let params = new HttpParams().set('quantity', quantity.toString());
+    if (excludeSalesOrderLineId) params = params.set('excludeSalesOrderLineId', excludeSalesOrderLineId);
     return this.http.get<AtpResult>(`${this.base}/atp/${partId}`, { params });
   }
 

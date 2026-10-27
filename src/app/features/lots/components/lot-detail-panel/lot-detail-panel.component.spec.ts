@@ -62,6 +62,10 @@ interface PanelInternals {
   inspectionStatusKey: (status: string) => string;
   ncrStatusKey: (status: string) => string;
   canInitiateRecall: () => boolean;
+  canEdit: boolean;
+  editing: () => boolean;
+  openEdit: () => void;
+  onLotSaved: () => void;
   initiatedRecall: () => RecallDetail | null;
   openInitiateRecall: () => void;
   openRecall: (id: number) => void;
@@ -230,3 +234,24 @@ describe('LotDetailPanelComponent', () => {
     expect(success).toHaveBeenCalledWith('lots.fileDeleted');
   });
 });
+
+describe('LotDetailPanelComponent editing', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('lets the lot roles edit and reloads the trace after a save', () => {
+    const { panel, trace } = setup({ roles: ['ProductionWorker'] });
+    expect(panel.canEdit).toBe(true);
+
+    panel.openEdit();
+    expect(panel.editing()).toBe(true);
+    panel.onLotSaved();
+
+    expect(panel.editing()).toBe(false);
+    expect(trace).toHaveBeenCalledTimes(2);
+  });
+
+  it('offers no edit to a role the lots API refuses', () => {
+    expect(setup({ roles: ['OfficeManager'] }).panel.canEdit).toBe(false);
+  });
+});
+

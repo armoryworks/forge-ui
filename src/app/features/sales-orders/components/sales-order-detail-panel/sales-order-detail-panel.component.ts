@@ -11,6 +11,10 @@ import { concatMap, from, toArray } from 'rxjs';
 
 import { AuthorizedByComponent } from '../../../communications/components/authorized-by/authorized-by.component';
 import { SalesOrderService } from '../../services/sales-order.service';
+import { InventoryService } from '../../../inventory/services/inventory.service';
+import { ReserveStockDialogComponent } from '../../../inventory/components/reserve-stock-dialog/reserve-stock-dialog.component';
+import { AtpCheckComponent } from '../../../inventory/components/atp-check/atp-check.component';
+import { RESERVATION_ROLES } from '../../../inventory/models/reservation-roles.model';
 import { SalesOrderDetail } from '../../models/sales-order-detail.model';
 import { SalesOrderLine } from '../../models/sales-order-line.model';
 import { SalesOrderInvoice } from '../../models/sales-order-invoice.model';
@@ -95,6 +99,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     CapDirective, DialogComponent, TextareaComponent,
     AuthorizedByComponent,
     DetailLoadErrorComponent,
+    ReserveStockDialogComponent, AtpCheckComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -114,6 +119,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly customerService = inject(CustomerService);
   private readonly fileDownload = inject(FileDownloadService);
   private readonly language = inject(LanguageService);
+  private readonly inventoryService = inject(InventoryService);
 
   /** Whether the shop allows editing the order number (only offered while Draft). */
   protected readonly allowManualOrderNumbers = computed(() => this.manualNumberSettings.isEnabled('salesOrders'));
@@ -144,7 +150,23 @@ export class SalesOrderDetailPanelComponent {
     quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
     unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
   });
+  private readonly lineFormValue = toSignal(this.lineForm.valueChanges, { initialValue: this.lineForm.getRawValue() });
+  protected readonly lineAtpPartId = computed(() => this.lineFormValue().partId ?? null);
+  protected readonly lineAtpQuantity = computed(() => this.lineFormValue().quantity ?? null);
+  protected readonly lineAtpLineId = computed(() => {
+    const editing = this.editingLineId();
+    return editing && editing > 0 ? editing : null;
+  });
   protected readonly expandedLines = signal<Set<number>>(new Set());
+  protected readonly canReserve = computed(() =>
+    this.capabilityService.isEnabled('CAP-INV-CORE') && this.capabilityService.isEnabled('CAP-INV-RESERVE')
+    && this.auth.hasAnyRole([...RESERVATION_ROLES]));
+  protected readonly reservedByLine = signal<ReadonlyMap<number, number>>(new Map());
+  protected readonly reservingLine = signal<SalesOrderLine | null>(null);
+  protected readonly orderReservable = computed(() => {
+    const status = this.so()?.status;
+    return !!status && !['Draft', 'Shipped', 'Completed', 'Cancelled'].includes(status);
+  });
   protected readonly scheduleMilestones = signal<ScheduleMilestone[]>([]);
   protected readonly scheduleLoading = signal(false);
   protected readonly documents = signal<FileAttachment[]>([]);
@@ -444,6 +466,7 @@ export class SalesOrderDetailPanelComponent {
         // Load the acceptance list up front (when the feature is on) so the
         // Confirm button can pre-empt release before the user opens the tab.
         if (this.acceptanceCapEnabled()) this.loadAcceptances(id);
+        this.loadReservations(id);
       },
       error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
     });
@@ -1037,6 +1060,38 @@ export class SalesOrderDetailPanelComponent {
     });
   }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
+
+  private loadReservations(id: number): void {
+    if (!this.canReserve()) return;
+    this.inventoryService.getSalesOrderReservations(id).subscribe({
+      next: reservations => {
+        const byLine = new Map<number, number>();
+        for (const r of reservations) {
+          if (r.salesOrderLineId != null) byLine.set(r.salesOrderLineId, (byLine.get(r.salesOrderLineId) ?? 0) + r.quantity);
+        }
+        this.reservedByLine.set(byLine);
+      },
+    });
+  }
+
+  protected canReserveLine(line: SalesOrderLine): boolean {
+    return this.orderReservable() && line.partId != null && line.shipsGoods !== false
+      && line.remainingQuantity - (this.reservedByLine().get(line.id) ?? 0) > 0;
+  }
+
+  protected openReserve(line: SalesOrderLine): void {
+    this.reservingLine.set(line);
+  }
+
+  protected closeReserve(): void {
+    this.reservingLine.set(null);
+  }
+
+  protected onReserved(): void {
+    this.reservingLine.set(null);
+    const so = this.so();
+    if (so) this.loadReservations(so.id);
+  }
 
   // --- Line editing ---
   protected canEditLines(status: string): boolean { return status === 'Draft'; }

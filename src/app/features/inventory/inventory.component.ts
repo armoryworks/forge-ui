@@ -45,11 +45,16 @@ import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggl
 import { ViewMode, DEFAULT_VIEW_MODE } from '../../shared/models/view-mode.model';
 import { InventoryReorderVisualComponent } from './components/inventory-reorder-visual/inventory-reorder-visual.component';
 import { ReceivingInspectionQueueComponent } from './components/receiving-inspection-queue/receiving-inspection-queue.component';
+import { ReserveStockDialogComponent } from './components/reserve-stock-dialog/reserve-stock-dialog.component';
+import { InterPlantTransfersComponent } from './components/inter-plant-transfers/inter-plant-transfers.component';
+import { AbcClassificationComponent } from './components/abc-classification/abc-classification.component';
+import { ReplenishmentCardsComponent } from './components/replenishment-cards/replenishment-cards.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { CapabilityService } from '../../shared/services/capability.service';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent, LinkableEntityType } from '../../shared/components/entity-link/entity-link.component';
 import { INVENTORY_TAB_ROLES } from './models/inventory-tab-roles.model';
+import { INVENTORY_TAB_CAPABILITIES } from './models/inventory-tab-capabilities.model';
 import { INVENTORY_TABS, InventoryTab } from './models/inventory-tab.model';
 import { TabListDirective, TabDirective } from '../../shared/directives/tab-list.directive';
 import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
@@ -60,7 +65,7 @@ import { requiredTrimmed } from '../../shared/validators/required-trimmed.valida
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DateTimePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent],
+  imports: [TabListDirective, TabDirective, ScrollCueDirective, ReactiveFormsModule, CurrencyPipe, DatePipe, DateTimePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent, ViewModeToggleComponent, InventoryReorderVisualComponent, ReceivingInspectionQueueComponent, EntityPickerComponent, EntityLinkComponent, ReserveStockDialogComponent, InterPlantTransfersComponent, AbcClassificationComponent, ReplenishmentCardsComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -88,18 +93,28 @@ export class InventoryComponent {
   );
 
   protected readonly inspectionEnabled = computed(() => this.capabilities.isEnabled('CAP-QC-INSPECTION'));
+  protected readonly reservationsEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-RESERVE'));
+  protected readonly transfersEnabled = computed(() => this.capabilities.isEnabled('CAP-INV-MULTILOC'));
+  protected readonly abcEnabled = computed(() => this.capabilities.isEnabled('CAP-PLAN-ABC'));
+  protected readonly replenishmentCardsEnabled = computed(() => this.capabilities.isEnabled('CAP-EXT-KANBAN-REPLENISHMENT'));
 
   protected readonly canReplenish = this.auth.hasAnyRole([...INVENTORY_TAB_ROLES['replenishment']]);
   protected readonly canAdjustStock = this.auth.hasAnyRole(['Admin', 'Manager']);
 
+  private tabDisabled(tab: InventoryTab): boolean {
+    const capability = INVENTORY_TAB_CAPABILITIES[tab];
+    return capability !== undefined && !this.capabilities.isEnabled(capability);
+  }
+
   protected readonly activeTab = computed<InventoryTab>(() => {
     const tab = this.routeTab();
     if (tab === 'replenishment' && !this.canReplenish) return 'stock';
-    return tab === 'inspection' && !this.inspectionEnabled() ? 'stock' : tab;
+    return this.tabDisabled(tab) ? 'stock' : tab;
   });
 
-  private readonly disabledInspectionRedirect = effect(() => {
-    if (this.routeTab() !== 'inspection' || this.capabilities.descriptor() === null || this.inspectionEnabled()) return;
+  private readonly disabledTabRedirect = effect(() => {
+    const tab = this.routeTab();
+    if (this.capabilities.descriptor() === null || !this.tabDisabled(tab)) return;
     untracked(() => this.router.navigate(['..', 'stock'], { relativeTo: this.route, replaceUrl: true }));
   });
 
@@ -237,11 +252,6 @@ export class InventoryComponent {
   protected readonly partBinOptions = computed<SelectOption[]>(() =>
     this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'available') })),
   );
-  protected readonly reservableBinOptions = computed<SelectOption[]>(() =>
-    this.partBins()
-      .filter(b => b.status !== 'QcHold')
-      .map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'available') })),
-  );
   protected readonly adjustBinOptions = computed<SelectOption[]>(() =>
     this.partBins().map(b => ({ value: b.binContentId, label: this.binOptionLabel(b, 'onHand') })),
   );
@@ -296,26 +306,13 @@ export class InventoryComponent {
     { field: 'quantity', header: this.translate.instant('inventory.columns.qty'), sortable: true, align: 'right', width: '80px' },
     { field: 'jobNumber', header: this.translate.instant('inventory.columns.jobNumber'), sortable: true, width: '100px' },
     { field: 'jobTitle', header: this.translate.instant('inventory.columns.job'), sortable: true },
+    { field: 'salesOrderNumber', header: this.translate.instant('inventoryScreens.reserve.salesOrderColumn'), sortable: true, width: '130px' },
     { field: 'notes', header: this.translate.instant('common.notes'), sortable: false },
     { field: 'createdAt', header: this.translate.instant('inventory.columns.reservedDate'), sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
-  // Create reservation dialog
   protected readonly showReservationDialog = signal(false);
-  protected readonly reservationForm = new FormGroup({
-    partId: new FormControl<number | null>(null, [Validators.required]),
-    binContentId: new FormControl<number | null>(null, [Validators.required]),
-    jobId: new FormControl<number | null>(null),
-    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.001)]),
-    notes: new FormControl(''),
-  });
-
-  protected readonly reservationViolations = FormValidationService.getViolations(this.reservationForm, {
-    partId: this.translate.instant('replenishmentUi.part'),
-    binContentId: this.translate.instant('replenishmentUi.bin'),
-    quantity: 'Quantity',
-  });
 
   // Cycle count detail dialog
   protected readonly showCycleCountDialog = signal(false);
@@ -365,7 +362,6 @@ export class InventoryComponent {
       untracked(() => quantity.updateValueAndValidity());
     });
 
-    this.watchPartBins(this.reservationForm.controls.partId, this.reservationForm.controls.binContentId);
     this.watchPartBins(this.transferForm.controls.partId, this.transferForm.controls.sourceBinContentId);
     this.watchPartBins(this.adjustForm.controls.partId, this.adjustForm.controls.binContentId);
 
@@ -833,7 +829,6 @@ export class InventoryComponent {
   }
 
   protected openReservationDialog(): void {
-    this.reservationForm.reset();
     this.showReservationDialog.set(true);
   }
 
@@ -841,26 +836,10 @@ export class InventoryComponent {
     this.showReservationDialog.set(false);
   }
 
-  protected submitReservation(): void {
-    if (this.reservationForm.invalid) return;
-    this.saving.set(true);
-    const form = this.reservationForm.getRawValue();
-    this.inventoryService.createReservation({
-      partId: form.partId!,
-      binContentId: form.binContentId!,
-      jobId: form.jobId ?? undefined,
-      quantity: form.quantity!,
-      notes: form.notes || undefined,
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.closeReservationDialog();
-        this.loadReservations();
-        this.loadStock();
-        this.snackbar.success(this.translate.instant('inventory.snackbar.reservationCreated'));
-      },
-      error: () => this.saving.set(false),
-    });
+  protected onReservationSaved(): void {
+    this.closeReservationDialog();
+    this.loadReservations();
+    this.loadStock();
   }
 
   protected releaseReservation(id: number): void {

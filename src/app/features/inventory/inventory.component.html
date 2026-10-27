@@ -6,7 +6,7 @@
     </button>
   }
   @if (activeTab() === 'reservations') {
-    <button class="action-btn action-btn--create" (click)="openReservationDialog()">
+    <button class="action-btn action-btn--create" data-testid="reserve-stock-btn" (click)="openReservationDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.reserveStock' | translate }}
     </button>
@@ -70,10 +70,12 @@
       <span class="material-icons-outlined">fact_check</span>
       {{ 'inventory.tabs.cycleCounts' | translate }}
     </button>
-    <button class="tab" [appTab]="activeTab() === 'reservations'" id="inventory-tab-reservations" aria-controls="inventory-tabpanel" (click)="switchTab('reservations')">
-      <span class="material-icons-outlined">lock</span>
-      {{ 'inventory.tabs.reservations' | translate }}
-    </button>
+    @if (reservationsEnabled()) {
+      <button class="tab" [appTab]="activeTab() === 'reservations'" id="inventory-tab-reservations" aria-controls="inventory-tabpanel" data-testid="inventory-tab-reservations" (click)="switchTab('reservations')">
+        <span class="material-icons-outlined">lock</span>
+        {{ 'inventory.tabs.reservations' | translate }}
+      </button>
+    }
     @if (canReplenish) {
       <button class="tab" [appTab]="activeTab() === 'replenishment'" id="inventory-tab-replenishment" aria-controls="inventory-tabpanel" (click)="switchTab('replenishment')">
         <span class="material-icons-outlined">shopping_cart</span>
@@ -81,6 +83,24 @@
         @if (pendingSuggestions().length > 0) {
           <span class="tab__badge">{{ pendingSuggestions().length }}</span>
         }
+      </button>
+    }
+    @if (transfersEnabled()) {
+      <button class="tab" [appTab]="activeTab() === 'transfers'" id="inventory-tab-transfers" aria-controls="inventory-tabpanel" data-testid="inventory-tab-transfers" (click)="switchTab('transfers')">
+        <span class="material-icons-outlined">local_shipping</span>
+        {{ 'inventoryScreens.tabs.transfers' | translate }}
+      </button>
+    }
+    @if (abcEnabled()) {
+      <button class="tab" [appTab]="activeTab() === 'abc'" id="inventory-tab-abc" aria-controls="inventory-tabpanel" data-testid="inventory-tab-abc" (click)="switchTab('abc')">
+        <span class="material-icons-outlined">leaderboard</span>
+        {{ 'inventoryScreens.tabs.abc' | translate }}
+      </button>
+    }
+    @if (replenishmentCardsEnabled()) {
+      <button class="tab" [appTab]="activeTab() === 'replenishmentCards'" id="inventory-tab-replenishmentCards" aria-controls="inventory-tabpanel" data-testid="inventory-tab-replenishment-cards" (click)="switchTab('replenishmentCards')">
+        <span class="material-icons-outlined">style</span>
+        {{ 'inventoryScreens.tabs.replenishmentCards' | translate }}
       </button>
     }
     <button class="tab" [appTab]="activeTab() === 'uom'" id="inventory-tab-uom" aria-controls="inventory-tabpanel" (click)="switchTab('uom')">
@@ -512,6 +532,14 @@
             <span class="text-muted">{{ $any(row).jobTitle ?? '—' }}</span>
           </ng-template>
 
+          <ng-template appColumnCell="salesOrderNumber" let-row>
+            @if ($any(row).salesOrderNumber) {
+              <span>{{ 'inventoryScreens.reserve.salesOrderLineShort' | translate: { order: $any(row).salesOrderNumber, line: $any(row).salesOrderLineNumber } }}</span>
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </ng-template>
+
           <ng-template appColumnCell="notes" let-row>
             <span class="text-muted">{{ $any(row).notes ?? '—' }}</span>
           </ng-template>
@@ -741,6 +769,24 @@
       </div>
     }
 
+    @if (activeTab() === 'transfers') {
+      <div class="tab-panel">
+        <app-inter-plant-transfers />
+      </div>
+    }
+
+    @if (activeTab() === 'abc') {
+      <div class="tab-panel">
+        <app-abc-classification />
+      </div>
+    }
+
+    @if (activeTab() === 'replenishmentCards') {
+      <div class="tab-panel">
+        <app-replenishment-cards />
+      </div>
+    }
+
     @if (activeTab() === 'uom') {
       <div class="tab-panel">
         <app-uom-management />
@@ -749,29 +795,8 @@
   </div>
 </div>
 
-<!-- Reserve Stock Dialog -->
 @if (showReservationDialog()) {
-  <app-dialog [title]="'inventory.dialogs.reserveStockTitle' | translate" width="520px" (closed)="closeReservationDialog()">
-    <div [formGroup]="reservationForm">
-      <app-entity-picker data-testid="reserve-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
-      <app-select data-testid="reserve-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="reservableBinOptions()" [placeholder]="(reservationForm.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
-      @if (showNoBinsHint(reservationForm.controls.partId.value, reservableBinOptions())) {
-        <p class="dialog-hint" data-testid="reserve-no-bins">{{ (partBins().length ? 'replenishmentUi.allBinsOnHold' : 'replenishmentUi.noBins') | translate }}</p>
-      }
-      <app-entity-picker data-testid="reserve-job" [label]="'replenishmentUi.jobOptional' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId" />
-      <app-input data-testid="reserve-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
-      <app-textarea data-testid="reserve-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
-    </div>
-
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeReservationDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="reservationViolations" [loading]="saving()">
-      <button class="action-btn action-btn--primary"
-        [disabled]="reservationForm.invalid || saving()"
-        (click)="submitReservation()">{{ 'inventory.dialogs.reserve' | translate }}</button>
-      </app-validation-button>
-    </div>
-  </app-dialog>
+  <app-reserve-stock-dialog (closed)="closeReservationDialog()" (saved)="onReservationSaved()" />
 }
 
 <!-- Location Dialog -->

@@ -1,0 +1,20 @@
+@use 'styles/variables' as *;
+
+.atp-check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm;
+
+  &__result {
+    font-size: $font-size-sm;
+
+    &--ok {
+      color: var(--success);
+    }
+
+    &--late {
+      color: var(--warning);
+    }
+  }
+}

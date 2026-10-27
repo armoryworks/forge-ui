@@ -18,6 +18,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
@@ -39,6 +40,7 @@ export class SerialNumbersTabComponent {
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   readonly partId = input.required<number>();
 
@@ -100,6 +102,21 @@ export class SerialNumbersTabComponent {
   ];
 
   protected readonly statusFilter = new FormControl<SerialNumberStatus | null>(null);
+
+  protected readonly canTransferRole = this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer']);
+  protected readonly canTransfer = computed(() => {
+    const serial = this.selectedSerial();
+    return this.canTransferRole && serial !== null && serial.status !== 'Shipped' && serial.status !== 'Scrapped';
+  });
+  protected readonly showTransferDialog = signal(false);
+  protected readonly transferForm = new FormGroup({
+    toLocationId: new FormControl<number | null>(null, [Validators.required]),
+    reason: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(1000)] }),
+  });
+  protected readonly transferViolations = FormValidationService.getViolations(this.transferForm, {
+    toLocationId: this.translate.instant('inventoryScreens.serials.toLocation'),
+    reason: this.translate.instant('inventoryScreens.serials.reason'),
+  });
 
   constructor() {
     effect(() => {
@@ -170,6 +187,32 @@ export class SerialNumbersTabComponent {
     this.showDetailDialog.set(false);
     this.selectedSerial.set(null);
     this.serialHistory.set([]);
+  }
+
+  protected openTransfer(): void {
+    this.transferForm.reset({ toLocationId: null, reason: '' });
+    this.showTransferDialog.set(true);
+  }
+
+  protected closeTransfer(): void {
+    this.showTransferDialog.set(false);
+  }
+
+  protected saveTransfer(): void {
+    const serial = this.selectedSerial();
+    if (!serial || this.transferForm.invalid || this.saving()) return;
+    const v = this.transferForm.getRawValue();
+    this.saving.set(true);
+    this.serialService.transferSerial(serial.id, { toLocationId: v.toLocationId!, notes: v.reason.trim() }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.showTransferDialog.set(false);
+        this.snackbar.success(this.translate.instant('inventoryScreens.serials.transferred', { serial: serial.serialValue }));
+        this.closeDetail();
+        this.loadSerials(this.partId());
+      },
+      error: () => this.saving.set(false),
+    });
   }
 
   protected openGenealogy(serial: SerialNumber): void {
