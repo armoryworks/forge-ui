@@ -20,6 +20,9 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { DecimalInputDirective } from '../../../../shared/directives/decimal-input.directive';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { defaultLotExpiry } from '../../../../shared/utils/lot-expiry';
 
 @Component({
   selector: 'app-receive-dialog',
@@ -27,7 +30,7 @@ import { DecimalInputDirective } from '../../../../shared/directives/decimal-inp
   imports: [
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, EmptyStateComponent, CurrencyInputComponent, SelectComponent,
-    InputComponent, TextareaComponent, EntityPickerComponent, DecimalInputDirective,
+    InputComponent, TextareaComponent, EntityPickerComponent, DecimalInputDirective, DatepickerComponent,
     TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
@@ -57,6 +60,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   protected readonly binLabels = signal<(string | null)[]>([]);
   protected readonly binPickerFilters: Record<string, string> = { activeOnly: 'true' };
   protected readonly lotControls = signal<FormControl<string>[]>([]);
+  protected readonly expiryControls = signal<FormControl<Date | null>[]>([]);
   protected readonly noteControls = signal<FormControl<string>[]>([]);
   protected readonly openNotes = signal<ReadonlySet<number>>(new Set());
   protected readonly packingSlipCtrl = new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] });
@@ -99,6 +103,9 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
     this.binControls.set(lines.map(l => new FormControl<number | null>(l.partId ? l.partDefaultBinId ?? null : null)));
     this.binLabels.set(lines.map(l => (l.partId ? l.partDefaultBinPath ?? null : null)));
     this.lotControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] })));
+    this.expiryControls.set(lines.map(l => new FormControl<Date | null>(
+      l.lotTracked ? defaultLotExpiry(l.shelfLifeDays) : null,
+      l.lotTracked && l.shelfLifeDays ? [Validators.required] : [])));
     this.noteControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(1000)] })));
     // Default actual freight to the PO's estimate so the common case is
     // one-click. Buyer can override.
@@ -196,6 +203,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
     return this.packingSlipCtrl.invalid
       || this.lineControls().some(c => c.hasError('numberFormat'))
       || this.lotControls().some(c => c.invalid)
+      || this.receivableLines().some((l, i) => (this.lineControls()[i]?.value ?? 0) > 0 && this.expiryControls()[i]?.invalid)
       || this.noteControls().some(c => c.invalid);
   }
 
@@ -227,6 +235,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
     const controls = this.lineControls();
     const bins = this.binControls();
     const lots = this.lotControls();
+    const expiries = this.expiryControls();
     const notes = this.noteControls();
 
     const receiveLines: ReceiveLineRequest[] = [];
@@ -241,6 +250,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
           quantity: qty,
           storageLocationId: stocked && this.binsEnabled() ? bins[i].value ?? undefined : undefined,
           lotNumber: lot || undefined,
+          expirationDate: stocked && l.lotTracked ? toIsoDate(expiries[i].value) ?? undefined : undefined,
           notes: note || undefined,
         });
       }

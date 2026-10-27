@@ -1,0 +1,57 @@
+<div class="abc">
+  <div class="abc__parameters" [formGroup]="form">
+    <app-input data-testid="abc-lookback" type="number" [label]="'inventoryScreens.abc.lookbackMonths' | translate" formControlName="lookbackMonths" [required]="true" />
+    <app-input data-testid="abc-threshold-a" type="number" suffix="%" [label]="'inventoryScreens.abc.classAThreshold' | translate" formControlName="classAThresholdPercent" [required]="true" />
+    <app-input data-testid="abc-threshold-b" type="number" suffix="%" [label]="'inventoryScreens.abc.classBThreshold' | translate" formControlName="classBThresholdPercent" [required]="true" />
+    <app-validation-button [violations]="violations" [loading]="running()">
+      <button class="action-btn action-btn--primary" data-testid="abc-run" [disabled]="form.invalid || thresholdsOutOfOrder() || running()" (click)="run()">
+        <span class="material-icons-outlined">play_arrow</span>
+        {{ 'inventoryScreens.abc.run' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+  <p class="abc__hint">{{ 'inventoryScreens.abc.basisHint' | translate }}</p>
+  @if (thresholdsOutOfOrder()) {
+    <p class="abc__warning" data-testid="abc-threshold-order">{{ 'inventoryScreens.abc.thresholdOrder' | translate }}</p>
+  }
+
+  @if (activeRun(); as run) {
+    <section class="abc__preview" data-testid="abc-preview" [appLoadingBlock]="loadingResults()">
+      <div class="abc__preview-head">
+        <span class="abc__summary">
+          {{ 'inventoryScreens.abc.summary' | translate: { a: run.classACount, b: run.classBCount, c: run.classCCount, changed: changedCount() } }}
+        </span>
+        <app-toggle data-testid="abc-changes-only" [label]="'inventoryScreens.abc.changesOnly' | translate" [formControl]="changesOnly" />
+        <span class="abc__spacer"></span>
+        @if (activeRunApplied()) {
+          <span class="chip chip--success" data-testid="abc-applied">{{ 'inventoryScreens.abc.appliedChip' | translate }}</span>
+        } @else {
+          <button class="action-btn action-btn--primary" data-testid="abc-apply" [disabled]="applying() || changedCount() === 0" (click)="apply()">
+            <span class="material-icons-outlined">done_all</span>
+            {{ 'inventoryScreens.abc.apply' | translate: { count: changedCount() } }}
+          </button>
+        }
+      </div>
+      <app-data-table tableId="inventory-abc-results" [columns]="resultColumns" [data]="visibleResults()" trackByField="partId"
+        [rowClass]="resultRowClass" emptyIcon="leaderboard" [emptyMessage]="'inventoryScreens.abc.noResults' | translate">
+        <ng-template appColumnCell="annualDemandQuantity" let-row>{{ row.annualDemandQuantity | number:'1.0-2' }}</ng-template>
+        <ng-template appColumnCell="annualUsageValue" let-row><app-currency-display [value]="row.annualUsageValue" /></ng-template>
+        <ng-template appColumnCell="cumulativePercent" let-row>{{ row.cumulativePercent | number:'1.1-1' }}%</ng-template>
+        <ng-template appColumnCell="currentClassification" let-row>{{ row.currentClassification ?? '—' }}</ng-template>
+        <ng-template appColumnCell="classification" let-row>
+          <span class="chip" [class.chip--error]="row.classification === 'A'" [class.chip--warning]="row.classification === 'B'" [class.chip--muted]="row.classification === 'C'">{{ row.classification }}</span>
+        </ng-template>
+      </app-data-table>
+    </section>
+  }
+
+  <section class="abc__history">
+    <h4 class="abc__section-title">{{ 'inventoryScreens.abc.history' | translate }}</h4>
+    <app-data-table tableId="inventory-abc-runs" [columns]="runColumns" [data]="runs()" [clickableRows]="true"
+      emptyIcon="history" [emptyMessage]="'inventoryScreens.abc.noRuns' | translate" (rowClick)="openRun($any($event))">
+      <ng-template appColumnCell="runDate" let-row>{{ row.runDate | dateTime }}</ng-template>
+      <ng-template appColumnCell="thresholds" let-row>{{ row.classAThresholdPercent | number:'1.0-1' }}% / {{ row.classBThresholdPercent | number:'1.0-1' }}%</ng-template>
+      <ng-template appColumnCell="counts" let-row>{{ 'inventoryScreens.abc.countsValue' | translate: { a: row.classACount, b: row.classBCount, c: row.classCCount } }}</ng-template>
+    </app-data-table>
+  </section>
+</div>

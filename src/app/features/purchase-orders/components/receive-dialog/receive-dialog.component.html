@@ -68,6 +68,13 @@
                   [maxlength]="100"
                   [info]="line.lotTracked ? ('purchaseOrders.receiveLotAutoAssigned' | translate) : ''"
                   [attr.data-testid]="'receive-lot-' + line.id" />
+                @if (line.lotTracked) {
+                  <app-datepicker
+                    [label]="'inventoryScreens.lots.expires' | translate"
+                    [formControl]="expiryControls()[i]"
+                    [required]="!!line.shelfLifeDays"
+                    [attr.data-testid]="'receive-expiry-' + line.id" />
+                }
               }
             </td>
             <td class="receive-table__toggle">

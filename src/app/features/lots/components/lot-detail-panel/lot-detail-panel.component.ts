@@ -31,6 +31,7 @@ import { FileUploadZoneComponent } from '../../../../shared/components/file-uplo
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { LotEditDialogComponent } from '../lot-edit-dialog/lot-edit-dialog.component';
 
 const STATUS_KEYS: Record<string, Record<string, string>> = {
   QcInspection: {
@@ -67,7 +68,7 @@ const NCR_STATUS_KEYS: Record<string, string> = {
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent, FileUploadZoneComponent],
+  imports: [DateOnlyPipe, DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, BarcodeInfoComponent, EntityActivitySectionComponent, LoadingBlockDirective, DataTableComponent, ColumnCellDirective, EntityLinkComponent, DetailLoadErrorComponent, FileUploadZoneComponent, LotEditDialogComponent],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -98,6 +99,9 @@ export class LotDetailPanelComponent {
   protected readonly receivedFrom = computed(() => this.trace()?.receivedFrom ?? []);
   protected readonly inspections = computed(() => this.trace()?.inspections ?? []);
   protected readonly nonConformances = computed(() => this.trace()?.nonConformances ?? []);
+
+  protected readonly canEdit = this.auth.hasAnyRole(['Admin', 'Manager', 'Engineer', 'ProductionWorker']);
+  protected readonly editing = signal(false);
 
   protected readonly canAttachFiles = computed(() => this.capabilities.isEnabled('CAP-CROSS-ATTACHMENTS'));
 
@@ -138,17 +142,7 @@ export class LotDetailPanelComponent {
   constructor() {
     effect(() => {
       const num = this.lotNumber();
-      this.loadError.set(null);
-      if (!num) {
-        this.loading.set(false);
-        this.loadError.set(new HttpErrorResponse({ status: 404 }));
-        return;
-      }
-      this.loading.set(true);
-      this.service.trace(num).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: (t) => { this.trace.set(t); this.loading.set(false); },
-        error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
-      });
+      this.loadTrace(num);
     });
 
     effect(() => {
@@ -156,6 +150,33 @@ export class LotDetailPanelComponent {
       this.files.set([]);
       if (id && this.canAttachFiles()) this.loadFiles(id);
     });
+  }
+
+  private loadTrace(num: string): void {
+    this.loadError.set(null);
+    if (!num) {
+      this.loading.set(false);
+      this.loadError.set(new HttpErrorResponse({ status: 404 }));
+      return;
+    }
+    this.loading.set(true);
+    this.service.trace(num).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (t) => { this.trace.set(t); this.loading.set(false); },
+      error: (err: unknown) => { this.loading.set(false); this.loadError.set(err); },
+    });
+  }
+
+  protected openEdit(): void {
+    this.editing.set(true);
+  }
+
+  protected closeEdit(): void {
+    this.editing.set(false);
+  }
+
+  protected onLotSaved(): void {
+    this.editing.set(false);
+    this.loadTrace(this.lotNumber());
   }
 
   private loadFiles(lotId: number): void {

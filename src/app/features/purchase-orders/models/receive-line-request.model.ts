@@ -7,4 +7,5 @@ export interface ReceiveLineRequest {
   // freightAllocationMethod is 'Manual'. Ignored otherwise.
   manualFreight?: number;
   lotNumber?: string;
+  expirationDate?: string;
 }

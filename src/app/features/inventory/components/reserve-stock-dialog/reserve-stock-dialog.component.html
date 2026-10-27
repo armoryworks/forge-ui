@@ -1,0 +1,35 @@
+<app-dialog [title]="'inventory.dialogs.reserveStockTitle' | translate" width="560px" (closed)="close()">
+  <div class="reserve-form" [formGroup]="form">
+    @if (partLocked()) {
+      <p class="reserve-form__part" data-testid="reserve-part-fixed">{{ partLabel() }}</p>
+    } @else {
+      <app-entity-picker data-testid="reserve-part" [label]="'replenishmentUi.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" [required]="true" />
+    }
+    <app-select data-testid="reserve-bin" [label]="'replenishmentUi.bin' | translate" formControlName="binContentId" [options]="binOptions()" [required]="true"
+      [placeholder]="(form.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" />
+    @if (noBins()) {
+      <p class="reserve-form__hint" data-testid="reserve-no-bins">{{ 'inventoryScreens.reserve.noFreeStock' | translate }}</p>
+    }
+    <app-select data-testid="reserve-for" [label]="'inventoryScreens.reserve.for' | translate" formControlName="demand" [options]="demandOptions" />
+    @if (demand() === 'job') {
+      <app-entity-picker data-testid="reserve-job" [label]="'inventoryScreens.reserve.job' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title" formControlName="jobId" [required]="true" />
+    }
+    @if (demand() === 'salesOrderLine') {
+      <app-select data-testid="reserve-so-line" [label]="'inventoryScreens.reserve.salesOrderLine' | translate" formControlName="salesOrderLineId" [options]="salesOrderLineOptions()" [required]="true" />
+      @if (noSalesOrderLines()) {
+        <p class="reserve-form__hint" data-testid="reserve-no-so-lines">{{ 'inventoryScreens.reserve.noOpenLines' | translate }}</p>
+      }
+    }
+    <app-input data-testid="reserve-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" [required]="true" />
+    <app-textarea data-testid="reserve-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="reserve-cancel" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="reserve-save"
+        [disabled]="form.invalid || saving()"
+        (click)="submit()">{{ 'inventory.dialogs.reserve' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

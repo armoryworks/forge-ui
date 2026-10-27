@@ -8,4 +8,5 @@ export interface PartBinLocation {
   availableQuantity: number;
   lotNumber: string | null;
   status: BinContentStatus;
+  locationId?: number | null;
 }

@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__filter {
+    min-width: 180px;
+  }
+
+  &__scan {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__waiting {
+    color: var(--text-secondary);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    margin-right: $sp-sm;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-xs;
+  }
+}
+
+.card-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+  }
+}

@@ -24,6 +24,7 @@ interface ReceiveInternals {
       quantity: FormControl<number | null>;
       binId: FormControl<number | null>;
       lot: FormControl<string>;
+      expiry: FormControl<Date | null>;
     }>>;
   }>;
   lines: Signal<PurchaseOrderLine[]>;
@@ -158,7 +159,7 @@ describe('AppReceiveComponent', () => {
   it('posts the quantity, bin, lot and packing slip and reloads the PO', async () => {
     const receive = await create();
     const first = receive.form.controls.lines.at(0);
-    first.setValue({ quantity: 25, binId: 9, lot: '  HT-88812 ' });
+    first.setValue({ quantity: 25, binId: 9, lot: '  HT-88812 ', expiry: null });
     receive.onBinSelected(0, { id: 9, locationPath: 'Dock / Rack B / 2' });
     receive.form.controls.packingSlip.setValue(' PS-1001 ');
 
@@ -256,7 +257,7 @@ describe('AppReceiveComponent', () => {
     const receive = await create();
     TestBed.tick();
     const before = receive.form.controls.lines;
-    before.at(0).setValue({ quantity: 10, binId: 142, lot: 'HT-1' });
+    before.at(0).setValue({ quantity: 10, binId: 142, lot: 'HT-1', expiry: null });
     receive.onBinSelected(0, { id: 142, locationPath: 'Yard / Bay 9 / 142' });
     receive.submit();
 
@@ -272,7 +273,7 @@ describe('AppReceiveComponent', () => {
     const after = receive.form.controls.lines;
     expect(after).not.toBe(before);
     expect(receive.form.get('lines')).toBe(after);
-    expect(after.at(0).getRawValue()).toEqual({ quantity: null, binId: 5, lot: '' });
+    expect(after.at(0).getRawValue()).toEqual({ quantity: null, binId: 5, lot: '', expiry: null });
     expect(receive.binLabels()).toEqual(['Dock / Rack A / 1']);
     expect(picker.setSelected).toHaveBeenCalledWith(5, 'Dock / Rack A / 1');
 
@@ -377,5 +378,30 @@ describe('AppReceiveComponent', () => {
 
     expect(receive.canSubmit()).toBe(false);
     expect(receive.fullyReceived()).toBe(false);
+  });
+
+  it('sends the lot expiry of a lot-tracked line, defaulted from its shelf life', async () => {
+    const receive = await create(purchaseOrder({ lines: [line({ lotTracked: true, shelfLifeDays: 10 })] }));
+    const first = receive.form.controls.lines.at(0);
+    expect(first.controls.expiry.value).not.toBeNull();
+    first.controls.expiry.setValue(new Date(2027, 0, 15));
+    first.controls.quantity.setValue(5);
+
+    receive.submit();
+
+    const post = http.expectOne('/api/v1/purchase-orders/7/receive');
+    expect(post.request.body.lines[0].expirationDate).toBe('2027-01-15T00:00:00Z');
+    post.flush(null);
+    await vi.waitFor(() => expect(success).toHaveBeenCalled());
+    http.expectOne('/api/v1/purchase-orders/7').flush(purchaseOrder());
+  });
+
+  it('will not submit a shelf-life lot without an expiry', async () => {
+    const receive = await create(purchaseOrder({ lines: [line({ lotTracked: true, shelfLifeDays: 10 })] }));
+    const first = receive.form.controls.lines.at(0);
+    first.controls.expiry.setValue(null);
+    first.controls.quantity.setValue(5);
+
+    expect(receive.canSubmit()).toBe(false);
   });
 });

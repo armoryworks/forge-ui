@@ -75,6 +75,11 @@
     <div class="serial-detail">
       <div class="serial-detail__header">
         <span [class]="getStatusClass(serial.status)">{{ serial.status }}</span>
+        @if (canTransfer()) {
+          <button class="action-btn action-btn--sm" data-testid="serial-transfer-btn" (click)="openTransfer()">
+            <span class="material-icons-outlined">swap_horiz</span> {{ 'inventoryScreens.serials.transfer' | translate }}
+          </button>
+        }
         <button class="action-btn action-btn--sm" (click)="openGenealogy(serial)"
           aria-label="View genealogy">
           <span class="material-icons-outlined">account_tree</span> Genealogy
@@ -162,6 +167,24 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeDetail()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+@if (showTransferDialog() && selectedSerial(); as serial) {
+  <app-dialog [title]="'inventoryScreens.serials.transferTitle' | translate: { serial: serial.serialValue }" width="440px" (closed)="closeTransfer()">
+    <div [formGroup]="transferForm">
+      @if (serial.currentLocationName) {
+        <p class="serial-transfer__from">{{ 'inventoryScreens.serials.currentLocation' | translate: { location: serial.currentLocationName } }}</p>
+      }
+      <app-entity-picker data-testid="serial-transfer-location" [label]="'inventoryScreens.serials.toLocation' | translate" entityType="inventory/locations/bins" displayField="locationPath" formControlName="toLocationId" [required]="true" />
+      <app-textarea data-testid="serial-transfer-reason" [label]="'inventoryScreens.serials.reason' | translate" formControlName="reason" [rows]="2" [required]="true" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeTransfer()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="transferViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="serial-transfer-save" [disabled]="transferForm.invalid || saving()" (click)="saveTransfer()">{{ 'inventoryScreens.serials.transfer' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

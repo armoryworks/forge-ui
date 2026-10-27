@@ -21,6 +21,7 @@ export interface LotTrace {
   quantity: number;
   expirationDate: Date | null;
   supplierLotNumber: string | null;
+  notes?: string | null;
   events: LotTraceEvent[];
   shippedTo?: LotTraceShipment[];
   receivedFrom?: LotTraceReceipt[];

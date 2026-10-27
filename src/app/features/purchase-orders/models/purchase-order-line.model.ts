@@ -24,4 +24,6 @@ export interface PurchaseOrderLine {
   lotTracked?: boolean;
   unitSymbol?: string | null;
   quantityDecimalPlaces?: number | null;
+  /** Days a received lot keeps; drives the default lot expiry at receipt (null = no shelf life). */
+  shelfLifeDays?: number | null;
 }

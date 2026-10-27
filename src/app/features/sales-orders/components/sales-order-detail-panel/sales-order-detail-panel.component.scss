@@ -739,3 +739,9 @@
     font-size: $icon-size-sm;
   }
 }
+
+.line-reserved {
+  display: block;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

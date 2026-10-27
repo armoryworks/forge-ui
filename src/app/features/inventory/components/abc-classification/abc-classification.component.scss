@@ -1,0 +1,56 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.abc {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__parameters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__hint {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  &__warning {
+    margin: 0;
+    color: var(--error);
+  }
+
+  &__preview {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__preview-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__section-title {
+    margin: 0 0 $sp-sm;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+}
+
+:host ::ng-deep .abc-row--changed {
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent);
+}

@@ -12,4 +12,7 @@ export interface Reservation {
   quantity: number;
   notes: string | null;
   createdAt: Date;
+  salesOrderId?: number | null;
+  salesOrderNumber?: string | null;
+  salesOrderLineNumber?: number | null;
 }

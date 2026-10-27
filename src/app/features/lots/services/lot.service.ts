@@ -37,6 +37,14 @@ export class LotService {
     return this.http.post<LotListItem>(this.base, request);
   }
 
+  update(lotId: number, request: {
+    expirationDate: string | null;
+    supplierLotNumber: string | null;
+    notes: string | null;
+  }): Observable<LotListItem> {
+    return this.http.put<LotListItem>(`${this.base}/${lotId}`, request);
+  }
+
   getFiles(lotId: number): Observable<FileAttachment[]> {
     return this.http.get<FileAttachment[]>(`${this.base}/${lotId}/files`);
   }

@@ -33,9 +33,7 @@ interface InventoryInternals {
   assigneeControl: FormControl<number | null>;
   assigneeOptions(): { value: unknown; label: string }[];
   partBinOptions(): { value: unknown; label: string }[];
-  reservableBinOptions(): { value: unknown; label: string }[];
   adjustBinOptions(): { value: unknown; label: string }[];
-  reservationForm: FormGroup<{ partId: FormControl<number | null>; binContentId: FormControl<number | null> }>;
   transferForm: FormGroup<{ partId: FormControl<number | null>; sourceBinContentId: FormControl<number | null> }>;
   adjustForm: FormGroup<{ partId: FormControl<number | null>; binContentId: FormControl<number | null> }>;
   showNoBinsHint(partId: number | null, options: { value: unknown; label: string }[]): boolean;
@@ -63,6 +61,7 @@ function setup(
   capability: { loaded: boolean; enabled: boolean },
   services: { inventory?: Overrides; replenishment?: Overrides } = {},
   roles: string[] = ['Manager'],
+  extraCapabilities: string[] = [],
 ) {
   const descriptor = signal<object | null>(capability.loaded ? {} : null);
   const enabled = signal(capability.enabled);
@@ -88,7 +87,7 @@ function setup(
         provide: CapabilityService,
         useValue: {
           descriptor,
-          isEnabled: (code: string) => code === 'CAP-QC-INSPECTION' && enabled(),
+          isEnabled: (code: string) => (code === 'CAP-QC-INSPECTION' && enabled()) || extraCapabilities.includes(code),
         },
       },
     ],
@@ -264,20 +263,6 @@ describe('InventoryComponent stock dialogs', () => {
     { binContentId: 33, locationPath: 'QC / Q1', quantity: 2, reservedQuantity: 0, availableQuantity: 2, lotNumber: null, status: 'QcHold' },
   ];
 
-  it('loads the picked part\'s bins into the reserve bin select, leaving out QC-held stock', () => {
-    const getPartBins = vi.fn(() => of(bins));
-    const { internals } = setup('reservations', { loaded: true, enabled: false }, { inventory: { getPartBins } });
-
-    expect(internals.reservableBinOptions()).toEqual([]);
-    internals.reservationForm.controls.partId.setValue(10);
-
-    expect(getPartBins).toHaveBeenCalledWith(10);
-    expect(internals.reservableBinOptions()).toEqual([
-      { value: 31, label: 'replenishmentUi.binOptionWithLot' },
-      { value: 32, label: 'replenishmentUi.binOption' },
-    ]);
-  });
-
   it('shows a non-stored status on transfer bins and on-hand quantities on adjust bins', () => {
     const getPartBins = vi.fn(() => of(bins));
     const { internals } = setup('stockOps', { loaded: true, enabled: false }, { inventory: { getPartBins } });
@@ -294,17 +279,6 @@ describe('InventoryComponent stock dialogs', () => {
       'replenishmentUi.binOptionOnHand',
       'replenishmentUi.binOptionOnHand · inventory.statuses.qcHold',
     ]);
-  });
-
-  it('shows the reserve hint when every bin of the part is on QC hold', () => {
-    const getPartBins = vi.fn(() => of([bins[2]]));
-    const { internals } = setup('reservations', { loaded: true, enabled: false }, { inventory: { getPartBins } });
-
-    internals.reservationForm.controls.partId.setValue(10);
-
-    expect(internals.reservableBinOptions()).toEqual([]);
-    expect(internals.showNoBinsHint(10, internals.reservableBinOptions())).toBe(true);
-    expect(internals.showNoBinsHint(10, internals.partBinOptions())).toBe(false);
   });
 
   it('clears the chosen bin when the transfer part changes', () => {
@@ -329,6 +303,29 @@ describe('InventoryComponent stock dialogs', () => {
 
     expect(getPartBins).not.toHaveBeenCalled();
     expect(internals.showNoBinsHint(null, internals.adjustBinOptions())).toBe(false);
+  });
+});
+
+describe('InventoryComponent capability-gated tabs', () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it.each([
+    ['transfers', 'CAP-INV-MULTILOC'],
+    ['abc', 'CAP-PLAN-ABC'],
+    ['replenishmentCards', 'CAP-EXT-KANBAN-REPLENISHMENT'],
+    ['reservations', 'CAP-INV-RESERVE'],
+  ])('opens the %s tab while %s is on', (tab, capability) => {
+    const { internals, router } = setup(tab, { loaded: true, enabled: false }, {}, ['Manager'], [capability]);
+
+    expect(internals.activeTab()).toBe(tab);
+    expect(redirectsToStock(router)).toBe(false);
+  });
+
+  it.each(['transfers', 'abc', 'replenishmentCards', 'reservations'])('sends the %s tab back to stock while its capability is off', (tab) => {
+    const { internals, router } = setup(tab, { loaded: true, enabled: false });
+
+    expect(internals.activeTab()).toBe('stock');
+    expect(redirectsToStock(router)).toBe(true);
   });
 });
 

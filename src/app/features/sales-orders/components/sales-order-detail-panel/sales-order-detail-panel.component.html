@@ -442,6 +442,18 @@
                         {{ line.shippedQuantity | number:'1.0-4' }}
                       </span>
                       / {{ line.remainingQuantity | number:'1.0-4' }}
+                      @if (canReserve() && line.partId) {
+                        <span class="line-reserved" [attr.data-testid]="'so-line-reserved-' + line.id">
+                          {{ 'inventoryScreens.reserve.reservedOnLine' | translate: { qty: ((reservedByLine().get(line.id) ?? 0) | number:'1.0-4') } }}
+                          @if (canReserveLine(line)) {
+                            <button type="button" class="icon-btn icon-btn--sm" [attr.data-testid]="'so-line-reserve-' + line.id"
+                              [matTooltip]="'inventoryScreens.reserve.reserveLine' | translate" [attr.aria-label]="'inventoryScreens.reserve.reserveLine' | translate"
+                              (click)="openReserve(line)">
+                              <span class="material-icons-outlined">lock</span>
+                            </button>
+                          }
+                        </span>
+                      }
                     </td>
                     <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="so.currencyCode ?? null" [maximumFractionDigits]="4" /></td>
                     <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="so.currencyCode ?? null" /></td>
@@ -545,6 +557,7 @@
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
               <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
               <app-currency-input [label]="'salesOrders.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+              <app-atp-check [partId]="lineAtpPartId()" [quantity]="lineAtpQuantity()" [requestedDate]="so.requestedDeliveryDate" [salesOrderLineId]="lineAtpLineId()" />
               <div class="line-edit-form__actions">
                 <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
                 <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>
@@ -1245,3 +1258,14 @@
     <app-detail-load-error [error]="loadError()" (closed)="closed.emit()" />
   }
 </div>
+
+@if (reservingLine(); as line) {
+  <app-reserve-stock-dialog
+    [partId]="line.partId"
+    [partLabel]="(line.partNumber ?? '') + ' · ' + line.description"
+    [salesOrderId]="so()?.id ?? null"
+    [salesOrderLineId]="line.id"
+    [quantity]="line.remainingQuantity - (reservedByLine().get(line.id) ?? 0)"
+    (closed)="closeReserve()"
+    (saved)="onReserved()" />
+}

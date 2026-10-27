@@ -28,6 +28,7 @@ interface DialogInternals {
   binPickers: () => { setSelected: (id: number, label: string) => void; clearSelected: () => void }[];
   draftConfig: DraftConfig;
   lotControls(): FormControl<string>[];
+  expiryControls(): FormControl<Date | null>[];
   noteControls(): FormControl<string>[];
   packingSlipCtrl: FormControl<string>;
   onBinSelected(index: number, entity: Record<string, unknown> | null): void;
@@ -305,5 +306,38 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
     const sent = receiveItems.mock.calls[0][1].lines[0];
     expect(sent.storageLocationId).toBeUndefined();
     expect(sent.lotNumber).toBe('HEAT-A');
+  });
+
+  it('defaults the lot expiry from the shelf life and sends it for a lot-tracked line', () => {
+    const { internals, receiveItems } = setup([line({ id: 1, lotTracked: true, shelfLifeDays: 30 })]);
+    const expected = new Date();
+    expected.setHours(0, 0, 0, 0);
+    expected.setDate(expected.getDate() + 30);
+
+    expect(internals.expiryControls()[0].value?.getTime()).toBe(expected.getTime());
+    internals.expiryControls()[0].setValue(new Date(2027, 2, 31));
+    internals.lineControls()[0].setValue(2);
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].lines[0].expirationDate).toBe('2027-03-31T00:00:00Z');
+  });
+
+  it('will not receive a shelf-life lot without an expiry', () => {
+    const { internals, receiveItems } = setup([line({ id: 1, lotTracked: true, shelfLifeDays: 30 })]);
+    internals.expiryControls()[0].setValue(null);
+    internals.lineControls()[0].setValue(2);
+
+    internals.save();
+
+    expect(receiveItems).not.toHaveBeenCalled();
+  });
+
+  it('sends no expiry for a line that is not lot-tracked', () => {
+    const { internals, receiveItems } = setup([line({ id: 1 })]);
+    internals.lineControls()[0].setValue(1);
+
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].lines[0].expirationDate).toBeUndefined();
   });
 });

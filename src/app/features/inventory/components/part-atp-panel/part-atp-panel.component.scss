@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+
+.atp {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-md;
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: $sp-sm;
+    margin: 0;
+  }
+
+  &__fact {
+    dt {
+      font-size: $font-size-xs;
+      color: var(--text-muted);
+    }
+
+    dd {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    &--main dd {
+      color: var(--primary);
+    }
+  }
+
+  &__check {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__answer {
+    color: var(--text-secondary);
+  }
+
+}
+
+:host ::ng-deep .atp-row--short {
+  color: var(--error);
+}

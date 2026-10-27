@@ -1,0 +1,35 @@
+@if (visible()) {
+  <section class="atp" data-testid="part-atp-panel" [appLoadingBlock]="loading()">
+    <h4 class="atp__title">{{ 'inventoryScreens.atp.title' | translate }}</h4>
+    @if (result(); as r) {
+      <dl class="atp__facts">
+        <div class="atp__fact"><dt>{{ 'inventory.onHand' | translate }}</dt><dd data-testid="atp-on-hand">{{ r.onHand | number:'1.0-4' }}</dd></div>
+        <div class="atp__fact"><dt>{{ 'inventory.columns.reserved' | translate }}</dt><dd data-testid="atp-reserved">{{ reserved() | number:'1.0-4' }}</dd></div>
+        <div class="atp__fact"><dt>{{ 'inventoryScreens.atp.openOrders' | translate }}</dt><dd data-testid="atp-allocated">{{ r.allocatedToOrders | number:'1.0-4' }}</dd></div>
+        <div class="atp__fact"><dt>{{ 'inventoryScreens.atp.scheduledReceipts' | translate }}</dt><dd data-testid="atp-receipts">{{ r.scheduledReceipts | number:'1.0-4' }}</dd></div>
+        <div class="atp__fact atp__fact--main"><dt>{{ 'inventoryScreens.atp.available' | translate }}</dt><dd data-testid="atp-available">{{ r.availableToPromise | number:'1.0-4' }}</dd></div>
+      </dl>
+      <div class="atp__check">
+        <app-input data-testid="atp-quantity" type="number" [label]="'inventoryScreens.atp.quantity' | translate" [formControl]="quantityControl" />
+        <button type="button" class="action-btn action-btn--sm" data-testid="atp-check-btn" [disabled]="quantityControl.invalid || loading()" (click)="check()">
+          {{ 'inventoryScreens.atp.check' | translate }}
+        </button>
+        <span class="atp__answer" data-testid="atp-earliest">
+          @if (r.earliestAvailableDate) {
+            {{ 'inventoryScreens.atp.earliest' | translate: { qty: (r.requestedQuantity | number:'1.0-4'), date: (r.earliestAvailableDate | dateOnly) } }}
+          } @else {
+            {{ 'inventoryScreens.atp.notWithinHorizon' | translate: { qty: (r.requestedQuantity | number:'1.0-4') } }}
+          }
+        </span>
+      </div>
+    }
+    @if (timeline().length > 0) {
+      <app-data-table tableId="part-atp-timeline" [columns]="timelineColumns" [data]="timeline()" trackByField="date" [rowClass]="timelineRowClass" data-testid="atp-timeline">
+        <ng-template appColumnCell="date" let-row>{{ row.date | dateOnly }}</ng-template>
+        <ng-template appColumnCell="cumulativeSupply" let-row>{{ row.cumulativeSupply | number:'1.0-4' }}</ng-template>
+        <ng-template appColumnCell="cumulativeDemand" let-row>{{ row.cumulativeDemand | number:'1.0-4' }}</ng-template>
+        <ng-template appColumnCell="netAvailable" let-row>{{ row.netAvailable | number:'1.0-4' }}</ng-template>
+      </app-data-table>
+    }
+  </section>
+}

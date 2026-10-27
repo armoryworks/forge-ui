@@ -3,4 +3,5 @@ export interface MobileReceiptLine {
   quantity: number;
   storageLocationId: number | null;
   lotNumber: string | null;
+  expirationDate?: string | null;
 }

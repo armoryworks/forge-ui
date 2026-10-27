@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.reserve-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__part {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}

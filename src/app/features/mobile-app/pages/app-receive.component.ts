@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderDetail } from '../../purchase-orders/models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../../purchase-orders/models/purchase-order-line.model';
+import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { EntityPickerComponent } from '../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { MobileReceiptLine } from '../../../shared/models/mobile-receipt-line.model';
@@ -18,6 +19,8 @@ import { InstanceService } from '../../../shared/services/instance.service';
 import { MobileReceivingService } from '../../../shared/services/mobile-receiving.service';
 import { SharedIdentityService } from '../../../shared/services/shared-identity.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { toIsoDate } from '../../../shared/utils/date.utils';
+import { defaultLotExpiry } from '../../../shared/utils/lot-expiry';
 import { randomId } from '../../../shared/utils/random-id';
 import { IdentityPromptComponent } from '../identity/identity-prompt.component';
 
@@ -25,6 +28,7 @@ type LineForm = FormGroup<{
   quantity: FormControl<number | null>;
   binId: FormControl<number | null>;
   lot: FormControl<string>;
+  expiry: FormControl<Date | null>;
 }>;
 
 const RECEIVABLE_STATUSES = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
@@ -32,7 +36,8 @@ const RECEIVABLE_STATUSES = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
 /**
  * Receive: reached by scanning a PO at the dock. The PO header, its open
  * lines with what is still due in the line's unit, and per line a quantity
- * (held to the unit's precision), a bin and a lot / heat number; one packing
+ * (held to the unit's precision), a bin, a lot / heat number and, for a lot-tracked
+ * part, the lot's expiry (defaulted from the part's shelf life); one packing
  * slip number for the whole receipt. A line with no bin of its own shows the
  * bin the receipt falls back to. Online only, and a refusal shows the
  * server's own message.
@@ -40,7 +45,7 @@ const RECEIVABLE_STATUSES = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
 @Component({
   selector: 'app-app-receive',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, EntityPickerComponent, IdentityPromptComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, DatepickerComponent, EntityPickerComponent, IdentityPromptComponent],
   templateUrl: './app-receive.component.html',
   styleUrl: './app-receive.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -208,6 +213,9 @@ export class AppReceiveComponent {
       ]),
       binId: new FormControl<number | null>(line.partId ? (line.partDefaultBinId ?? fallbackId) : null),
       lot: new FormControl('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
+      expiry: new FormControl<Date | null>(
+        line.lotTracked ? defaultLotExpiry(line.shelfLifeDays) : null,
+        line.lotTracked && line.shelfLifeDays ? [Validators.required] : []),
     }));
     this.form.setControl('lines', new FormArray(groups), { emitEvent: false });
     this.pendingReceipt = null;
@@ -262,6 +270,7 @@ export class AppReceiveComponent {
         quantity,
         storageLocationId: stocked && stockBins ? value.binId : null,
         lotNumber: lot || null,
+        ...(stocked && line.lotTracked ? { expirationDate: toIsoDate(value.expiry) } : {}),
       });
     });
     const slip = this.form.controls.packingSlip.value.trim();

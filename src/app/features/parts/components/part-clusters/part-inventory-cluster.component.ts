@@ -10,6 +10,7 @@ import { shallowEqual } from '../../../../shared/utils/shallow-equal';
 import { PartDetail } from '../../models/part-detail.model';
 import { TraceabilityType } from '../../models/traceability-type.type';
 import { AbcClass } from '../../models/abc-class.type';
+import { PartAtpPanelComponent } from '../../../inventory/components/part-atp-panel/part-atp-panel.component';
 
 /**
  * Pillar 4 — Inventory cluster.
@@ -23,7 +24,7 @@ import { AbcClass } from '../../models/abc-class.type';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, ValidationButtonComponent,
+    InputComponent, SelectComponent, ValidationButtonComponent, PartAtpPanelComponent,
   ],
   templateUrl: './part-inventory-cluster.component.html',
   styleUrl: './part-clusters.shared.scss',

@@ -8,6 +8,8 @@ import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { SerialService } from '../../services/serial.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { SerialNumber } from '../../models/serial-number.model';
 import { SerialNumbersTabComponent } from './serial-numbers-tab.component';
 
 interface TabInternals {
@@ -16,16 +18,23 @@ interface TabInternals {
   lotFilters: () => Record<string, string>;
   openCreate: () => void;
   saveSerial: () => void;
+  openDetail: (serial: SerialNumber) => void;
+  canTransfer: () => boolean;
+  openTransfer: () => void;
+  transferForm: FormGroup;
+  saveTransfer: () => void;
 }
 
 describe('SerialNumbersTabComponent', () => {
   const createSerialNumber = vi.fn((_partId: number, _body: Record<string, unknown>) => of({ id: 1 }));
+  const transferSerial = vi.fn((_id: number, _body: Record<string, unknown>) => of(undefined));
 
-  function setup(lotsOn = true): TabInternals {
+  function setup(lotsOn = true, roles: string[] = ['Engineer']): TabInternals {
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
-        { provide: SerialService, useValue: { getPartSerials: vi.fn(() => of([])), createSerialNumber } },
+        { provide: SerialService, useValue: { getPartSerials: vi.fn(() => of([])), createSerialNumber, transferSerial, getSerialHistory: vi.fn(() => of([])) } },
+        { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-INV-LOTS' && lotsOn } },
       ],
@@ -69,5 +78,38 @@ describe('SerialNumbersTabComponent', () => {
 
   it('hides the lot picker while lot tracking is off', () => {
     expect(setup(false).lotsEnabled()).toBe(false);
+  });
+
+  function serial(overrides: Partial<SerialNumber> = {}): SerialNumber {
+    return {
+      id: 5, partId: 12, partNumber: 'P-12', serialValue: 'SN-0005', status: 'Available', jobId: null, jobNumber: null,
+      lotRecordId: null, lotNumber: null, currentLocationId: 3, currentLocationName: 'Q1', shipmentLineId: null,
+      customerId: null, customerName: null, parentSerialId: null, parentSerialValue: null, manufacturedAt: null,
+      shippedAt: null, scrappedAt: null, notes: null, createdAt: '2026-10-01T00:00:00Z', childCount: 0,
+      ...overrides,
+    };
+  }
+
+  it('transfers a serial in stock to another location with the reason', () => {
+    const tab = setup();
+    tab.openDetail(serial());
+    expect(tab.canTransfer()).toBe(true);
+    tab.openTransfer();
+    tab.transferForm.patchValue({ toLocationId: 9, reason: ' Rework cell ' });
+
+    tab.saveTransfer();
+
+    expect(transferSerial).toHaveBeenCalledWith(5, { toLocationId: 9, notes: 'Rework cell' });
+  });
+
+  it('offers no transfer for a shipped serial or to a production worker', () => {
+    const tab = setup();
+    tab.openDetail(serial({ status: 'Shipped' }));
+    expect(tab.canTransfer()).toBe(false);
+
+    TestBed.resetTestingModule();
+    const worker = setup(true, ['ProductionWorker']);
+    worker.openDetail(serial());
+    expect(worker.canTransfer()).toBe(false);
   });
 });

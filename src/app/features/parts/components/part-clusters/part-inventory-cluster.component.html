@@ -16,6 +16,10 @@
     <app-select [label]="'parts.detail.clusters.inventory.abcClass' | translate" formControlName="abcClass" [options]="abcOptions" [isReadonly]="!editing()" />
   </div>
 
+  @if (!editing()) {
+    <app-part-atp-panel [partId]="part().id" />
+  }
+
   @if (editing()) {
     <div class="cluster__actions">
       <button class="action-btn" type="button" (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
