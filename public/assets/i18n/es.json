@@ -3642,7 +3642,14 @@
       "StraightLine": "Línea recta",
       "DecliningBalance": "Saldo decreciente",
       "UnitsOfProduction": "Unidades de producción"
-    }
+    },
+    "meterReading": "Lectura del horómetro (h)",
+    "readingDate": "Fecha de lectura",
+    "hoursRecorded": "Lectura de {{hours}} h registrada",
+    "hoursSaveFailed": "No se pudo guardar la lectura del horómetro.",
+    "recordHoursTitle": "Registrar horas — {{name}}",
+    "lastReading": "Última lectura: {{hours}} h. La nueva lectura no puede ser menor.",
+    "recordHours": "Registrar horas"
   },
   "admin": {
     "title": "Configuración Admin",
@@ -9312,7 +9319,17 @@
       "confirmResolve": "Resolver",
       "confirmFalsePositive": "Marcar falso positivo"
     },
-    "emptyFiltered": "Ninguna predicción coincide con estos filtros. Amplía el filtro de severidad o de estado para ver más."
+    "emptyFiltered": "Ninguna predicción coincide con estos filtros. Amplía el filtro de severidad o de estado para ver más.",
+    "colAsset": "Activo",
+    "runComplete": "Predicciones revisadas en {{count}} centros de trabajo",
+    "runFailed": "Falló la corrida de predicciones.",
+    "runNow": "Ejecutar predicciones ahora",
+    "ruleTypes": {
+      "ServiceDueSoon": "Servicio próximo",
+      "RisingBreakdownRisk": "Riesgo de falla en aumento",
+      "PerformanceDegradation": "Tiempo de ciclo en aumento",
+      "RisingScrap": "Desecho en aumento"
+    }
   },
   "mrp": {
     "title": "Planificación de Requerimientos de Materiales",
@@ -15700,5 +15717,81 @@
       "Adjustment": "Ajustado",
       "Reconciliation": "Ajuste por conteo"
     }
+  },
+  "productionRuns": {
+    "sectionTitle": "Corridas de producción",
+    "newRun": "Nueva corrida de producción",
+    "empty": "Todavía no hay corridas de producción.",
+    "quantitySummary": "{{good}} buenas · {{scrap}} de desecho de {{target}}",
+    "start": "Iniciar",
+    "stop": "Detener",
+    "receive": "Recibir a inventario",
+    "editRun": "Editar corrida {{run}}",
+    "toolingShots": "{{tool}} · {{shots}} golpes",
+    "startedAt": "Iniciada {{at}}",
+    "completedAt": "Detenida {{at}}",
+    "runTimeEntered": "Tiempo de corrida {{minutes}} min (capturado)",
+    "runTimeDerived": "Tiempo de corrida {{minutes}} min (de inicio/paro menos tiempo muerto)",
+    "receivedSummary": "{{quantity}} recibidas a inventario",
+    "journalPosted": "· póliza n.º {{entry}} registrada",
+    "status": {
+      "Planned": "Planeada",
+      "InProgress": "En proceso",
+      "Completed": "Terminada",
+      "Cancelled": "Cancelada"
+    },
+    "started": "Corrida {{run}} iniciada",
+    "stopped": "Corrida {{run}} detenida",
+    "saveFailed": "No se pudo guardar la corrida de producción.",
+    "receiveTitle": "¿Recibir la corrida {{run}} a inventario?",
+    "receiveMessage": "{{quantity}} piezas buenas de {{part}} pasan al inventario de producto terminado. Esto no se puede deshacer desde aquí.",
+    "receivedWithJournal": "{{quantity}} recibidas a inventario; póliza n.º {{entry}} registrada",
+    "received": "{{quantity}} recibidas a inventario",
+    "receiveFailed": "No se pudo recibir la corrida a inventario.",
+    "targetQuantity": "Cantidad objetivo",
+    "goodQuantity": "Cantidad buena",
+    "scrapQuantity": "Cantidad de desecho",
+    "setupMinutes": "Preparación (min)",
+    "runMinutes": "Tiempo de corrida (min)",
+    "workCenterDefault": "Según la ruta del trabajo",
+    "toolingNone": "Sin herramental",
+    "toolingDefault": "Según el herramental de la pieza",
+    "toolingOption": "{{name}} ({{cavities}} cavidades)",
+    "updated": "Corrida {{run}} guardada",
+    "created": "Corrida {{run}} creada",
+    "editTitle": "Editar corrida {{run}}",
+    "newTitle": "Nueva corrida de producción",
+    "workCenter": "Centro de trabajo",
+    "tooling": "Herramental",
+    "runTimeManualHint": "El tiempo de corrida se capturó a mano y se conserva. Bórrelo para volver al tiempo de inicio a paro menos el tiempo muerto.",
+    "runTimeDerivedHint": "Deje el tiempo de corrida vacío para usar el tiempo de inicio a paro, menos preparación y tiempo muerto. Un valor capturado tiene prioridad."
+  },
+  "downtime": {
+    "categories": {
+      "EquipmentFailure": "Falla del equipo",
+      "SetupAdjustment": "Preparación y ajuste",
+      "Idling": "Inactividad y paros menores",
+      "ReducedSpeed": "Velocidad reducida",
+      "ProcessDefects": "Defectos del proceso",
+      "ReducedYield": "Rendimiento reducido"
+    },
+    "asset": "Máquina o herramienta",
+    "category": "Categoría de pérdida",
+    "reason": "Motivo",
+    "started": "{{asset}} marcada como parada",
+    "saveFailed": "No se pudo guardar el tiempo muerto.",
+    "startTitleFor": "Iniciar tiempo muerto — {{asset}}",
+    "machineDownTitle": "Máquina parada",
+    "planned": "Tiempo muerto planeado",
+    "start": "Iniciar tiempo muerto",
+    "sectionTitle": "Tiempo muerto",
+    "startDowntime": "Iniciar tiempo muerto",
+    "empty": "No hay tiempo muerto registrado.",
+    "plannedChip": "Planeado",
+    "openChip": "Parada ahora",
+    "end": "Terminar tiempo muerto",
+    "lasted": "{{hours}} h",
+    "ended": "{{asset}} de nuevo en marcha",
+    "machineDown": "Máquina parada"
   }
 }

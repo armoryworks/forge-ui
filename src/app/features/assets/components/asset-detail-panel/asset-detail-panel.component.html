@@ -57,7 +57,14 @@
         }
         <div class="info-item">
           <span class="info-label">{{ 'assets.hours' | translate }}</span>
-          <span class="info-value">{{ asset.currentHours }}</span>
+          <span class="info-value">
+            {{ asset.currentHours }}
+            @if (canRecordHours()) {
+              <button type="button" class="action-btn action-btn--sm" data-testid="asset-record-hours" (click)="recordHours()">
+                <span class="material-icons-outlined">speed</span>{{ 'assets.recordHours' | translate }}
+              </button>
+            }
+          </span>
         </div>
       </div>
 
@@ -158,6 +165,8 @@
           }
         </div>
       </div>
+
+      <app-asset-downtime-section [asset]="asset" />
 
       <!-- Maintenance History -->
       <div class="info-section">

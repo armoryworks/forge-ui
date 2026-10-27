@@ -1,9 +1,11 @@
+import { DowntimeCategory } from './downtime-category.type';
+
 export interface CreateDowntimeRequest {
   assetId: number;
   workCenterId: number | null;
   startedAt: string;
   endedAt: string | null;
-  category: string | null;
+  category: DowntimeCategory | null;
   downtimeReasonId: number | null;
   reason: string;
   resolution: string | null;

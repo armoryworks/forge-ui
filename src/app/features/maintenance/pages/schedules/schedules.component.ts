@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, formatNumber } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -23,6 +24,10 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { DowntimeDialogComponent } from '../../../assets/components/downtime-dialog/downtime-dialog.component';
+import { DowntimeDialogData } from '../../../assets/models/downtime-dialog-data.model';
+import { DowntimeLog } from '../../../assets/models/downtime-log.model';
 
 @Component({
   selector: 'app-maintenance-schedules',
@@ -45,6 +50,10 @@ export class SchedulesComponent {
   private readonly locale = inject(LOCALE_ID);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
+  private readonly capabilities = inject(CapabilityService);
+
+  protected readonly canReportDowntime = this.capabilities.isEnabled('CAP-MAINT-BREAKDOWN');
 
   protected readonly schedules = signal<MaintenanceSchedule[]>([]);
   protected readonly loading = signal(true);
@@ -178,5 +187,11 @@ export class SchedulesComponent {
     if (schedule.intervalHours) parts.push(this.translate.instant('maintenanceSchedules.everyHours', { count: schedule.intervalHours }));
     if (schedule.intervalShots) parts.push(this.translate.instant('maintenanceSchedules.everyShots', { count: formatNumber(schedule.intervalShots, this.locale) }));
     return parts;
+  }
+
+  protected openMachineDown(): void {
+    this.dialog.open<DowntimeDialogComponent, DowntimeDialogData, DowntimeLog | undefined>(
+      DowntimeDialogComponent, { width: '480px', data: { asset: null } },
+    );
   }
 }

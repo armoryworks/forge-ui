@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.production-run-dialog__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}

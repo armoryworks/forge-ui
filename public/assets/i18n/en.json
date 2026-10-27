@@ -3642,7 +3642,14 @@
     "colHours": "Hours",
     "maintenanceHistory": "Maintenance History",
     "noMaintenanceLogs": "No maintenance logs",
-    "currentShotCount": "Current shot count"
+    "currentShotCount": "Current shot count",
+    "meterReading": "Meter reading (h)",
+    "readingDate": "Reading date",
+    "hoursRecorded": "Meter reading {{hours}} h recorded",
+    "hoursSaveFailed": "The meter reading could not be saved.",
+    "recordHoursTitle": "Record hours — {{name}}",
+    "lastReading": "Last reading: {{hours}} h. The new reading cannot be lower.",
+    "recordHours": "Record hours"
   },
   "admin": {
     "title": "Admin Settings",
@@ -9319,7 +9326,17 @@
       "confirmResolve": "Resolve",
       "confirmFalsePositive": "Mark false positive"
     },
-    "emptyFiltered": "No predictions match these filters. Widen the severity or status filter to see more."
+    "emptyFiltered": "No predictions match these filters. Widen the severity or status filter to see more.",
+    "colAsset": "Asset",
+    "runComplete": "Predictions checked for {{count}} work centers",
+    "runFailed": "The prediction run failed.",
+    "runNow": "Run predictions now",
+    "ruleTypes": {
+      "ServiceDueSoon": "Service due soon",
+      "RisingBreakdownRisk": "Rising breakdown risk",
+      "PerformanceDegradation": "Cycle time drifting",
+      "RisingScrap": "Rising scrap"
+    }
   },
   "mrp": {
     "title": "Material Requirements Planning",
@@ -15700,5 +15717,81 @@
       "Adjustment": "Adjusted",
       "Reconciliation": "Count adjustment"
     }
+  },
+  "productionRuns": {
+    "sectionTitle": "Production runs",
+    "newRun": "New production run",
+    "empty": "No production runs yet.",
+    "quantitySummary": "{{good}} good · {{scrap}} scrap of {{target}}",
+    "start": "Start",
+    "stop": "Stop",
+    "receive": "Receive to stock",
+    "editRun": "Edit run {{run}}",
+    "toolingShots": "{{tool}} · {{shots}} shots",
+    "startedAt": "Started {{at}}",
+    "completedAt": "Stopped {{at}}",
+    "runTimeEntered": "Run time {{minutes}} min (entered)",
+    "runTimeDerived": "Run time {{minutes}} min (from start/stop less downtime)",
+    "receivedSummary": "Received {{quantity}} to stock",
+    "journalPosted": "· journal #{{entry}} posted",
+    "status": {
+      "Planned": "Planned",
+      "InProgress": "In progress",
+      "Completed": "Completed",
+      "Cancelled": "Cancelled"
+    },
+    "started": "Run {{run}} started",
+    "stopped": "Run {{run}} stopped",
+    "saveFailed": "The production run could not be saved.",
+    "receiveTitle": "Receive run {{run}} to stock?",
+    "receiveMessage": "{{quantity}} good pieces of {{part}} go into finished-goods stock. This cannot be undone from here.",
+    "receivedWithJournal": "Received {{quantity}} to stock; journal #{{entry}} posted",
+    "received": "Received {{quantity}} to stock",
+    "receiveFailed": "The run could not be received to stock.",
+    "targetQuantity": "Target quantity",
+    "goodQuantity": "Good quantity",
+    "scrapQuantity": "Scrap quantity",
+    "setupMinutes": "Setup (min)",
+    "runMinutes": "Run time (min)",
+    "workCenterDefault": "From the job's routing",
+    "toolingNone": "No tooling",
+    "toolingDefault": "From the part's tooling",
+    "toolingOption": "{{name}} ({{cavities}} cavities)",
+    "updated": "Run {{run}} saved",
+    "created": "Run {{run}} created",
+    "editTitle": "Edit run {{run}}",
+    "newTitle": "New production run",
+    "workCenter": "Work center",
+    "tooling": "Tooling",
+    "runTimeManualHint": "Run time was entered by hand and is kept. Clear it to go back to the time from start/stop less downtime.",
+    "runTimeDerivedHint": "Leave run time empty to use the time from start to stop, less setup and downtime. A value you enter wins."
+  },
+  "downtime": {
+    "categories": {
+      "EquipmentFailure": "Equipment failure",
+      "SetupAdjustment": "Setup and adjustment",
+      "Idling": "Idling and minor stops",
+      "ReducedSpeed": "Reduced speed",
+      "ProcessDefects": "Process defects",
+      "ReducedYield": "Reduced yield"
+    },
+    "asset": "Machine or tool",
+    "category": "Loss category",
+    "reason": "Reason",
+    "started": "{{asset}} marked down",
+    "saveFailed": "The downtime could not be saved.",
+    "startTitleFor": "Start downtime — {{asset}}",
+    "machineDownTitle": "Machine down",
+    "planned": "Planned downtime",
+    "start": "Start downtime",
+    "sectionTitle": "Downtime",
+    "startDowntime": "Start downtime",
+    "empty": "No downtime recorded.",
+    "plannedChip": "Planned",
+    "openChip": "Down now",
+    "end": "End downtime",
+    "lasted": "{{hours}} h",
+    "ended": "{{asset}} back up",
+    "machineDown": "Machine down"
   }
 }

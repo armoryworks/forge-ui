@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.downtime {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.downtime__header {
+  @include flex-between;
+  align-items: center;
+}
+
+.downtime__title {
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.downtime__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.downtime__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.downtime__item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.downtime__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.downtime__reason {
+  font-size: $font-size-sm;
+}
+
+.downtime__end {
+  margin-left: auto;
+}
+
+.downtime__meta {
+  display: flex;
+  gap: $sp-md;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+}

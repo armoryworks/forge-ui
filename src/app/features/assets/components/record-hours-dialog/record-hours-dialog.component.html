@@ -1,0 +1,13 @@
+<app-dialog [title]="'assets.recordHoursTitle' | translate: { name: data.asset.name }" width="420px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p class="record-hours__hint">{{ 'assets.lastReading' | translate: { hours: data.asset.currentHours } }}</p>
+    <app-input [label]="'assets.meterReading' | translate" type="number" formControlName="currentHours" [min]="data.asset.currentHours" [required]="true" data-testid="record-hours-reading" />
+    <app-datepicker [label]="'assets.readingDate' | translate" formControlName="readingAt" [max]="today" [required]="true" data-testid="record-hours-date" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="record-hours-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="record-hours-save">{{ 'common.save' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>

@@ -10,12 +10,15 @@ import { PredictionsComponent } from './predictions.component';
 import { PredictiveMaintenanceService } from '../../services/predictive-maintenance.service';
 import { MaintenancePrediction } from '../../models/prediction.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 
 interface PredictionsView {
   severityControl: FormControl<string>;
   statusControl: FormControl<string>;
   filteredPredictions: Signal<MaintenancePrediction[]>;
   emptyMessageKey: Signal<string>;
+  canRunNow: boolean;
+  runNow(): void;
 }
 
 const ROWS = [
@@ -24,14 +27,17 @@ const ROWS = [
   { id: 3, severity: 'Low', status: 'Resolved' },
 ] as MaintenancePrediction[];
 
-function create(rows: MaintenancePrediction[] = ROWS): PredictionsView {
+const runAll = vi.fn(() => of({ workCenters: 3 }));
+
+function create(rows: MaintenancePrediction[] = ROWS, roles = true): PredictionsView {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideTranslateService(),
-      { provide: PredictiveMaintenanceService, useValue: { list: vi.fn(() => of(rows)), getDashboard: vi.fn(() => of(null)) } },
+      { provide: PredictiveMaintenanceService, useValue: { list: vi.fn(() => of(rows)), getDashboard: vi.fn(() => of(null)), runAll } },
       { provide: MatDialog, useValue: { open: vi.fn() } },
-      { provide: SnackbarService, useValue: { success: vi.fn() } },
+      { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+      { provide: AuthService, useValue: { hasAnyRole: vi.fn(() => roles) } },
     ],
   });
   return TestBed.runInInjectionContext(() => new PredictionsComponent()) as unknown as PredictionsView;
@@ -55,5 +61,20 @@ describe('PredictionsComponent filters', () => {
     expect(view.emptyMessageKey()).toBe('maintenance.emptyFiltered');
 
     expect(create([]).emptyMessageKey()).toBe('maintenance.empty');
+  });
+});
+
+describe('PredictionsComponent run now', () => {
+  it('lets Admin and Manager run the rules for every work center', () => {
+    const view = create();
+    expect(view.canRunNow).toBe(true);
+
+    view.runNow();
+
+    expect(runAll).toHaveBeenCalled();
+  });
+
+  it('hides run now from other roles', () => {
+    expect(create(ROWS, false).canRunNow).toBe(false);
   });
 });

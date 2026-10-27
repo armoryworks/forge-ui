@@ -38,6 +38,11 @@
         [formControl]="statusControl" [options]="statusOptions" />
       <span appSpacer></span>
       <span class="toolbar__hint">{{ 'maintenance.hint' | translate }}</span>
+      @if (canRunNow) {
+        <button type="button" class="action-btn" data-testid="predictions-run-now" [disabled]="running()" (click)="runNow()">
+          <span class="material-icons-outlined">refresh</span>{{ 'maintenance.runNow' | translate }}
+        </button>
+      }
     </app-toolbar>
 
     <!-- Predictions table -->
@@ -53,6 +58,10 @@
           <span [class]="getSeverityClass(row.severity)">
             {{ ('maintenance.severity.' + row.severity) | translate }}
           </span>
+        </ng-template>
+
+        <ng-template appColumnCell="predictionType" let-row>
+          {{ row.ruleKey ? (('maintenance.ruleTypes.' + row.predictionType) | translate) : row.predictionType }}
         </ng-template>
 
         <ng-template appColumnCell="confidencePercent" let-row>

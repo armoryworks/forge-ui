@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { WritableSignal } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
@@ -10,6 +11,8 @@ import { SchedulesComponent } from './schedules.component';
 import { MaintenanceSchedulesService } from '../../services/maintenance-schedules.service';
 import { AssetsService } from '../../../assets/services/assets.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { DowntimeDialogComponent } from '../../../assets/components/downtime-dialog/downtime-dialog.component';
 import { MaintenanceSchedule } from '../../models/maintenance-schedule.model';
 
 interface SchedulesView {
@@ -23,6 +26,8 @@ interface SchedulesView {
   saveLog(): void;
   createJob(schedule: MaintenanceSchedule): void;
   intervalParts(schedule: MaintenanceSchedule): string[];
+  canReportDowntime: boolean;
+  openMachineDown(): void;
 }
 
 const lube: MaintenanceSchedule = {
@@ -34,6 +39,8 @@ const lube: MaintenanceSchedule = {
 describe('SchedulesComponent', () => {
   let service: { list: ReturnType<typeof vi.fn>; create: ReturnType<typeof vi.fn>; logService: ReturnType<typeof vi.fn>; createJob: ReturnType<typeof vi.fn> };
   let navigate: ReturnType<typeof vi.fn>;
+  let dialogOpen: ReturnType<typeof vi.fn>;
+  let breakdownOn: boolean;
   let view: SchedulesView;
 
   beforeEach(() => {
@@ -45,6 +52,8 @@ describe('SchedulesComponent', () => {
       createJob: vi.fn(() => of({ jobId: 12 })),
     };
     navigate = vi.fn();
+    dialogOpen = vi.fn();
+    breakdownOn = true;
     TestBed.configureTestingModule({
       providers: [
         provideTranslateService(),
@@ -52,6 +61,8 @@ describe('SchedulesComponent', () => {
         { provide: AssetsService, useValue: { getAssets: vi.fn(() => of([{ id: 9, name: 'VMC-01' }])) } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: Router, useValue: { navigate } },
+        { provide: MatDialog, useValue: { open: dialogOpen } },
+        { provide: CapabilityService, useValue: { isEnabled: vi.fn((code: string) => breakdownOn && code === 'CAP-MAINT-BREAKDOWN') } },
       ],
     });
     view = TestBed.runInInjectionContext(() => new SchedulesComponent()) as unknown as SchedulesView;
@@ -108,5 +119,19 @@ describe('SchedulesComponent', () => {
   it('describes every interval the schedule uses', () => {
     expect(view.intervalParts({ ...lube, intervalShots: 50000 })).toHaveLength(3);
     expect(view.intervalParts({ ...lube, intervalHours: null })).toHaveLength(1);
+  });
+  it('opens the machine-down dialog with an asset picker', () => {
+    expect(view.canReportDowntime).toBe(true);
+
+    view.openMachineDown();
+
+    expect(dialogOpen).toHaveBeenCalledWith(DowntimeDialogComponent, expect.objectContaining({ data: { asset: null } }));
+  });
+
+  it('hides machine down while breakdown maintenance is off', () => {
+    breakdownOn = false;
+    const hidden = TestBed.runInInjectionContext(() => new SchedulesComponent()) as unknown as SchedulesView;
+
+    expect(hidden.canReportDowntime).toBe(false);
   });
 });

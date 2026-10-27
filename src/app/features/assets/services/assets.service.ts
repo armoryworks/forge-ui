@@ -38,8 +38,8 @@ export class AssetsService {
   }
 
   // Machine hours
-  updateMachineHours(id: number, currentHours: number): Observable<AssetItem> {
-    return this.http.patch<AssetItem>(`${this.base}/${id}/hours`, { currentHours });
+  updateMachineHours(id: number, currentHours: number, readingAt: string | null = null): Observable<AssetItem> {
+    return this.http.patch<AssetItem>(`${this.base}/${id}/hours`, { currentHours, readingAt });
   }
 
   // Downtime logging
@@ -50,6 +50,10 @@ export class AssetsService {
 
   createDowntimeLog(assetId: number, request: CreateDowntimeRequest): Observable<DowntimeLog> {
     return this.http.post<DowntimeLog>(`${this.base}/${assetId}/downtime`, request);
+  }
+
+  endDowntimeLog(downtimeId: number): Observable<DowntimeLog> {
+    return this.http.patch<DowntimeLog>(`${this.base}/downtime/${downtimeId}/end`, {});
   }
 
   getMaintenanceLogs(assetId: number): Observable<MaintenanceLogListItem[]> {

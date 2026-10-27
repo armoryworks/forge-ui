@@ -1,0 +1,80 @@
+@if (visible()) {
+  <div class="prs" data-testid="production-runs-section" [appLoadingBlock]="loading()">
+    <div class="prs__header">
+      <h3 class="prs__title">{{ 'productionRuns.sectionTitle' | translate }}</h3>
+      <button type="button" class="icon-btn" data-testid="production-run-new"
+        [attr.aria-label]="'productionRuns.newRun' | translate"
+        [matTooltip]="'productionRuns.newRun' | translate" matTooltipPosition="above"
+        (click)="openCreate()">
+        <span class="material-icons-outlined">add</span>
+      </button>
+    </div>
+    @if (rows().length === 0) {
+      <p class="prs__empty" data-testid="production-runs-empty">{{ 'productionRuns.empty' | translate }}</p>
+    } @else {
+      <ul class="prs__list" [attr.aria-label]="'productionRuns.sectionTitle' | translate">
+        @for (row of rows(); track row.run.id) {
+          <li class="prs__item" [attr.data-testid]="'production-run-' + row.run.id">
+            <div class="prs__line">
+              <span class="prs__number">{{ row.run.runNumber }}</span>
+              <span [class]="row.statusChipClass">{{ row.statusLabelKey | translate }}</span>
+              <span class="prs__qty">{{ 'productionRuns.quantitySummary' | translate: { good: (row.run.completedQuantity | number), scrap: (row.run.scrapQuantity | number), target: (row.run.targetQuantity | number) } }}</span>
+              <span class="prs__actions">
+                @if (row.canStart) {
+                  <button type="button" class="action-btn action-btn--sm" [disabled]="busyRunId() === row.run.id"
+                    [attr.data-testid]="'production-run-start-' + row.run.id" (click)="start(row.run)">
+                    <span class="material-icons-outlined">play_arrow</span>{{ 'productionRuns.start' | translate }}
+                  </button>
+                }
+                @if (row.canStop) {
+                  <button type="button" class="action-btn action-btn--sm" [disabled]="busyRunId() === row.run.id"
+                    [attr.data-testid]="'production-run-stop-' + row.run.id" (click)="stop(row.run)">
+                    <span class="material-icons-outlined">stop</span>{{ 'productionRuns.stop' | translate }}
+                  </button>
+                }
+                @if (row.canReceive) {
+                  <button type="button" class="action-btn action-btn--sm" [disabled]="busyRunId() === row.run.id"
+                    [attr.data-testid]="'production-run-receive-' + row.run.id" (click)="receive(row.run)">
+                    <span class="material-icons-outlined">inventory</span>{{ 'productionRuns.receive' | translate }}
+                  </button>
+                }
+                @if (row.canEdit) {
+                  <button type="button" class="icon-btn" [attr.data-testid]="'production-run-edit-' + row.run.id"
+                    [attr.aria-label]="'productionRuns.editRun' | translate: { run: row.run.runNumber }"
+                    [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEdit(row.run)">
+                    <span class="material-icons-outlined">edit</span>
+                  </button>
+                }
+              </span>
+            </div>
+            <div class="prs__meta">
+              @if (row.run.workCenterName) {
+                <span>{{ row.run.workCenterName }}</span>
+              }
+              @if (row.run.toolingAssetName) {
+                <span>{{ 'productionRuns.toolingShots' | translate: { tool: row.run.toolingAssetName, shots: (row.run.shotsApplied | number) } }}</span>
+              }
+              @if (row.run.startedAt) {
+                <span>{{ 'productionRuns.startedAt' | translate: { at: (row.run.startedAt | dateTime: 'compact') } }}</span>
+              }
+              @if (row.run.completedAt) {
+                <span>{{ 'productionRuns.completedAt' | translate: { at: (row.run.completedAt | dateTime: 'compact') } }}</span>
+              }
+              @if (row.runTimeLabelKey) {
+                <span>{{ row.runTimeLabelKey | translate: { minutes: (row.run.runTimeMinutes | number: '1.0-2') } }}</span>
+              }
+              @if (row.received) {
+                <span class="prs__received" [attr.data-testid]="'production-run-received-' + row.run.id">
+                  {{ 'productionRuns.receivedSummary' | translate: { quantity: (row.run.receivedQuantity | number) } }}
+                  @if (row.run.receiptJournalEntryNumber !== null) {
+                    {{ 'productionRuns.journalPosted' | translate: { entry: row.run.receiptJournalEntryNumber } }}
+                  }
+                </span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+}

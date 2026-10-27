@@ -47,6 +47,7 @@ import { DetailLoadErrorComponent } from '../../../shared/components/detail-load
 import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
 import { JobCostTabComponent } from './job-cost-tab.component';
 import { OperationTimeTabComponent } from './operation-time-tab.component';
+import { ProductionRunsSectionComponent } from './production-runs-section/production-runs-section.component';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { JOB_EDIT_ROLES } from '../job-roles';
 import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
@@ -54,7 +55,7 @@ import { DateTimePipe } from '../../../shared/pipes/date-time.pipe';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DateOnlyPipe, DatePipe, DateTimePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
+  imports: [DateOnlyPipe, DatePipe, DateTimePipe, DecimalPipe, NgTemplateOutlet, ReactiveFormsModule, TranslatePipe, AvatarComponent, PriorityIndicatorComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, ProductionRunsSectionComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent, EntityPickerComponent, CapDirective, JobGatesSectionComponent, DetailLoadErrorComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

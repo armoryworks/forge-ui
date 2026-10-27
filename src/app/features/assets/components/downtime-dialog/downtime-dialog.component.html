@@ -1,0 +1,17 @@
+<app-dialog [title]="(data.asset ? 'downtime.startTitleFor' : 'downtime.machineDownTitle') | translate: { asset: data.asset?.name ?? '' }" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    @if (pickAsset) {
+      <app-select [label]="'downtime.asset' | translate" formControlName="assetId" [options]="assetOptions()" [required]="true" data-testid="downtime-asset" />
+    }
+    <app-select [label]="'downtime.category' | translate" formControlName="category" [options]="categoryOptions" [required]="true" data-testid="downtime-category" />
+    <app-input [label]="'downtime.reason' | translate" formControlName="reason" [maxlength]="500" [required]="true" data-testid="downtime-reason" />
+    <app-toggle [label]="'downtime.planned' | translate" formControlName="isPlanned" data-testid="downtime-planned" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" [maxlength]="2000" data-testid="downtime-notes" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" data-testid="downtime-cancel">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="downtime-save">{{ 'downtime.start' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>
