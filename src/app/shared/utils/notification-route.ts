@@ -26,6 +26,9 @@ export function resolveEntityRoute(entityType: string, entityId: number): Entity
     case 'customerreturn': return { path: ['/customer-returns'], query: { id: entityId } };
     case 'creditmemo': return { path: ['/credit-memos'], query: { detail: `credit-memo:${entityId}` } };
     case 'payment': return { path: ['/payments'], query: { id: entityId } };
+    case 'leaverequest': return { path: ['/leave', 'mine'] };
+    case 'leaveapproval': return { path: ['/leave', 'team'] };
+    case 'events': return { path: ['/calendar'] };
     default: return null;
   }
 }

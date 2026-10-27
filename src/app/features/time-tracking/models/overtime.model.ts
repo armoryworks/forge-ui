@@ -32,6 +32,10 @@ export interface OvertimeBreakdown {
   doubletimeCost: number;
   totalCost: number;
   dailyBreakdown: DailyOvertimeDetail[];
+  ruleName?: string | null;
+  dailyThresholdsFirst?: boolean;
+  dailyThresholdHours?: number;
+  weeklyThresholdHours?: number;
 }
 
 export interface DailyOvertimeDetail {

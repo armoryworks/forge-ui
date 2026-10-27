@@ -3,4 +3,5 @@ export interface PayPeriod {
   periodStart: string;
   periodEnd: string;
   daysRemaining: number;
+  anchorDate?: string | null;
 }

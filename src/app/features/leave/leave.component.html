@@ -1,0 +1,32 @@
+<app-page-layout [pageTitle]="'leave.title' | translate" [pageSubtitle]="'leave.subtitle' | translate">
+  <ng-container toolbar>
+    <div class="leave-tabs" role="tablist" [attr.aria-label]="'leave.title' | translate">
+      @for (tab of tabs(); track tab.key) {
+        <button class="tab" role="tab" [attr.data-testid]="'leave-tab-' + tab.key"
+                [class.tab--active]="activeTab() === tab.key"
+                [attr.aria-selected]="activeTab() === tab.key"
+                (click)="switchTab(tab.key)">
+          <span class="material-icons-outlined" aria-hidden="true">{{ tab.icon }}</span>
+          {{ tab.labelKey | translate }}
+        </button>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container content>
+    @switch (activeTab()) {
+      @case ('team') {
+        <app-leave-approvals [canDecide]="canDecide()" />
+      }
+      @case ('balances') {
+        <app-leave-balances [canAdjust]="isAdmin()" />
+      }
+      @case ('policies') {
+        <app-leave-policies [canEdit]="isAdmin()" />
+      }
+      @default {
+        <app-my-leave />
+      }
+    }
+  </ng-container>
+</app-page-layout>

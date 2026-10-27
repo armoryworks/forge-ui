@@ -90,7 +90,8 @@
     "exchangeRates": "Exchange Rates",
     "openingStock": "Opening Stock",
     "inventoryValuation": "Inventory Valuation",
-    "creditMemos": "Credit Memos"
+    "creditMemos": "Credit Memos",
+    "leave": "Leave"
   },
   "navGroups": {
     "operations": "Operations",
@@ -3562,7 +3563,29 @@
     "nonBillable": "Non-billable",
     "durationRange": "Enter a duration between 1 minute and 24 hours.",
     "colLabor": "Labor",
-    "splitWith": "Split with {{count}} concurrent timer(s)"
+    "splitWith": "Split with {{count}} concurrent timer(s)",
+    "noOperation": "No specific operation",
+    "entryTypeRun": "Run",
+    "entryTypeSetup": "Setup",
+    "entryTypeRework": "Rework",
+    "jobOptional": "Job (optional)",
+    "operation": "Operation",
+    "entryType": "Time type",
+    "overtime": {
+      "title": "Weekly overtime",
+      "employee": "Employee",
+      "weekOf": "Week of",
+      "regular": "Regular",
+      "overtime": "Overtime",
+      "doubletime": "Double time",
+      "cost": "Labor cost",
+      "total": "Total",
+      "noHours": "No hours this week.",
+      "pickEmployee": "Choose an employee and a week to see the overtime breakdown.",
+      "loadFailed": "Could not load the overtime breakdown.",
+      "ruleDaily": "Rule: {{name}}, daily overtime after {{daily}} h, then weekly after {{weekly}} h.",
+      "ruleWeekly": "Rule: {{name}}, overtime after {{weekly}} h in the week."
+    }
   },
   "assets": {
     "title": "Assets",
@@ -3683,7 +3706,8 @@
       "tariffs": "Tariff Rates",
       "workingCalendars": "Working Calendars",
       "database": "Database Transfer",
-      "paymentTerms": "Payment Terms"
+      "paymentTerms": "Payment Terms",
+      "leavePolicies": "Leave Policies"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -4475,7 +4499,9 @@
       "missing": "Cannot enable {{name}} — enable these dependencies first: {{list}}.",
       "conflicts": "{{name}} conflicts with: {{list}}. Disable the peer first.",
       "concurrency": "{{name}} was modified by another admin. The page has been refreshed; try again."
-    }
+    },
+    "hireDate": "Hire date",
+    "hireDateMissing": "No hire date: leave accrues from the account creation date until one is entered."
   },
   "teamsPanel": {
     "teams": "teams",
@@ -14653,6 +14679,134 @@
       "BankTransfer": "Bank transfer",
       "Wire": "Wire",
       "Other": "Other"
+    }
+  },
+  "leave": {
+    "title": "Leave",
+    "subtitle": "Time off balances, requests and approvals",
+    "tabs": {
+      "mine": "My leave",
+      "team": "Requests",
+      "balances": "Balances",
+      "policies": "Policies"
+    },
+    "myBalances": "My balances",
+    "requestLeave": "Request leave",
+    "hoursShort": "h",
+    "usedThisYear": "Used this year: {{hours}} h",
+    "accruedThisYear": "accrued: {{hours}} h",
+    "noBalances": "No leave balance yet. Balances appear once leave accrues or an administrator records an opening balance.",
+    "pendingHours": "{{hours}} h are waiting for approval.",
+    "myRequests": "My requests",
+    "noRequests": "You have not requested any leave.",
+    "status": {
+      "all": "All",
+      "Pending": "Pending",
+      "Approved": "Approved",
+      "Denied": "Denied",
+      "Cancelled": "Cancelled"
+    },
+    "cancelRequest": "Cancel request",
+    "fields": {
+      "type": "Leave type",
+      "startDate": "First day",
+      "endDate": "Last day",
+      "hours": "Hours",
+      "reason": "Reason",
+      "decidedBy": "Decided by",
+      "note": "Note",
+      "employee": "Employee",
+      "effectiveDate": "Effective date",
+      "balance": "Balance",
+      "used": "Used",
+      "accrued": "Accrued",
+      "lastAccrual": "Accrued through",
+      "adjustmentType": "Entry",
+      "balanceAfter": "Balance after",
+      "recordedBy": "Recorded by"
+    },
+    "hoursHint": "Filled in as 8 hours per weekday; change it for partial days.",
+    "submitRequest": "Submit request",
+    "loadFailed": "Could not load leave.",
+    "requestSubmitted": "Leave request sent for approval.",
+    "requestFailed": "Could not submit the leave request.",
+    "cancelTitle": "Cancel leave request?",
+    "cancelMessage": "Withdraw this request for {{hours}} h of {{type}}?",
+    "requestCancelled": "Leave request cancelled.",
+    "cancelFailed": "Could not cancel the leave request.",
+    "readOnly": "Read only",
+    "noTeamRequests": "No leave requests match this filter.",
+    "approve": "Approve",
+    "deny": "Deny",
+    "denyTitle": "Deny leave request",
+    "denySummary": "{{name}} asked for {{hours}} h of {{type}}. The note is sent to the employee.",
+    "approved": "Leave approved for {{name}}.",
+    "denied": "Leave denied for {{name}}.",
+    "decideFailed": "Could not record the decision.",
+    "balancesHint": "Balances accrue when a pay period is locked. Record an opening balance for new or migrated employees, or an adjustment to correct one.",
+    "recordBalance": "Record balance",
+    "noBalancesAll": "No leave balances yet.",
+    "history": "Balance history",
+    "adjust": "Adjust balance",
+    "openingHint": "The balance the employee starts with on the effective date. One opening balance per employee and leave type.",
+    "adjustmentHint": "Hours to add, or a negative number to remove. A reason is required.",
+    "historyTitle": "Balance history: {{name}}",
+    "noHistory": "No opening balance or adjustments recorded.",
+    "adjustmentType": {
+      "Opening": "Opening balance",
+      "Adjustment": "Adjustment"
+    },
+    "openingNotNegative": "An opening balance cannot be negative.",
+    "adjustmentNotZero": "An adjustment must add or remove some hours.",
+    "adjustmentNeedsReason": "Give a reason for the adjustment.",
+    "adjusted": "{{type}} balance is now {{hours}} h.",
+    "adjustFailed": "Could not record the balance.",
+    "policy": {
+      "hint": "Accrual is credited per locked pay period, up to the maximum balance.",
+      "add": "Add policy",
+      "edit": "Edit policy",
+      "none": "No leave policies yet.",
+      "accrualRate": "Hours per pay period",
+      "maxBalance": "Maximum balance",
+      "carryOver": "Year-end carryover",
+      "waitingPeriod": "Waiting period (days)",
+      "paid": "Paid leave",
+      "accrueFromHire": "Accrue from hire date",
+      "saved": "Leave policy {{name}} saved.",
+      "saveFailed": "Could not save the leave policy."
+    }
+  },
+  "timePay": {
+    "types": {
+      "weekly": "Weekly",
+      "biweekly": "Every two weeks",
+      "semimonthly": "Twice a month (1st-15th, 16th-end)",
+      "monthly": "Monthly"
+    },
+    "periodType": "Pay period",
+    "anchorDate": "First day of a pay period",
+    "anchorHint": "Any past or future first day of a pay period; the others repeat from it.",
+    "calendarHint": "These periods follow the calendar, so no start date is needed.",
+    "previewTitle": "Upcoming pay periods",
+    "current": "Current",
+    "saved": "Pay period settings saved.",
+    "saveFailed": "Could not save the pay period settings.",
+    "loadFailed": "Could not load the pay period settings.",
+    "save": "Save pay periods"
+  },
+  "events": {
+    "rsvp": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "accepted": "You accepted the invitation.",
+      "declined": "You declined the invitation.",
+      "failed": "Could not send your answer.",
+      "status": {
+        "Invited": "Invited",
+        "Accepted": "Accepted",
+        "Declined": "Declined",
+        "Attended": "Attended"
+      }
     }
   }
 }

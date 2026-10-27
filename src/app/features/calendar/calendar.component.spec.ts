@@ -177,7 +177,7 @@ describe('CalendarComponent · event days', () => {
         { provide: Router, useValue: { navigate: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
         { provide: UserPreferencesService, useValue: { get: () => null, set: vi.fn() } },
-        { provide: AuthService, useValue: { hasAnyRole: () => false } },
+        { provide: AuthService, useValue: { hasAnyRole: () => false, user: () => null } },
       ],
     });
     const component = TestBed.runInInjectionContext(() => new CalendarComponent()) as unknown as CalendarEventInternals;

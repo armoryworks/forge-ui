@@ -259,6 +259,13 @@ export const routes: Routes = [
           import('./features/time-tracking/time-tracking.routes').then((m) => m.TIME_TRACKING_ROUTES),
       },
       {
+        path: 'leave',
+        data: { titleKey: 'leave.title' },
+        canActivate: routeAccessGuards('leave'),
+        loadChildren: () =>
+          import('./features/leave/leave.routes').then((m) => m.LEAVE_ROUTES),
+      },
+      {
         path: 'piece-rates',
         data: { titleKey: 'nav.pieceRates' },
         canActivate: routeAccessGuards('piece-rates'),

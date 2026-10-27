@@ -71,6 +71,30 @@
   color: var(--text-secondary);
 }
 
+.day-dialog__rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.day-dialog__attendees {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+}
+
+.day-dialog__attendee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-sm;
+}
+
 // Shared meta row (events / jobs / POs)
 .day-dialog__meta {
   display: flex;

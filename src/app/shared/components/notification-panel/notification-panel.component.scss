@@ -190,3 +190,9 @@
     color: var(--error);
   }
 }
+
+.notification-item__rsvp {
+  display: flex;
+  gap: $sp-xs;
+  margin-top: $sp-xs;
+}

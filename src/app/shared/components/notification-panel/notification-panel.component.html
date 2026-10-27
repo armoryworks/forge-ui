@@ -45,6 +45,18 @@
             <div class="notification-item__title">{{ n.title }}</div>
             <div class="notification-item__message" [innerHTML]="n.message | richText"></div>
             <div class="notification-item__time">{{ n.createdAt | dateTime }}</div>
+            @if (n.type === 'event_invite' && n.entityId) {
+              <div class="notification-item__rsvp">
+                <button class="action-btn action-btn--sm" [attr.data-testid]="'notification-accept-' + n.id"
+                        (click)="respondToInvite(n, 'Accepted', $event)" (keydown.enter)="$event.stopPropagation()">
+                  {{ 'events.rsvp.accept' | translate }}
+                </button>
+                <button class="action-btn action-btn--sm action-btn--danger" [attr.data-testid]="'notification-decline-' + n.id"
+                        (click)="respondToInvite(n, 'Declined', $event)" (keydown.enter)="$event.stopPropagation()">
+                  {{ 'events.rsvp.decline' | translate }}
+                </button>
+              </div>
+            }
           </div>
           <div class="notification-item__actions">
             <button class="icon-btn" [class.notification-item__pin--active]="n.isPinned" [attr.aria-pressed]="n.isPinned" [attr.aria-label]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" [matTooltip]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" matTooltipPosition="above" (click)="togglePin(n, $event)">

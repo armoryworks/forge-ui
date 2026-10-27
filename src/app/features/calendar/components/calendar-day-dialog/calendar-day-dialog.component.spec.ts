@@ -6,6 +6,9 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { EventsService } from '../../../events/services/events.service';
 import { CalendarDayDialogComponent, CalendarDayDialogData, CalendarDayEvent } from './calendar-day-dialog.component';
 
 @Component({ selector: 'app-dialog', standalone: true, template: '<ng-content />' })
@@ -39,6 +42,8 @@ describe('CalendarDayDialogComponent', () => {
     };
   }
 
+  const eventsService = { respondToEvent: vi.fn(() => of(undefined)) };
+
   function render(events: CalendarDayEvent[]): HTMLElement {
     const data: CalendarDayDialogData = { date: new Date(2026, 9, 30), events, jobs: [], poEvents: [] };
     TestBed.resetTestingModule();
@@ -49,6 +54,9 @@ describe('CalendarDayDialogComponent', () => {
         { provide: MAT_DIALOG_DATA, useValue: data },
         { provide: MatDialogRef, useValue: { close: vi.fn() } },
         { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: EventsService, useValue: eventsService },
+        { provide: AuthService, useValue: { user: () => ({ id: 7 }) } },
+        { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
       ],
     });
     TestBed.overrideComponent(CalendarDayDialogComponent, {
@@ -72,5 +80,29 @@ describe('CalendarDayDialogComponent', () => {
 
     expect(text).toContain('09:00 AM – 10:30 AM');
     expect(text).not.toContain('All day');
+  });
+
+  it('lets an invited employee accept and shows every attendee status', () => {
+    eventsService.respondToEvent.mockClear();
+    const invited: CalendarDayEvent = {
+      ...event(3, '2026-10-30T15:00:00Z', '2026-10-30T16:00:00Z', false),
+      myStatus: 'Invited',
+      attendees: [
+        { id: 1, userId: 7, userName: 'Kelly, Ben', status: 'Invited', respondedAt: null },
+        { id: 2, userId: 8, userName: 'Ortiz, Rosa', status: 'Declined', respondedAt: null },
+      ],
+    };
+    const host = render([invited]);
+
+    expect(host.querySelector('[data-testid="event-attendees-3"]')?.textContent).toContain('Ortiz, Rosa');
+    (host.querySelector('[data-testid="event-accept-3"]') as HTMLButtonElement).click();
+
+    expect(eventsService.respondToEvent).toHaveBeenCalledWith(3, 'Accepted');
+  });
+
+  it('offers no answer buttons on an event the user is not invited to', () => {
+    const host = render([event(4, '2026-10-30T15:00:00Z', '2026-10-30T16:00:00Z', false)]);
+
+    expect(host.querySelector('[data-testid="event-rsvp-4"]')).toBeNull();
   });
 });

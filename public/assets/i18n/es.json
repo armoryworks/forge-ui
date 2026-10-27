@@ -90,7 +90,8 @@
     "exchangeRates": "Tipos de cambio",
     "openingStock": "Existencias iniciales",
     "inventoryValuation": "Valoración de inventario",
-    "creditMemos": "Notas de crédito"
+    "creditMemos": "Notas de crédito",
+    "leave": "Ausencias"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -3562,7 +3563,29 @@
     "nonBillable": "No facturable",
     "durationRange": "Ingrese una duración entre 1 minuto y 24 horas.",
     "colLabor": "Mano de obra",
-    "splitWith": "Repartido con {{count}} temporizador(es) simultáneo(s)"
+    "splitWith": "Repartido con {{count}} temporizador(es) simultáneo(s)",
+    "noOperation": "Sin operación específica",
+    "entryTypeRun": "Producción",
+    "entryTypeSetup": "Preparación",
+    "entryTypeRework": "Retrabajo",
+    "jobOptional": "Trabajo (opcional)",
+    "operation": "Operación",
+    "entryType": "Tipo de tiempo",
+    "overtime": {
+      "title": "Horas extra semanales",
+      "employee": "Empleado",
+      "weekOf": "Semana del",
+      "regular": "Regulares",
+      "overtime": "Horas extra",
+      "doubletime": "Tiempo doble",
+      "cost": "Costo de mano de obra",
+      "total": "Total",
+      "noHours": "No hay horas esta semana.",
+      "pickEmployee": "Elija un empleado y una semana para ver el desglose de horas extra.",
+      "loadFailed": "No se pudo cargar el desglose de horas extra.",
+      "ruleDaily": "Regla: {{name}}, horas extra diarias después de {{daily}} h, luego semanales después de {{weekly}} h.",
+      "ruleWeekly": "Regla: {{name}}, horas extra después de {{weekly}} h en la semana."
+    }
   },
   "assets": {
     "title": "Activos",
@@ -3683,7 +3706,8 @@
       "tariffs": "Tasas arancelarias",
       "workingCalendars": "Calendarios laborales",
       "database": "Transferencia de base de datos",
-      "paymentTerms": "Condiciones de pago"
+      "paymentTerms": "Condiciones de pago",
+      "leavePolicies": "Políticas de ausencias"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -4475,7 +4499,9 @@
       "missing": "No se puede habilitar {{name}}: primero habilite estas dependencias: {{list}}.",
       "conflicts": "{{name}} entra en conflicto con: {{list}}. Primero deshabilite la otra capacidad.",
       "concurrency": "Otro administrador modificó {{name}}. La página se actualizó; inténtelo de nuevo."
-    }
+    },
+    "hireDate": "Fecha de contratación",
+    "hireDateMissing": "Sin fecha de contratación: las ausencias se acumulan desde la fecha de creación de la cuenta hasta que se ingrese una."
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -14653,6 +14679,134 @@
       "BankTransfer": "Transferencia bancaria",
       "Wire": "Giro",
       "Other": "Otro"
+    }
+  },
+  "leave": {
+    "title": "Ausencias",
+    "subtitle": "Saldos, solicitudes y aprobaciones de tiempo libre",
+    "tabs": {
+      "mine": "Mis ausencias",
+      "team": "Solicitudes",
+      "balances": "Saldos",
+      "policies": "Políticas"
+    },
+    "myBalances": "Mis saldos",
+    "requestLeave": "Solicitar ausencia",
+    "hoursShort": "h",
+    "usedThisYear": "Usado este año: {{hours}} h",
+    "accruedThisYear": "acumulado: {{hours}} h",
+    "noBalances": "Aún no tiene saldo de ausencias. Los saldos aparecen cuando se acumula tiempo o un administrador registra un saldo inicial.",
+    "pendingHours": "{{hours}} h están pendientes de aprobación.",
+    "myRequests": "Mis solicitudes",
+    "noRequests": "No ha solicitado ninguna ausencia.",
+    "status": {
+      "all": "Todas",
+      "Pending": "Pendiente",
+      "Approved": "Aprobada",
+      "Denied": "Rechazada",
+      "Cancelled": "Cancelada"
+    },
+    "cancelRequest": "Cancelar solicitud",
+    "fields": {
+      "type": "Tipo de ausencia",
+      "startDate": "Primer día",
+      "endDate": "Último día",
+      "hours": "Horas",
+      "reason": "Motivo",
+      "decidedBy": "Decidida por",
+      "note": "Nota",
+      "employee": "Empleado",
+      "effectiveDate": "Fecha de vigencia",
+      "balance": "Saldo",
+      "used": "Usado",
+      "accrued": "Acumulado",
+      "lastAccrual": "Acumulado hasta",
+      "adjustmentType": "Movimiento",
+      "balanceAfter": "Saldo resultante",
+      "recordedBy": "Registrado por"
+    },
+    "hoursHint": "Se calcula con 8 horas por día laborable; cámbielo para días parciales.",
+    "submitRequest": "Enviar solicitud",
+    "loadFailed": "No se pudieron cargar las ausencias.",
+    "requestSubmitted": "Solicitud de ausencia enviada para aprobación.",
+    "requestFailed": "No se pudo enviar la solicitud de ausencia.",
+    "cancelTitle": "¿Cancelar la solicitud de ausencia?",
+    "cancelMessage": "¿Retirar esta solicitud de {{hours}} h de {{type}}?",
+    "requestCancelled": "Solicitud de ausencia cancelada.",
+    "cancelFailed": "No se pudo cancelar la solicitud de ausencia.",
+    "readOnly": "Solo lectura",
+    "noTeamRequests": "Ninguna solicitud de ausencia coincide con este filtro.",
+    "approve": "Aprobar",
+    "deny": "Rechazar",
+    "denyTitle": "Rechazar solicitud de ausencia",
+    "denySummary": "{{name}} solicitó {{hours}} h de {{type}}. La nota se envía al empleado.",
+    "approved": "Ausencia aprobada para {{name}}.",
+    "denied": "Ausencia rechazada para {{name}}.",
+    "decideFailed": "No se pudo registrar la decisión.",
+    "balancesHint": "Los saldos se acumulan al cerrar un período de pago. Registre un saldo inicial para empleados nuevos o migrados, o un ajuste para corregirlo.",
+    "recordBalance": "Registrar saldo",
+    "noBalancesAll": "Aún no hay saldos de ausencias.",
+    "history": "Historial del saldo",
+    "adjust": "Ajustar saldo",
+    "openingHint": "El saldo con el que el empleado comienza en la fecha de vigencia. Un saldo inicial por empleado y tipo de ausencia.",
+    "adjustmentHint": "Horas que se suman, o un número negativo para restarlas. Se requiere un motivo.",
+    "historyTitle": "Historial del saldo: {{name}}",
+    "noHistory": "No hay saldo inicial ni ajustes registrados.",
+    "adjustmentType": {
+      "Opening": "Saldo inicial",
+      "Adjustment": "Ajuste"
+    },
+    "openingNotNegative": "Un saldo inicial no puede ser negativo.",
+    "adjustmentNotZero": "Un ajuste debe sumar o restar horas.",
+    "adjustmentNeedsReason": "Indique el motivo del ajuste.",
+    "adjusted": "El saldo de {{type}} ahora es {{hours}} h.",
+    "adjustFailed": "No se pudo registrar el saldo.",
+    "policy": {
+      "hint": "La acumulación se acredita por cada período de pago cerrado, hasta el saldo máximo.",
+      "add": "Agregar política",
+      "edit": "Editar política",
+      "none": "Aún no hay políticas de ausencias.",
+      "accrualRate": "Horas por período de pago",
+      "maxBalance": "Saldo máximo",
+      "carryOver": "Traspaso al cierre del año",
+      "waitingPeriod": "Período de espera (días)",
+      "paid": "Ausencia pagada",
+      "accrueFromHire": "Acumular desde la fecha de contratación",
+      "saved": "Política de ausencias {{name}} guardada.",
+      "saveFailed": "No se pudo guardar la política de ausencias."
+    }
+  },
+  "timePay": {
+    "types": {
+      "weekly": "Semanal",
+      "biweekly": "Cada dos semanas",
+      "semimonthly": "Dos veces al mes (1-15, 16-fin)",
+      "monthly": "Mensual"
+    },
+    "periodType": "Período de pago",
+    "anchorDate": "Primer día de un período de pago",
+    "anchorHint": "Cualquier primer día de un período de pago, pasado o futuro; los demás se repiten a partir de él.",
+    "calendarHint": "Estos períodos siguen el calendario, por lo que no se necesita una fecha de inicio.",
+    "previewTitle": "Próximos períodos de pago",
+    "current": "Actual",
+    "saved": "Configuración del período de pago guardada.",
+    "saveFailed": "No se pudo guardar la configuración del período de pago.",
+    "loadFailed": "No se pudo cargar la configuración del período de pago.",
+    "save": "Guardar períodos de pago"
+  },
+  "events": {
+    "rsvp": {
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "accepted": "Aceptó la invitación.",
+      "declined": "Rechazó la invitación.",
+      "failed": "No se pudo enviar su respuesta.",
+      "status": {
+        "Invited": "Invitado",
+        "Accepted": "Aceptado",
+        "Declined": "Rechazado",
+        "Attended": "Asistió"
+      }
     }
   }
 }

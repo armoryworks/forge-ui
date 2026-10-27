@@ -1,0 +1,31 @@
+@if (enabled()) {
+  <div class="pay-period-settings" [formGroup]="form" data-testid="pay-period-settings">
+    <div class="pay-period-settings__fields">
+      <app-select [label]="'timePay.periodType' | translate" formControlName="type" [options]="typeOptions"
+                  [required]="true" data-testid="time-pay-type" />
+      @if (usesAnchor()) {
+        <app-datepicker [label]="'timePay.anchorDate' | translate" formControlName="anchorDate" data-testid="time-pay-anchor" />
+      }
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--sm" data-testid="time-pay-save"
+                [disabled]="form.invalid || saving() || loading()" (click)="save()">
+          <span class="material-icons-outlined">save</span>
+          {{ 'timePay.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+    <p class="pay-period-settings__hint">{{ (usesAnchor() ? 'timePay.anchorHint' : 'timePay.calendarHint') | translate }}</p>
+
+    <span class="pay-period-settings__label">{{ 'timePay.previewTitle' | translate }}</span>
+    <ul class="pay-period-settings__preview" data-testid="time-pay-preview">
+      @for (period of preview(); track period.start) {
+        <li class="pay-period-settings__period" [class.pay-period-settings__period--current]="period.isCurrent">
+          <span>{{ period.start | dateOnly }} – {{ period.end | dateOnly }}</span>
+          @if (period.isCurrent) {
+            <span class="chip chip--primary">{{ 'timePay.current' | translate }}</span>
+          }
+        </li>
+      }
+    </ul>
+  </div>
+}

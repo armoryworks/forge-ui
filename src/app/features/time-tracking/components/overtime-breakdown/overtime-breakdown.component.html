@@ -1,0 +1,31 @@
+<section class="overtime" data-testid="overtime-breakdown">
+  <div class="overtime__head">
+    <h2 class="overtime__title">{{ 'timeTracking.overtime.title' | translate }}</h2>
+    @if (!fixedEmployee()) {
+      <app-select [label]="'timeTracking.overtime.employee' | translate" [formControl]="employeeControl"
+                  [options]="staffOptions()" data-testid="overtime-employee" />
+    }
+    <app-datepicker [label]="'timeTracking.overtime.weekOf' | translate" [formControl]="weekControl" data-testid="overtime-week" />
+  </div>
+
+  @if (breakdown(); as b) {
+    <div class="overtime__totals" data-testid="overtime-totals">
+      <span class="chip">{{ 'timeTracking.overtime.regular' | translate }}: {{ b.regularHours | number:'1.0-2' }}</span>
+      <span class="chip chip--warning">{{ 'timeTracking.overtime.overtime' | translate }}: {{ b.overtimeHours | number:'1.0-2' }}</span>
+      <span class="chip chip--error">{{ 'timeTracking.overtime.doubletime' | translate }}: {{ b.doubletimeHours | number:'1.0-2' }}</span>
+      <span class="chip chip--info">{{ 'timeTracking.overtime.cost' | translate }}: {{ b.totalCost | currency }}</span>
+    </div>
+    @if (ruleSummary()) {
+      <p class="overtime__rule" data-testid="overtime-rule">{{ ruleSummary() }}</p>
+    }
+    <app-data-table tableId="overtime-breakdown" [columns]="columns" [data]="b.dailyBreakdown" [loading]="loading()"
+      emptyIcon="schedule" [emptyMessage]="'timeTracking.overtime.noHours' | translate">
+      <ng-template appColumnCell="totalHours" let-row>{{ $any(row).totalHours | number:'1.0-2' }}</ng-template>
+      <ng-template appColumnCell="regularHours" let-row>{{ $any(row).regularHours | number:'1.0-2' }}</ng-template>
+      <ng-template appColumnCell="overtimeHours" let-row>{{ $any(row).overtimeHours | number:'1.0-2' }}</ng-template>
+      <ng-template appColumnCell="doubletimeHours" let-row>{{ $any(row).doubletimeHours | number:'1.0-2' }}</ng-template>
+    </app-data-table>
+  } @else {
+    <p class="overtime__hint">{{ 'timeTracking.overtime.pickEmployee' | translate }}</p>
+  }
+</section>

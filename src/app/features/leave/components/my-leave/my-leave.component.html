@@ -1,0 +1,75 @@
+<div class="my-leave">
+  <div class="my-leave__head">
+    <h2 class="my-leave__section">{{ 'leave.myBalances' | translate }}</h2>
+    <span class="my-leave__spacer"></span>
+    <button class="action-btn action-btn--create" data-testid="leave-request-btn" (click)="openRequest()"
+            [disabled]="policies().length === 0">
+      <span class="material-icons-outlined">add</span>
+      {{ 'leave.requestLeave' | translate }}
+    </button>
+  </div>
+
+  <div class="my-leave__balances" data-testid="leave-my-balances">
+    @for (b of balances(); track b.id) {
+      <div class="balance-card" [attr.data-testid]="'leave-balance-' + b.policyId">
+        <span class="balance-card__name">{{ b.policyName }}</span>
+        <span class="balance-card__value">{{ b.balance | number:'1.0-2' }} {{ 'leave.hoursShort' | translate }}</span>
+        <span class="balance-card__meta">
+          {{ 'leave.usedThisYear' | translate:{ hours: (b.usedThisYear | number:'1.0-2') } }}
+          · {{ 'leave.accruedThisYear' | translate:{ hours: (b.accruedThisYear | number:'1.0-2') } }}
+        </span>
+      </div>
+    } @empty {
+      <p class="my-leave__hint">{{ 'leave.noBalances' | translate }}</p>
+    }
+  </div>
+  @if (pendingHours() > 0) {
+    <p class="my-leave__hint" data-testid="leave-pending-hours">{{ 'leave.pendingHours' | translate:{ hours: (pendingHours() | number:'1.0-2') } }}</p>
+  }
+
+  <h2 class="my-leave__section">{{ 'leave.myRequests' | translate }}</h2>
+  <app-data-table tableId="leave-my-requests" [columns]="columns" [data]="rows()" [loading]="loading()"
+    emptyIcon="beach_access" [emptyMessage]="'leave.noRequests' | translate">
+    <ng-template appColumnCell="hours" let-row>{{ $any(row).hours | number:'1.0-2' }}</ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip {{ $any(row).chipClass }}">{{ ('leave.status.' + $any(row).status) | translate }}</span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if ($any(row).status === 'Pending') {
+        <button class="icon-btn icon-btn--danger" [attr.data-testid]="'leave-cancel-' + $any(row).id"
+                [attr.aria-label]="'leave.cancelRequest' | translate" (click)="cancelRequest($any(row))">
+          <span class="material-icons-outlined">event_busy</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showRequestDialog()) {
+  <app-dialog [title]="'leave.requestLeave' | translate" width="520px" (closed)="closeRequest()">
+    <div [formGroup]="form">
+      <app-select [label]="'leave.fields.type' | translate" formControlName="policyId" [options]="policyOptions()"
+                  [required]="true" data-testid="leave-request-type" />
+      <div class="dialog-row">
+        <app-datepicker [label]="'leave.fields.startDate' | translate" formControlName="startDate" [required]="true"
+                        data-testid="leave-request-start" />
+        <app-datepicker [label]="'leave.fields.endDate' | translate" formControlName="endDate" [required]="true"
+                        data-testid="leave-request-end" />
+      </div>
+      <app-input [label]="'leave.fields.hours' | translate" type="number" formControlName="hours" [required]="true"
+                 data-testid="leave-request-hours" />
+      <p class="my-leave__hint">{{ 'leave.hoursHint' | translate }}</p>
+      <app-textarea [label]="'leave.fields.reason' | translate" formControlName="reason" [rows]="3" [maxlength]="1000"
+                    data-testid="leave-request-reason" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeRequest()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" data-testid="leave-request-submit"
+                [disabled]="form.invalid || saving()" (click)="submitRequest()">
+          {{ 'leave.submitRequest' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
