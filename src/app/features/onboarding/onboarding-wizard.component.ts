@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   CUSTOM_ELEMENTS_SCHEMA,
@@ -6,6 +7,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -13,7 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, forkJoin, fromEvent, filter, map, of, startWith } from 'rxjs';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -222,6 +224,16 @@ export class OnboardingWizardComponent {
 
   protected readonly currentStepIndex = computed(() =>
     Math.min(this.requestedStepIndex(), this.reachableStepIndex()));
+
+  /**
+   * Steps before the furthest reachable step count as completed for the linear stepper, so a
+   * step the server already holds (or the draft already satisfies) opens from `?step=` even
+   * though this visit never touched the steps before it.
+   */
+  protected readonly stepCompleted = computed(() =>
+    Array.from({ length: 7 }, (_, i) => i < this.reachableStepIndex()));
+
+  private readonly stepper = viewChild(MatStepper);
 
   // Review-phase params live in the URL too (?review=preview|signing&formIdx=N)
   // so the address bar represents what the user is looking at and a shared
@@ -656,6 +668,12 @@ export class OnboardingWizardComponent {
         ctrl.setValue(false, { emitEvent: false });
       }
       ctrl.updateValueAndValidity({ emitEvent: false });
+    });
+
+    afterRenderEffect(() => {
+      const stepper = this.stepper();
+      const index = this.currentStepIndex();
+      if (stepper && stepper.selectedIndex !== index) stepper.selectedIndex = index;
     });
 
     // Restore review state BEFORE loading the draft — if the user was

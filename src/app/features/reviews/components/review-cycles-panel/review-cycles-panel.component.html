@@ -1,0 +1,64 @@
+<div class="cycles">
+  @if (canManage()) {
+    <div class="cycles__actions">
+      <button class="action-btn action-btn--create" data-testid="review-cycle-new-btn" (click)="openDialog(null)">
+        <span class="material-icons-outlined">add</span>
+        {{ 'reviews.cycles.new' | translate }}
+      </button>
+    </div>
+  }
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="review-cycles"
+      [columns]="columns"
+      [data]="cycles()"
+      emptyIcon="event_repeat"
+      [emptyMessage]="'reviews.cycles.empty' | translate"
+      [clickableRows]="true"
+      (rowClick)="select($event)">
+      <ng-template appColumnCell="startDate" let-row>
+        {{ row.startDate | dateOnly }} – {{ row.endDate | dateOnly }}
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span class="chip" [class.chip--muted]="row.status === 'Draft'" [class.chip--info]="row.status === 'Active'"
+          [class.chip--success]="row.status === 'Completed'">
+          {{ 'reviews.cycles.status.' + row.status | translate }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="progress" let-row>
+        @if (row.progress; as p) {
+          <span class="cycles__progress" [attr.data-testid]="'review-cycle-progress-' + row.id">
+            {{ 'reviews.cycles.progressText' | translate: { done: p.acknowledged + p.closed, total: row.reviewCount, self: p.selfSubmitted, manager: p.managerSubmitted } }}
+          </span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        @if (canManage()) {
+          <div class="cycles__row-actions">
+            @if (row.status !== 'Completed') {
+              <button class="action-btn action-btn--sm" [attr.data-testid]="'review-cycle-edit-' + row.id"
+                (click)="$event.stopPropagation(); openDialog(row)">{{ 'common.edit' | translate }}</button>
+              <button class="action-btn action-btn--sm action-btn--primary" [attr.data-testid]="'review-cycle-launch-' + row.id"
+                [disabled]="busy()" (click)="$event.stopPropagation(); launch(row)">
+                {{ (row.status === 'Draft' ? 'reviews.cycles.launch' : 'reviews.cycles.relaunch') | translate }}
+              </button>
+            }
+            @if (row.status === 'Active') {
+              <button class="action-btn action-btn--sm" [attr.data-testid]="'review-cycle-close-' + row.id"
+                [disabled]="busy()" (click)="$event.stopPropagation(); close(row)">{{ 'reviews.cycles.close' | translate }}</button>
+            }
+          </div>
+        }
+      </ng-template>
+    </app-data-table>
+  </div>
+
+  @if (selected(); as cycle) {
+    <section class="cycles__reviews" data-testid="review-cycle-reviews">
+      <h2 class="cycles__title">{{ 'reviews.cycles.reviewsIn' | translate: { name: cycle.name } }}</h2>
+      <app-review-list tableId="review-cycle-reviews" [reviews]="cycleReviews()"
+        [emptyMessage]="'reviews.cycles.noReviews' | translate" (opened)="openReview($event)" />
+    </section>
+  }
+</div>

@@ -1,0 +1,47 @@
+<app-dialog [title]="'employees.termination.title' | translate: { name: displayName }" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="terminate">
+    <div class="terminate__row">
+      <app-datepicker data-testid="terminate-date" [label]="'employees.termination.date' | translate"
+        formControlName="terminationDate" [required]="true" />
+      <app-select data-testid="terminate-reason" [label]="'employees.termination.reason' | translate"
+        formControlName="reasonCode" [options]="reasonOptions()" [required]="true" />
+    </div>
+    <app-textarea data-testid="terminate-notes" [label]="'employees.termination.notes' | translate"
+      formControlName="notes" [rows]="3" [maxlength]="2000" />
+    <div class="terminate__row">
+      <app-toggle data-testid="terminate-rehire-eligible" [label]="'employees.termination.rehireEligible' | translate"
+        formControlName="rehireEligible" />
+      <app-toggle data-testid="terminate-final-pay" [label]="'employees.termination.finalPayRequired' | translate"
+        formControlName="finalPayRequired" />
+    </div>
+
+    <section class="terminate__checklist" data-testid="terminate-checklist">
+      <h3 class="terminate__checklist-title">
+        {{ (scheduled() ? 'employees.termination.checklist.titleScheduled' : 'employees.termination.checklist.titleNow') | translate }}
+      </h3>
+      <ul class="terminate__checklist-list">
+        @for (item of checklist(); track item) {
+          <li class="terminate__checklist-item">
+            <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+            {{ item | translate }}
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="terminate-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--destructive"
+        data-testid="terminate-confirm-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">person_off</span>
+        {{ (scheduled() ? 'employees.termination.schedule' : 'employees.termination.confirm') | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

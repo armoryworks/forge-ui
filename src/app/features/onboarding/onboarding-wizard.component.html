@@ -227,7 +227,6 @@
       class="onboarding__stepper"
       orientation="horizontal"
       [linear]="true"
-      [selectedIndex]="currentStepIndex()"
       (selectionChange)="onStepperSelectionChange($event.selectedIndex)"
     >
       <!-- Override the default "create" (pencil) edit icon with step numbers -->
@@ -238,6 +237,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="personalForm"
+        [completed]="stepCompleted()[0]"
         [label]="'onboarding.steps.personalInfo' | translate"
         aria-label="Personal Information"
       >
@@ -328,6 +328,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="addressForm"
+        [completed]="stepCompleted()[1]"
         [label]="'onboarding.steps.address' | translate"
         aria-label="Home Address"
       >
@@ -379,6 +380,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="w4Form"
+        [completed]="stepCompleted()[2]"
         [label]="'onboarding.steps.federalTax' | translate"
         aria-label="W-4 Federal Tax Withholding"
       >
@@ -513,6 +515,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="stateForm"
+        [completed]="stepCompleted()[3]"
         [label]="'onboarding.steps.stateTax' | translate"
         aria-label="State Tax Withholding"
       >
@@ -582,6 +585,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="i9Form"
+        [completed]="stepCompleted()[4]"
         [label]="'onboarding.steps.i9' | translate"
         aria-label="I-9 Employment Eligibility"
       >
@@ -993,6 +997,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="depositForm"
+        [completed]="stepCompleted()[5]"
         [label]="'onboarding.steps.directDeposit' | translate"
         aria-label="Direct Deposit Authorization"
       >
@@ -1080,6 +1085,7 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <mat-step
         [stepControl]="ackForm"
+        [completed]="stepCompleted()[6]"
         [label]="'onboarding.steps.acknowledge' | translate"
         aria-label="Acknowledgments"
       >

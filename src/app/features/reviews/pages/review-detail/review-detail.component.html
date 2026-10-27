@@ -1,0 +1,144 @@
+<div class="review" [appLoadingBlock]="loading()">
+  <a routerLink="/reviews" class="review__back" data-testid="review-back-link">
+    <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+    {{ 'reviews.detail.back' | translate }}
+  </a>
+
+  @if (loadError(); as err) {
+    <app-detail-load-error [error]="err" closeLabel="reviews.detail.back" [retryable]="true" (retry)="reload()" />
+  } @else if (review(); as r) {
+    <header class="review__header">
+      <h1 class="review__title">{{ r.employeeName }} · {{ r.cycleName }}</h1>
+      <span class="chip chip--info" data-testid="review-stage-chip">{{ 'reviews.stage.' + stage() | translate }}</span>
+      <span class="review__meta">{{ 'reviews.detail.reviewer' | translate: { name: r.reviewerName } }}</span>
+    </header>
+
+    <section class="review__section" data-testid="review-self-section">
+      <h2 class="review__section-title">{{ 'reviews.detail.selfTitle' | translate }}</h2>
+      @if (canSelfSubmit()) {
+        <div class="review__form" [formGroup]="selfForm">
+          @if (competencies().length > 0) {
+            <div class="review__ratings" [formGroup]="selfRatings">
+              @for (name of competencies(); track name) {
+                <app-select [attr.data-testid]="'self-rating-' + $index" [label]="name" [formControlName]="name" [options]="scaleOptions()" />
+              }
+            </div>
+          }
+          <app-textarea data-testid="self-assessment" [label]="'reviews.detail.selfAssessment' | translate"
+            formControlName="assessment" [rows]="5" [maxlength]="5000" />
+          <div class="review__actions">
+            <button class="action-btn action-btn--primary" data-testid="self-submit-btn"
+              [disabled]="selfForm.invalid || saving()" (click)="submitSelf()">{{ 'reviews.detail.submitSelf' | translate }}</button>
+          </div>
+        </div>
+      } @else {
+        @if (selfRatingRows().length > 0) {
+          <ul class="review__rating-list">
+            @for (row of selfRatingRows(); track row.competency) {
+              <li><strong>{{ row.competency }}</strong>: {{ row.rating ?? '—' }} / {{ r.ratingScaleMax }}</li>
+            }
+          </ul>
+        }
+        <p class="review__text">{{ r.employeeSelfAssessment ?? ('reviews.detail.notYet' | translate) }}</p>
+      }
+    </section>
+
+    <section class="review__section" data-testid="review-manager-section">
+      <h2 class="review__section-title">{{ 'reviews.detail.managerTitle' | translate }}</h2>
+      @if (canManagerSubmit()) {
+        <div class="review__form" [formGroup]="managerForm">
+          @if (competencies().length > 0) {
+            <div class="review__ratings" [formGroup]="managerRatings">
+              @for (name of competencies(); track name) {
+                <app-select [attr.data-testid]="'manager-rating-' + $index" [label]="name" [formControlName]="name" [options]="scaleOptions()" />
+              }
+            </div>
+          }
+          <app-select data-testid="manager-overall" [label]="'reviews.detail.overall' | translate"
+            formControlName="overall" [options]="scaleOptions()" [required]="true" />
+          <app-textarea data-testid="manager-goals" [label]="'reviews.detail.goals' | translate"
+            [hint]="'reviews.detail.goalsHint' | translate" formControlName="goals" [rows]="3" />
+          <app-textarea data-testid="manager-strengths" [label]="'reviews.detail.strengths' | translate"
+            formControlName="strengths" [rows]="3" [maxlength]="5000" />
+          <app-textarea data-testid="manager-improvements" [label]="'reviews.detail.improvements' | translate"
+            formControlName="improvements" [rows]="3" [maxlength]="5000" />
+          <div class="review__actions">
+            <button class="action-btn action-btn--primary" data-testid="manager-submit-btn"
+              [disabled]="managerForm.invalid || saving()" (click)="submitManager()">{{ 'reviews.detail.submitManager' | translate }}</button>
+          </div>
+        </div>
+      } @else if (r.overallRating !== null || r.managerSubmittedAt) {
+        <p class="review__overall" data-testid="review-overall">
+          {{ 'reviews.detail.overallValue' | translate: { rating: r.overallRating ?? '—', max: r.ratingScaleMax } }}
+        </p>
+        @if (managerRatingRows().length > 0) {
+          <ul class="review__rating-list">
+            @for (row of managerRatingRows(); track row.competency) {
+              <li><strong>{{ row.competency }}</strong>: {{ row.rating ?? '—' }} / {{ r.ratingScaleMax }}</li>
+            }
+          </ul>
+        }
+        @if (goals().length > 0) {
+          <h3 class="review__subtitle">{{ 'reviews.detail.goals' | translate }}</h3>
+          <ul class="review__rating-list">
+            @for (goal of goals(); track $index) {
+              <li>{{ goal }}</li>
+            }
+          </ul>
+        }
+        @if (r.strengthsComments) {
+          <h3 class="review__subtitle">{{ 'reviews.detail.strengths' | translate }}</h3>
+          <p class="review__text">{{ r.strengthsComments }}</p>
+        }
+        @if (r.improvementComments) {
+          <h3 class="review__subtitle">{{ 'reviews.detail.improvements' | translate }}</h3>
+          <p class="review__text">{{ r.improvementComments }}</p>
+        }
+      } @else {
+        <p class="review__text">{{ 'reviews.detail.notYet' | translate }}</p>
+      }
+    </section>
+
+    @if (canAcknowledge()) {
+      <section class="review__section" data-testid="review-ack-section" [formGroup]="ackForm">
+        <h2 class="review__section-title">{{ 'reviews.detail.ackTitle' | translate }}</h2>
+        <p class="review__hint">{{ 'reviews.detail.ackHint' | translate }}</p>
+        <app-textarea data-testid="ack-comments" [label]="'reviews.detail.ackComments' | translate"
+          formControlName="comments" [rows]="3" [maxlength]="2000" />
+        <div class="review__actions">
+          <button class="action-btn action-btn--primary" data-testid="ack-submit-btn"
+            [disabled]="ackForm.invalid || saving()" (click)="acknowledge()">{{ 'reviews.detail.acknowledge' | translate }}</button>
+        </div>
+      </section>
+    } @else if (r.acknowledgedAt) {
+      <section class="review__section">
+        <h2 class="review__section-title">{{ 'reviews.detail.ackTitle' | translate }}</h2>
+        <p class="review__text">{{ 'reviews.detail.acknowledgedOn' | translate: { date: (r.acknowledgedAt | dateTime) } }}</p>
+        @if (r.acknowledgementComments) {
+          <p class="review__text">{{ r.acknowledgementComments }}</p>
+        }
+      </section>
+    }
+
+    @if (canClose()) {
+      <div class="review__actions">
+        <button class="action-btn" data-testid="review-close-btn" [disabled]="saving()" (click)="closeReview()">
+          {{ 'reviews.detail.close' | translate }}
+        </button>
+      </div>
+    }
+
+    <section class="review__section" data-testid="review-history">
+      <h2 class="review__section-title">{{ 'reviews.detail.history' | translate }}</h2>
+      <ul class="review__history">
+        @for (item of history(); track $index) {
+          <li class="review__history-item">
+            <span class="review__history-when">{{ item.createdAt | dateTime }}</span>
+            <span>{{ item.description }}</span>
+            <span class="review__history-who">{{ item.userName ?? ('reviews.detail.system' | translate) }}</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

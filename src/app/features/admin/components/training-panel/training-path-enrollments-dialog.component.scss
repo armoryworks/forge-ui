@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+
+.enrollments {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.enrollments__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 180px auto;
+  gap: $sp-sm;
+  align-items: center;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.enrollments__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-xxs;
+}
+
+.enrollments__overdue {
+  color: var(--error);
+}

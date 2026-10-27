@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeService } from '../../services/employee.service';
@@ -25,6 +26,16 @@ import { EmployeeActivityTabComponent } from './tabs/employee-activity-tab.compo
 import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component';
 import { EMPLOYEE_TABS, EmployeeTab } from '../../models/employee-tab.model';
 import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.directive';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import { EmployeeTerminateDialogComponent } from '../../components/employee-terminate-dialog/employee-terminate-dialog.component';
+import { EmployeeTerminateDialogData } from '../../components/employee-terminate-dialog/employee-terminate-dialog-data.model';
+import { EmployeeTerminationPanelComponent } from '../../components/employee-termination-panel/employee-termination-panel.component';
+import { TerminationResult } from '../../models/termination-result.model';
+
+export const TERMINATION_CAPABILITY = 'CAP-HR-TERMINATION';
+const TERMINATION_ROLES = ['Admin', 'Manager'];
 
 function toKind(value: string | null): EmployeeKind | null {
   return value === 'user' || value === 'profile' ? value : null;
@@ -35,11 +46,11 @@ function toKind(value: string | null): EmployeeKind | null {
   standalone: true,
   imports: [
     ScrollCueDirective,
-    RouterLink, TranslatePipe, AvatarComponent, DetailLoadErrorComponent,
+    RouterLink, TranslatePipe, AvatarComponent, DetailLoadErrorComponent, DateOnlyPipe,
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,
     EmployeeExpensesTabComponent, EmployeeDocumentsTabComponent, EmployeeActivityTabComponent,
-    EmployeeEventsTabComponent,
+    EmployeeEventsTabComponent, EmployeeTerminationPanelComponent,
   ],
   templateUrl: './employee-detail.component.html',
   styleUrl: './employee-detail.component.scss',
@@ -51,6 +62,9 @@ export class EmployeeDetailComponent {
   private readonly employeeService = inject(EmployeeService);
   private readonly translate = inject(TranslateService);
   private readonly navTree = inject(NavTreeService);
+  private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly employeeId = toSignal(
     this.route.paramMap.pipe(map(p => parsePositiveId(p.get('id')))),
@@ -79,6 +93,24 @@ export class EmployeeDetailComponent {
   });
 
   protected readonly hasLogin = computed(() => this.employee()?.hasLogin !== false);
+
+  protected readonly targetKind = computed<EmployeeKind>(() => this.hasLogin() ? 'user' : 'profile');
+
+  protected readonly terminationVisible = computed(() =>
+    this.capabilities.isEnabled(TERMINATION_CAPABILITY, true) && this.auth.hasAnyRole(TERMINATION_ROLES));
+
+  protected readonly isTerminated = computed(() => !!this.employee()?.termination?.appliedAt);
+
+  protected readonly terminationScheduled = computed(() => {
+    const t = this.employee()?.termination;
+    return !!t && !t.appliedAt;
+  });
+
+  protected readonly canTerminate = computed(() => {
+    const e = this.employee();
+    if (!e || !this.terminationVisible() || e.termination) return false;
+    return !(this.hasLogin() && e.id === this.auth.user()?.id);
+  });
 
   protected readonly tabs = computed<readonly EmployeeTab[]>(() => this.hasLogin() ? EMPLOYEE_TABS : ['overview']);
 
@@ -126,6 +158,17 @@ export class EmployeeDetailComponent {
   protected reloadEmployee(): void {
     const id = this.employeeId();
     if (id) this.loadEmployee(id, this.employeeKind());
+  }
+
+  protected openTerminate(): void {
+    const e = this.employee();
+    if (!e) return;
+    this.dialog.open<EmployeeTerminateDialogComponent, EmployeeTerminateDialogData, TerminationResult | null>(
+      EmployeeTerminateDialogComponent,
+      { width: '560px', data: { employee: e, kind: this.targetKind() } },
+    ).afterClosed().subscribe(result => {
+      if (result) this.reloadEmployee();
+    });
   }
 
   protected backToList(): void {

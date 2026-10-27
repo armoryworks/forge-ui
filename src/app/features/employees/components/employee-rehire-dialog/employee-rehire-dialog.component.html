@@ -1,0 +1,21 @@
+<app-dialog [title]="(applied ? 'employees.termination.rehireTitle' : 'employees.termination.cancelTitle') | translate: { name: displayName }"
+  width="460px" (closed)="close()">
+  <div [formGroup]="form" class="rehire">
+    <p class="rehire__hint">
+      {{ (applied ? 'employees.termination.rehireHint' : 'employees.termination.cancelHint') | translate }}
+    </p>
+    @if (applied) {
+      <app-datepicker data-testid="rehire-date" [label]="'employees.termination.rehireDate' | translate"
+        formControlName="rehireDate" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" data-testid="rehire-cancel-btn" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button class="action-btn action-btn--primary" data-testid="rehire-confirm-btn" [disabled]="saving()" (click)="save()">
+      {{ (applied ? 'employees.termination.rehire' : 'employees.termination.cancelScheduled') | translate }}
+    </button>
+  </div>
+</app-dialog>

@@ -19,7 +19,7 @@
       [placeholder]="'employees.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
     <app-select [label]="'employees.role' | translate" [formControl]="roleControl" [options]="roleOptions()" />
-    <app-select [label]="'employees.status' | translate" [formControl]="statusControl" [options]="statusOptions" />
+    <app-select data-testid="employees-status-filter" [label]="'employees.status' | translate" [formControl]="statusControl" [options]="statusOptions" />
   </div>
 
   <div [appLoadingBlock]="loading()" class="employees-list-content">
@@ -42,9 +42,13 @@
         </div>
       </ng-template>
       <ng-template appColumnCell="isActive" let-row>
-        <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
-          {{ (row.isActive ? 'employees.filters.active' : 'employees.filters.inactive') | translate }}
-        </span>
+        @if (row.isTerminated) {
+          <span class="chip chip--error" data-testid="employee-terminated-chip">{{ 'employees.filters.terminated' | translate }}</span>
+        } @else {
+          <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
+            {{ (row.isActive ? 'employees.filters.active' : 'employees.filters.inactive') | translate }}
+          </span>
+        }
       </ng-template>
       <ng-template appColumnCell="startDate" let-row>
         <span class="text-muted">{{ row.startDate | date:'MM/dd/yyyy' }}</span>

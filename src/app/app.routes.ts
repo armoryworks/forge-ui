@@ -282,6 +282,13 @@ export const routes: Routes = [
           import('./features/leave/leave.routes').then((m) => m.LEAVE_ROUTES),
       },
       {
+        path: 'reviews',
+        data: { titleKey: 'nav.reviews' },
+        canActivate: routeAccessGuards('reviews'),
+        loadChildren: () =>
+          import('./features/reviews/reviews.routes').then((m) => m.REVIEWS_ROUTES),
+      },
+      {
         path: 'piece-rates',
         data: { titleKey: 'nav.pieceRates' },
         canActivate: routeAccessGuards('piece-rates'),

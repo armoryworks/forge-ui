@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+
+.cycles {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.cycles__actions,
+.cycles__row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-xs;
+  flex-wrap: wrap;
+}
+
+.cycles__progress {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.cycles__title {
+  margin: 0 0 $sp-sm;
+  font-size: $font-size-md;
+}

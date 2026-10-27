@@ -104,7 +104,8 @@
     "ppap": "PPAP",
     "controlledDocuments": "Controlled documents",
     "projects": "Projects",
-    "leave": "Leave"
+    "leave": "Leave",
+    "reviews": "Reviews"
   },
   "navGroups": {
     "operations": "Operations",
@@ -4511,7 +4512,17 @@
     "trainingPathDialog": {
       "autoAssignToNewUsers": "Auto-assign to new users",
       "icon": "Icon",
-      "slug": "Slug"
+      "slug": "Slug",
+      "editTitle": "Edit training path",
+      "newTitle": "New training path",
+      "modules": "Modules, in order",
+      "noModules": "No modules yet",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeModule": "Remove module",
+      "addModule": "Add a module",
+      "saveChanges": "Save changes",
+      "create": "Create path"
     },
     "walkthroughPreviewDialog": {
       "addStep": "Add step",
@@ -10371,7 +10382,8 @@
       "all": "-- All --",
       "active": "Active",
       "inactive": "Inactive",
-      "allRoles": "-- All Roles --"
+      "allRoles": "-- All Roles --",
+      "terminated": "Terminated"
     },
     "detail": {
       "backToEmployees": "Employees",
@@ -10478,6 +10490,67 @@
     },
     "employeeTrainingTab": {
       "noTrainingRecordsFound": "No training records found"
+    },
+    "termination": {
+      "title": "Terminate {{name}}",
+      "date": "Last day (termination date)",
+      "reason": "Reason",
+      "notes": "Notes",
+      "rehireEligible": "Eligible for rehire",
+      "finalPayRequired": "Final paycheck required",
+      "schedule": "Schedule termination",
+      "confirm": "Terminate now",
+      "done": "{{name}} has been terminated",
+      "scheduledDone": "Termination of {{name}} is scheduled",
+      "failed": "Could not record the termination",
+      "terminate": "Terminate",
+      "terminated": "Terminated",
+      "scheduledChip": "Leaving {{date}}",
+      "panelTitle": "Terminated",
+      "panelTitleScheduled": "Termination scheduled",
+      "rehire": "Rehire",
+      "cancelScheduled": "Cancel termination",
+      "finalPay": "Final pay",
+      "hoursSince": "Hours worked {{start}} – {{end}}",
+      "ptoPayout": "Paid leave to pay out",
+      "finalPayStatus": "Final pay",
+      "processedOn": "Processed {{date}}",
+      "finalPayPending": "Not processed yet",
+      "finalPayNotRequired": "Not required",
+      "markProcessed": "Mark final pay processed",
+      "finalPayMarked": "Final pay marked processed",
+      "finalPayFailed": "Could not mark final pay processed",
+      "rehireTitle": "Rehire {{name}}",
+      "cancelTitle": "Cancel termination of {{name}}",
+      "rehireHint": "The account is reactivated. Sign-in methods that were removed (PIN, badge, passkeys, API keys) must be set up again. Leave starts accruing again from the next pay period.",
+      "cancelHint": "The scheduled termination is withdrawn and nothing changes for this employee.",
+      "rehireDate": "Rehire date (new start date)",
+      "rehired": "{{name}} has been rehired",
+      "cancelled": "Termination of {{name}} cancelled",
+      "rehireFailed": "Could not reverse the termination",
+      "checklist": {
+        "titleNow": "What happens now",
+        "titleScheduled": "What happens on the termination date",
+        "deactivate": "The user account is deactivated",
+        "signOut": "Every session, phone and device is signed out",
+        "credentials": "Kiosk PIN, badge, scan cards, passkeys and API keys stop working",
+        "timers": "Running timers are stopped and the employee is clocked out",
+        "jobs": "Open jobs are unassigned and the team's manager is notified",
+        "leave": "Leave stops accruing and open leave requests are cancelled",
+        "profileOnly": "The employee record is marked terminated",
+        "audit": "The termination is recorded in the audit trail"
+      },
+      "hours": "{{hours}} h",
+      "hoursWithAmount": "{{hours}} h ({{amount}})",
+      "leaveLine": "{{policy}}: {{hours}} h",
+      "reasons": {
+        "resignation": "Resignation",
+        "dismissal": "Dismissal",
+        "layoff": "Layoff",
+        "retirement": "Retirement",
+        "end_of_contract": "End of contract",
+        "other": "Other"
+      }
     }
   },
   "trainingPage": {
@@ -11038,13 +11111,37 @@
         "walkthroughFailed": "Failed to generate walkthrough steps",
         "moduleRestored": "Module restored",
         "deleteFailed": "Couldn't delete the module",
-        "restoreFailed": "Couldn't restore the module"
+        "restoreFailed": "Couldn't restore the module",
+        "pathUpdated": "Training path updated"
       },
       "deleteConfirm": {
         "title": "Delete training module?",
         "message": "Delete \"{{title}}\"? It disappears from the library and from learners' paths. You can undo right after deleting."
       },
-      "undo": "Undo"
+      "undo": "Undo",
+      "enrollments": {
+        "open": "Enrolments",
+        "title": "Enrolments: {{path}}",
+        "people": "People",
+        "roles": "Roles",
+        "dueDate": "Due date",
+        "enroll": "Enrol",
+        "empty": "Nobody is enrolled in this path",
+        "overdue": "Overdue",
+        "complete": "Complete",
+        "applyDueDate": "Set this enrolment's due date to the date above",
+        "remove": "Remove enrolment",
+        "enrolled": "{{count}} enrolled, {{already}} already enrolled",
+        "enrollFailed": "Could not enrol",
+        "updateFailed": "Could not update the enrolment",
+        "removed": "{{name}} removed from the path",
+        "cols": {
+          "user": "Person",
+          "enrolled": "Enrolled",
+          "due": "Due",
+          "progress": "Progress"
+        }
+      }
     },
     "trainingDetail": {
       "title": "Training Detail",
@@ -16393,6 +16490,112 @@
         "Declined": "Declined",
         "Attended": "Attended"
       }
+    }
+  },
+  "reviews": {
+    "title": "Performance reviews",
+    "tabs": {
+      "mine": "My reviews",
+      "team": "Team reviews",
+      "cycles": "Review cycles"
+    },
+    "emptyMine": "You have no performance reviews yet",
+    "emptyTeam": "You are not reviewing anyone right now",
+    "cols": {
+      "cycle": "Cycle",
+      "employee": "Employee",
+      "reviewer": "Reviewer",
+      "status": "Stage",
+      "rating": "Rating"
+    },
+    "stage": {
+      "notStarted": "Self-review due",
+      "selfSubmitted": "Manager review due",
+      "managerSubmitted": "Awaiting acknowledgement",
+      "acknowledged": "Acknowledged",
+      "closed": "Closed"
+    },
+    "cycles": {
+      "new": "New review cycle",
+      "empty": "No review cycles yet",
+      "cols": {
+        "name": "Cycle",
+        "period": "Period",
+        "status": "Status",
+        "progress": "Progress"
+      },
+      "status": {
+        "Draft": "Draft",
+        "Active": "Open",
+        "Completed": "Closed"
+      },
+      "progressText": "{{done}} of {{total}} done · {{self}} with manager · {{manager}} to acknowledge",
+      "launch": "Launch",
+      "relaunch": "Add new employees",
+      "close": "Close cycle",
+      "launchConfirmTitle": "Launch review cycle",
+      "launchConfirm": "Create a review for everyone in the scope of {{name}} and ask them for their self-review?",
+      "launched": "{{count}} review(s) created",
+      "launchFailed": "Could not launch the review cycle",
+      "closeConfirmTitle": "Close review cycle",
+      "closeConfirm": "Close {{name}}? Every review in it that is still open is closed where it stands.",
+      "closed": "Review cycle closed",
+      "closeFailed": "Could not close the review cycle",
+      "reviewsIn": "Reviews in {{name}}",
+      "noReviews": "This cycle has no reviews yet. Launch it to create them.",
+      "editTitle": "Edit review cycle",
+      "newTitle": "New review cycle",
+      "saved": "Review cycle {{name}} saved",
+      "saveFailed": "Could not save the review cycle",
+      "scope": {
+        "all": "All active employees",
+        "department": "One department",
+        "list": "Chosen employees"
+      },
+      "form": {
+        "name": "Name",
+        "startDate": "Period start",
+        "endDate": "Period end",
+        "description": "Description",
+        "scale": "Rating scale",
+        "scope": "Who is reviewed",
+        "department": "Department",
+        "employees": "Employees",
+        "competencies": "Competencies",
+        "competenciesHint": "One per line, for example Quality or Safety",
+        "lockedHint": "The cycle is launched, so its scope, scale and competencies can no longer change.",
+        "departmentRequired": "Enter the department to review",
+        "employeesRequired": "Choose at least one employee"
+      }
+    },
+    "detail": {
+      "back": "Back to reviews",
+      "reviewer": "Reviewer: {{name}}",
+      "selfTitle": "Self-review",
+      "selfAssessment": "Your assessment of the period",
+      "submitSelf": "Submit self-review",
+      "notYet": "Not submitted yet",
+      "managerTitle": "Manager review",
+      "overall": "Overall rating",
+      "goals": "Goals for the next period",
+      "goalsHint": "One goal per line",
+      "strengths": "Strengths",
+      "improvements": "Areas to improve",
+      "submitManager": "Submit manager review",
+      "overallValue": "Overall: {{rating}} of {{max}}",
+      "ackTitle": "Acknowledgement",
+      "ackHint": "Acknowledging confirms you have read the review. It does not mean you agree with it.",
+      "ackComments": "Your comments (optional)",
+      "acknowledge": "Acknowledge review",
+      "acknowledgedOn": "Acknowledged {{date}}",
+      "close": "Close review",
+      "history": "History",
+      "system": "System",
+      "selfSubmitted": "Self-review submitted",
+      "managerSubmitted": "Manager review submitted",
+      "acknowledged": "Review acknowledged",
+      "closed": "Review closed",
+      "actionFailed": "Could not update the review"
     }
   }
 }

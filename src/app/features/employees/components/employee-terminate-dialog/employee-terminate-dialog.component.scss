@@ -1,0 +1,52 @@
+@use 'styles/variables' as *;
+
+.terminate {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.terminate__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+
+  @media (max-width: $breakpoint-mobile) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.terminate__checklist {
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  padding: $sp-sm $sp-md;
+  background: var(--bg);
+}
+
+.terminate__checklist-title {
+  margin: 0 0 $sp-xs;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.terminate__checklist-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.terminate__checklist-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--primary);
+  }
+}

@@ -6,3 +6,41 @@
   gap: $sp-md;
   margin-top: $sp-md;
 }
+
+.path-modules {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-md;
+}
+
+.path-modules__title {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.path-modules__empty {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+.path-modules__list {
+  margin: 0;
+  padding-left: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.path-modules__item {
+  display: flex;
+  align-items: center;
+  gap: $sp-xxs;
+}
+
+.path-modules__name {
+  flex: 1;
+  font-size: $font-size-sm;
+}

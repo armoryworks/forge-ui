@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -21,6 +21,10 @@ import { DraftResumeService } from '../../../../shared/services/draft-resume.ser
 import { TrainingService } from '../../../training/services/training.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { trainingContentIcon } from '../../../../shared/utils/training-content-icon';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { TrainingPathDialogData } from './training-path-dialog-data.model';
+import { TrainingPathDialogModuleOption } from './training-path-dialog-module-option.model';
+import { TrainingPathEnrollmentsDialogData } from './training-path-enrollments-dialog-data.model';
 
 export interface TrainingModuleRow {
   id: number;
@@ -39,6 +43,9 @@ export interface TrainingPathRow {
   isAutoAssigned: boolean;
   isActive: boolean;
   moduleCount: number;
+  slug?: string;
+  description?: string;
+  moduleIds?: number[];
 }
 
 export interface UserProgressRow {
@@ -60,10 +67,12 @@ interface TrainingModulePage {
 interface TrainingPathResponse {
   id: number;
   title: string;
+  slug?: string;
+  description?: string;
   icon: string;
   isAutoAssigned: boolean;
   isActive: boolean;
-  modules: unknown[];
+  modules: { moduleId: number; position: number }[];
 }
 
 const MODULE_PAGE_SIZE = 100;
@@ -95,7 +104,10 @@ export class TrainingPanelComponent implements OnInit {
   private readonly draftResume = inject(DraftResumeService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
   private moduleLoad?: Subscription;
+
+  protected readonly isAdmin = computed(() => this.auth.hasAnyRole(['Admin']));
 
   private readonly base = `${environment.apiUrl}/training`;
   protected readonly activeSubTab = signal<PanelSubTab>('content');
@@ -122,7 +134,7 @@ export class TrainingPanelComponent implements OnInit {
     { field: 'moduleCount', header: this.translate.instant('adminPanels.training.cols.modules'), sortable: true, width: '90px', align: 'right' },
     { field: 'isAutoAssigned', header: this.translate.instant('adminPanels.training.cols.autoAssign'), sortable: true, width: '110px', align: 'center' },
     { field: 'isActive', header: this.translate.instant('adminPanels.training.cols.active'), sortable: true, width: '80px', align: 'center' },
-    { field: 'actions', header: '', width: '60px', align: 'right' },
+    { field: 'actions', header: '', width: '100px', align: 'right' },
   ];
 
   protected readonly progressColumns: ColumnDef[] = [
@@ -187,7 +199,11 @@ export class TrainingPanelComponent implements OnInit {
   private loadPaths(): void {
     this.http.get<TrainingPathResponse[]>(`${this.base}/paths`)
       .subscribe({
-        next: paths => this.paths.set(paths.map(({ modules, ...path }) => ({ ...path, moduleCount: modules?.length ?? 0 }))),
+        next: paths => this.paths.set(paths.map(({ modules, ...path }) => ({
+          ...path,
+          moduleCount: modules?.length ?? 0,
+          moduleIds: [...(modules ?? [])].sort((a, b) => a.position - b.position).map(m => m.moduleId),
+        }))),
       });
   }
 
@@ -278,7 +294,7 @@ export class TrainingPanelComponent implements OnInit {
     import('./training-path-dialog.component').then(({ TrainingPathDialogComponent }) => {
       this.dialog.open(TrainingPathDialogComponent, {
         width: '600px',
-        data: null,
+        data: { path: null, availableModules: this.moduleOptions() } satisfies TrainingPathDialogData,
       }).afterClosed().subscribe(created => {
         if (created) {
           this.loadPaths();
@@ -286,6 +302,33 @@ export class TrainingPanelComponent implements OnInit {
         }
       });
     });
+  }
+
+  protected openEditPathDialog(path: TrainingPathRow): void {
+    import('./training-path-dialog.component').then(({ TrainingPathDialogComponent }) => {
+      this.dialog.open(TrainingPathDialogComponent, {
+        width: '600px',
+        data: { path, availableModules: this.moduleOptions() } satisfies TrainingPathDialogData,
+      }).afterClosed().subscribe(saved => {
+        if (saved) {
+          this.loadPaths();
+          this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.pathUpdated'));
+        }
+      });
+    });
+  }
+
+  protected openEnrollmentsDialog(path: TrainingPathRow): void {
+    import('./training-path-enrollments-dialog.component').then(({ TrainingPathEnrollmentsDialogComponent }) => {
+      this.dialog.open(TrainingPathEnrollmentsDialogComponent, {
+        width: '800px',
+        data: { pathId: path.id, pathTitle: path.title, canEdit: this.isAdmin() } satisfies TrainingPathEnrollmentsDialogData,
+      }).afterClosed().subscribe(() => this.loadProgress());
+    });
+  }
+
+  private moduleOptions(): TrainingPathDialogModuleOption[] {
+    return this.modules().map(m => ({ id: m.id, title: m.title }));
   }
 
   protected openUserDetailDialog(user: UserProgressRow): void {

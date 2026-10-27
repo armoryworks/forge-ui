@@ -1,0 +1,32 @@
+<app-page-layout [pageTitle]="'reviews.title' | translate">
+  <ng-container toolbar>
+    <div class="reviews-tabs" role="tablist" [attr.aria-label]="'reviews.title' | translate">
+      @for (tab of tabs(); track tab) {
+        <button class="tab" [attr.data-testid]="'reviews-tab-' + tab" [class.tab--active]="activeTab() === tab"
+          role="tab" [attr.aria-selected]="activeTab() === tab" (click)="switchTab(tab)">
+          {{ 'reviews.tabs.' + tab | translate }}
+        </button>
+      }
+    </div>
+  </ng-container>
+
+  <ng-container content>
+    @switch (activeTab()) {
+      @case ('mine') {
+        <div [appLoadingBlock]="loading()">
+          <app-review-list tableId="reviews-mine" [reviews]="mine()" [showEmployee]="false"
+            [emptyMessage]="'reviews.emptyMine' | translate" (opened)="openReview($event)" />
+        </div>
+      }
+      @case ('team') {
+        <div [appLoadingBlock]="loading()">
+          <app-review-list tableId="reviews-team" [reviews]="team()" [showReviewer]="false"
+            [emptyMessage]="'reviews.emptyTeam' | translate" (opened)="openReview($event)" />
+        </div>
+      }
+      @case ('cycles') {
+        <app-review-cycles-panel (opened)="openReview($event)" />
+      }
+    }
+  </ng-container>
+</app-page-layout>

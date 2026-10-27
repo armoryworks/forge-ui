@@ -260,6 +260,7 @@ export class NavTreeService {
         { icon: 'beach_access', label: 'Leave', i18nKey: 'nav.leave', route: '/leave/mine', routePrefix: '/leave', capability: 'CAP-HR-LEAVE' },
         { icon: 'request_quote', label: 'Piece Rates', i18nKey: 'nav.pieceRates', route: '/piece-rates', capability: 'CAP-HR-PIECE-RATES', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library', routePrefix: '/training' },
+        { icon: 'rate_review', label: 'Reviews', i18nKey: 'nav.reviews', route: '/reviews', routePrefix: '/reviews', capability: 'CAP-HR-REVIEW' },
       ],
     },
 

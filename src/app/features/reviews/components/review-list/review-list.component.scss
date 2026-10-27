@@ -1,0 +1,16 @@
+.review-stage--notStarted {
+  color: var(--text-muted);
+}
+
+.review-stage--selfSubmitted,
+.review-stage--managerSubmitted {
+  color: var(--info);
+}
+
+.review-stage--acknowledged {
+  color: var(--warning);
+}
+
+.review-stage--closed {
+  color: var(--success);
+}

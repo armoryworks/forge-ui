@@ -88,11 +88,13 @@
     <div class="tab-panel" [appLoadingBlock]="isLoading()">
       <div class="panel-header">
         <span class="panel-header__count">{{ paths().length }} {{ 'adminPanels.training.paths' | translate }}</span>
-        <button class="action-btn action-btn--create" data-testid="new-path-btn" (click)="openCreatePathDialog()"
-          [attr.aria-label]="'adminPanels.training.newPath' | translate">
-          <span class="material-icons-outlined">add</span>
-          {{ 'adminPanels.training.newPath' | translate }}
-        </button>
+        @if (isAdmin()) {
+          <button class="action-btn action-btn--create" data-testid="new-path-btn" (click)="openCreatePathDialog()"
+            [attr.aria-label]="'adminPanels.training.newPath' | translate">
+            <span class="material-icons-outlined">add</span>
+            {{ 'adminPanels.training.newPath' | translate }}
+          </button>
+        }
       </div>
 
       <app-data-table
@@ -120,10 +122,18 @@
 
         <ng-template appColumnCell="actions" let-row>
           <div class="action-cell">
-            <button class="icon-btn" [title]="'adminPanels.training.editPath' | translate" [attr.aria-label]="'adminPanels.training.editPath' | translate"
-              (click)="$event.stopPropagation()">
-              <span class="material-icons-outlined">edit</span>
+            <button class="icon-btn" [attr.data-testid]="'path-enrollments-' + row.id"
+              [title]="'adminPanels.training.enrollments.open' | translate" [attr.aria-label]="'adminPanels.training.enrollments.open' | translate"
+              (click)="openEnrollmentsDialog(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">group</span>
             </button>
+            @if (isAdmin()) {
+              <button class="icon-btn" [attr.data-testid]="'path-edit-' + row.id"
+                [title]="'adminPanels.training.editPath' | translate" [attr.aria-label]="'adminPanels.training.editPath' | translate"
+                (click)="openEditPathDialog(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+            }
           </div>
         </ng-template>
       </app-data-table>

@@ -1,0 +1,17 @@
+<app-data-table
+  [tableId]="tableId()"
+  [columns]="columns()"
+  [data]="rows()"
+  emptyIcon="rate_review"
+  [emptyMessage]="emptyMessage()"
+  [clickableRows]="true"
+  (rowClick)="open($event)">
+  <ng-template appColumnCell="stage" let-row>
+    <span class="chip review-stage review-stage--{{ row.stage }}" [attr.data-testid]="'review-stage-' + row.id">
+      {{ 'reviews.stage.' + row.stage | translate }}
+    </span>
+  </ng-template>
+  <ng-template appColumnCell="overallRating" let-row>
+    <span class="text-muted">{{ row.overallRating ?? '—' }}</span>
+  </ng-template>
+</app-data-table>

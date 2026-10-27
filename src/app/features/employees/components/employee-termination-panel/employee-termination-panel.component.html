@@ -1,0 +1,82 @@
+@if (termination(); as t) {
+  <section class="termination" data-testid="employee-termination-panel">
+    <header class="termination__header">
+      <h2 class="termination__title">
+        <span class="material-icons-outlined" aria-hidden="true">person_off</span>
+        {{ (applied() ? 'employees.termination.panelTitle' : 'employees.termination.panelTitleScheduled') | translate }}
+      </h2>
+      <button class="action-btn" data-testid="employee-rehire-btn" (click)="rehire()">
+        <span class="material-icons-outlined">{{ applied() ? 'person_add' : 'event_busy' }}</span>
+        {{ (applied() ? 'employees.termination.rehire' : 'employees.termination.cancelScheduled') | translate }}
+      </button>
+    </header>
+
+    <dl class="termination__facts">
+      <div class="termination__fact">
+        <dt>{{ 'employees.termination.date' | translate }}</dt>
+        <dd data-testid="termination-date">{{ t.terminationDate | dateOnly }}</dd>
+      </div>
+      <div class="termination__fact">
+        <dt>{{ 'employees.termination.reason' | translate }}</dt>
+        <dd data-testid="termination-reason">{{ reasonLabel() }}</dd>
+      </div>
+      <div class="termination__fact">
+        <dt>{{ 'employees.termination.rehireEligible' | translate }}</dt>
+        <dd>{{ (t.rehireEligible ? 'common.yes' : 'common.no') | translate }}</dd>
+      </div>
+      @if (t.notes) {
+        <div class="termination__fact termination__fact--wide">
+          <dt>{{ 'employees.termination.notes' | translate }}</dt>
+          <dd>{{ t.notes }}</dd>
+        </div>
+      }
+    </dl>
+
+    @if (summary(); as s) {
+      <div class="termination__final-pay" data-testid="final-pay-summary">
+        <h3 class="termination__subtitle">{{ 'employees.termination.finalPay' | translate }}</h3>
+        <dl class="termination__facts">
+          <div class="termination__fact">
+            <dt>{{ 'employees.termination.hoursSince' | translate: { start: (s.periodStart | dateOnly), end: (s.periodEnd | dateOnly) } }}</dt>
+            <dd data-testid="final-pay-hours">{{ s.hoursSinceLastPeriod | number: '1.0-2' }}</dd>
+          </div>
+          <div class="termination__fact">
+            <dt>{{ 'employees.termination.ptoPayout' | translate }}</dt>
+            <dd data-testid="final-pay-pto">
+              @if (s.ptoPayoutAmount !== null && s.ptoPayoutAmount !== undefined) {
+                {{ 'employees.termination.hoursWithAmount' | translate: { hours: (s.ptoPayoutHours | number: '1.0-2'), amount: (s.ptoPayoutAmount | currency) } }}
+              } @else {
+                {{ 'employees.termination.hours' | translate: { hours: (s.ptoPayoutHours | number: '1.0-2') } }}
+              }
+            </dd>
+          </div>
+          <div class="termination__fact">
+            <dt>{{ 'employees.termination.finalPayStatus' | translate }}</dt>
+            <dd data-testid="final-pay-status">
+              @if (t.finalPayProcessedAt) {
+                {{ 'employees.termination.processedOn' | translate: { date: (t.finalPayProcessedAt | dateTime) } }}
+              } @else if (t.finalPayRequired) {
+                {{ 'employees.termination.finalPayPending' | translate }}
+              } @else {
+                {{ 'employees.termination.finalPayNotRequired' | translate }}
+              }
+            </dd>
+          </div>
+        </dl>
+        @if (s.leaveLines.length > 0) {
+          <ul class="termination__leave">
+            @for (line of s.leaveLines; track line.policyId) {
+              <li>{{ 'employees.termination.leaveLine' | translate: { policy: line.policyName, hours: (line.balanceHours | number: '1.0-2') } }}</li>
+            }
+          </ul>
+        }
+        @if (canMarkProcessed()) {
+          <button class="action-btn action-btn--primary" data-testid="final-pay-processed-btn"
+            [disabled]="processing()" (click)="markProcessed()">
+            {{ 'employees.termination.markProcessed' | translate }}
+          </button>
+        }
+      </div>
+    }
+  </section>
+}

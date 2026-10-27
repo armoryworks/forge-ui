@@ -1,4 +1,4 @@
-<app-dialog [title]="isEditing ? 'Edit Training Path' : 'New Training Path'" width="600px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
+<app-dialog [title]="(isEditing ? 'admin.trainingPathDialog.editTitle' : 'admin.trainingPathDialog.newTitle') | translate" width="600px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
 
   <div [formGroup]="form">
     <app-input data-testid="path-title" [label]="'common.title' | translate" formControlName="title" [required]="true" [maxlength]="200" />
@@ -17,14 +17,44 @@
     </div>
   </div>
 
+  <section class="path-modules" data-testid="path-modules">
+    <h3 class="path-modules__title">{{ 'admin.trainingPathDialog.modules' | translate }}</h3>
+    @if (selectedModules().length === 0) {
+      <p class="path-modules__empty">{{ 'admin.trainingPathDialog.noModules' | translate }}</p>
+    }
+    <ol class="path-modules__list">
+      @for (module of selectedModules(); track module.id; let i = $index, last = $last, first = $first) {
+        <li class="path-modules__item" [attr.data-testid]="'path-module-' + module.id">
+          <span class="path-modules__name">{{ module.title }}</span>
+          <button class="icon-btn" [attr.data-testid]="'path-module-up-' + module.id" [disabled]="first"
+            [attr.aria-label]="'admin.trainingPathDialog.moveUp' | translate" (click)="moveModule(i, -1)">
+            <span class="material-icons-outlined">arrow_upward</span>
+          </button>
+          <button class="icon-btn" [attr.data-testid]="'path-module-down-' + module.id" [disabled]="last"
+            [attr.aria-label]="'admin.trainingPathDialog.moveDown' | translate" (click)="moveModule(i, 1)">
+            <span class="material-icons-outlined">arrow_downward</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.data-testid]="'path-module-remove-' + module.id"
+            [attr.aria-label]="'admin.trainingPathDialog.removeModule' | translate" (click)="removeModule(i)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </li>
+      }
+    </ol>
+    @if (addOptions().length > 0) {
+      <app-select data-testid="path-module-add" [label]="'admin.trainingPathDialog.addModule' | translate"
+        [formControl]="addModuleControl" [options]="addOptions()" />
+    }
+  </section>
+
   <div dialog-footer>
-    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn" data-testid="path-cancel-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary" data-testid="path-save-btn"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
-      {{ isEditing ? 'Save Changes' : 'Create Path' }}
+      {{ (isEditing ? 'admin.trainingPathDialog.saveChanges' : 'admin.trainingPathDialog.create') | translate }}
     </button>
     </app-validation-button>
   </div>

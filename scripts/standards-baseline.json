@@ -176,7 +176,7 @@
     "src/app/features/admin/components/sales-tax-dialog/sales-tax-dialog.component.html": 1,
     "src/app/features/admin/components/training-detail-panel/training-detail-panel.component.html": 1,
     "src/app/features/admin/components/training-panel/training-module-dialog.component.html": 4,
-    "src/app/features/admin/components/training-panel/training-path-dialog.component.html": 3,
+    "src/app/features/admin/components/training-panel/training-path-dialog.component.html": 2,
     "src/app/features/admin/components/training-panel/user-training-detail-panel.component.html": 1,
     "src/app/features/admin/components/training-panel/walkthrough-preview-dialog.component.html": 5,
     "src/app/features/admin/database/database-transfer.component.html": 2,
