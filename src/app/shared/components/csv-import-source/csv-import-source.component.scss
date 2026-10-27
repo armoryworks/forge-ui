@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.csv-source {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__upload { cursor: pointer; }
+
+  &__or {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  &__errors {
+    margin: 0;
+    padding-left: $sp-lg;
+    font-size: var(--font-size-sm);
+    color: var(--error);
+  }
+}

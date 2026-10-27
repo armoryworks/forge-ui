@@ -8,6 +8,12 @@
         <span class="nudge-badge">{{ uninvoicedCount() }}</span>
       }
     </button>
+    @if (canImportInvoices()) {
+      <a class="action-btn" routerLink="/invoices/import" data-testid="invoices-import-btn">
+        <span class="material-icons-outlined">upload_file</span>
+        {{ 'invoiceImport.open' | translate }}
+      </a>
+    }
     <button class="action-btn action-btn--create" data-testid="new-invoice-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'invoices.newInvoice' | translate }}

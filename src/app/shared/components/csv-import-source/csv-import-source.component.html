@@ -1,0 +1,30 @@
+<section class="csv-source">
+  <h3 class="csv-source__title">{{ 'csvImport.step1' | translate }}</h3>
+  @if (hint()) {
+    <p class="csv-source__hint">{{ hint() }}</p>
+  }
+  <div class="csv-source__row">
+    <label class="action-btn action-btn--sm csv-source__upload" [attr.data-testid]="testIdPrefix() + '-upload'">
+      <span class="material-icons-outlined">upload_file</span>
+      {{ 'csvImport.uploadCsv' | translate }}
+      <input type="file" accept=".csv,text/csv,text/plain" (change)="onFileChange($event)" hidden />
+    </label>
+    <span class="csv-source__or">{{ 'csvImport.or' | translate }}</span>
+    <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="testIdPrefix() + '-template'" (click)="templateRequested.emit()">
+      <span class="material-icons-outlined">download</span>
+      {{ 'csvImport.downloadTemplate' | translate }}
+    </button>
+  </div>
+  <app-textarea [label]="'csvImport.pasteLabel' | translate" [formControl]="pasteControl" [rows]="5" [attr.data-testid]="testIdPrefix() + '-paste'" />
+  <div class="csv-source__row">
+    <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="testIdPrefix() + '-parse'" (click)="parsePasted()">{{ 'csvImport.parse' | translate }}</button>
+    @if (hasRows()) {
+      <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="testIdPrefix() + '-reset'" (click)="reset()">{{ 'csvImport.reset' | translate }}</button>
+    }
+  </div>
+  @if (errors().length > 0) {
+    <ul class="csv-source__errors" role="alert">
+      @for (err of errors(); track $index) { <li>{{ err }}</li> }
+    </ul>
+  }
+</section>

@@ -27,6 +27,12 @@
         <span class="material-icons-outlined">view_module</span>
       </button>
     </div>
+    @if (canImportJobs()) {
+      <a class="action-btn" routerLink="/kanban/import" data-testid="backlog-import-jobs-btn">
+        <span class="material-icons-outlined">upload_file</span>
+        {{ 'jobImport.open' | translate }}
+      </a>
+    }
     @if (canCreateJobs()) {
       <button class="new-job-btn" data-testid="backlog-new-job-btn" (click)="openCreateDialog()">
         <span class="material-icons-outlined">add</span>

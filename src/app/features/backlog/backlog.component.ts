@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy, Component, computed, inject, OnInit, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -13,7 +13,8 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { JOB_CREATE_ROLES } from '../kanban/job-roles';
+import { JOB_CREATE_ROLES, JOB_IMPORT_ROLES } from '../kanban/job-roles';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -49,7 +50,7 @@ type ViewMode = 'table' | 'card';
     JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    BacklogCardGridComponent, PriorityIndicatorComponent, EntityLinkComponent,
+    BacklogCardGridComponent, PriorityIndicatorComponent, EntityLinkComponent, RouterLink,
   ],
   templateUrl: './backlog.component.html',
   styleUrl: './backlog.component.scss',
@@ -66,6 +67,7 @@ export class BacklogComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly auth = inject(AuthService);
+  private readonly capability = inject(CapabilityService);
   private readonly snackbar = inject(SnackbarService);
 
   /**
@@ -76,6 +78,8 @@ export class BacklogComponent implements OnInit {
    */
   protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
   protected readonly canCreateJobs = computed(() => this.auth.hasAnyRole(JOB_CREATE_ROLES));
+  protected readonly canImportJobs = computed(() =>
+    this.auth.hasAnyRole(JOB_IMPORT_ROLES) && this.capability.isEnabled('CAP-CROSS-INTEG-FILE', true));
   protected readonly showArchived = signal(false);
   /** Selected job ids in the archived-view bulk-action context. WU-07 / F2. */
   protected readonly selectedJobs = signal<KanbanJob[]>([]);

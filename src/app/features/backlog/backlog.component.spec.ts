@@ -13,6 +13,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -20,6 +21,7 @@ class FakeLoader implements TranslateLoader {
 
 interface ComponentInternals {
   canCreateJobs: () => boolean;
+  canImportJobs: () => boolean;
   showJobDialog: () => boolean;
   openCreateDialog(): void;
   jobs: { set(value: unknown[]): void };
@@ -29,6 +31,7 @@ interface ComponentInternals {
 
 describe('BacklogComponent', () => {
   let roles: string[];
+  let fileImportOn: boolean;
 
   function create(): ComponentInternals {
     TestBed.resetTestingModule();
@@ -44,6 +47,7 @@ describe('BacklogComponent', () => {
         { provide: DetailDialogService, useValue: { open: vi.fn(), getDetailFromUrl: () => null } },
         { provide: AuthService, useValue: { hasRole: (r: string) => roles.includes(r), hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: CapabilityService, useValue: { isEnabled: (code: string) => code !== 'CAP-CROSS-INTEG-FILE' || fileImportOn } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
     });
@@ -52,6 +56,17 @@ describe('BacklogComponent', () => {
 
   beforeEach(() => {
     roles = ['PM'];
+    fileImportOn = true;
+  });
+
+  it('links job import for admins and managers while file import is on', () => {
+    roles = ['Manager'];
+    expect(create().canImportJobs()).toBe(true);
+    roles = ['PM'];
+    expect(create().canImportJobs()).toBe(false);
+    roles = ['Admin'];
+    fileImportOn = false;
+    expect(create().canImportJobs()).toBe(false);
   });
 
   it('offers New Job to the roles that plan work', () => {

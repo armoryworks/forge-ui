@@ -833,6 +833,8 @@ All list views must show `<app-empty-state>` when data is empty — icon + messa
 | `NumericKeypadComponent` | `shared/components/numeric-keypad/` | On-screen digit pad for touch terminals (auto/always/off, remembered per device); emits digit, backspace and clear — the host decides which field they edit |
 | `JobOperationsService` | `shared/services/` | Per-job operation progress API (`jobs/{id}/operations`, operation timer start/stop, progress PATCH) plus the cached `trackingEnabled` signal from `job-operations/config` (false on any error) |
 | `RunningTimersService` | `shared/services/` | The caller's open timers (`time-tracking/timers/active`) and stop-by-id |
+| `CsvImportSourceComponent` | `shared/components/csv-import-source/` | Step 1 of a CSV import page: upload a .csv, paste rows, or download a template (`templateRequested`); emits the raw text (`textLoaded`). Pair with `parseCsvText` / `pickCsv` / `parseCsvNumber` / `parseCsvDate` from `shared/utils/csv-import.ts` and the `DataImportResult` models for the validate-then-commit endpoints (job and historical invoice imports) |
+| `SalesTaxCodesService` | `shared/services/` | Sales tax codes loaded once (`ensureLoaded()`), as picker `options` led by "By ship-to address"; an error leaves the list empty |
 
 ### AppDataTableComponent — Usage Guide
 

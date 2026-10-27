@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -34,6 +35,9 @@ import { InvoiceDetailDialogComponent, InvoiceDetailDialogData } from './compone
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
+import { AuthService } from '../../shared/services/auth.service';
+import { CapabilityService } from '../../shared/services/capability.service';
+import { INVOICE_IMPORT_ROLES } from './invoice-import-roles';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -44,7 +48,7 @@ import { DateOnlyPipe } from '../../shared/pipes/date-only.pipe';
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent, EntityLinkComponent, DiscountChipComponent,
-    InvoiceDialogComponent, UninvoicedJobsPanelComponent, MatTooltipModule,
+    InvoiceDialogComponent, UninvoicedJobsPanelComponent, MatTooltipModule, RouterLink,
   ],
   templateUrl: './invoices.component.html',
   styleUrl: './invoices.component.scss',
@@ -60,9 +64,13 @@ export class InvoicesComponent implements OnInit {
   private readonly currencyCatalog = inject(CurrencyCatalogService).ensureLoaded();
   private readonly baseCurrency = inject(CurrencyService).baseCurrency;
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly auth = inject(AuthService);
+  private readonly capability = inject(CapabilityService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly providerName = this.accountingService.providerName;
+  protected readonly canImportInvoices = computed(() =>
+    this.isStandalone() && this.auth.hasAnyRole(INVOICE_IMPORT_ROLES) && this.capability.isEnabled('CAP-CROSS-INTEG-FILE', true));
 
   protected readonly showCreateDialog = signal(false);
   protected readonly showUninvoicedPanel = signal(false);
