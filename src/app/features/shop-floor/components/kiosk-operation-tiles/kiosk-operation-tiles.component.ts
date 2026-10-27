@@ -9,6 +9,7 @@ import { DurationMsPipe } from '../../../../shared/pipes/duration-ms.pipe';
 import { JobOperationRow } from '../../models/job-operation-row.model';
 import { SpcCharacteristic } from '../../../quality/models/spc.model';
 import { spcForOperation } from '../../../quality/utils/spc-for-operation';
+import { WorkInstructionsComponent } from '../../../controlled-documents/components/work-instructions/work-instructions.component';
 
 interface OperationTile {
   row: JobOperationRow;
@@ -28,7 +29,7 @@ interface OperationTile {
 @Component({
   selector: 'app-kiosk-operation-tiles',
   standalone: true,
-  imports: [NgTemplateOutlet, TranslatePipe, DurationMsPipe],
+  imports: [NgTemplateOutlet, TranslatePipe, DurationMsPipe, WorkInstructionsComponent],
   templateUrl: './kiosk-operation-tiles.component.html',
   styleUrl: './kiosk-operation-tiles.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

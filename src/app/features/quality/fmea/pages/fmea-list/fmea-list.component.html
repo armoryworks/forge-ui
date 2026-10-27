@@ -1,0 +1,54 @@
+<app-page-header [title]="'fmea.title' | translate" [subtitle]="'fmea.subtitle' | translate">
+  @if (canAuthor) {
+    <button class="action-btn action-btn--create" type="button" (click)="openCreate()" data-testid="fmea-new-btn">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'fmea.new' | translate }}
+    </button>
+  }
+</app-page-header>
+
+<div class="fmea-list">
+  <div class="tab-bar" appTabList [attr.aria-label]="'fmea.title' | translate">
+    <button class="tab" type="button" [appTab]="view() === 'analyses'" (click)="switchView('analyses')" data-testid="fmea-view-analyses">
+      <span class="material-icons-outlined" aria-hidden="true">list_alt</span>
+      {{ 'fmea.viewAnalyses' | translate }}
+    </button>
+    <button class="tab" type="button" [appTab]="view() === 'high-rpn'" (click)="switchView('high-rpn')" data-testid="fmea-view-high-rpn">
+      <span class="material-icons-outlined" aria-hidden="true">priority_high</span>
+      {{ 'fmea.viewHighRpn' | translate: { threshold: threshold } }}
+    </button>
+  </div>
+
+  @if (view() === 'analyses') {
+    <div class="fmea-list__filters">
+      <app-select [label]="'common.type' | translate" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="load()" data-testid="fmea-type-filter" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" data-testid="fmea-status-filter" />
+    </div>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="fmeas" [columns]="columns" [data]="fmeas()" [clickableRows]="true" (rowClick)="open($event)"
+        emptyIcon="rule" [emptyMessage]="'fmea.empty' | translate" data-testid="fmea-table">
+        <ng-template appColumnCell="type" let-row>{{ ('fmea.type' + row.type) | translate }}</ng-template>
+        <ng-template appColumnCell="subject" let-row>
+          {{ row.partNumber ?? '—' }}@if (row.operationName) { · {{ row.operationName }} }
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="statusChip(row.status)">{{ ('fmea.status' + row.status) | translate }}</span>
+        </ng-template>
+        <ng-template appColumnCell="maxRpn" let-row>
+          <span [class.fmea-list__high]="row.maxRpn >= threshold">{{ row.maxRpn }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>{{ row.createdAt | date:'MM/dd/yyyy' }}</ng-template>
+      </app-data-table>
+    </div>
+  } @else {
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="fmea-high-rpn" [columns]="highRpnColumns" [data]="highRpnRows()" [clickableRows]="true" (rowClick)="openItem($event)"
+        emptyIcon="verified" [emptyMessage]="'fmea.noHighRpn' | translate" data-testid="fmea-high-rpn-table">
+        <ng-template appColumnCell="fmeaNumber" let-row>{{ row.fmeaNumber ?? '—' }}</ng-template>
+        <ng-template appColumnCell="sod" let-row>{{ row.severity }}·{{ row.occurrence }}·{{ row.detection }}</ng-template>
+        <ng-template appColumnCell="rpn" let-row><span class="fmea-list__high">{{ row.rpn }}</span></ng-template>
+        <ng-template appColumnCell="recommendedAction" let-row>{{ row.recommendedAction ?? '—' }}</ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>

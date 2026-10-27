@@ -26,6 +26,7 @@ export interface CustomerDetail {
   isAutomotive?: boolean;
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
+  requiresCoa?: boolean;
   referenceNotes?: string | null;
   // Phase B of the customer workflow migration (2026-05-31) — credit + tax
   // fields the new guided wizard's Credit & Tax step writes and re-hydrates

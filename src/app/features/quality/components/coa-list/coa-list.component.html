@@ -1,0 +1,41 @@
+<ul class="coa-list">
+  @for (c of certificates(); track c.id) {
+    <li class="coa-list__row" [class.coa-list__row--voided]="c.status === 'Voided'" [attr.data-testid]="'coa-row-' + c.id">
+      <div class="coa-list__main">
+        <span class="coa-list__number">{{ c.certificateNumber }}</span>
+        @if (c.status === 'Voided') {
+          <span class="chip chip--muted">{{ 'coa.voided' | translate }}</span>
+        } @else if (c.conforms) {
+          <span class="chip chip--success" [attr.data-testid]="'coa-conforms-' + c.id">{{ 'coa.conforms' | translate }}</span>
+        } @else {
+          <span class="chip chip--error" [attr.data-testid]="'coa-nonconforming-' + c.id">{{ 'coa.doesNotConform' | translate }}</span>
+        }
+        @if (showLot()) {
+          <app-entity-link type="lot" [entityId]="c.lotRecordId">{{ c.lotNumber }}</app-entity-link>
+          <span class="coa-list__muted">{{ c.partNumber }}</span>
+        }
+        @if (c.customerName) {
+          <span class="coa-list__muted">{{ c.customerName }}</span>
+        }
+        @if (c.shipmentId && c.shipmentNumber && !showLot()) {
+          <app-entity-link type="shipment" [entityId]="c.shipmentId">{{ c.shipmentNumber }}</app-entity-link>
+        }
+        <span class="coa-list__muted">{{ c.generatedAt | date:'MM/dd/yyyy' }}</span>
+        <span class="coa-list__muted">{{ 'coa.resultCount' | translate: { count: c.results.length } }}</span>
+      </div>
+      <div class="coa-list__actions">
+        <button class="action-btn action-btn--sm" type="button" (click)="download(c, 'en')" [attr.data-testid]="'coa-pdf-en-' + c.id">
+          <span class="material-icons-outlined">picture_as_pdf</span> {{ 'coa.pdfEnglish' | translate }}
+        </button>
+        <button class="action-btn action-btn--sm" type="button" (click)="download(c, 'es')" [attr.data-testid]="'coa-pdf-es-' + c.id">
+          <span class="material-icons-outlined">picture_as_pdf</span> {{ 'coa.pdfSpanish' | translate }}
+        </button>
+        @if (canVoid() && c.status === 'Issued') {
+          <button class="action-btn action-btn--sm action-btn--danger" type="button" (click)="voidRequested.emit(c)" [attr.data-testid]="'coa-void-' + c.id">
+            {{ 'coa.void' | translate }}
+          </button>
+        }
+      </div>
+    </li>
+  }
+</ul>

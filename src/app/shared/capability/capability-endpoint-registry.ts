@@ -99,6 +99,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'auto-po', capability: 'CAP-P2P-AUTOPO' },
   { prefix: 'banking', capability: 'CAP-BANK-NACHA' },
   { prefix: 'bi', capability: 'CAP-CROSS-BI-EXPORT' },
+  { prefix: 'certificates-of-analysis', capability: 'CAP-QC-COA' },
   { prefix: 'chat', capability: 'CAP-EXT-CHAT' },
   { prefix: 'company-locations', capability: 'CAP-MD-LOCATIONS' },
   { prefix: 'compliance-forms', capability: 'CAP-QC-COMPLIANCE-FORMS' },
@@ -108,6 +109,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'customer-returns', capability: 'CAP-O2C-RMA' },
   { prefix: 'customers', capability: 'CAP-MD-CUSTOMERS' },
   { prefix: 'dashboard', capability: 'CAP-RPT-DASHBOARDS' },
+  { prefix: 'deliverables', capability: 'CAP-O2C-DELIVERABLE' },
   { prefix: 'downloads', capability: 'CAP-CROSS-DOCS' },
   { prefix: 'edi', capability: 'CAP-CROSS-INTEG-EDI' },
   { prefix: 'employee-profile', capability: 'CAP-MD-EMPLOYEES' },
@@ -139,6 +141,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'payroll', capability: 'CAP-HR-PAYROLL' },
   { prefix: 'pick-waves', capability: 'CAP-O2C-PICKPACK' },
   { prefix: 'planning-cycles', capability: 'CAP-PLAN-MRP' },
+  { prefix: 'ppap', capability: 'CAP-QC-PPAP' },
   { prefix: 'ppap-submissions', capability: 'CAP-QC-PPAP' },
   { prefix: 'predictions', capability: 'CAP-MAINT-PREDICTIVE' },
   { prefix: 'price-lists', capability: 'CAP-MD-PRICELIST' },
@@ -151,6 +154,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   // — NCR-specific paths still 403-and-fall-through-to-layer-2 if NCR is off
   // but inspection is on, which is the rare edge case.
   { prefix: 'quality', capability: 'CAP-QC-INSPECTION' },
+  { prefix: 'recalls', capability: 'CAP-QC-RECALL' },
   { prefix: 'receiving-inspection-templates', capability: 'CAP-QC-INSPECTION' },
   { prefix: 'quotes', capability: 'CAP-O2C-QUOTE' },
   { prefix: 'recurring-orders', capability: 'CAP-O2C-RECURRING' },

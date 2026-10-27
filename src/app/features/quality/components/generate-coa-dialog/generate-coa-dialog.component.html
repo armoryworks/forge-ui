@@ -1,0 +1,21 @@
+<app-dialog [title]="'coa.generateTitle' | translate: { lotNumber: data.lotNumber }" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <p class="text-muted">{{ 'coa.generateHint' | translate }}</p>
+    <app-entity-picker [label]="'coa.customerOptional' | translate" entityType="customers" displayField="name"
+      formControlName="customerId" data-testid="coa-generate-customer" />
+    <app-select [label]="'coa.language' | translate" formControlName="language" [options]="languageOptions"
+      data-testid="coa-generate-language" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000"
+      data-testid="coa-generate-notes" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="coa-generate-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()"
+        (click)="generate()" data-testid="coa-generate-confirm-btn">
+        <span class="material-icons-outlined">verified</span>
+        {{ 'coa.generate' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

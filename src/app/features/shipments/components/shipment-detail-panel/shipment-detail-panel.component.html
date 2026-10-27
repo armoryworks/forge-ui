@@ -129,6 +129,7 @@
       </div>
 
       <app-shipment-packages-section [shipmentId]="shipment.id" [editable]="canEdit(shipment.status)" (changed)="onPackagesChanged()" />
+      <app-shipment-coa-section [shipmentId]="shipment.id" [shipped]="shipment.status !== 'Pending' && shipment.status !== 'Packed'" />
 
       <div class="info-grid">
         <div class="info-item">

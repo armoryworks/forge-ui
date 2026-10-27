@@ -1,0 +1,22 @@
+<app-dialog [title]="'projects.newTitle' | translate" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="200" [required]="true" data-testid="project-create-name" />
+    <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="2" [maxlength]="2000" data-testid="project-create-description" />
+    <div class="dialog-row">
+      <app-entity-picker [label]="'common.customer' | translate" entityType="customers" displayField="name" formControlName="customerId" data-testid="project-create-customer" />
+      <app-input [label]="'projects.budget' | translate" type="number" formControlName="budgetTotal" data-testid="project-create-budget" />
+    </div>
+    <div class="dialog-row">
+      <app-datepicker [label]="'projects.plannedStart' | translate" formControlName="plannedStartDate" data-testid="project-create-start" />
+      <app-datepicker [label]="'projects.plannedEnd' | translate" formControlName="plannedEndDate" data-testid="project-create-end" />
+    </div>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="project-create-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="project-create-save-btn">
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

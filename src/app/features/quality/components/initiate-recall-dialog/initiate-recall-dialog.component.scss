@@ -1,0 +1,43 @@
+@use 'styles/variables' as *;
+
+.recall-preview {
+  border: $border-width-thin solid var(--border);
+  padding: $sp-md $sp-lg;
+  margin: $sp-md 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    font-weight: 600;
+    font-size: var(--font-size-title);
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-weight: 600;
+    font-size: var(--font-size-md);
+  }
+
+  &__customers,
+  &__state {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+  }
+}

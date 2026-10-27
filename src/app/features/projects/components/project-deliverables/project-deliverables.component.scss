@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+
+.deliverables {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__head,
+  &__summary,
+  &__main,
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__head {
+    justify-content: space-between;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding: $sp-md 0;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__name {
+    font-weight: 600;
+  }
+
+  &__muted {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+  }
+}

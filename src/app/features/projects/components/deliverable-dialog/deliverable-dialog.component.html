@@ -1,0 +1,26 @@
+<app-dialog [title]="(data.deliverable ? 'deliverables.editTitle' : 'deliverables.newTitle') | translate" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="200" [required]="true" data-testid="deliverable-name" />
+    @if (typeOptions(); as options) {
+      @if (options.length > 0) {
+        <app-select [label]="'deliverables.type' | translate" formControlName="deliverableTypeId" [options]="options" [required]="true" data-testid="deliverable-type" />
+      } @else {
+        <p class="text-muted" data-testid="deliverable-no-types">{{ 'deliverables.noTypes' | translate }}</p>
+      }
+    }
+    <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="2" [maxlength]="2000" data-testid="deliverable-description" />
+    <div class="dialog-row">
+      <app-datepicker [label]="'common.dueDate' | translate" formControlName="dueDate" data-testid="deliverable-due" />
+      <app-entity-picker [label]="'deliverables.jobOptional' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title"
+        formControlName="jobId" data-testid="deliverable-job" />
+    </div>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="deliverable-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="deliverable-save-btn">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

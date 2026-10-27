@@ -1,6 +1,7 @@
 import { Component, output, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { Observable, of, throwError } from 'rxjs';
 import { TranslateLoader, TranslateService, provideTranslateService } from '@ngx-translate/core';
@@ -97,6 +98,8 @@ describe('JobOperationsComponent', () => {
       imports: [JobOperationsComponent],
       providers: [
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: MobileApiService, useValue: api },
         { provide: MobileTimerService, useValue: timer },
         { provide: UndoService, useValue: { offer } },

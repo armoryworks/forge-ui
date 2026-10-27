@@ -111,6 +111,7 @@ export class NavTreeService {
         { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer', 'ProductionWorker', 'OfficeManager', 'Production Planner'] },
         { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
         { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Production Planner'] },
+        { icon: 'folder_special', label: 'Projects', i18nKey: 'nav.projects', route: '/projects', capability: 'CAP-EXT-PROJECTS', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
         { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager', 'Production Planner'] },
         { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
         { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM', 'OfficeManager', 'Production Planner'] },
@@ -242,6 +243,9 @@ export class NavTreeService {
       children: [
         { icon: 'checklist', label: 'Quality', i18nKey: 'nav.quality', route: '/quality', capability: 'CAP-QC-INSPECTION', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         { icon: 'report', label: 'Recalls', i18nKey: 'recalls.title', route: '/quality/recalls', capability: 'CAP-QC-RECALL', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'rule', label: 'FMEA', i18nKey: 'nav.fmea', route: '/quality/fmea', capability: 'CAP-QC-FMEA', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'assignment_turned_in', label: 'PPAP', i18nKey: 'nav.ppap', route: '/quality/ppap', capability: 'CAP-QC-PPAP', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'description', label: 'Controlled Documents', i18nKey: 'nav.controlledDocuments', route: '/controlled-documents', capability: 'CAP-CROSS-DOCS', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ComplianceOfficer'] },
         { icon: 'fact_check', label: 'Compliance', i18nKey: 'nav.compliance', route: '/compliance', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager', 'ComplianceOfficer', 'OfficeManager'] },
         { icon: 'radar', label: 'Watchtower', i18nKey: 'nav.watchtower', route: '/watchtower', capability: 'CAP-EXT-WATCHTOWER', allowedRoles: ['Admin', 'Manager'] },
       ],

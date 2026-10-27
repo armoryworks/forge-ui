@@ -9,6 +9,46 @@
       <app-entity-picker [label]="'recalls.pickLot' | translate" entityType="lots" displayField="lotNumber"
         secondaryDisplayField="partNumber" formControlName="lotId" data-testid="recall-lot-picker" />
     }
+
+    @if (previewLoading()) {
+      <div class="recall-preview" data-testid="recall-preview-loading">
+        <span class="recall-preview__state">{{ 'recalls.preview.loading' | translate }}</span>
+      </div>
+    } @else if (preview(); as p) {
+      <div class="recall-preview" data-testid="recall-preview">
+        <span class="recall-preview__title">{{ 'recalls.preview.title' | translate }}</span>
+        <div class="recall-preview__stats">
+          <div class="recall-preview__stat">
+            <span class="recall-preview__label">{{ 'recalls.preview.downstreamLots' | translate }}</span>
+            <span class="recall-preview__value" data-testid="recall-preview-downstream">{{ downstreamLotCount() }}</span>
+          </div>
+          <div class="recall-preview__stat">
+            <span class="recall-preview__label">{{ 'recalls.colShipments' | translate }}</span>
+            <span class="recall-preview__value" data-testid="recall-preview-shipments">{{ p.affectedShipmentsCount }}</span>
+          </div>
+          <div class="recall-preview__stat">
+            <span class="recall-preview__label">{{ 'recalls.colCustomers' | translate }}</span>
+            <span class="recall-preview__value" data-testid="recall-preview-customers">{{ p.affectedCustomersCount }}</span>
+          </div>
+          <div class="recall-preview__stat">
+            <span class="recall-preview__label">{{ 'recalls.preview.toQuarantine' | translate }}</span>
+            <span class="recall-preview__value" data-testid="recall-preview-quarantine">{{ p.totalQuarantineQuantity | number:'1.0-4' }}</span>
+          </div>
+        </div>
+        @if (previewCustomers().length > 0) {
+          <span class="recall-preview__customers" data-testid="recall-preview-customer-names">
+            {{ 'recalls.preview.customerList' | translate: { names: previewCustomers().join(', ') } }}
+          </span>
+        } @else {
+          <span class="recall-preview__state">{{ 'recalls.preview.noShipments' | translate }}</span>
+        }
+      </div>
+    } @else if (previewFailed()) {
+      <div class="recall-preview" data-testid="recall-preview-failed">
+        <span class="recall-preview__state">{{ 'recalls.preview.failed' | translate }}</span>
+      </div>
+    }
+
     <app-textarea [label]="'recalls.reason' | translate"
       formControlName="reason" [rows]="4" [maxlength]="2000"
       data-testid="recall-reason" />
@@ -18,7 +58,7 @@
     <button class="action-btn" (click)="close()" data-testid="recall-initiate-cancel-btn">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations">
       <button class="action-btn action-btn--primary"
-        [disabled]="form.invalid || saving()"
+        [disabled]="form.invalid || saving() || previewLoading()"
         (click)="confirm()" data-testid="recall-initiate-confirm-btn">
         <span class="material-icons-outlined">report</span>
         {{ 'recalls.initiate' | translate }}

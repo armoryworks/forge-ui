@@ -1,0 +1,74 @@
+<app-dialog [title]="document().documentNumber + ' — ' + document().title" width="760px" (closed)="close()">
+  <div class="doc-detail" [appLoadingBlock]="loading()">
+    <div class="doc-detail__meta">
+      <span [class]="documentChip(document().status)" data-testid="doc-detail-status">{{ ('controlledDocuments.status' + document().status) | translate }}</span>
+      <span class="chip chip--muted">{{ ('controlledDocuments.category' + document().category) | translate }}</span>
+      @if (document().partNumber) {
+        <span class="doc-detail__muted">{{ document().partNumber }}@if (document().operationLabel) { · {{ document().operationLabel }} }</span>
+      }
+      @if (document().reviewDueDate) {
+        <span class="doc-detail__muted">{{ 'controlledDocuments.reviewDue' | translate: { date: (document().reviewDueDate | date:'MM/dd/yyyy') } }}</span>
+      }
+    </div>
+    @if (document().description) {
+      <p class="doc-detail__description">{{ document().description }}</p>
+    }
+
+    <h4 class="doc-detail__section">{{ 'controlledDocuments.revisions' | translate }}</h4>
+    <ul class="doc-detail__revisions" data-testid="doc-revisions">
+      @for (r of revisions(); track r.id) {
+        <li class="doc-detail__revision" [attr.data-testid]="'doc-revision-' + r.revisionNumber">
+          <div class="doc-detail__revision-head">
+            <span class="doc-detail__rev">{{ 'controlledDocuments.revisionLabel' | translate: { number: r.revisionNumber } }}</span>
+            <span [class]="revisionChip(r.status)">{{ ('controlledDocuments.revisionStatus' + r.status) | translate }}</span>
+            <button class="doc-detail__link" type="button" (click)="open(r)" [attr.data-testid]="'doc-revision-open-' + r.id">{{ r.fileName ?? ('controlledDocuments.openFile' | translate) }}</button>
+          </div>
+          <span>{{ r.changeDescription }}</span>
+          <span class="doc-detail__muted">
+            {{ 'controlledDocuments.authoredBy' | translate: { name: r.authoredByName ?? '—' } }}
+            @if (r.approvedAt) {
+              · {{ 'controlledDocuments.approvedBy' | translate: { name: r.approvedByName ?? '—', date: (r.approvedAt | date:'MM/dd/yyyy') } }}
+            }
+          </span>
+          <div class="doc-detail__actions">
+            @if (canAuthor && r.status === 'Draft') {
+              <button class="action-btn action-btn--sm" type="button" [disabled]="busy()" (click)="submit(r)" [attr.data-testid]="'doc-revision-submit-' + r.id">
+                {{ 'controlledDocuments.submitForReview' | translate }}
+              </button>
+            }
+            @if (canApprove && r.status === 'InReview') {
+              <button class="action-btn action-btn--sm action-btn--primary" type="button" [disabled]="busy()" (click)="approve(r)" [attr.data-testid]="'doc-revision-approve-' + r.id">
+                {{ 'controlledDocuments.approve' | translate }}
+              </button>
+              <button class="action-btn action-btn--sm action-btn--danger" type="button" [disabled]="busy()" (click)="reject(r)" [attr.data-testid]="'doc-revision-reject-' + r.id">
+                {{ 'controlledDocuments.reject' | translate }}
+              </button>
+            }
+          </div>
+        </li>
+      } @empty {
+        <li class="doc-detail__muted" data-testid="doc-no-revisions">{{ 'controlledDocuments.noRevisions' | translate }}</li>
+      }
+    </ul>
+
+    @if (canRevise()) {
+      <h4 class="doc-detail__section">{{ 'controlledDocuments.newRevision' | translate }}</h4>
+      @if (uploadedFile(); as file) {
+        <span class="doc-detail__muted" data-testid="doc-revision-uploaded">{{ 'controlledDocuments.fileReady' | translate: { name: file.fileName } }}</span>
+        <app-textarea [label]="'controlledDocuments.changeDescription' | translate" [formControl]="changeDescription" [rows]="2" [maxlength]="2000"
+          data-testid="doc-revision-change-description" />
+        <button class="action-btn action-btn--primary" type="button" [disabled]="changeDescription.invalid || busy()" (click)="saveRevision()" data-testid="doc-revision-save-btn">
+          {{ 'controlledDocuments.createRevision' | translate }}
+        </button>
+      } @else {
+        <app-file-upload-zone entityType="controlled-documents" [entityId]="document().id" [multiple]="false" [maxSizeMb]="50" (uploaded)="onUploaded($event)" />
+      }
+    }
+  </div>
+  <div dialog-footer>
+    @if (canApprove && document().status !== 'Obsolete') {
+      <button class="action-btn action-btn--danger" type="button" (click)="obsolete()" data-testid="doc-obsolete-btn">{{ 'controlledDocuments.obsolete' | translate }}</button>
+    }
+    <button class="action-btn" type="button" (click)="close()" data-testid="doc-detail-close-btn">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

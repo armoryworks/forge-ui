@@ -28,6 +28,7 @@ export interface CustomerSummary {
   isAutomotive?: boolean;
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
+  requiresCoa?: boolean;
   referenceNotes?: string | null;
   creditLimit?: number | null;
   isTaxExempt?: boolean;

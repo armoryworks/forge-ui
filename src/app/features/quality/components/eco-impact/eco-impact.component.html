@@ -1,0 +1,94 @@
+<div class="eco-impact" [appLoadingBlock]="loading()" data-testid="eco-impact">
+  <h4 class="eco-impact__title">{{ 'ecoImpact.title' | translate }}</h4>
+  @if (failed()) {
+    <p class="eco-impact__empty" data-testid="eco-impact-failed">
+      {{ 'ecoImpact.failed' | translate }}
+      <button class="action-btn action-btn--sm" type="button" (click)="load(ecoId())" data-testid="eco-impact-retry-btn">
+        {{ 'ecoImpact.retry' | translate }}
+      </button>
+    </p>
+  } @else if (impact(); as i) {
+    @for (part of i.parts; track part.partId) {
+      <div class="eco-impact__part" [attr.data-testid]="'eco-impact-part-' + part.partId">
+        <div class="eco-impact__part-head">
+          <app-entity-link type="part" [entityId]="part.partId">{{ part.partNumber }}</app-entity-link>
+          @if (part.partName) {
+            <span class="eco-impact__muted">{{ part.partName }}</span>
+          }
+          <span class="chip chip--muted">{{ 'ecoImpact.currentRevision' | translate: { revision: part.currentRevision } }}</span>
+        </div>
+
+        @if (isEmpty(part)) {
+          <p class="eco-impact__empty">{{ 'ecoImpact.nothingOpen' | translate }}</p>
+        }
+
+        @if (part.openJobs.length > 0) {
+          <span class="eco-impact__section">{{ 'ecoImpact.openJobs' | translate: { count: part.openJobs.length } }}</span>
+          <ul class="eco-impact__list">
+            @for (job of part.openJobs; track job.jobId) {
+              <li [attr.data-testid]="'eco-impact-job-' + job.jobId">
+                <app-entity-link type="job" [entityId]="job.jobId">{{ job.jobNumber }}</app-entity-link>
+                <span>{{ job.title }}</span>
+                @if (job.relation === 'WhereUsed') {
+                  <span class="chip chip--info">{{ 'ecoImpact.usedIn' | translate: { part: job.partNumber ?? '' } }}</span>
+                }
+                @if (job.partRevision) {
+                  <span class="chip" [class.chip--warning]="isOtherRevision(part, job.partRevision)">{{ 'ecoImpact.revision' | translate: { revision: job.partRevision } }}</span>
+                }
+                @if (job.stageName) {
+                  <span class="eco-impact__muted">{{ job.stageName }}</span>
+                }
+                @if (job.dueDate) {
+                  <span class="eco-impact__muted">{{ 'ecoImpact.due' | translate: { date: (job.dueDate | dateOnly) } }}</span>
+                }
+              </li>
+            }
+          </ul>
+        }
+
+        @if (part.openPurchaseOrderLines.length > 0) {
+          <span class="eco-impact__section">{{ 'ecoImpact.openPurchaseOrders' | translate: { count: part.openPurchaseOrderLines.length } }}</span>
+          <ul class="eco-impact__list">
+            @for (line of part.openPurchaseOrderLines; track line.lineId) {
+              <li [attr.data-testid]="'eco-impact-po-' + line.lineId">
+                <app-entity-link type="purchase-order" [entityId]="line.purchaseOrderId">{{ line.poNumber }}</app-entity-link>
+                <span>{{ line.vendorName }}</span>
+                <span class="eco-impact__muted">{{ 'ecoImpact.openQuantity' | translate: { quantity: (line.openQuantity | number:'1.0-4') } }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (part.openSalesOrderLines.length > 0) {
+          <span class="eco-impact__section">{{ 'ecoImpact.openSalesOrders' | translate: { count: part.openSalesOrderLines.length } }}</span>
+          <ul class="eco-impact__list">
+            @for (line of part.openSalesOrderLines; track line.lineId) {
+              <li [attr.data-testid]="'eco-impact-so-' + line.lineId">
+                <app-entity-link type="sales-order" [entityId]="line.salesOrderId">{{ line.orderNumber }}</app-entity-link>
+                <span>{{ 'ecoImpact.line' | translate: { line: line.lineNumber } }}</span>
+                <span>{{ line.customerName }}</span>
+                <span class="eco-impact__muted">{{ 'ecoImpact.openQuantity' | translate: { quantity: (line.openQuantity | number:'1.0-4') } }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (part.stockByRevision.length > 0) {
+          <span class="eco-impact__section">{{ 'ecoImpact.stockByRevision' | translate }}</span>
+          <ul class="eco-impact__list">
+            @for (stock of part.stockByRevision; track stock.revision) {
+              <li [attr.data-testid]="'eco-impact-stock-' + (stock.revision ?? 'none')">
+                <span class="chip" [class.chip--warning]="isOtherRevision(part, stock.revision)">
+                  {{ stock.revision ? ('ecoImpact.revision' | translate: { revision: stock.revision }) : ('ecoImpact.noRevision' | translate) }}
+                </span>
+                <span>{{ 'ecoImpact.onHand' | translate: { quantity: (stock.quantity | number:'1.0-4'), lots: stock.lotCount } }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    } @empty {
+      <p class="eco-impact__empty" data-testid="eco-impact-no-parts">{{ 'ecoImpact.noParts' | translate }}</p>
+    }
+  }
+</div>

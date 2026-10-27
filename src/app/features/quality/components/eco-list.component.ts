@@ -28,6 +28,7 @@ import { ECO_AUTHOR_ROLES, QUALITY_MANAGER_ROLES } from '../quality-roles';
 import { DateOnlyPipe } from '../../../shared/pipes/date-only.pipe';
 import { requiredTrimmed } from '../../../shared/validators/required-trimmed.validator';
 import { wholeNumber } from '../../../shared/validators/whole-number.validator';
+import { EcoImpactComponent } from './eco-impact/eco-impact.component';
 
 const PART_ENTITY_TYPES = ['Part', 'BOM'];
 
@@ -51,6 +52,7 @@ const jsonText = (control: AbstractControl): ValidationErrors | null => {
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
     ValidationButtonComponent, MatTooltipModule, TranslatePipe, EntityPickerComponent,
+    EcoImpactComponent,
   ],
   templateUrl: './eco-list.component.html',
   styleUrl: './eco-list.component.scss',

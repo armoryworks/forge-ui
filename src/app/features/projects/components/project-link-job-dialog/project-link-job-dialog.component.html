@@ -1,0 +1,15 @@
+<app-dialog [title]="'projects.linkJobTitle' | translate" width="480px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-select [label]="'projects.wbsElement' | translate" formControlName="elementId" [options]="elementOptions" [required]="true" data-testid="project-link-element" />
+    <app-entity-picker [label]="'projects.job' | translate" entityType="jobs" displayField="jobNumber" secondaryDisplayField="title"
+      formControlName="jobId" [required]="true" data-testid="project-link-job" />
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="project-link-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="project-link-save-btn">
+        {{ 'projects.linkJob' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { EcoImpact } from '../models/eco-impact.model';
 import { Eco, CreateEcoRequest, UpdateEcoRequest, EcoAffectedItem, CreateEcoAffectedItemRequest, EcoStatus } from '../models/eco.model';
 
 @Injectable({ providedIn: 'root' })
@@ -18,6 +19,10 @@ export class EcoService {
 
   getEcoById(id: number): Observable<Eco> {
     return this.http.get<Eco>(`${this.base}/${id}`);
+  }
+
+  getImpact(id: number): Observable<EcoImpact> {
+    return this.http.get<EcoImpact>(`${this.base}/${id}/impact`);
   }
 
   createEco(data: CreateEcoRequest): Observable<Eco> {

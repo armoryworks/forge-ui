@@ -25,6 +25,7 @@ import { ShipmentPackagesSectionComponent } from '../shipment-packages-section/s
 import { ShipmentPickupSectionComponent } from '../shipment-pickup-section/shipment-pickup-section.component';
 import { ShipmentDocumentsActionsComponent } from '../shipment-documents-actions/shipment-documents-actions.component';
 import { EdiSendActionComponent } from '../../../admin/components/edi-send-action/edi-send-action.component';
+import { ShipmentCoaSectionComponent } from '../../../quality/components/shipment-coa-section/shipment-coa-section.component';
 
 @Component({
   selector: 'app-shipment-detail-panel',
@@ -36,6 +37,7 @@ import { EdiSendActionComponent } from '../../../admin/components/edi-send-actio
     EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
     DetailLoadErrorComponent,
     ShipmentPackagesSectionComponent, ShipmentPickupSectionComponent, ShipmentDocumentsActionsComponent, EdiSendActionComponent,
+    ShipmentCoaSectionComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
   styleUrl: './shipment-detail-panel.component.scss',

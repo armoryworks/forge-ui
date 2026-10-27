@@ -1,0 +1,10 @@
+@if (instructions().length > 0) {
+  <div class="work-instructions" [attr.data-testid]="'work-instructions-' + operationId()">
+    @for (wi of instructions(); track wi.revisionId) {
+      <button class="work-instructions__btn" type="button" (click)="open(wi)" [attr.data-testid]="'work-instruction-' + wi.documentId">
+        <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
+        {{ 'workInstructions.open' | translate: { title: wi.title, revision: wi.revisionNumber } }}
+      </button>
+    }
+  </div>
+}

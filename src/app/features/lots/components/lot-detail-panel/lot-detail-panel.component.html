@@ -200,6 +200,8 @@
         </div>
       }
 
+      <app-lot-coa-section [lotId]="lotId()" [lotNumber]="lotNumber()" />
+
       @if (canAttachFiles()) {
         <div class="trace-shipments lot-files" data-testid="lot-files">
           <h4 class="trace-timeline__title">{{ 'lots.files' | translate }}</h4>

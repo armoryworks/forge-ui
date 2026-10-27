@@ -39,6 +39,9 @@
               [class.op-tile__status--in-progress]="tile.row.status === 'InProgress'"
               [class.op-tile__status--complete]="tile.row.status === 'Complete'">{{ tile.statusKey | translate }}</span>
       </div>
+      @if (!tile.closed) {
+        <app-work-instructions [operationId]="tile.row.operationId" />
+      }
       <div class="op-tile__meta">
         @if (tile.row.plannedQuantity; as planned) {
           <span class="op-tile__qty" [attr.data-testid]="'kiosk-op-tile-planned-' + tile.row.stepNumber">{{ 'shopFloor.operations.quantityOfPlanned' | translate: { count: tile.row.completedQuantity, total: planned } }}</span>

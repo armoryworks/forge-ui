@@ -409,6 +409,20 @@ export const routes: Routes = [
           import('./features/customer-returns/customer-returns.routes').then((m) => m.CUSTOMER_RETURNS_ROUTES),
       },
       {
+        path: 'controlled-documents',
+        data: { titleKey: 'controlledDocuments.title' },
+        canActivate: routeAccessGuards('controlled-documents'),
+        loadChildren: () =>
+          import('./features/controlled-documents/controlled-documents.routes').then((m) => m.CONTROLLED_DOCUMENTS_ROUTES),
+      },
+      {
+        path: 'projects',
+        data: { titleKey: 'projects.title' },
+        canActivate: routeAccessGuards('projects'),
+        loadChildren: () =>
+          import('./features/projects/projects.routes').then((m) => m.PROJECTS_ROUTES),
+      },
+      {
         path: 'lots',
         data: { titleKey: 'nav.lots' },
         canActivate: routeAccessGuards('lots'),

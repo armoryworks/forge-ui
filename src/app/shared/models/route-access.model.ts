@@ -53,6 +53,8 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   'quality': { roles: ['Admin', 'Manager', 'Engineer'] },
   'customer-returns': { roles: ['Admin', 'Manager', 'OfficeManager'] },
   'lots': { roles: ['Admin', 'Manager', 'Engineer'] },
+  'controlled-documents': { roles: ['Admin', 'Manager', 'Engineer', 'ComplianceOfficer'], capabilities: ['CAP-CROSS-DOCS'] },
+  'projects': { roles: ['Admin', 'Manager', 'PM', 'Engineer'], capabilities: ['CAP-EXT-PROJECTS'] },
   'mrp': { roles: ['Admin', 'Manager', 'Production Planner'] },
   'oee': { roles: ['Admin', 'Manager'] },
   'andon': { capabilities: ['CAP-EXT-ANDON'] },

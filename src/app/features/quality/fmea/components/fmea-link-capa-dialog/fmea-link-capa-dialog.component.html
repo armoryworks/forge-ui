@@ -1,0 +1,10 @@
+<app-dialog [title]="'fmea.linkCapaTitle' | translate: { number: data.item.itemNumber }" width="480px" (closed)="close()">
+  <p class="text-muted">{{ 'fmea.linkCapaHint' | translate }}</p>
+  <app-select [label]="'fmea.capa' | translate" [formControl]="capaControl" [options]="capaOptions()" data-testid="fmea-link-capa-select" />
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="fmea-link-capa-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" type="button" [disabled]="capaControl.invalid || saving()" (click)="save()" data-testid="fmea-link-capa-save-btn">
+      {{ 'fmea.linkCapa' | translate }}
+    </button>
+  </div>
+</app-dialog>

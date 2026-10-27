@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideTranslateService, TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
@@ -34,7 +36,11 @@ describe('KioskOperationTilesComponent planned quantity', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [KioskOperationTilesComponent],
-      providers: [provideTranslateService({ loader: { provide: TranslateLoader, useClass: PlannedLoader }, fallbackLang: 'en', lang: 'en' })],
+      providers: [
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: PlannedLoader }, fallbackLang: 'en', lang: 'en' }),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
   });
 

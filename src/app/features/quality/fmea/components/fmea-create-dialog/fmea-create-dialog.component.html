@@ -1,0 +1,25 @@
+<app-dialog [title]="'fmea.newTitle' | translate" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="200" [required]="true" data-testid="fmea-create-name" />
+    <div class="dialog-row">
+      <app-select [label]="'common.type' | translate" formControlName="type" [options]="typeOptions" data-testid="fmea-create-type" />
+      <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber"
+        secondaryDisplayField="name" formControlName="partId" data-testid="fmea-create-part" />
+    </div>
+    @if (form.controls.type.value === 'Process' && form.controls.partId.value) {
+      <app-select [label]="'fmea.operation' | translate" formControlName="operationId" [options]="operationOptions()" data-testid="fmea-create-operation" />
+    }
+    <div class="dialog-row">
+      <app-input [label]="'fmea.preparedBy' | translate" formControlName="preparedBy" [maxlength]="200" data-testid="fmea-create-prepared-by" />
+      <app-input [label]="'fmea.responsibility' | translate" formControlName="responsibility" [maxlength]="200" data-testid="fmea-create-responsibility" />
+    </div>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="fmea-create-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="fmea-create-save-btn">
+        {{ 'common.create' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

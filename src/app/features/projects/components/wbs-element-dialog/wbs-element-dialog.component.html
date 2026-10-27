@@ -1,0 +1,29 @@
+<app-dialog [title]="'projects.addWbsTitle' | translate" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-select [label]="'projects.parentElement' | translate" formControlName="parentElementId" [options]="parentOptions" data-testid="wbs-parent" />
+      <app-select [label]="'common.type' | translate" formControlName="type" [options]="typeOptions" data-testid="wbs-type" />
+    </div>
+    <div class="dialog-row">
+      <app-input [label]="'projects.wbsCode' | translate" formControlName="code" [maxlength]="50" [required]="true" data-testid="wbs-code" />
+      <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="200" [required]="true" data-testid="wbs-name" />
+    </div>
+    <div class="dialog-row">
+      <app-input [label]="'projects.budgetLabor' | translate" type="number" formControlName="budgetLabor" data-testid="wbs-budget-labor" />
+      <app-input [label]="'projects.budgetMaterial' | translate" type="number" formControlName="budgetMaterial" data-testid="wbs-budget-material" />
+      <app-input [label]="'projects.budgetOther' | translate" type="number" formControlName="budgetOther" data-testid="wbs-budget-other" />
+    </div>
+    <div class="dialog-row">
+      <app-datepicker [label]="'projects.plannedStart' | translate" formControlName="plannedStart" data-testid="wbs-start" />
+      <app-datepicker [label]="'projects.plannedEnd' | translate" formControlName="plannedEnd" data-testid="wbs-end" />
+    </div>
+  </div>
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()" data-testid="wbs-cancel-btn">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" type="button" [disabled]="form.invalid || saving()" (click)="save()" data-testid="wbs-save-btn">
+        {{ 'common.add' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

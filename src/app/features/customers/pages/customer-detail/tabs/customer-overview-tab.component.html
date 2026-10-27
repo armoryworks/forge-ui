@@ -82,6 +82,19 @@
             <span class="compliance-toggle__help">{{ flag.helpKey | translate }}</span>
           </div>
         }
+        @if (coaEnabled()) {
+          <div class="compliance-toggle">
+            <mat-slide-toggle
+              [checked]="!!customer().requiresCoa"
+              [disabled]="isPending('requiresCoa')"
+              (change)="toggleFlag('requiresCoa', $event.checked)"
+              [attr.aria-label]="'customers.compliance.requiresCoa' | translate"
+              data-testid="customer-requires-coa-toggle">
+              <span class="compliance-toggle__label">{{ 'customers.compliance.requiresCoa' | translate }}</span>
+            </mat-slide-toggle>
+            <span class="compliance-toggle__help">{{ 'customers.compliance.requiresCoaHelp' | translate }}</span>
+          </div>
+        }
       </div>
     </section>
 

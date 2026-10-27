@@ -1,0 +1,29 @@
+@use 'styles/variables' as *;
+
+.fmea-rpn {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  margin: $sp-md 0;
+  border: $border-width-thin solid var(--border);
+
+  &--high {
+    border-color: var(--warning);
+  }
+
+  &__label {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: var(--font-size-kpi);
+    font-weight: 600;
+  }
+
+  &__hint {
+    font-size: var(--font-size-sm);
+    color: var(--warning-text);
+  }
+}

@@ -29,6 +29,7 @@ import { SpcRecordPanelComponent } from '../../../quality/components/spc-record-
 import { SpcCharacteristic } from '../../../quality/models/spc.model';
 import { SpcService } from '../../../quality/services/spc.service';
 import { spcForOperation } from '../../../quality/utils/spc-for-operation';
+import { WorkInstructionsComponent } from '../../../controlled-documents/components/work-instructions/work-instructions.component';
 
 /**
  * A job's routing operations on the phone, shown only while operation
@@ -43,7 +44,7 @@ import { spcForOperation } from '../../../quality/utils/spc-for-operation';
 @Component({
   selector: 'app-job-operations',
   standalone: true,
-  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent, SpcRecordPanelComponent],
+  imports: [TranslatePipe, IdentityPromptComponent, OperationQuantitySheetComponent, SpcRecordPanelComponent, WorkInstructionsComponent],
   templateUrl: './job-operations.component.html',
   styleUrl: './job-operations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

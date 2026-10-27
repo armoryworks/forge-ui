@@ -1,0 +1,28 @@
+<app-page-header [title]="'controlledDocuments.title' | translate" [subtitle]="'controlledDocuments.subtitle' | translate">
+  @if (canAuthor) {
+    <button class="action-btn action-btn--create" type="button" (click)="openCreate()" data-testid="doc-new-btn">
+      <span class="material-icons-outlined" aria-hidden="true">add</span>
+      {{ 'controlledDocuments.new' | translate }}
+    </button>
+  }
+</app-page-header>
+
+<div class="controlled-documents">
+  <div class="controlled-documents__filters">
+    <app-select [label]="'common.category' | translate" [formControl]="categoryFilter" [options]="categoryOptions" (selectionChange)="load()" data-testid="doc-category-filter" />
+    <app-select [label]="'common.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="load()" data-testid="doc-status-filter" />
+  </div>
+  <div [appLoadingBlock]="loading()">
+    <app-data-table tableId="controlled-documents" [columns]="columns" [data]="documents()" [clickableRows]="true" (rowClick)="openRow($event)"
+      emptyIcon="description" [emptyMessage]="'controlledDocuments.empty' | translate" data-testid="doc-table">
+      <ng-template appColumnCell="category" let-row>{{ ('controlledDocuments.category' + row.category) | translate }}</ng-template>
+      <ng-template appColumnCell="appliesTo" let-row>
+        {{ row.partNumber ?? '—' }}@if (row.operationLabel) { · {{ row.operationLabel }} }
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="statusChip(row.status)">{{ ('controlledDocuments.status' + row.status) | translate }}</span>
+      </ng-template>
+      <ng-template appColumnCell="reviewDueDate" let-row>{{ row.reviewDueDate ? (row.reviewDueDate | date:'MM/dd/yyyy') : '—' }}</ng-template>
+    </app-data-table>
+  </div>
+</div>
