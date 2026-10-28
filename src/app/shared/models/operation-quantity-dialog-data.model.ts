@@ -4,6 +4,7 @@ import { OperationReason } from './operation-reason.model';
 export interface OperationQuantityDialogData {
   title: string;
   jobQuantity: number;
+  targetQuantity?: number | null;
   completedQuantity: number;
   scrapQuantity: number;
   reasons: OperationReason[];

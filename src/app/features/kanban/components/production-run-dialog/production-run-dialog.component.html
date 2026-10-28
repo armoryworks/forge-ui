@@ -16,6 +16,14 @@
         <app-input [label]="'productionRuns.setupMinutes' | translate" type="number" formControlName="setupTimeMinutes" [min]="0" data-testid="production-run-setup" />
         <app-input [label]="'productionRuns.runMinutes' | translate" type="number" formControlName="runTimeMinutes" [min]="0" data-testid="production-run-run-time" />
       </div>
+      @if (overrun() > 0) {
+        <div class="production-run-dialog__overrun" role="alert" data-testid="production-run-overrun">
+          <p class="production-run-dialog__overrun-text">
+            {{ 'productionRuns.overrun' | translate: { over: overrun(), target: data.run?.targetQuantity } }}
+          </p>
+          <app-toggle formControlName="overrunAck" [label]="'productionRuns.overrunAck' | translate" data-testid="production-run-overrun-ack" />
+        </div>
+      }
       <p class="production-run-dialog__hint">{{ (data.run?.runTimeManual ? 'productionRuns.runTimeManualHint' : 'productionRuns.runTimeDerivedHint') | translate }}</p>
     }
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" [maxlength]="2000" data-testid="production-run-notes" />
@@ -24,7 +32,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()" data-testid="production-run-cancel">{{ 'common.cancel' | translate }}</button>
     <app-validation-button [violations]="violations" [loading]="saving()">
-      <button class="action-btn action-btn--primary" [disabled]="form.invalid || saving()" (click)="save()" data-testid="production-run-save">
+      <button class="action-btn action-btn--primary" [disabled]="form.invalid || overrunBlocked() || saving()" (click)="save()" data-testid="production-run-save">
         {{ (isEdit ? 'common.save' : 'common.create') | translate }}
       </button>
     </app-validation-button>

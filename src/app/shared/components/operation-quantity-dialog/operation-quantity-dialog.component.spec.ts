@@ -14,7 +14,7 @@ class FakeLoader implements TranslateLoader {
 
 interface DialogInternals {
   remaining: number;
-  form: { patchValue(value: { quantity?: number | null; scrap?: number | null; rework?: number | null; reason?: string | null }): void };
+  form: { patchValue(value: { quantity?: number | null; scrap?: number | null; rework?: number | null; reason?: string | null; overrunAck?: boolean }): void };
   askReason: () => boolean;
   violations: () => string[];
   canRecord: () => boolean;
@@ -31,6 +31,9 @@ interface DialogInternals {
   overPlanned: () => boolean;
   stopMode: boolean;
   doneCompleted: () => number;
+  overrun: () => number;
+  canComplete: () => boolean;
+  doneViolations: () => string[];
 }
 
 function setup(data: OperationQuantityDialogData, confirm = true) {
@@ -50,14 +53,14 @@ function setup(data: OperationQuantityDialogData, confirm = true) {
 }
 
 describe('OperationQuantityDialogComponent', () => {
-  it('prefills the pieces still to do and completes all of them', () => {
+  it('prefills the good pieces still to do, without counting scrap, and completes all of them', () => {
     const { component, close } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 12, scrapQuantity: 2, reasons: [] });
 
-    expect(component.remaining).toBe(26);
+    expect(component.remaining).toBe(28);
     expect(component.isAll()).toBe(true);
     component.complete();
 
-    expect(close).toHaveBeenCalledWith({ completedQuantity: 38, scrapQuantity: 2, reworkQuantity: 0, reasonCode: null, complete: true, addedQuantity: 26, addedScrap: 0 });
+    expect(close).toHaveBeenCalledWith({ completedQuantity: 40, scrapQuantity: 2, reworkQuantity: 0, reasonCode: null, complete: true, addedQuantity: 28, addedScrap: 0 });
   });
 
   it('records a partial count as absolute totals and keeps the step open', () => {
@@ -70,16 +73,56 @@ describe('OperationQuantityDialogComponent', () => {
     expect(close).toHaveBeenCalledWith({ completedQuantity: 20, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false, addedQuantity: 8, addedScrap: 1 });
   });
 
-  it('warns and refuses when finished plus scrapped exceeds the job quantity', () => {
+  it('never counts scrap toward the job quantity', () => {
+    const { component, close } = setup({ title: 'Mill', jobQuantity: 10, completedQuantity: 8, scrapQuantity: 3, reasons: [] });
+
+    component.form.patchValue({ quantity: 2, scrap: 4 });
+    expect(component.overrun()).toBe(0);
+    expect(component.canRecord()).toBe(true);
+    component.record();
+
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 10, scrapQuantity: 7 }));
+  });
+
+  it('warns about good pieces over the job quantity and records them once the overrun is confirmed', () => {
     const { component, close } = setup({ title: 'Mill', jobQuantity: 10, completedQuantity: 8, scrapQuantity: 0, reasons: [] });
 
-    component.form.patchValue({ quantity: 3 });
-    expect(component.violations()).toHaveLength(1);
+    component.form.patchValue({ quantity: 5 });
+    expect(component.overrun()).toBe(3);
+    expect(component.violations()).toEqual([]);
     expect(component.canRecord()).toBe(false);
+    expect(component.canComplete()).toBe(false);
+    expect(component.doneViolations()).toEqual(['jobOperations.dialog.overrunConfirmFirst']);
     component.record();
+    expect(close).not.toHaveBeenCalled();
+
+    component.form.patchValue({ overrunAck: true });
+    expect(component.canRecord()).toBe(true);
+    component.record();
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 13, complete: false, addedQuantity: 5 }));
+  });
+
+  it('measures the overrun against the target when the job starts extra pieces to cover scrap', () => {
+    const { component, close, confirmDialog } = setup({ title: 'Mill', jobQuantity: 110, targetQuantity: 100, completedQuantity: 90, scrapQuantity: 8, reasons: [] });
+
+    expect(component.remaining).toBe(10);
+    component.form.patchValue({ quantity: 10 });
+    expect(component.overrun()).toBe(0);
+    component.form.patchValue({ quantity: 14 });
+    expect(component.overrun()).toBe(4);
+    component.form.patchValue({ overrunAck: true });
     component.complete();
 
-    expect(close).not.toHaveBeenCalled();
+    expect(confirmDialog.open).not.toHaveBeenCalled();
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 104, scrapQuantity: 8, complete: true }));
+  });
+
+  it('asks for no confirmation when only scrap is added to a step already past the job quantity', () => {
+    const { component } = setup({ title: 'Mill', jobQuantity: 10, completedQuantity: 12, scrapQuantity: 0, reasons: [] });
+
+    component.form.patchValue({ quantity: 0, scrap: 1 });
+    expect(component.overrun()).toBe(0);
+    expect(component.canRecord()).toBe(true);
   });
 
   it('takes whole pieces only when the stock unit has no decimals', () => {
@@ -207,11 +250,11 @@ describe('OperationQuantityDialogComponent', () => {
     const { component, close, confirmDialog } = setup({ title: 'Mill', jobQuantity: 40, completedQuantity: 12, scrapQuantity: 0, reasons: [], mode: 'stop' });
 
     component.form.patchValue({ scrap: 2 });
-    expect(component.doneCompleted()).toBe(38);
+    expect(component.doneCompleted()).toBe(40);
     component.complete();
 
     expect(confirmDialog.open).not.toHaveBeenCalled();
-    expect(close).toHaveBeenCalledWith(expect.objectContaining({ complete: true, completedQuantity: 38, scrapQuantity: 2, addedQuantity: 0, addedScrap: 2 }));
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ complete: true, completedQuantity: 40, scrapQuantity: 2, addedQuantity: 0, addedScrap: 2 }));
   });
 
   it('the +1 / +5 / +10 steppers add to the chosen field', () => {

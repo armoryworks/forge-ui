@@ -10,6 +10,7 @@ export const CATALOG_SETTING_SECTIONS: CatalogSettingSection[] = [
       { key: 'shop-floor.labor-split', labelKey: 'admin.catalogSettings.laborSplit' },
       { key: 'shop-floor.backflush-default', labelKey: 'admin.catalogSettings.backflushDefault' },
       { key: 'shop-floor.step-gating', labelKey: 'admin.catalogSettings.stepGating' },
+      { key: 'shop-floor.max-overrun-percent', labelKey: 'admin.catalogSettings.maxOverrunPercent' },
       { key: 'shop-floor.recent-job-days', labelKey: 'admin.catalogSettings.recentJobDays' },
       { key: 'shop-floor.stale-timer-hours', labelKey: 'admin.catalogSettings.staleTimerHours' },
     ],

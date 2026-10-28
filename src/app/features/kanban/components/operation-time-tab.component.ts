@@ -253,6 +253,7 @@ export class OperationTimeTabComponent {
         data: {
           title: row.operationName,
           jobQuantity: this.jobQuantity(),
+          targetQuantity: this.data()?.targetQuantity ?? null,
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
           reasons: this.operationsService.reasons(),

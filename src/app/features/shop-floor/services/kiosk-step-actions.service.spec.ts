@@ -52,7 +52,7 @@ describe('KioskStepActionsService', () => {
   it('loads one step with its job quantity, decimals and reasons', () => {
     let loaded: unknown;
     service.loadStep(41, 401).subscribe(step => loaded = step);
-    expect(loaded).toEqual({ row: row(), context: { jobQuantity: 40, decimalPlaces: 0, reasons: [{ code: 'chatter', label: 'Chatter' }], gating: null } });
+    expect(loaded).toEqual({ row: row(), context: { jobQuantity: 40, targetQuantity: null, decimalPlaces: 0, reasons: [{ code: 'chatter', label: 'Chatter' }], gating: null } });
   });
 
   it('stopping a run timer sends only the pieces entered and a Done', () => {

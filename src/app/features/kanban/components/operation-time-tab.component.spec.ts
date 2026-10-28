@@ -309,7 +309,7 @@ describe('OperationTimeTabComponent', () => {
 
     component.openQuantity(firstRow(component));
     expect(dialog.open.mock.calls[0][1].data).toEqual({
-      title: 'Mill', jobQuantity: 40, completedQuantity: 20, scrapQuantity: 0,
+      title: 'Mill', jobQuantity: 40, targetQuantity: null, completedQuantity: 20, scrapQuantity: 0,
       reasons: [{ code: 'tooling', label: 'Tool wear' }], decimalPlaces: null, plannedQuantity: null, gate: null,
     });
     afterClosed.next({ completedQuantity: 30, scrapQuantity: 1, reworkQuantity: 0, reasonCode: null, complete: false });

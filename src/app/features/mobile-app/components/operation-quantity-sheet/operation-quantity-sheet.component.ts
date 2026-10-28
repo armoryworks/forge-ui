@@ -14,12 +14,13 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
 /**
  * Quantities for one operation on a stepper; the good count can also be
  * typed when it is too far to step to. Good pieces
- * start at everything not yet scrapped when the sheet opens from Done, and at
- * the recorded count otherwise; scrap and rework stay folded away until asked
+ * start at the target when the sheet opens from Done, and at the recorded
+ * count otherwise; scrap and rework stay folded away until asked
  * for, and a reason is offered as chips once either is non-zero. Counts are
- * absolute except rework, which is this entry's pieces sent back. Going over
- * the job quantity is flagged here because the server refuses it. Rework
- * entered while the user's Run timer is open offers to book rework time now.
+ * absolute except rework, which is this entry's pieces sent back. Scrap never
+ * counts toward the target; good pieces past it are an overrun the operator
+ * confirms before recording. Rework entered while the user's Run timer is open
+ * offers to book rework time now.
  */
 @Component({
   selector: 'app-operation-quantity-sheet',
@@ -32,6 +33,7 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
 export class OperationQuantitySheetComponent {
   readonly label = input.required<string>();
   readonly jobQuantity = input.required<number>();
+  readonly targetQuantity = input<number | null>(null);
   readonly completed = input<number>(0);
   readonly scrap = input<number>(0);
   readonly reasons = input<OperationReason[]>([]);
@@ -41,16 +43,20 @@ export class OperationQuantitySheetComponent {
   readonly recorded = output<OperationQuantityEntry>();
   readonly cancelled = output<void>();
 
+  protected readonly target = computed(() => Math.min(this.targetQuantity() ?? this.jobQuantity(), this.jobQuantity()));
   protected readonly scrapCount = linkedSignal(() => this.scrap());
   protected readonly goodCount = linkedSignal(() =>
     this.finishing()
-      ? Math.max(this.completed(), this.jobQuantity() - this.scrap())
+      ? Math.max(this.completed(), this.target())
       : this.completed());
   protected readonly reworkCount = signal(0);
   protected readonly reason = signal<string | null>(null);
   protected readonly scrapOpen = linkedSignal(() => this.scrap() > 0);
   protected readonly reworkOpen = signal(false);
-  protected readonly over = computed(() => this.goodCount() + this.scrapCount() > this.jobQuantity());
+  protected readonly overrun = computed(() =>
+    this.goodCount() > this.target() && this.goodCount() > this.completed() ? this.goodCount() - this.target() : 0);
+  protected readonly overrunAck = linkedSignal({ source: this.overrun, computation: () => false });
+  protected readonly blocked = computed(() => this.overrun() > 0 && !this.overrunAck());
   protected readonly askReason = computed(() =>
     this.reasons().length > 0 && (this.scrapCount() > this.scrap() || this.reworkCount() > 0));
   protected readonly offerReworkTime = computed(() => this.runTimerOpen() && this.reworkCount() > 0);
@@ -98,7 +104,7 @@ export class OperationQuantitySheetComponent {
   }
 
   protected submit(complete: boolean): void {
-    if (this.over() || this.busy()) return;
+    if (this.blocked() || this.busy()) return;
     this.recorded.emit({
       completed: this.goodCount(),
       scrap: this.scrapCount(),

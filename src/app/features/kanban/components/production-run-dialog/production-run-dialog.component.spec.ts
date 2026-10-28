@@ -22,6 +22,8 @@ interface DialogView {
   showWorkCenter: boolean;
   showTooling: boolean;
   toolingOptions: Signal<{ value: unknown; label: string }[]>;
+  overrun: Signal<number>;
+  overrunBlocked: Signal<boolean>;
 }
 
 const RUN = {
@@ -121,5 +123,29 @@ describe('ProductionRunDialogComponent', () => {
 
     expect(view.form.invalid).toBe(true);
     expect(runs.createRun).not.toHaveBeenCalled();
+  });
+
+  it('lets scrap run past the target without asking', () => {
+    const { view, runs } = setup({ jobId: 7, partId: 3, defaultTargetQuantity: null, run: RUN });
+    view.form.patchValue({ completedQuantity: 2000, scrapQuantity: 150 });
+
+    expect(view.overrun()).toBe(0);
+    view.save();
+
+    expect(runs.updateRun).toHaveBeenCalled();
+  });
+
+  it('warns about good pieces over the run target and saves them once the overrun is confirmed', () => {
+    const { view, runs } = setup({ jobId: 7, partId: 3, defaultTargetQuantity: null, run: RUN });
+    view.form.patchValue({ completedQuantity: 2040 });
+
+    expect(view.overrun()).toBe(40);
+    expect(view.overrunBlocked()).toBe(true);
+    view.save();
+    expect(runs.updateRun).not.toHaveBeenCalled();
+
+    view.form.patchValue({ overrunAck: true });
+    view.save();
+    expect(runs.updateRun).toHaveBeenCalledWith(7, 11, expect.objectContaining({ completedQuantity: 2040 }));
   });
 });
