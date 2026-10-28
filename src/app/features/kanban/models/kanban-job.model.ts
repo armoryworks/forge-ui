@@ -42,4 +42,5 @@ export interface KanbanJob {
   updatedAt?: string | null;
   estimatedTotalCost?: number | null;
   quotedPrice?: number | null;
+  percentComplete?: number | null;
 }

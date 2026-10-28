@@ -878,6 +878,7 @@
       "overdue": "Overdue",
       "holds": "Holds",
       "operations": "Operations",
+      "percentComplete": "% Complete",
       "runningTimers": "Running timers",
       "estimatedRemaining": "Est. remaining (min)",
       "parentJob": "Parent Job",

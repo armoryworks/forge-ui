@@ -72,6 +72,10 @@
     }
   </ng-template>
 
+  <ng-template appColumnCell="percentComplete" let-row>
+    <app-job-percent-complete [percent]="row.percentComplete" />
+  </ng-template>
+
   <ng-template appColumnCell="operationsProgress" let-row>
     {{ operationsText(row) }}
   </ng-template>

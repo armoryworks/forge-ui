@@ -133,9 +133,35 @@ describe('JobsTableComponent', () => {
     expect(visible).toEqual(['jobNumber', 'title', 'currentStageId', 'assigneeId', 'priorityName', 'dueDate', 'customerName', 'completedDate', 'createdAt']);
     expect(component.columns().map(c => c.field)).toEqual(expect.arrayContaining([
       'trackTypeId', 'partNumber', 'quantity', 'targetQuantity', 'salesOrderNumber', 'isOverdue', 'onHold',
-      'operationsProgress', 'runningTimerCount', 'estimatedRemainingMinutes', 'parentJobNumber', 'childJobCount',
+      'operationsProgress', 'percentComplete', 'runningTimerCount', 'estimatedRemainingMinutes', 'parentJobNumber', 'childJobCount',
       'billingStatus', 'externalRef', 'disposition', 'startDate', 'updatedAt', 'estimatedTotalCost', 'quotedPrice',
     ]));
+  });
+
+  it('offers % complete as a number column every role sees, sorted and filtered on the server too', () => {
+    roles = ['ProductionWorker'];
+    create();
+    const col = component.columns().find(c => c.field === 'percentComplete')!;
+
+    expect(col).toMatchObject({ header: 'jobsTable.columns.percentComplete', type: 'number', sortable: true, visible: false });
+    expect(col.serverSortable).not.toBe(false);
+    expect(col.serverFilterable).not.toBe(false);
+  });
+
+  it('carries the API percent onto the row and sends a range filter on it to the server', () => {
+    total = JOBS_TABLE_LOCAL_LIMIT + 1;
+    getPage.mockImplementation((_q: JobsTableQuery, request: JobsTablePageRequest) => of({
+      items: [job(1, { percentComplete: 41 }), job(2, { percentComplete: null })],
+      totalCount: total, page: request.page, pageSize: request.pageSize,
+    }));
+    create();
+
+    component.onServerPageChange({
+      pageIndex: 0, pageSize: 25, sort: 'percentComplete', order: 'desc', filters: { percentComplete: { min: 25, max: 75 } },
+    });
+
+    expect(getPage.mock.calls.at(-1)![1]).toMatchObject({ sort: 'percentComplete', filters: ['percentComplete:range:25..75'] });
+    expect(component.rows().map(r => r.percentComplete)).toEqual([41, null]);
   });
 
   it('shows the order type column by default only when listing every order type', () => {

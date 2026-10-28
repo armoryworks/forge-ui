@@ -254,6 +254,7 @@ export class DataTableComponent implements OnInit {
           case 'number':
           case 'currency': {
             const range = filterVal as { min?: number; max?: number };
+            if (isBlankSortValue(cellVal)) return range.min == null && range.max == null;
             const num = Number(cellVal);
             if (range.min != null && num < range.min) return false;
             if (range.max != null && num > range.max) return false;

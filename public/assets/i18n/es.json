@@ -878,6 +878,7 @@
       "overdue": "Vencido",
       "holds": "Retenciones",
       "operations": "Operaciones",
+      "percentComplete": "% completado",
       "runningTimers": "Temporizadores activos",
       "estimatedRemaining": "Restante est. (min)",
       "parentJob": "Trabajo padre",

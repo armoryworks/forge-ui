@@ -250,6 +250,21 @@ describe('DataTableComponent · behaviour', () => {
     expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2]);
   });
 
+  it('leaves blank cells out of a number range the way the server does', () => {
+    setup([{ field: 'percent', header: 'Percent', type: 'number' }], [
+      { id: 1, percent: 0 }, { id: 2, percent: 41 }, { id: 3, percent: null }, { id: 4, percent: 100 }, { id: 5 },
+    ]);
+
+    internals.filters.set({ percent: { max: 41 } });
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([1, 2]);
+
+    internals.filters.set({ percent: { min: 40, max: 100 } });
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2, 4]);
+
+    internals.filters.set({ percent: {} });
+    expect(internals.sortedData()).toHaveLength(5);
+  });
+
   it('matches text filters without regard to accents in either the data or the filter', () => {
     setup([{ field: 'name', header: 'Name' }], [
       { id: 1, name: 'García' }, { id: 2, name: 'Garden' }, { id: 3, name: 'Peña' },

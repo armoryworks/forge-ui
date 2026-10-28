@@ -1,0 +1,9 @@
+@if (value() !== null) {
+  <span class="job-percent" data-testid="job-percent-complete">
+    <span class="job-percent__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+          [attr.aria-valuenow]="value()" [attr.aria-label]="'jobsTable.columns.percentComplete' | translate">
+      <span class="job-percent__fill" [class.job-percent__fill--complete]="complete()" [style.width.%]="value()"></span>
+    </span>
+    <span class="job-percent__value">{{ value() }}%</span>
+  </span>
+}

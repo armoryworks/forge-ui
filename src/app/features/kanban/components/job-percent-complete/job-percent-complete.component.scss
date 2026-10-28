@@ -1,0 +1,32 @@
+@use 'styles/variables' as *;
+
+.job-percent {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  width: 100%;
+}
+
+.job-percent__bar {
+  flex: 1;
+  height: $progress-bar-height;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+}
+
+.job-percent__fill {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+
+  &--complete {
+    background: var(--success);
+  }
+}
+
+.job-percent__value {
+  min-width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

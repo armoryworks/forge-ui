@@ -17,6 +17,7 @@ import { BILLING_STAGE_ROLES } from '../../../../shared/models/billing-stage-rol
 import { AuthService } from '../../../../shared/services/auth.service';
 import { DisplayLabelService } from '../../../../shared/services/display-label.service';
 import { JobStageSelectComponent } from '../job-stage-select/job-stage-select.component';
+import { JobPercentCompleteComponent } from '../job-percent-complete/job-percent-complete.component';
 import { JobsTableService } from '../../services/jobs-table.service';
 import { KanbanService } from '../../services/kanban.service';
 import { KanbanJob } from '../../models/kanban-job.model';
@@ -59,7 +60,7 @@ interface FilterChip {
 @Component({
   selector: 'app-jobs-table',
   standalone: true,
-  imports: [DataTableComponent, ColumnCellDirective, AvatarComponent, JobStageSelectComponent, TranslatePipe],
+  imports: [DataTableComponent, ColumnCellDirective, AvatarComponent, JobStageSelectComponent, JobPercentCompleteComponent, TranslatePipe],
   templateUrl: './jobs-table.component.html',
   styleUrl: './jobs-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -148,6 +149,10 @@ export class JobsTableComponent {
         field: 'operationsProgress', header: 'jobsTable.columns.operations', sortable: true, type: 'number', visible: false,
         serverSortable: false, serverFilterable: false,
         exportValue: row => this.operationsText(row as JobTableRow),
+      },
+      {
+        field: 'percentComplete', header: 'jobsTable.columns.percentComplete', sortable: true, type: 'number', width: '140px',
+        visible: false,
       },
       {
         field: 'runningTimerCount', header: 'jobsTable.columns.runningTimers', sortable: true, type: 'number', align: 'right',
