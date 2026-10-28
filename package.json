@@ -93,7 +93,7 @@
     "driver.js": "^1.4.0",
     "gridstack": "^12.4.2",
     "html5-qrcode": "^2.3.8",
-    "marked": "^17.0.4",
+    "marked": "^18.0.11",
     "ng2-charts": "^10.0.0",
     "ngx-extended-pdf-viewer": "^29.0.1",
     "ngx-markdown": "^22.0.0",
