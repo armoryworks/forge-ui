@@ -1144,8 +1144,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           if (kind === 'cycles') {
             const reported = step.row.completedQuantity + step.row.scrapQuantity + cycles;
             const gated = (step.context.gating ?? 'Off') !== 'Off' && step.row.available != null && reported > step.row.available;
-            const target = Math.min(step.context.targetQuantity ?? step.context.jobQuantity, step.context.jobQuantity);
-            const overrun = step.row.completedQuantity + cycles > target;
+            const overrun = step.row.completedQuantity + cycles > step.context.jobQuantity;
             const record$: Observable<unknown> = gated || overrun
               ? this.stepActions.recordPieces(jobId, step.row, step.context, cycles)
               : this.shopFloorService.updateOperationProgress(jobId, operationId, {

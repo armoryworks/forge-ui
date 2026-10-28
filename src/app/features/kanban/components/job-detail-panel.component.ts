@@ -27,6 +27,7 @@ import { KanbanService } from '../services/kanban.service';
 import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
 import { UserRef } from '../models/user-ref.model';
 import { JobDetail } from '../models/job-detail.model';
+import { JobStartPlan } from '../models/job-start-plan.model';
 import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 import { Subtask } from '../models/subtask.model';
 import { JobLink } from '../models/job-link.model';
@@ -117,6 +118,10 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly operationTimeTab = viewChild(OperationTimeTabComponent);
 
   protected readonly quantityControl = new FormControl<number | null>(null);
+  protected readonly extraPiecesControl = new FormControl<number | null>(null);
+  protected readonly startPlan = signal<JobStartPlan | null>(null);
+  protected readonly quantityLabelKey = computed(() =>
+    this.job()?.extraPieces != null ? 'kanban.orderQuantity' : 'kanban.quantityToMake');
   protected readonly targetStart = computed(() => {
     const j = this.job();
     const target = j?.targetQuantity;
@@ -206,7 +211,50 @@ export class JobDetailPanelComponent implements OnInit {
 
   private applyDetail(detail: JobDetail): void {
     this.job.set(detail);
-    this.quantityControl.setValue(detail.quantity);
+    this.quantityControl.setValue(this.shownQuantity(detail));
+    this.extraPiecesControl.setValue(detail.extraPieces ?? null);
+    this.loadStartPlan(detail);
+  }
+
+  private shownQuantity(detail: JobDetail): number | null {
+    return detail.extraPieces != null ? detail.targetQuantity ?? detail.quantity : detail.quantity;
+  }
+
+  private loadStartPlan(detail: JobDetail): void {
+    const order = detail.targetQuantity ?? detail.quantity;
+    if (detail.partId == null || order == null || order <= 0 || !this.canEditQuantity()) {
+      this.startPlan.set(null);
+      return;
+    }
+    this.kanbanService.getStartPlan(detail.partId, order, null, detail.id).subscribe({
+      next: plan => this.startPlan.set(plan),
+      error: () => this.startPlan.set(null),
+    });
+  }
+
+  protected saveExtraPieces(): void {
+    const j = this.job();
+    if (!j || !this.canEditQuantity()) return;
+    const raw = this.extraPiecesControl.value;
+    const extra = raw == null || String(raw).trim() === '' ? null : Number(raw);
+    const before = j.extraPieces ?? null;
+    if (extra != null && (!Number.isInteger(extra) || extra < 0)) {
+      this.extraPiecesControl.setValue(before);
+      return;
+    }
+    if (extra === before) return;
+
+    const change = extra == null ? { clearExtraPieces: true } : { extraPieces: extra };
+    this.kanbanService.updateJob(j.id, change).subscribe({
+      next: () => {
+        this.snackbar.success(this.translate.instant('kanban.extraPiecesUpdated'));
+        this.refreshBuildQuantity();
+      },
+      error: (err: unknown) => {
+        this.extraPiecesControl.setValue(before);
+        this.snackbar.errorFrom(err, 'kanban.extraPiecesUpdateFailed');
+      },
+    });
   }
 
   private refreshBuildQuantity(): void {
@@ -228,11 +276,12 @@ export class JobDetailPanelComponent implements OnInit {
     const j = this.job();
     if (!j || !this.canEditQuantity()) return;
     const qty = this.quantityControl.value;
+    const shown = this.shownQuantity(j);
     if (!this.isValidQty(qty)) {
-      this.quantityControl.setValue(j.quantity);
+      this.quantityControl.setValue(shown);
       return;
     }
-    if (qty === j.quantity) return;
+    if (qty === shown) return;
 
     this.kanbanService.updateJob(j.id, { quantity: qty }).subscribe({
       next: () => {
@@ -240,7 +289,7 @@ export class JobDetailPanelComponent implements OnInit {
         this.refreshBuildQuantity();
       },
       error: (err: unknown) => {
-        this.quantityControl.setValue(j.quantity);
+        this.quantityControl.setValue(shown);
         this.snackbar.errorFrom(err, 'kanban.quantityUpdateFailed');
       },
     });

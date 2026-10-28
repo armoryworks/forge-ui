@@ -29,7 +29,11 @@ interface DialogInternals {
     quantity: FormControl<number | null>;
     trackTypeId: FormControl<number | null>;
     initialStageId: FormControl<number | null>;
+    extraPieces: FormControl<number | null>;
   }>;
+  quantityLabelKey: () => string;
+  plannedStart: () => { order: number; extra: number; start: number } | null;
+  startPlan: () => { calculatedExtraPieces: number } | null;
   filledFromSoLine: () => boolean;
   startStageOptions: () => { value: unknown }[];
   partLabel: () => { id: number; text: string } | null;
@@ -112,6 +116,7 @@ describe('JobDialogComponent', () => {
   let lines: AssignableSalesOrderLine[];
   let roles: string[];
   let getAssignableSalesOrderLines: ReturnType<typeof vi.fn>;
+  let getStartPlan: ReturnType<typeof vi.fn>;
 
   function render(mode: 'create' | 'edit', job: JobDetail | null = null, types: TrackType[] = trackTypes): void {
     fixture = TestBed.createComponent(JobDialogComponent);
@@ -127,6 +132,8 @@ describe('JobDialogComponent', () => {
     roles = ['Manager'];
     getAssignableSalesOrderLines = vi.fn(() => of(lines));
     createJob = vi.fn(() => new Subject());
+    getStartPlan = vi.fn((_partId: number, quantity: number) =>
+      of({ orderQuantity: quantity, calculatedStartQuantity: quantity + 6, calculatedExtraPieces: 6 }));
     updateJob = vi.fn(() => new Subject());
     getSalesOrderById = vi.fn((id: number) => of(id === 9
       ? { id: 9, customerId: 77, requestedDeliveryDate: '2026-11-02T00:00:00Z' }
@@ -144,6 +151,7 @@ describe('JobDialogComponent', () => {
             getAssignableSalesOrderLines,
             createJob,
             updateJob,
+            getStartPlan,
           },
         },
         { provide: SalesOrderService, useValue: { getSalesOrderById } },
@@ -600,5 +608,86 @@ describe('JobDialogComponent', () => {
     fixture.destroy();
     render('edit', editableJob({ disposition: 'ShipToCustomer' }));
     expect(component.jobForm.controls.quantity.enabled).toBe(false);
+  });
+
+  it('sends extra pieces on create and calls the quantity the order quantity once they are set', () => {
+    render('create');
+    const { title, partId, quantity, extraPieces } = component.jobForm.controls;
+    title.setValue('Pins');
+    partId.setValue(12);
+    quantity.setValue(100);
+    expect(component.quantityLabelKey()).toBe('kanban.quantityToMake');
+
+    extraPieces.setValue(14);
+    component.onSubmit();
+
+    expect(component.quantityLabelKey()).toBe('kanban.orderQuantity');
+    expect(component.plannedStart()).toEqual({ order: 100, extra: 14, start: 114 });
+    expect(createJob.mock.calls[0][0]).toEqual(expect.objectContaining({ partId: 12, quantity: 100, extraPieces: 14 }));
+  });
+
+  it('leaves extra pieces out of a create when blank and shows the calculated plan as the hint', () => {
+    vi.useFakeTimers();
+    try {
+      render('create');
+      component.jobForm.controls.title.setValue('Pins');
+      component.jobForm.controls.partId.setValue(12);
+      component.jobForm.controls.quantity.setValue(100);
+      vi.advanceTimersByTime(300);
+
+      expect(getStartPlan).toHaveBeenLastCalledWith(12, 100, null, null);
+      expect(component.startPlan()?.calculatedExtraPieces).toBe(6);
+      component.onSubmit();
+      expect(createJob.mock.calls[0][0].extraPieces).toBeUndefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('refuses negative or fractional extra pieces', () => {
+    render('create');
+    const { partId, extraPieces } = component.jobForm.controls;
+    partId.setValue(12);
+
+    extraPieces.setValue(-1);
+    expect(extraPieces.invalid).toBe(true);
+    extraPieces.setValue(2.5);
+    expect(extraPieces.invalid).toBe(true);
+    extraPieces.setValue(3);
+    expect(extraPieces.valid).toBe(true);
+  });
+
+  it('edits a job with extra pieces as order quantity plus extras', () => {
+    render('edit', editableJob({ quantity: 114, targetQuantity: 100, extraPieces: 14 }));
+    const { quantity, extraPieces } = component.jobForm.controls;
+    expect(quantity.value).toBe(100);
+    expect(extraPieces.value).toBe(14);
+
+    extraPieces.setValue(10);
+    submitEdit();
+
+    expect(updateJob.mock.calls[0][1]).toEqual(expect.objectContaining({ extraPieces: 10, quantity: 100 }));
+  });
+
+  it('switches the quantity to the order when extras are first set on a planned job, and clears them back', () => {
+    render('edit', editableJob({ quantity: 106, targetQuantity: 100, extraPieces: null }));
+    const { quantity, extraPieces } = component.jobForm.controls;
+    expect(quantity.value).toBe(106);
+
+    extraPieces.setValue(14);
+    expect(quantity.value).toBe(100);
+    extraPieces.setValue(null);
+    expect(quantity.value).toBe(106);
+  });
+
+  it('clears extra pieces with a clear flag and no quantity', () => {
+    render('edit', editableJob({ quantity: 114, targetQuantity: 100, extraPieces: 14 }));
+
+    component.jobForm.controls.extraPieces.setValue(null);
+    submitEdit();
+
+    expect(updateJob.mock.calls[0][1]).toEqual(expect.objectContaining({ clearExtraPieces: true }));
+    expect(updateJob.mock.calls[0][1].quantity).toBeUndefined();
+    expect(updateJob.mock.calls[0][1].extraPieces).toBeUndefined();
   });
 });

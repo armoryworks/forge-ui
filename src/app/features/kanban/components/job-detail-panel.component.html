@@ -508,10 +508,19 @@
           @if (canEditQuantity()) {
             <div class="jd-detail-row">
               <app-input class="jd-detail-qty" type="number" [min]="0.0001" step="any"
-                [label]="'kanban.quantityToMake' | translate" [formControl]="quantityControl"
+                [label]="quantityLabelKey() | translate" [formControl]="quantityControl"
                 (focusout)="saveQuantity()" (keydown.enter)="commitQuantityOnEnter($event)"
                 data-testid="job-detail-quantity" />
+              <app-input class="jd-detail-qty" type="number" [min]="0" step="1"
+                [label]="'kanban.extraPieces' | translate" [formControl]="extraPiecesControl"
+                (focusout)="saveExtraPieces()" (keydown.enter)="commitQuantityOnEnter($event)"
+                data-testid="job-detail-extra-pieces" />
             </div>
+            @if ((j.extraPieces ?? null) === null && startPlan(); as plan) {
+              <div class="jd-detail-row">
+                <span class="jd-detail-hint" data-testid="job-detail-extra-pieces-calculated">{{ 'kanban.extraPiecesCalculated' | translate: { extra: plan.calculatedExtraPieces, start: (plan.calculatedStartQuantity | number:'1.0-4') } }}</span>
+              </div>
+            }
           } @else if (j.quantity !== null) {
             <div class="jd-detail-row">
               <span class="jd-detail-label">{{ 'kanban.addPartQty' | translate }}</span>

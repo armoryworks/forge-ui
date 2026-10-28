@@ -55,3 +55,9 @@
   font-size: $font-size-xs;
   color: var(--text-muted);
 }
+
+.job-extra-pieces {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

@@ -299,6 +299,7 @@
   flex-shrink: 0;
 }
 .jd-detail-qty { width: 120px; }
+.jd-detail-hint { font-size: var(--font-size-xs); color: var(--text-muted); }
 .jd-detail-value {
   display: flex;
   align-items: center;

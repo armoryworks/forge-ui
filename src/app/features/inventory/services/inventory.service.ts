@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { AtpResult, AtpBucket } from '../models/atp.model';
 import { StorageLocation } from '../models/storage-location.model';
 import { StorageLocationFlat } from '../models/storage-location-flat.model';
+import { SurplusLocation } from '../models/surplus-location.model';
 import { BinContentItem } from '../models/bin-content-item.model';
 import { BinMovementItem } from '../models/bin-movement-item.model';
 import { InventoryPartSummary } from '../models/inventory-part-summary.model';
@@ -34,6 +35,10 @@ export class InventoryService {
 
   getLocationTree(): Observable<StorageLocation[]> {
     return this.http.get<StorageLocation[]>(`${this.base}/locations`);
+  }
+
+  getSurplusLocation(): Observable<SurplusLocation> {
+    return this.http.get<SurplusLocation>(`${this.base}/surplus-location`);
   }
 
   getBinLocations(): Observable<StorageLocationFlat[]> {

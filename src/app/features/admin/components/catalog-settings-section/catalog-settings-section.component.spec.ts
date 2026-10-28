@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 import { AdminSettingsService } from '../../settings/services/admin-settings.service';
 import { SettingsCatalogEntry } from '../../settings/models/setting-entry.model';
 import { CatalogSettingsSectionComponent } from './catalog-settings-section.component';
@@ -15,7 +16,7 @@ function entry(overrides: Partial<SettingsCatalogEntry>): SettingsCatalogEntry {
 }
 
 type Harness = {
-  rows: () => { key: string; kind: string }[];
+  rows: () => { key: string; kind: string; options: { value: unknown; label: string }[] }[];
   form: { controls: Record<string, { setValue(v: unknown): void; markAsDirty(): void; value: unknown }> };
   save(): void;
   ngOnInit(): void;
@@ -37,11 +38,21 @@ describe('CatalogSettingsSectionComponent', () => {
               entry({ key: 'terms.discount_grace_days', dataType: 'Integer', value: '0' }),
               entry({ key: 'ar.writeoff_reverses_tax', dataType: 'Boolean', value: 'false' }),
               entry({ key: 'payments.unlisted', dataType: 'String' }),
+              entry({ key: 'inventory.surplus-location-id', dataType: 'Integer', value: '3' }),
             ]),
             updateSetting,
           },
         },
         { provide: SnackbarService, useValue: { success: vi.fn(), errorFrom: vi.fn() } },
+        {
+          provide: InventoryService,
+          useValue: {
+            getBinLocations: () => of([
+              { id: 3, name: 'SURPLUS', locationType: 'Bin', barcode: null, locationPath: 'Main / SURPLUS', isActive: true },
+              { id: 4, name: 'OLD', locationType: 'Bin', barcode: null, locationPath: 'Main / OLD', isActive: false },
+            ]),
+          },
+        },
         { provide: TranslateService, useValue: { instant: (k: string) => k } },
       ],
     });
@@ -87,5 +98,26 @@ describe('CatalogSettingsSectionComponent', () => {
       ['terms.discount_grace_days', '5'],
       ['ar.writeoff_reverses_tax', 'true'],
     ]);
+  });
+
+  it('offers active bins for a storage-bin field, with blank meaning off', () => {
+    Object.defineProperty(component, 'section', {
+      value: () => ({
+        key: 'inventory-surplus', group: 'Inventory', titleKey: 't', icon: 'inventory_2',
+        fields: [{ key: 'inventory.surplus-location-id', labelKey: 'a', picker: 'storage-bin' }],
+      }),
+    });
+    component.ngOnInit();
+
+    const row = component.rows()[0];
+    expect(row.kind).toBe('select');
+    expect(row.options.map(o => o.value)).toEqual(['', '3']);
+    expect(component.form.controls['inventory.surplus-location-id'].value).toBe('3');
+
+    const control = component.form.controls['inventory.surplus-location-id'];
+    control.setValue('');
+    control.markAsDirty();
+    component.save();
+    expect(updateSetting.mock.calls).toEqual([['inventory.surplus-location-id', null]]);
   });
 });

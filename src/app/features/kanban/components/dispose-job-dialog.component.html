@@ -18,6 +18,14 @@
       @if (locationsEnabled) {
         <app-select [label]="'kanban.destinationBin' | translate" formControlName="locationId" [options]="binOptions()" data-testid="dispose-job-bin" />
       }
+      @if (surplusSplit(); as split) {
+        @if (split.surplusQuantity > 0) {
+          <p class="dispose-job__hint" data-testid="dispose-job-surplus-split">{{ 'kanban.surplusSplit' | translate: { demand: split.demandQuantity, surplus: split.surplusQuantity, location: split.surplusLocationName } }}</p>
+          @if (locationsEnabled) {
+            <app-select [label]="'kanban.surplusBin' | translate" formControlName="surplusLocationId" [options]="surplusBinOptions()" data-testid="dispose-job-surplus-bin" />
+          }
+        }
+      }
     }
     @if (formGroup.controls.disposition.value === 'Other' && writeOffAccountsEnabled) {
       <app-select [label]="'kanban.dispositionWriteOffAccount' | translate" formControlName="expenseGlAccountId"

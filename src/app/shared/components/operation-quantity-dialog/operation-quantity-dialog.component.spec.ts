@@ -102,19 +102,21 @@ describe('OperationQuantityDialogComponent', () => {
     expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 13, complete: false, addedQuantity: 5 }));
   });
 
-  it('measures the overrun against the target when the job starts extra pieces to cover scrap', () => {
+  it('records good up to the start quantity of a job with planned extra pieces without an overrun and fills Done to the target', () => {
     const { component, close, confirmDialog } = setup({ title: 'Mill', jobQuantity: 110, targetQuantity: 100, completedQuantity: 90, scrapQuantity: 8, reasons: [] });
 
     expect(component.remaining).toBe(10);
-    component.form.patchValue({ quantity: 10 });
+    component.form.patchValue({ quantity: 20 });
     expect(component.overrun()).toBe(0);
-    component.form.patchValue({ quantity: 14 });
+    expect(component.canRecord()).toBe(true);
+    component.form.patchValue({ quantity: 24 });
     expect(component.overrun()).toBe(4);
+    expect(component.canRecord()).toBe(false);
     component.form.patchValue({ overrunAck: true });
     component.complete();
 
     expect(confirmDialog.open).not.toHaveBeenCalled();
-    expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 104, scrapQuantity: 8, complete: true }));
+    expect(close).toHaveBeenCalledWith(expect.objectContaining({ completedQuantity: 114, scrapQuantity: 8, complete: true }));
   });
 
   it('asks for no confirmation when only scrap is added to a step already past the job quantity', () => {

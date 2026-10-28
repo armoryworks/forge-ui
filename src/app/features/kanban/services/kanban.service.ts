@@ -12,6 +12,8 @@ import { BoardColumn } from '../models/board-column.model';
 import { KanbanBoard } from '../models/kanban-board.model';
 import { BoardFilters } from '../models/board-filters.model';
 import { JobDetail } from '../models/job-detail.model';
+import { JobStartPlan } from '../models/job-start-plan.model';
+import { JobSurplusSplit } from '../models/job-surplus-split.model';
 import { Subtask } from '../models/subtask.model';
 import { Activity } from '../models/activity.model';
 import { CustomerRef } from '../models/customer-ref.model';
@@ -125,6 +127,7 @@ export class KanbanService {
     partId?: number | null;
     quantity?: number | null;
     initialStageId?: number | null;
+    extraPieces?: number | null;
   }): Observable<JobDetail> {
     return this.http.post<JobDetail>(`${environment.apiUrl}/jobs`, command);
   }
@@ -140,8 +143,21 @@ export class KanbanService {
       `${environment.apiUrl}/orders/assignable-lines`, { params });
   }
 
-  updateJob(id: number, changes: Partial<Omit<JobDetail, 'dueDate'>> & { dueDate?: Date | string | null }): Observable<unknown> {
+  updateJob(id: number, changes: Partial<Omit<JobDetail, 'dueDate'>> & { dueDate?: Date | string | null; clearExtraPieces?: boolean }): Observable<unknown> {
     return this.http.put(`${environment.apiUrl}/jobs/${id}`, changes);
+  }
+
+  getStartPlan(partId: number, quantity: number, salesOrderLineId: number | null = null, jobId: number | null = null): Observable<JobStartPlan> {
+    let params = new HttpParams().set('partId', partId).set('quantity', quantity);
+    if (salesOrderLineId != null) params = params.set('salesOrderLineId', salesOrderLineId);
+    if (jobId != null) params = params.set('jobId', jobId);
+    return this.http.get<JobStartPlan>(`${environment.apiUrl}/jobs/start-plan`, { params });
+  }
+
+  getSurplusSplit(jobId: number, quantity: number, runId: number | null = null): Observable<JobSurplusSplit> {
+    let params = new HttpParams().set('quantity', quantity);
+    if (runId != null) params = params.set('runId', runId);
+    return this.http.get<JobSurplusSplit>(`${environment.apiUrl}/jobs/${jobId}/surplus-split`, { params });
   }
 
   getJobLinks(jobId: number): Observable<JobLink[]> {

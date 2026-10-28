@@ -521,4 +521,12 @@ describe('InventoryComponent cycle count lines', () => {
     expect(fix.suggestionQcHold(suggestion({ qcHoldQuantity: 0 }))).toBeNull();
     expect(fix.suggestionQcHold(suggestion())).toBeNull();
   });
+
+  it('marks the configured surplus location so it can be badged', () => {
+    const { internals } = setup('stock', { loaded: true, enabled: true }, {
+      inventory: { getSurplusLocation: () => of({ locationId: 5, name: 'SURPLUS' }) },
+    });
+
+    expect((internals as unknown as { surplusLocationId: () => number | null }).surplusLocationId()).toBe(5);
+  });
 });

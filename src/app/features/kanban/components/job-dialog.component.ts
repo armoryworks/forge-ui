@@ -4,10 +4,11 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
+import { JobStartPlan } from '../models/job-start-plan.model';
 import { CustomerRef } from '../models/customer-ref.model';
 import { UserRef } from '../models/user-ref.model';
 import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
@@ -112,6 +113,30 @@ export class JobDialogComponent implements OnInit {
     partId: new FormControl<number | null>(null),
     quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.min(0.0001)]),
     initialStageId: new FormControl<number | null>(null),
+    extraPieces: new FormControl<number | null>(null, [Validators.min(0), Validators.pattern(/^\d+$/)]),
+  });
+
+  private readonly formValue = toSignal(
+    this.jobForm.valueChanges.pipe(map(() => this.jobForm.getRawValue())),
+    { initialValue: this.jobForm.getRawValue() },
+  );
+
+  protected readonly startPlan = signal<JobStartPlan | null>(null);
+
+  protected readonly extraPiecesShown = computed(() => this.mode() === 'create'
+    ? this.formValue().partId != null
+    : this.quantityEditable(this.job()));
+
+  protected readonly extraPiecesSet = computed(() => this.formValue().extraPieces != null);
+
+  protected readonly quantityLabelKey = computed(() =>
+    this.extraPiecesSet() ? 'kanban.orderQuantity' : 'kanban.quantityToMake');
+
+  protected readonly plannedStart = computed(() => {
+    const f = this.formValue();
+    const order = Number(f.quantity ?? 0);
+    const extra = Number(f.extraPieces ?? 0);
+    return f.extraPieces != null && order > 0 ? { order, extra, start: order + extra } : null;
   });
 
   private readonly selectedTrackTypeId = toSignal(
@@ -143,6 +168,7 @@ export class JobDialogComponent implements OnInit {
     title: this.translate.instant('kanban.jobTitle'),
     trackTypeId: this.translate.instant('kanban.trackType'),
     quantity: this.translate.instant('kanban.quantityToMake'),
+    extraPieces: this.translate.instant('kanban.extraPieces'),
   });
 
   protected readonly trackTypeOptions = computed<SelectOption[]>(() =>
@@ -202,8 +228,13 @@ export class JobDialogComponent implements OnInit {
         dueDate: this.utcCalendarDate(j.dueDate),
       });
       if (this.mode() === 'edit' && this.quantityEditable(j)) {
-        this.jobForm.controls.quantity.setValue(j.quantity ?? 1);
+        const hasExtras = j.extraPieces != null;
+        this.jobForm.controls.quantity.setValue(hasExtras ? (j.targetQuantity ?? j.quantity ?? 1) : (j.quantity ?? 1));
         this.jobForm.controls.quantity.enable({ emitEvent: false });
+        this.jobForm.controls.extraPieces.setValue(j.extraPieces ?? null);
+        this.jobForm.controls.extraPieces.valueChanges
+          .pipe(startWith(j.extraPieces ?? null), map(v => v != null), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+          .subscribe(set => this.syncOrderQuantity(j, set));
       }
     } else {
       const types = this.trackTypes();
@@ -212,6 +243,8 @@ export class JobDialogComponent implements OnInit {
         this.jobForm.patchValue({ trackTypeId: defaultType.id });
       }
     }
+
+    this.watchStartPlan();
 
     forkJoin({
       customers: this.kanbanService.getCustomers(),
@@ -274,6 +307,50 @@ export class JobDialogComponent implements OnInit {
       : undefined;
     control.setValue((orderConfirmed ?? stages[0])?.id ?? null);
     control.markAsPristine();
+  }
+
+  private watchStartPlan(): void {
+    this.jobForm.valueChanges.pipe(
+      startWith(null),
+      map(() => this.startPlanKey()),
+      distinctUntilChanged((a, b) => a === b),
+      debounceTime(300),
+      switchMap(key => {
+        if (key === null) return of(null);
+        const [partId, quantity, lineId] = key.split('|').map(v => (v === '' ? null : Number(v)));
+        return this.kanbanService.getStartPlan(partId!, quantity!, lineId, this.job()?.id ?? null)
+          .pipe(catchError(() => of(null)));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(plan => this.startPlan.set(plan));
+  }
+
+  private startPlanKey(): string | null {
+    if (!this.extraPiecesShown()) return null;
+    const f = this.jobForm.getRawValue();
+    const j = this.job();
+    const partId = f.partId ?? j?.partId ?? null;
+    const order = this.mode() === 'edit' && f.extraPieces == null ? (j?.targetQuantity ?? f.quantity) : f.quantity;
+    if (partId == null || order == null || !(Number(order) > 0)) return null;
+    return `${partId}|${order}|${f.salesOrderLineId ?? ''}`;
+  }
+
+  private syncOrderQuantity(j: JobDetail, extrasSet: boolean): void {
+    const quantity = this.jobForm.controls.quantity;
+    if (quantity.dirty) return;
+    const shown = extrasSet ? (j.targetQuantity ?? j.quantity) : j.quantity;
+    if (shown != null && quantity.value !== shown) quantity.setValue(shown);
+  }
+
+  private extraPiecesChange(current: JobDetail, extra: number | null, quantity: number | null): Partial<JobDetail> & { clearExtraPieces?: boolean } {
+    const before = current.extraPieces ?? null;
+    if (extra != null) {
+      return { extraPieces: extra === before ? undefined : extra, quantity: quantity ?? undefined };
+    }
+    if (before != null) {
+      return { clearExtraPieces: true, quantity: this.jobForm.controls.quantity.dirty ? quantity ?? undefined : undefined };
+    }
+    return { quantity: this.editedQuantity(current, quantity) };
   }
 
   protected quantityEditable(j: JobDetail | null): boolean {
@@ -513,6 +590,7 @@ export class JobDialogComponent implements OnInit {
         partId: f.partId,
         quantity: this.submittedQuantity(f.partId, f.salesOrderLineId, f.quantity),
         initialStageId: f.initialStageId,
+        extraPieces: f.partId != null && f.extraPieces != null ? Number(f.extraPieces) : undefined,
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);
@@ -527,9 +605,11 @@ export class JobDialogComponent implements OnInit {
       // JobNumber is editable only while the job is not disposed/closed.
       const canRenumber = this.allowManualJobNumbers() && !current.disposition;
       const nextJobNumber = canRenumber ? (f.jobNumber?.trim() || current.jobNumber) : current.jobNumber;
-      const quantity = this.editedQuantity(current, f.quantity);
+      const quantityChange = this.quantityEditable(current)
+        ? this.extraPiecesChange(current, f.extraPieces != null ? Number(f.extraPieces) : null, f.quantity)
+        : {};
       this.kanbanService.updateJob(jobId, {
-        quantity,
+        ...quantityChange,
         jobNumber: canRenumber ? (f.jobNumber?.trim() || undefined) : undefined,
         title: f.title!.trim(),
         description: f.description || null,
@@ -538,9 +618,10 @@ export class JobDialogComponent implements OnInit {
         priority: f.priority ?? 'Normal',
         dueDate: dueDateIso,
       }).subscribe({
-        next: () => {
+        next: result => {
           this.saving.set(false);
           this.dialogRef.clearDraft();
+          const server = (result ?? null) as Partial<JobDetail> | null;
           const updated: JobDetail = {
             ...current,
             jobNumber: nextJobNumber,
@@ -550,7 +631,9 @@ export class JobDialogComponent implements OnInit {
             customerId: f.customerId,
             priority: f.priority ?? 'Normal',
             dueDate: dueDateIso ? new Date(dueDateIso) : null,
-            quantity: quantity ?? current.quantity,
+            quantity: server?.quantity !== undefined ? server.quantity : quantityChange.quantity ?? current.quantity,
+            targetQuantity: server?.targetQuantity !== undefined ? server.targetQuantity : current.targetQuantity,
+            extraPieces: server?.extraPieces !== undefined ? server.extraPieces : current.extraPieces,
           };
           this.saved.emit(updated);
         },

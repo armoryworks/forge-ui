@@ -2,13 +2,15 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } fro
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { concatMap, from, toArray } from 'rxjs';
+import { catchError, concatMap, forkJoin, from, Observable, of, toArray } from 'rxjs';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { InventoryService } from '../../../inventory/services/inventory.service';
+import { StorageLocationFlat } from '../../../inventory/models/storage-location-flat.model';
 import { AdminSettingsService } from '../../settings/services/admin-settings.service';
 import { SettingsCatalogEntry } from '../../settings/models/setting-entry.model';
 import { CatalogSettingSection } from '../../models/catalog-setting-section.model';
@@ -36,6 +38,7 @@ export class CatalogSettingsSectionComponent implements OnInit {
   private readonly adminSettings = inject(AdminSettingsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly inventory = inject(InventoryService);
 
   readonly section = input.required<CatalogSettingSection>();
 
@@ -80,9 +83,12 @@ export class CatalogSettingsSectionComponent implements OnInit {
 
   private load(): void {
     this.loading.set(true);
-    this.adminSettings.getGroup(this.section().group).subscribe({
-      next: entries => {
-        this.build(entries);
+    const bins$: Observable<StorageLocationFlat[]> = this.section().fields.some(field => field.picker === 'storage-bin')
+      ? this.inventory.getBinLocations().pipe(catchError(() => of([])))
+      : of([]);
+    forkJoin({ entries: this.adminSettings.getGroup(this.section().group), bins: bins$ }).subscribe({
+      next: ({ entries, bins }) => {
+        this.build(entries, bins);
         this.loading.set(false);
       },
       error: (err: unknown) => {
@@ -92,14 +98,18 @@ export class CatalogSettingsSectionComponent implements OnInit {
     });
   }
 
-  private build(entries: SettingsCatalogEntry[]): void {
+  private build(entries: SettingsCatalogEntry[], bins: StorageLocationFlat[]): void {
+    const binOptions: SelectOption[] = [
+      { value: '', label: this.translate.instant('admin.catalogSettings.noLocation') },
+      ...bins.filter(bin => bin.isActive).map(bin => ({ value: String(bin.id), label: bin.locationPath || bin.name })),
+    ];
     const byKey = new Map(entries.map(entry => [entry.key, entry]));
     const form = new FormGroup<Record<string, FormControl<string | boolean>>>({});
     const rows: CatalogFieldRow[] = [];
     for (const field of this.section().fields) {
       const entry = byKey.get(field.key);
       if (!entry) continue;
-      const kind = CatalogSettingsSectionComponent.kindOf(entry);
+      const kind = field.picker === 'storage-bin' ? 'select' : CatalogSettingsSectionComponent.kindOf(entry);
       const initial: string | boolean = kind === 'toggle' ? entry.value?.toLowerCase() === 'true' : entry.value ?? '';
       form.addControl(field.key, new FormControl<string | boolean>(initial, { nonNullable: true }));
       rows.push({
@@ -107,7 +117,9 @@ export class CatalogSettingsSectionComponent implements OnInit {
         labelKey: field.labelKey,
         hint: entry.description,
         kind,
-        options: (entry.choices ?? []).map(choice => ({ value: choice.value, label: choice.label })),
+        options: field.picker === 'storage-bin'
+          ? binOptions
+          : (entry.choices ?? []).map(choice => ({ value: choice.value, label: choice.label })),
       });
     }
     this.form = form;

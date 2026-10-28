@@ -8,6 +8,8 @@ import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ProductionRun } from '../../models/production-run.model';
+import { KanbanService } from '../../services/kanban.service';
+import { JobSurplusSplit } from '../../models/job-surplus-split.model';
 import { ProductionRunsService } from '../../services/production-runs.service';
 import { ProductionRunsSectionComponent } from './production-runs-section.component';
 
@@ -26,7 +28,7 @@ function run(overrides: Partial<ProductionRun> = {}): ProductionRun {
   };
 }
 
-function setup(opts: { runs?: ProductionRun[]; capability?: boolean; roles?: boolean; partId?: number | null } = {}) {
+function setup(opts: { runs?: ProductionRun[]; capability?: boolean; roles?: boolean; partId?: number | null; split?: JobSurplusSplit } = {}) {
   const runs = opts.runs ?? [run()];
   const service = {
     getRuns: vi.fn(() => of(runs)),
@@ -34,6 +36,10 @@ function setup(opts: { runs?: ProductionRun[]; capability?: boolean; roles?: boo
     receiveToStock: vi.fn(() => of(run({ status: 'Completed', receivedQuantity: 1940, receiptJournalEntryNumber: 812 }))),
   };
   const dialog = { open: vi.fn(() => ({ afterClosed: () => of(true) })) };
+  const kanban = {
+    getSurplusSplit: vi.fn((_jobId: number, quantity: number) => of(opts.split
+      ?? { demandQuantity: quantity, surplusQuantity: 0, surplusLocationId: null, surplusLocationName: null })),
+  };
   const snackbar = { success: vi.fn(), errorFrom: vi.fn() };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -41,6 +47,7 @@ function setup(opts: { runs?: ProductionRun[]; capability?: boolean; roles?: boo
     providers: [
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: ProductionRunsService, useValue: service },
+      { provide: KanbanService, useValue: kanban },
       { provide: AuthService, useValue: { hasAnyRole: vi.fn(() => opts.roles ?? true) } },
       { provide: CapabilityService, useValue: { isEnabled: vi.fn((code: string) => (opts.capability ?? true) && code === 'CAP-MFG-COMPLETE') } },
       { provide: MatDialog, useValue: dialog },
@@ -53,7 +60,7 @@ function setup(opts: { runs?: ProductionRun[]; capability?: boolean; roles?: boo
   fixture.componentRef.setInput('jobQuantity', 2000);
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
-  return { fixture, el, service, dialog, snackbar, component: fixture.componentInstance };
+  return { fixture, el, service, dialog, snackbar, kanban, component: fixture.componentInstance };
 }
 
 describe('ProductionRunsSectionComponent', () => {
@@ -130,5 +137,20 @@ describe('ProductionRunsSectionComponent', () => {
     const { el } = setup({ partId: null });
 
     expect(el.querySelector('[data-testid="production-runs-section"]')).toBeNull();
+  });
+
+  it('names the surplus split in the receive confirmation', () => {
+    const completed = run({ status: 'Completed', completedQuantity: 114 });
+    const { el, dialog, kanban } = setup({
+      runs: [completed],
+      split: { demandQuantity: 100, surplusQuantity: 14, surplusLocationId: 5, surplusLocationName: 'SURPLUS' },
+    });
+
+    (el.querySelector('[data-testid="production-run-receive-11"]') as HTMLButtonElement).click();
+
+    expect(kanban.getSurplusSplit).toHaveBeenCalledWith(7, 114, 11);
+    expect((dialog.open.mock.calls[0] as unknown[])[1]).toEqual(expect.objectContaining({
+      data: expect.objectContaining({ message: 'productionRuns.receiveMessage productionRuns.receiveSurplus' }),
+    }));
   });
 });

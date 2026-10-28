@@ -16,6 +16,15 @@ export const CATALOG_SETTING_SECTIONS: CatalogSettingSection[] = [
     ],
   },
   {
+    key: 'inventory-surplus',
+    group: 'Inventory',
+    titleKey: 'admin.catalogSettings.inventorySurplus',
+    icon: 'inventory_2',
+    fields: [
+      { key: 'inventory.surplus-location-id', labelKey: 'admin.catalogSettings.surplusLocation', picker: 'storage-bin' },
+    ],
+  },
+  {
     key: 'payments-credits',
     group: 'Payments',
     titleKey: 'admin.catalogSettings.paymentsCredits',

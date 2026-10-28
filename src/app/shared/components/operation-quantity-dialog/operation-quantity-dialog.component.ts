@@ -219,7 +219,8 @@ export class OperationQuantityDialogComponent {
   }
 
   private overrunOf(good: number): number {
-    return good > this.target && good > this.data.completedQuantity ? good - this.target : 0;
+    const start = this.data.jobQuantity;
+    return good > start && good > this.data.completedQuantity ? good - start : 0;
   }
 
   private exceedsGate(total: number): boolean {

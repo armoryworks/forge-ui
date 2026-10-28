@@ -847,7 +847,16 @@
       "title": "Custom fields",
       "saved": "Custom fields saved",
       "saveFailed": "Could not save the custom fields"
-    }
+    },
+    "orderQuantity": "Order quantity",
+    "extraPieces": "Extra pieces",
+    "extraPiecesStart": "Start quantity {{start}}: {{order}} ordered + {{extra}} extra.",
+    "extraPiecesCalculated": "Blank uses the calculated plan: {{extra}} extra, start {{start}}.",
+    "extraPiecesHint": "Pieces to start beyond the order for scrap and material yield. Blank uses the calculated plan.",
+    "extraPiecesUpdated": "Extra pieces updated",
+    "extraPiecesUpdateFailed": "Could not update the extra pieces",
+    "surplusSplit": "{{demand}} cover the order and go to the bin above; {{surplus}} beyond it go to the surplus location {{location}}.",
+    "surplusBin": "Surplus bin"
   },
   "jobsTable": {
     "viewBoard": "Board",
@@ -2469,7 +2478,8 @@
     "messages": {
       "suggestionDismissed": "Suggestion dismissed"
     },
-    "consigned": "Consigned"
+    "consigned": "Consigned",
+    "surplusBadge": "Surplus"
   },
   "contactFields": {
     "mobile": "Mobile",
@@ -4781,7 +4791,7 @@
       "laborSplit": "Labor split for overlapping timers",
       "backflushDefault": "Backflush default for BOM components",
       "stepGating": "Step gating",
-      "maxOverrunPercent": "Maximum overrun (% over the target)",
+      "maxOverrunPercent": "Maximum overrun (% over the start quantity)",
       "recentJobDays": "Recent jobs on the kiosk (days)",
       "staleTimerHours": "Stale timer alert (hours)",
       "paymentsCredits": "Payments, discounts and credits",
@@ -4796,7 +4806,10 @@
       "qboFreightItem": "QuickBooks freight item ID",
       "qboBadDebtItem": "QuickBooks bad debt item ID",
       "qboRefundItem": "QuickBooks refund item ID",
-      "qboRefundAccount": "QuickBooks refund bank account ID"
+      "qboRefundAccount": "QuickBooks refund bank account ID",
+      "inventorySurplus": "Surplus stock",
+      "surplusLocation": "Surplus stock location",
+      "noLocation": "None (off)"
     }
   },
   "teamsPanel": {
@@ -14204,7 +14217,7 @@
       "lessTen": "Ten less",
       "moreTen": "Ten more",
       "overrun": "{{over}} good over the job quantity of {{total}}. Check the count, then confirm.",
-      "overrunTarget": "{{over}} good over the target of {{target}} (this job starts {{start}}). Check the count, then confirm.",
+      "overrunTarget": "{{over}} good over the start quantity of {{start}} (order {{target}} plus planned extras). Check the count, then confirm.",
       "overrunAck": "Yes, record the overrun",
       "doneCount": "Done — {{count}} of {{total}}",
       "recordCount": "Record {{count}}, keep going",
@@ -14752,7 +14765,7 @@
       "stopAndDone": "Stop and mark done ({{count}})",
       "overPlanned": "{{total}} is more than the {{planned}} planned for this step. Check the count before you continue.",
       "overrun": "{{over}} good over the job quantity of {{quantity}}. Check the count, then confirm to record it.",
-      "overrunTarget": "{{over}} good over the target of {{target}} (this job starts {{start}} to cover scrap). Check the count, then confirm to record it.",
+      "overrunTarget": "{{over}} good over the start quantity of {{start}} (order {{target}} plus planned extra pieces). Check the count, then confirm to record it.",
       "overrunAck": "Yes, record the overrun",
       "overrunConfirmFirst": "Confirm the overrun first.",
       "reworkTimeQuestion": "You're on a Run timer for this step. Book the rework time now?",
@@ -16269,7 +16282,8 @@
     "runTimeManualHint": "Run time was entered by hand and is kept. Clear it to go back to the time from start/stop less downtime.",
     "runTimeDerivedHint": "Leave run time empty to use the time from start to stop, less setup and downtime. A value you enter wins.",
     "overrun": "{{over}} good over the run target of {{target}}. Check the count, then confirm to save it.",
-    "overrunAck": "Yes, save the overrun"
+    "overrunAck": "Yes, save the overrun",
+    "receiveSurplus": "{{demand}} cover the order; {{surplus}} beyond it go to the surplus location {{location}}."
   },
   "downtime": {
     "categories": {

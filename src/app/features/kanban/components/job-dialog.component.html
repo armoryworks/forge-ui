@@ -29,12 +29,25 @@
         <div class="dialog-row">
           <app-entity-picker data-testid="job-part" [label]="'kanban.part' | translate" entityType="parts"
             displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
-          <app-input data-testid="job-quantity" [label]="'kanban.quantityToMake' | translate" type="number"
+          <app-input data-testid="job-quantity" [label]="quantityLabelKey() | translate" type="number"
             formControlName="quantity" [min]="0.0001" step="any" />
         </div>
       } @else if (quantityEditable(job())) {
-        <app-input data-testid="job-quantity-edit" [label]="'kanban.quantityToMake' | translate" type="number"
+        <app-input data-testid="job-quantity-edit" [label]="quantityLabelKey() | translate" type="number"
           formControlName="quantity" [min]="0.0001" step="any" />
+      }
+      @if (extraPiecesShown()) {
+        <div class="job-extra-pieces">
+          <app-input data-testid="job-extra-pieces" [label]="'kanban.extraPieces' | translate" type="number"
+            formControlName="extraPieces" [min]="0" step="1" />
+          @if (plannedStart(); as plan) {
+            <p class="field-hint" data-testid="job-extra-pieces-start">{{ 'kanban.extraPiecesStart' | translate: { start: plan.start, order: plan.order, extra: plan.extra } }}</p>
+          } @else if (startPlan(); as plan) {
+            <p class="field-hint" data-testid="job-extra-pieces-calculated">{{ 'kanban.extraPiecesCalculated' | translate: { extra: plan.calculatedExtraPieces, start: plan.calculatedStartQuantity } }}</p>
+          } @else {
+            <p class="field-hint">{{ 'kanban.extraPiecesHint' | translate }}</p>
+          }
+        </div>
       }
 
       <div class="dialog-row">

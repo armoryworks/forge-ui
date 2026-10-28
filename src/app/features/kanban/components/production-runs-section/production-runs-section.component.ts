@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { catchError, of } from 'rxjs';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -17,7 +18,9 @@ import { ProductionRunRow } from '../../models/production-run-row.model';
 import { ProductionRunStatus } from '../../models/production-run-status.type';
 import { ProductionRun } from '../../models/production-run.model';
 import { PRODUCTION_RUN_WRITE_ROLES } from '../../production-run-roles';
+import { KanbanService } from '../../services/kanban.service';
 import { ProductionRunsService } from '../../services/production-runs.service';
+import { JobSurplusSplit } from '../../models/job-surplus-split.model';
 import { ProductionRunDialogComponent } from '../production-run-dialog/production-run-dialog.component';
 
 const STATUS_CHIPS: Record<ProductionRunStatus, string> = {
@@ -41,6 +44,7 @@ export class ProductionRunsSectionComponent {
   readonly jobQuantity = input<number | null>(null);
 
   private readonly runsService = inject(ProductionRunsService);
+  private readonly kanban = inject(KanbanService);
   private readonly auth = inject(AuthService);
   private readonly capabilities = inject(CapabilityService);
   private readonly dialog = inject(MatDialog);
@@ -147,11 +151,23 @@ export class ProductionRunsSectionComponent {
 
   receive(run: ProductionRun): void {
     if (this.busyRunId() !== null) return;
+    this.kanban.getSurplusSplit(this.jobId(), run.completedQuantity, run.id)
+      .pipe(catchError(() => of(null)))
+      .subscribe(split => this.confirmReceive(run, split));
+  }
+
+  private confirmReceive(run: ProductionRun, split: JobSurplusSplit | null): void {
+    const message = this.translate.instant('productionRuns.receiveMessage', { quantity: run.completedQuantity, part: run.partNumber });
+    const surplus = split && split.surplusQuantity > 0
+      ? ' ' + this.translate.instant('productionRuns.receiveSurplus', {
+        demand: split.demandQuantity, surplus: split.surplusQuantity, location: split.surplusLocationName,
+      })
+      : '';
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
         title: this.translate.instant('productionRuns.receiveTitle', { run: run.runNumber }),
-        message: this.translate.instant('productionRuns.receiveMessage', { quantity: run.completedQuantity, part: run.partNumber }),
+        message: message + surplus,
         confirmLabel: this.translate.instant('productionRuns.receive'),
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {

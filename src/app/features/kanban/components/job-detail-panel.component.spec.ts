@@ -67,6 +67,9 @@ interface PanelInternals {
   onAllOperationsComplete(): void;
   moveToStage(stage: Stage): void;
   quantityControl: FormControl<number | null>;
+  extraPiecesControl: FormControl<number | null>;
+  saveExtraPieces(): void;
+  quantityLabelKey: () => string;
   canEditQuantity: () => boolean;
   saveQuantity(): void;
   quantityChanged: { subscribe(fn: () => void): unknown };
@@ -104,6 +107,7 @@ function setup(options: { admin?: boolean; confirm?: boolean; roles?: string[] }
     updateJobPart: vi.fn(),
     updateJob: vi.fn(),
     getJobDetail: vi.fn(),
+    getStartPlan: vi.fn().mockReturnValue(of({ orderQuantity: 100, calculatedStartQuantity: 106, calculatedExtraPieces: 6 })),
     getJobParts: vi.fn().mockReturnValue(of([])),
     createJobLink: vi.fn(),
     bulkArchive: vi.fn(),
@@ -669,6 +673,36 @@ describe('JobDetailPanelComponent', () => {
       expect(open).not.toHaveBeenCalled();
       vi.restoreAllMocks();
     });
+  });
+
+  it('sets extra pieces through the job update, and clears them with the clear flag', () => {
+    const { component, kanban, snackbar } = setup({ roles: ['Manager'] });
+    component.job.set(jobDetail({ partId: 9, quantity: 106, targetQuantity: 100 }));
+    kanban.updateJob.mockReturnValue(of({}));
+    kanban.getJobDetail.mockReturnValue(of(jobDetail({ partId: 9, quantity: 114, targetQuantity: 100, extraPieces: 14 })));
+
+    component.extraPiecesControl.setValue(14);
+    component.saveExtraPieces();
+
+    expect(kanban.updateJob).toHaveBeenCalledWith(JOB_ID, { extraPieces: 14 });
+    expect(snackbar.success).toHaveBeenCalledWith('kanban.extraPiecesUpdated');
+    expect(component.quantityControl.value).toBe(100);
+    expect(component.quantityLabelKey()).toBe('kanban.orderQuantity');
+
+    component.extraPiecesControl.setValue(null);
+    component.saveExtraPieces();
+    expect(kanban.updateJob).toHaveBeenLastCalledWith(JOB_ID, { clearExtraPieces: true });
+  });
+
+  it('restores invalid extra pieces without saving', () => {
+    const { component, kanban } = setup({ roles: ['Manager'] });
+    component.job.set(jobDetail({ partId: 9, quantity: 114, targetQuantity: 100, extraPieces: 14 }));
+
+    component.extraPiecesControl.setValue(-2);
+    component.saveExtraPieces();
+
+    expect(kanban.updateJob).not.toHaveBeenCalled();
+    expect(component.extraPiecesControl.value).toBe(14);
   });
 });
 

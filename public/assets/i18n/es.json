@@ -847,7 +847,16 @@
       "title": "Campos personalizados",
       "saved": "Campos personalizados guardados",
       "saveFailed": "No se pudieron guardar los campos personalizados"
-    }
+    },
+    "orderQuantity": "Cantidad del pedido",
+    "extraPieces": "Piezas extra",
+    "extraPiecesStart": "Cantidad de inicio {{start}}: {{order}} pedidas + {{extra}} extra.",
+    "extraPiecesCalculated": "En blanco usa el plan calculado: {{extra}} extra, inicio {{start}}.",
+    "extraPiecesHint": "Piezas a iniciar además del pedido para desecho y rendimiento del material. En blanco usa el plan calculado.",
+    "extraPiecesUpdated": "Piezas extra actualizadas",
+    "extraPiecesUpdateFailed": "No se pudieron actualizar las piezas extra",
+    "surplusSplit": "{{demand}} cubren el pedido y van a la ubicación de arriba; {{surplus}} adicionales van a la ubicación de excedentes {{location}}.",
+    "surplusBin": "Ubicación de excedentes"
   },
   "jobsTable": {
     "viewBoard": "Tablero",
@@ -2469,7 +2478,8 @@
     "messages": {
       "suggestionDismissed": "Sugerencia descartada"
     },
-    "consigned": "En consignación"
+    "consigned": "En consignación",
+    "surplusBadge": "Excedente"
   },
   "contactFields": {
     "mobile": "Móvil",
@@ -4781,7 +4791,7 @@
       "laborSplit": "Reparto de mano de obra entre temporizadores simultáneos",
       "backflushDefault": "Consumo automático predeterminado de componentes de la lista de materiales",
       "stepGating": "Control de pasos",
-      "maxOverrunPercent": "Excedente máximo (% sobre el objetivo)",
+      "maxOverrunPercent": "Excedente máximo (% sobre la cantidad de inicio)",
       "recentJobDays": "Trabajos recientes en el quiosco (días)",
       "staleTimerHours": "Alerta de temporizador olvidado (horas)",
       "paymentsCredits": "Pagos, descuentos y créditos",
@@ -4796,7 +4806,10 @@
       "qboFreightItem": "ID del artículo de flete en QuickBooks",
       "qboBadDebtItem": "ID del artículo de cuentas incobrables en QuickBooks",
       "qboRefundItem": "ID del artículo de reembolso en QuickBooks",
-      "qboRefundAccount": "ID de la cuenta bancaria de reembolsos en QuickBooks"
+      "qboRefundAccount": "ID de la cuenta bancaria de reembolsos en QuickBooks",
+      "inventorySurplus": "Existencias excedentes",
+      "surplusLocation": "Ubicación de existencias excedentes",
+      "noLocation": "Ninguna (desactivado)"
     }
   },
   "teamsPanel": {
@@ -14204,7 +14217,7 @@
       "lessTen": "Diez menos",
       "moreTen": "Diez más",
       "overrun": "{{over}} buenas por encima de la cantidad del trabajo, {{total}}. Revise el conteo y confirme.",
-      "overrunTarget": "{{over}} buenas por encima del objetivo de {{target}} (este trabajo inicia {{start}}). Revise el conteo y confirme.",
+      "overrunTarget": "{{over}} buenas por encima de la cantidad de inicio de {{start}} (pedido {{target}} más extras planeadas). Revise el conteo y confirme.",
       "overrunAck": "Sí, registrar el excedente",
       "doneCount": "Terminar — {{count}} de {{total}}",
       "recordCount": "Registrar {{count}} y seguir",
@@ -14752,7 +14765,7 @@
       "stopAndDone": "Detener y marcar terminado ({{count}})",
       "overPlanned": "{{total}} es más que las {{planned}} planificadas para este paso. Revise el conteo antes de continuar.",
       "overrun": "{{over}} buenas por encima de la cantidad del trabajo, {{quantity}}. Revise el conteo y confirme para registrarlo.",
-      "overrunTarget": "{{over}} buenas por encima del objetivo de {{target}} (este trabajo inicia {{start}} para cubrir el desecho). Revise el conteo y confirme para registrarlo.",
+      "overrunTarget": "{{over}} buenas por encima de la cantidad de inicio de {{start}} (pedido {{target}} más las piezas extra planeadas). Revise el conteo y confirme para registrarlo.",
       "overrunAck": "Sí, registrar el excedente",
       "overrunConfirmFirst": "Confirme primero el excedente.",
       "reworkTimeQuestion": "Tiene un temporizador de producción abierto en este paso. ¿Registrar ahora el tiempo de retrabajo?",
@@ -16269,7 +16282,8 @@
     "runTimeManualHint": "El tiempo de corrida se capturó a mano y se conserva. Bórrelo para volver al tiempo de inicio a paro menos el tiempo muerto.",
     "runTimeDerivedHint": "Deje el tiempo de corrida vacío para usar el tiempo de inicio a paro, menos preparación y tiempo muerto. Un valor capturado tiene prioridad.",
     "overrun": "{{over}} buenas por encima del objetivo de la corrida, {{target}}. Revise el conteo y confirme para guardarlo.",
-    "overrunAck": "Sí, guardar el excedente"
+    "overrunAck": "Sí, guardar el excedente",
+    "receiveSurplus": "{{demand}} cubren el pedido; {{surplus}} adicionales van a la ubicación de excedentes {{location}}."
   },
   "downtime": {
     "categories": {

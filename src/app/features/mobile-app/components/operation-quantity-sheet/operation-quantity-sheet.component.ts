@@ -18,8 +18,9 @@ import { OperationQuantityEntry } from '../../models/operation-quantity-entry.mo
  * count otherwise; scrap and rework stay folded away until asked
  * for, and a reason is offered as chips once either is non-zero. Counts are
  * absolute except rework, which is this entry's pieces sent back. Scrap never
- * counts toward the target; good pieces past it are an overrun the operator
- * confirms before recording. Rework entered while the user's Run timer is open
+ * counts toward the target; good pieces past the start quantity (the target
+ * plus any planned extra pieces) are an overrun the operator confirms before
+ * recording. Rework entered while the user's Run timer is open
  * offers to book rework time now.
  */
 @Component({
@@ -54,7 +55,7 @@ export class OperationQuantitySheetComponent {
   protected readonly scrapOpen = linkedSignal(() => this.scrap() > 0);
   protected readonly reworkOpen = signal(false);
   protected readonly overrun = computed(() =>
-    this.goodCount() > this.target() && this.goodCount() > this.completed() ? this.goodCount() - this.target() : 0);
+    this.goodCount() > this.jobQuantity() && this.goodCount() > this.completed() ? this.goodCount() - this.jobQuantity() : 0);
   protected readonly overrunAck = linkedSignal({ source: this.overrun, computation: () => false });
   protected readonly blocked = computed(() => this.overrun() > 0 && !this.overrunAck());
   protected readonly askReason = computed(() =>

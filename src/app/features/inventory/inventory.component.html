@@ -187,7 +187,12 @@
               <tbody>
                 @for (bin of $any(row).binLocations; track bin.locationId) {
                   <tr>
-                    <td>{{ bin.locationPath }}</td>
+                    <td>
+                      {{ bin.locationPath }}
+                      @if (bin.locationId === surplusLocationId()) {
+                        <span class="chip chip--info" data-testid="inventory-bin-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                      }
+                    </td>
                     <td class="align-right">{{ bin.quantity }}</td>
                     <td class="align-right">
                       <span [class]="getReservedClass(bin.reservedQuantity)">
@@ -255,6 +260,9 @@
                   }
                   <span class="material-icons-outlined tree-icon">{{ getLocationIcon(loc.locationType) }}</span>
                   <span class="tree-label">{{ loc.name }}</span>
+                  @if (loc.id === surplusLocationId()) {
+                    <span class="chip chip--info" data-testid="inventory-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                  }
                   @if (loc.contentCount > 0) {
                     <span class="tree-badge">{{ loc.contentCount }}</span>
                   }
@@ -275,6 +283,9 @@
                       }
                       <span class="material-icons-outlined tree-icon">{{ getLocationIcon(child.locationType) }}</span>
                       <span class="tree-label">{{ child.name }}</span>
+                      @if (child.id === surplusLocationId()) {
+                        <span class="chip chip--info" data-testid="inventory-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                      }
                       @if (child.contentCount > 0) {
                         <span class="tree-badge">{{ child.contentCount }}</span>
                       }
@@ -295,6 +306,9 @@
                           }
                           <span class="material-icons-outlined tree-icon">{{ getLocationIcon(grandchild.locationType) }}</span>
                           <span class="tree-label">{{ grandchild.name }}</span>
+                          @if (grandchild.id === surplusLocationId()) {
+                            <span class="chip chip--info" data-testid="inventory-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                          }
                           @if (grandchild.contentCount > 0) {
                             <span class="tree-badge">{{ grandchild.contentCount }}</span>
                           }
@@ -307,6 +321,9 @@
                               <span class="tree-toggle-spacer"></span>
                               <span class="material-icons-outlined tree-icon">{{ getLocationIcon(leaf.locationType) }}</span>
                               <span class="tree-label">{{ leaf.name }}</span>
+                              @if (leaf.id === surplusLocationId()) {
+                                <span class="chip chip--info" data-testid="inventory-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                              }
                               @if (leaf.contentCount > 0) {
                                 <span class="tree-badge">{{ leaf.contentCount }}</span>
                               }
@@ -330,7 +347,12 @@
             <div class="detail-header">
               <span class="material-icons-outlined detail-type-icon">{{ getLocationIcon(loc.locationType) }}</span>
               <div>
-                <div class="detail-name">{{ loc.name }}</div>
+                <div class="detail-name">
+                  {{ loc.name }}
+                  @if (loc.id === surplusLocationId()) {
+                    <span class="chip chip--info" data-testid="inventory-detail-surplus-badge">{{ 'inventory.surplusBadge' | translate }}</span>
+                  }
+                </div>
                 <div class="detail-path">{{ loc.locationPath }}</div>
               </div>
               @if (canEditStock) {

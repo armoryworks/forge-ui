@@ -23,9 +23,10 @@ export class ProductionRunsService {
     return this.http.put<ProductionRun>(`${this.baseUrl}/${jobId}/production-runs/${runId}`, request);
   }
 
-  receiveToStock(jobId: number, runId: number, locationId: number | null = null): Observable<ProductionRun> {
+  receiveToStock(jobId: number, runId: number, locationId: number | null = null, surplusLocationId: number | null = null): Observable<ProductionRun> {
     let params = new HttpParams();
     if (locationId != null) params = params.set('locationId', locationId);
+    if (surplusLocationId != null) params = params.set('surplusLocationId', surplusLocationId);
     return this.http.post<ProductionRun>(`${this.baseUrl}/${jobId}/production-runs/${runId}/receive-to-stock`, {}, { params });
   }
 }

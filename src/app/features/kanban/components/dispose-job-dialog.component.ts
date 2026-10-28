@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { forkJoin, of } from 'rxjs';
+import { catchError, distinctUntilChanged, forkJoin, of, switchMap } from 'rxjs';
 
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
@@ -20,6 +20,7 @@ import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
 import { JobDisposition } from '../models/job-disposition.type';
 import { JobDispositionStock } from '../models/job-disposition-stock.model';
+import { JobSurplusSplit } from '../models/job-surplus-split.model';
 
 export interface DisposeJobDialogData {
   jobId: number;
@@ -73,6 +74,8 @@ export class DisposeJobDialogComponent {
   protected readonly locationsEnabled = this.capabilityService.isEnabled(MULTI_LOCATION_CAPABILITY);
   protected readonly writeOffAccountsEnabled = this.capabilityService.isEnabled(FULL_GL_CAPABILITY);
   protected readonly writeOffOptions = signal<SelectOption[]>([]);
+  protected readonly surplusSplit = signal<JobSurplusSplit | null>(null);
+  protected readonly surplusBinOptions = computed(() => this.binOptions().filter(option => option.value != null));
   private stockRequested = false;
   private writeOffRequested = false;
 
@@ -89,6 +92,7 @@ export class DisposeJobDialogComponent {
     disposition: new FormControl<JobDisposition | null>(null, [Validators.required, this.stockReadyForInventory()]),
     goodQuantity: new FormControl<number | null>(null),
     locationId: new FormControl<number | null>(null),
+    surplusLocationId: new FormControl<number | null>(null),
     expenseGlAccountId: new FormControl<number | null>(null),
     notes: new FormControl('', [Validators.maxLength(2000)]),
   });
@@ -109,6 +113,24 @@ export class DisposeJobDialogComponent {
     this.formGroup.controls.disposition.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(disposition => this.applyDisposition(disposition));
+    this.formGroup.controls.goodQuantity.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        switchMap(good => {
+          const quantity = Number(good ?? 0) - (this.stock()?.receivedQuantity ?? 0);
+          return this.addingToInventory() && quantity > 0
+            ? this.kanbanService.getSurplusSplit(this.data.jobId, quantity).pipe(catchError(() => of(null)))
+            : of(null);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(split => this.applySurplusSplit(split));
+  }
+
+  private applySurplusSplit(split: JobSurplusSplit | null): void {
+    this.surplusSplit.set(split);
+    const control = this.formGroup.controls.surplusLocationId;
+    if (split?.surplusLocationId != null && !control.dirty) control.setValue(split.surplusLocationId);
   }
 
   save(): void {
@@ -123,6 +145,9 @@ export class DisposeJobDialogComponent {
       notes: raw.notes?.trim() || undefined,
       goodQuantity: stocking ? raw.goodQuantity ?? undefined : undefined,
       locationId: stocking && this.locationsEnabled ? raw.locationId ?? undefined : undefined,
+      surplusLocationId: stocking && this.locationsEnabled && (this.surplusSplit()?.surplusQuantity ?? 0) > 0
+        ? raw.surplusLocationId ?? undefined
+        : undefined,
       expenseGlAccountId: disposition === 'Other' && this.writeOffAccountsEnabled ? raw.expenseGlAccountId ?? undefined : undefined,
     }).subscribe({
       next: (result: JobDetail) => {

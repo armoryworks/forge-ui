@@ -110,10 +110,12 @@ describe('OperationQuantitySheetComponent', () => {
     expect(el.querySelector<HTMLButtonElement>('[data-testid="operation-qty-record"]')!.disabled).toBe(true);
   });
 
-  it('measures the overrun against the target when the job starts extra pieces', () => {
+  it('fills Done to the target and warns only past the start quantity when the job plans extra pieces', () => {
     const el = render(30, 4, true, 36);
 
     expect(text(el, 'operation-qty-good')).toBe('36');
+    for (let i = 0; i < 4; i++) click(el, 'operation-qty-plus');
+    expect(text(el, 'operation-qty-good')).toBe('40');
     expect(el.querySelector('[data-testid="operation-qty-over"]')).toBeNull();
     click(el, 'operation-qty-plus');
     expect(el.querySelector('[data-testid="operation-qty-over"]')).not.toBeNull();

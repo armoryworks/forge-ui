@@ -159,6 +159,7 @@ export class InventoryComponent {
 
   // Locations tab
   protected readonly locationTree = signal<StorageLocation[]>([]);
+  protected readonly surplusLocationId = signal<number | null>(null);
   protected readonly selectedLocation = signal<StorageLocation | null>(null);
   protected readonly binContents = signal<BinContentItem[]>([]);
   protected readonly expandedLocationIds = signal<Set<number>>(new Set());
@@ -337,6 +338,7 @@ export class InventoryComponent {
     this.loadStock();
     this.loadLowStockAlerts();
     this.loadBinLocations();
+    this.loadSurplusLocation();
 
     effect(() => {
       const scan = this.scanner.lastScan();
@@ -463,6 +465,13 @@ export class InventoryComponent {
 
 
   // ── Locations Tab ──
+
+  private loadSurplusLocation(): void {
+    this.inventoryService.getSurplusLocation().subscribe({
+      next: surplus => this.surplusLocationId.set(surplus?.locationId ?? null),
+      error: () => this.surplusLocationId.set(null),
+    });
+  }
 
   protected loadLocations(): void {
     this.loading.set(true);

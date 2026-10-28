@@ -1408,6 +1408,21 @@ describe('ShopFloorDisplayComponent — kiosk actions', () => {
       expect(shopFloor.updateOperationProgress).not.toHaveBeenCalled();
     });
 
+    it('cycles that stay within the start quantity of a job with planned extra pieces record without the dialog', () => {
+      const { c } = tracked();
+      const worker = { ...makeWorker('ProductionWorker'), runningTimers: [{ ...running(1, 41, 401, 2), cycleMinutes: 2 }] };
+      c.selectedWorker.set(worker);
+      shopFloor.getOperations.mockReturnValueOnce(of({
+        jobId: 41, jobQuantity: 14, targetQuantity: 10,
+        operations: [{ operationId: 401, stepNumber: 2, title: 'Press', completedQuantity: 10, scrapQuantity: 1, version: 3, openTimers: [] }],
+      }) as never);
+
+      (c as unknown as { chipCycles: (e: unknown) => void }).chipCycles({ timer: c.selectedWorkerTimers()[0], cycles: 3 });
+
+      expect(dialog.open).not.toHaveBeenCalled();
+      expect(shopFloor.updateOperationProgress).toHaveBeenCalledWith(41, 401, expect.objectContaining({ completedQuantity: 13 }));
+    });
+
     it('recorded cycles move the countdown on only once the pieces are saved', () => {
       const { c } = tracked();
       const tracker = TestBed.inject(KioskCycleTrackerService);

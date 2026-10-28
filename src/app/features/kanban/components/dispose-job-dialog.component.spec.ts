@@ -21,6 +21,7 @@ describe('DisposeJobDialogComponent', () => {
   const getBinLocations = vi.fn();
   const getDispositionStock = vi.fn();
   const getDispositionExpenseAccounts = vi.fn();
+  const getSurplusSplit = vi.fn();
   const isEnabled = vi.fn();
   const success = vi.fn();
   const close = vi.fn();
@@ -31,7 +32,7 @@ describe('DisposeJobDialogComponent', () => {
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: MAT_DIALOG_DATA, useValue: { jobId: 7, jobNumber: 'JOB-0007', currentDisposition: null, ...data } },
         { provide: MatDialogRef, useValue: { close } },
-        { provide: KanbanService, useValue: { disposeJob, getDispositionStock, getDispositionExpenseAccounts } },
+        { provide: KanbanService, useValue: { disposeJob, getDispositionStock, getDispositionExpenseAccounts, getSurplusSplit } },
         { provide: InventoryService, useValue: { getBinLocations } },
         { provide: CapabilityService, useValue: { isEnabled } },
         { provide: SnackbarService, useValue: { success } },
@@ -69,6 +70,34 @@ describe('DisposeJobDialogComponent', () => {
     getDispositionStock.mockReturnValue(of(stock()));
     getDispositionExpenseAccounts.mockReturnValue(of([{ id: 61, accountNumber: '61000', name: 'Scrap and Rework' }]));
     isEnabled.mockReturnValue(true);
+    getSurplusSplit.mockImplementation((_jobId: number, quantity: number) =>
+      of({ demandQuantity: quantity, surplusQuantity: 0, surplusLocationId: null, surplusLocationName: null }));
+  });
+
+  it('pre-fills the surplus bin and sends it when the good quantity goes beyond the order', () => {
+    getSurplusSplit.mockReturnValue(of({ demandQuantity: 100, surplusQuantity: 14, surplusLocationId: 1, surplusLocationName: 'A-01' }));
+    const component = create();
+    component.formGroup.controls.disposition.setValue('AddToInventory');
+    component.formGroup.controls.goodQuantity.setValue(114);
+
+    expect(getSurplusSplit).toHaveBeenLastCalledWith(7, 114);
+    expect((component as unknown as { surplusSplit: () => { surplusQuantity: number } }).surplusSplit().surplusQuantity).toBe(14);
+    expect(component.formGroup.controls.surplusLocationId.value).toBe(1);
+
+    component.formGroup.controls.surplusLocationId.setValue(3);
+    component.save();
+
+    expect(disposeJob).toHaveBeenCalledWith(7, expect.objectContaining({ goodQuantity: 114, locationId: 3, surplusLocationId: 3 }));
+  });
+
+  it('sends no surplus bin when nothing goes beyond the order', () => {
+    const component = create();
+    component.formGroup.controls.disposition.setValue('AddToInventory');
+    component.formGroup.controls.goodQuantity.setValue(50);
+
+    component.save();
+
+    expect(disposeJob.mock.calls[0][1].surplusLocationId).toBeUndefined();
   });
 
   it('offers Entered in error and Other', () => {
