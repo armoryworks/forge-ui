@@ -150,7 +150,7 @@ describe('SalesOrderDetailPanelComponent', () => {
     };
     customerService = {
       getCreditStatus: vi.fn(),
-      getTaxEditability: vi.fn(() => of({ canEditTax: false, reason: null, activeDocumentId: null, stateCode: 'UT', expiresAt: null })),
+      getTaxEditability: vi.fn(() => of({ canEditTax: false, reason: null, activeDocumentId: null, stateCode: 'UT', expiresAt: null, rateDetermined: true })),
     };
     snackbar = { success: vi.fn(), warn: vi.fn(), error: vi.fn(), info: vi.fn() };
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(dialogResult) }));
@@ -532,7 +532,7 @@ describe('SalesOrderDetailPanelComponent', () => {
   });
 
   it('sends a changed tax rate when a verified certificate is on file', () => {
-    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null }));
+    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null, rateDetermined: true }));
     const panel = build(order({ status: 'Confirmed', taxRate: 0.0725 }));
 
     panel['startEditHeader']();
@@ -544,7 +544,7 @@ describe('SalesOrderDetailPanelComponent', () => {
   });
 
   it('shows the server message when the save is refused with a conflict', () => {
-    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null }));
+    customerService.getTaxEditability.mockReturnValue(of({ canEditTax: true, reason: null, activeDocumentId: 3, stateCode: 'UT', expiresAt: null, rateDetermined: true }));
     soService['updateSalesOrder'].mockReturnValue(throwError(() => new HttpErrorResponse({
       status: 409,
       error: { title: 'Conflict', detail: 'A verified tax certificate is required to change the tax rate.' },

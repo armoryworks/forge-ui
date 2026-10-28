@@ -5,4 +5,6 @@ export interface CustomerTaxEditability {
   activeDocumentId: number | null;
   stateCode: string | null;
   expiresAt: string | null;
+  /** False when no tax configuration applies to the customer: a typed rate is then ordinary tax entry, not an override. */
+  rateDetermined: boolean;
 }

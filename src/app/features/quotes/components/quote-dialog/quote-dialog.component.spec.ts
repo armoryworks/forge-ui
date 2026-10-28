@@ -71,6 +71,7 @@ function makeEditability(overrides: Partial<CustomerTaxEditability> = {}): Custo
     activeDocumentId: null,
     stateCode: null,
     expiresAt: null,
+    rateDetermined: true,
     ...overrides,
   };
 }
@@ -167,6 +168,19 @@ describe('QuoteDialogComponent — tax-rate override gate', () => {
     TestBed.tick();
     taxOverrideReason.setValue(null);
     expect(taxOverrideReason.valid).toBe(true);
+    httpMock.verify();
+  });
+
+  it('treats a typed rate as ordinary tax entry when no tax configuration applies to the customer', () => {
+    const { component, internals, httpMock } = setup();
+    selectCustomer(component, httpMock, makeEditability({ canEditTax: true, reason: null, rateDetermined: false }));
+
+    component.form.controls.taxRate.setValue(8.25);
+    TestBed.tick();
+
+    expect(internals.taxLocked()).toBe(false);
+    expect(internals.taxOverridden()).toBe(false);
+    expect(component.form.controls.taxOverrideReason.valid).toBe(true);
     httpMock.verify();
   });
 

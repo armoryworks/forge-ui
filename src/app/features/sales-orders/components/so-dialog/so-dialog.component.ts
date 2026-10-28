@@ -189,7 +189,9 @@ export class SoDialogComponent {
   );
   /** True while the tax rate differs from the customer's computed rate, so an exemption reason is needed. */
   protected readonly taxOverridden = computed(() =>
-    this.customerIdValue() != null && isTaxOverride(this.taxRateValue(), (this.jurisdiction()?.rate ?? 0) * 100));
+    this.customerIdValue() != null
+    && this.taxEditability()?.rateDetermined !== false
+    && isTaxOverride(this.taxRateValue(), (this.jurisdiction()?.rate ?? 0) * 100));
   protected readonly freightTotal = computed(() =>
     this.lines().filter(l => l.lineType === 'Freight').reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );

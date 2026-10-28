@@ -109,7 +109,9 @@ export class QuoteDialogComponent {
   private readonly customerPicked = signal(false);
   /** True while the tax rate differs from the customer's computed rate, so an exemption reason is needed. */
   protected readonly taxOverridden = computed(
-    () => this.customerPicked() && isTaxOverride(this.taxRateValue(), this.defaultTaxPercent()));
+    () => this.customerPicked()
+      && this.taxEditability()?.rateDetermined !== false
+      && isTaxOverride(this.taxRateValue(), this.defaultTaxPercent()));
   /** The override is backed by a verified certificate on file (badge cue). */
   protected readonly taxCertBacked = computed(
     () => this.taxOverridden() && this.taxEditability()?.activeDocumentId != null);

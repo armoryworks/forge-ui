@@ -384,6 +384,7 @@ export class SalesOrderDetailPanelComponent {
   /** True while the edited rate is a change that differs from the customer's computed rate, so an exemption reason is needed. */
   protected readonly headerTaxOverridden = computed(() =>
     this.editingHeader()
+    && this.headerTaxEditability()?.rateDetermined !== false
     && isTaxOverride(this.headerTaxValue(), this.taxPercent())
     && isTaxOverride(this.headerTaxValue(), this.headerDefaultTaxPercent()));
   protected readonly headerTaxLocked = computed(() => this.headerTaxEditability()?.canEditTax === false);

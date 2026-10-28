@@ -120,6 +120,28 @@ function selectCustomer(
 describe('InvoiceDialogComponent — order, shipment and part pickers', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
+  it('asks no exemption reason for a typed rate when no tax configuration applies to the customer', () => {
+    const { internals, httpMock } = setup();
+    const tax = internals as unknown as { taxOverridden(): boolean };
+
+    selectCustomer(internals, httpMock, 5, acmeSources, null);
+    internals.invoiceForm.controls.taxRate.setValue(6.5);
+
+    expect(tax.taxOverridden()).toBe(false);
+    httpMock.verify();
+  });
+
+  it('treats a rate that differs from the computed customer rate as an override', () => {
+    const { internals, httpMock } = setup();
+    const tax = internals as unknown as { taxOverridden(): boolean };
+
+    selectCustomer(internals, httpMock, 5, acmeSources, 0.0725);
+    internals.invoiceForm.controls.taxRate.setValue(0);
+
+    expect(tax.taxOverridden()).toBe(true);
+    httpMock.verify();
+  });
+
   it('offers the customer\'s sales orders by number and customer', () => {
     const { internals, httpMock } = setup();
 

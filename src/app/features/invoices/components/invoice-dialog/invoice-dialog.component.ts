@@ -98,7 +98,7 @@ export class InvoiceDialogComponent {
   private prefilledLines: LineEntry[] | null = null;
   protected readonly sources = signal<InvoiceSources>({ salesOrders: [], shipments: [] });
   protected readonly customerDetail = signal<CustomerDetail | null>(null);
-  private readonly jurisdiction = signal<SalesTaxRate | null>(null);
+  private readonly jurisdiction = signal<SalesTaxRate | null | undefined>(undefined);
 
   protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
 
@@ -259,9 +259,9 @@ export class InvoiceDialogComponent {
     { initialValue: this.invoiceForm.controls.taxOverrideReason.value },
   );
 
-  /** True when the typed rate differs from both the customer's computed rate and the picked sales order's rate. */
+  /** True when the typed rate differs from both the customer's computed rate and the picked sales order's rate; never when no tax configuration applies to the customer. */
   protected readonly taxOverridden = computed(() => {
-    if (this.customerTaxExempt() || this.selectedCustomerId() == null) return false;
+    if (this.customerTaxExempt() || this.selectedCustomerId() == null || this.jurisdiction() === null) return false;
     const rate = this.taxRateValue();
     const salesOrderId = this.selectedSalesOrderId();
     const order = salesOrderId == null ? undefined : this.sources().salesOrders.find(so => so.id === salesOrderId);
@@ -346,7 +346,7 @@ export class InvoiceDialogComponent {
       startWith(controls.customerId.value),
       distinctUntilChanged(),
       switchMap(customerId => {
-        this.jurisdiction.set(null);
+        this.jurisdiction.set(undefined);
         return customerId == null
           ? EMPTY
           : this.adminService.getTaxRateForCustomer(customerId).pipe(catchError(() => EMPTY));

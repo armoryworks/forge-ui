@@ -30,6 +30,7 @@ interface DialogInternals {
   priceIsListPrice(): boolean;
   creditHoldMessage(): string | null;
   taxLocked(): boolean;
+  taxOverridden(): boolean;
   draftConfig: { snapshotFn(): Record<string, unknown>; restoreFn(data: Record<string, unknown>): void };
   onCustomerSelected(customer: Record<string, unknown> | null): void;
   onPartPicked(part: Record<string, unknown> | null): void;
@@ -107,8 +108,8 @@ function setup(parts: PartListItem[] = [part()], confirmed = true, commercialRol
   return { component, internals: component as unknown as DialogInternals, httpMock, dialogOpen };
 }
 
-function editability(canEditTax: boolean): CustomerTaxEditability {
-  return { canEditTax, reason: null, activeDocumentId: null, stateCode: 'CO', expiresAt: null };
+function editability(canEditTax: boolean, rateDetermined = true): CustomerTaxEditability {
+  return { canEditTax, reason: null, activeDocumentId: null, stateCode: 'CO', expiresAt: null, rateDetermined };
 }
 
 function flushTax(
@@ -116,10 +117,11 @@ function flushTax(
   customerId: number,
   rate: number | null = null,
   canEditTax = true,
+  rateDetermined = rate != null,
 ): void {
   httpMock.expectOne(`${api}/sales-tax-rates/for-customer/${customerId}`)
     .flush(rate == null ? null : { id: 1, name: 'State', code: 'CO', stateCode: 'CO', rate });
-  httpMock.expectOne(`${api}/customers/${customerId}/tax-editability`).flush(editability(canEditTax));
+  httpMock.expectOne(`${api}/customers/${customerId}/tax-editability`).flush(editability(canEditTax, rateDetermined));
 }
 
 function selectCustomer(
@@ -447,6 +449,19 @@ describe('SoDialogComponent', () => {
       expect(component.form.controls.taxRate.value).toBe(7.25);
       expect(component.form.controls.taxRate.disabled).toBe(true);
       expect(internals.taxLocked()).toBe(true);
+      httpMock.verify();
+    });
+
+    it('asks no exemption reason for a typed rate when no tax configuration applies to the customer', () => {
+      const { component, internals, httpMock } = setup();
+
+      pickCustomer(component, httpMock, null, true);
+      component.form.controls.taxRate.setValue(6.5);
+      TestBed.tick();
+
+      expect(component.form.controls.taxRate.enabled).toBe(true);
+      expect(internals.taxOverridden()).toBe(false);
+      expect(component.form.controls.taxOverrideReason.valid).toBe(true);
       httpMock.verify();
     });
 
