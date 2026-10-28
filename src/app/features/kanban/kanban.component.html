@@ -6,24 +6,49 @@
 } @else {
   <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board" [wrap]="true">
     <div class="page-header__track-types" data-tour="track-type-switcher">
+      @if (viewMode() === 'table') {
+        <button
+          class="track-type-btn"
+          data-testid="track-type-all-btn"
+          [class.track-type-btn--active]="tableAllTracks()"
+          [attr.aria-pressed]="tableAllTracks()"
+          (click)="showAllTrackTypes()">
+          {{ 'jobsTable.allTrackTypes' | translate }}
+        </button>
+      }
       @for (tt of trackTypes(); track tt.id) {
         <button
           class="track-type-btn"
-          [class.track-type-btn--active]="tt.id === selectedTrackTypeId()"
-          (click)="selectTrackType(tt.id)">
+          [class.track-type-btn--active]="tt.id === selectedTrackTypeId() && !(viewMode() === 'table' && tableAllTracks())"
+          (click)="pickTrackType(tt.id)">
           {{ tt.name }}
         </button>
       }
     </div>
 
-    <div class="view-toggle">
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [attr.aria-label]="'kanban.boardView' | translate" [attr.aria-pressed]="viewMode() === 'board'" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
-        <span class="material-icons-outlined">view_column</span>
+    @if (isWide()) {
+      <app-view-mode-toggle data-testid="jobs-view-toggle" [mode]="jobsView()" [options]="jobsViewOptions" (modeChange)="setJobsView($event)" />
+      <button class="my-work-btn" data-testid="jobs-view-default-btn"
+              [class.my-work-btn--active]="isDefaultJobsView()"
+              [disabled]="isDefaultJobsView()"
+              [matTooltip]="(isDefaultJobsView() ? 'jobsTable.isDefaultHint' : 'jobsTable.setDefaultHint') | translate"
+              matTooltipPosition="above"
+              (click)="setDefaultJobsView()">
+        <span class="material-icons-outlined">{{ isDefaultJobsView() ? 'check' : 'push_pin' }}</span>
+        {{ (isDefaultJobsView() ? 'jobsTable.isDefault' : 'jobsTable.setDefault') | translate }}
       </button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [attr.aria-label]="'kanban.teamView' | translate" [attr.aria-pressed]="viewMode() === 'team'" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
-        <span class="material-icons-outlined">people</span>
-      </button>
-    </div>
+    }
+
+    @if (viewMode() !== 'table') {
+      <div class="view-toggle">
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [attr.aria-label]="'kanban.boardView' | translate" [attr.aria-pressed]="viewMode() === 'board'" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">view_column</span>
+        </button>
+        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [attr.aria-label]="'kanban.teamView' | translate" [attr.aria-pressed]="viewMode() === 'team'" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">people</span>
+        </button>
+      </div>
+    }
 
     <app-input data-testid="board-search" [label]="'boardFilters.search' | translate" [formControl]="searchControl" [placeholder]="'boardFilters.searchPlaceholder' | translate" prefix="search" />
 
@@ -50,6 +75,15 @@
       {{ 'kanban.activeOnly' | translate }}
     </button>
 
+    @if (viewMode() === 'table') {
+      <button class="my-work-btn" data-testid="jobs-archived-btn" [class.my-work-btn--active]="includeArchived()"
+              (click)="toggleIncludeArchived()"
+              [attr.aria-pressed]="includeArchived()">
+        <span class="material-icons-outlined">inventory_2</span>
+        {{ 'jobsTable.includeArchived' | translate }}
+      </button>
+    }
+
     <app-select data-testid="board-customer-filter" [label]="'boardFilters.customer' | translate" [formControl]="customerFilter" [options]="customerOptions()" [placeholder]="'boardFilters.allCustomers' | translate" />
 
     <button class="my-work-btn" data-testid="board-overdue-btn" [class.my-work-btn--active]="overdueOnly()"
@@ -74,14 +108,14 @@
     }
   </app-page-header>
 
-  @if (selectionCount() === 0) {
+  @if (selectionCount() === 0 && viewMode() !== 'table') {
     <div class="board-hint" data-tour="board-columns" aria-hidden="true">
       <span class="material-icons-outlined board-hint__icon">info_outline</span>
       <span class="board-hint__text">{{ 'kanban.dragHint' | translate }} <kbd>Ctrl</kbd>{{ 'kanban.multiSelectHint' | translate }}</span>
     </div>
   }
 
-  @if (boardTruncated()) {
+  @if (boardTruncated() && viewMode() !== 'table') {
     <div class="board-truncated" data-testid="board-truncated-banner" role="status">
       <span class="material-icons-outlined board-truncated__icon">warning_amber</span>
       <span class="board-truncated__text">{{ 'kanban.boardTruncated' | translate: { shown: boardLoadedCount(), total: boardTotalCount() } }}</span>
@@ -104,6 +138,16 @@
           (accountingRefClicked)="onAccountingRefClicked($event)" />
       }
     </div>
+  }
+
+  @if (viewMode() === 'table' && trackTypes().length > 0) {
+    <app-jobs-table
+      [query]="tableQuery()"
+      [trackTypes]="trackTypes()"
+      [users]="users()"
+      [reloadToken]="tableReloadToken()"
+      (jobOpened)="openJobDetail($event)"
+      (selectionChanged)="onTableSelection($event)" />
   }
 
   <!-- Team (Swimlane) View -->
@@ -168,12 +212,21 @@
     <div class="bulk-bar">
       <span class="bulk-bar__count">{{ selectionCount() }} {{ 'common.selected' | translate }}</span>
 
-      <button class="bulk-bar__btn" [matMenuTriggerFor]="moveMenu">
-        <span class="material-icons-outlined">drive_file_move</span>
-        {{ 'kanban.move' | translate }}
-      </button>
+      @if (bulkStages().length > 0) {
+        <button class="bulk-bar__btn" data-testid="bulk-move-btn" [matMenuTriggerFor]="moveMenu">
+          <span class="material-icons-outlined">drive_file_move</span>
+          {{ 'kanban.move' | translate }}
+        </button>
+      } @else {
+        <span class="bulk-bar__stage-item" [matTooltip]="'jobsTable.mixedTrackTypes' | translate" matTooltipPosition="above">
+          <button class="bulk-bar__btn" data-testid="bulk-move-btn" disabled>
+            <span class="material-icons-outlined">drive_file_move</span>
+            {{ 'kanban.move' | translate }}
+          </button>
+        </span>
+      }
       <mat-menu #moveMenu="matMenu">
-        @for (stage of currentStages(); track stage.id) {
+        @for (stage of bulkStages(); track stage.id) {
           <span class="bulk-bar__stage-item" [matTooltip]="bulkStageDisabledReasons().get(stage.id) ?? ''"
                 [matTooltipDisabled]="!bulkStageDisabledReasons().has(stage.id)" matTooltipPosition="right">
             <button mat-menu-item (click)="bulkMoveToStage(stage)"

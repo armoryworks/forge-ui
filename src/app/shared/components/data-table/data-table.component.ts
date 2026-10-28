@@ -44,7 +44,7 @@ import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { DisplayLabelService } from '../../services/display-label.service';
-import { formatDate, formatDateTime, parseDateOnly } from '../../utils/date.utils';
+import { formatDate, formatDateTime, parseDateOnly, toCalendarDate } from '../../utils/date.utils';
 import { foldText } from '../../utils/text-fold';
 import { downloadCsv } from '../../utils/download-csv';
 
@@ -110,9 +110,12 @@ export class DataTableComponent implements OnInit {
   /**
    * Server-paged mode. When set, `data` is one server page: the paginator
    * runs off `totalCount`, sorting is a single column sent back through
-   * {@link serverPageChange}, column filters are hidden, and export covers
-   * the rows on this page. The consumer owns the state and fetches the
-   * page it asks for. Leave null for client-side paging over `data`.
+   * {@link serverPageChange}, column filters are hidden unless the state is
+   * `filterable` (then they travel back with each request), and export covers
+   * the rows on this page. Columns marked `serverSortable: false` or
+   * `serverFilterable: false` lose that action here. The consumer owns the
+   * state and fetches the page it asks for. Leave null for client-side paging
+   * over `data`.
    */
   readonly serverPaging = input<ServerPageState | null>(null);
 
@@ -180,6 +183,17 @@ export class DataTableComponent implements OnInit {
   });
 
   protected readonly isServerPaged = computed(() => this.serverPaging() !== null);
+
+  protected readonly isServerFilterable = computed(() => this.serverPaging()?.filterable === true);
+
+  /** The column filters in effect: in server-paged mode, only those the server applies. */
+  readonly activeFilters = computed<Record<string, unknown>>(() => {
+    const all = this.filters();
+    if (!this.isServerPaged()) return all;
+    if (!this.isServerFilterable()) return {};
+    const allowed = new Set(this.columns().filter(c => c.serverFilterable !== false).map(c => c.field));
+    return Object.fromEntries(Object.entries(all).filter(([field]) => allowed.has(field)));
+  });
 
   protected readonly paginatorLength = computed(() =>
     this.serverPaging()?.totalCount ?? this.sortedData().length,
@@ -360,7 +374,7 @@ export class DataTableComponent implements OnInit {
   });
 
   protected readonly activeFilterCount = computed(() =>
-    Object.keys(this.filters()).length
+    Object.keys(this.activeFilters()).length
   );
 
   protected readonly expandedRows = signal<Set<unknown>>(new Set());
@@ -412,7 +426,7 @@ export class DataTableComponent implements OnInit {
   formatCellValue(row: unknown, col: ColumnDef): unknown {
     const val = (row as Record<string, unknown>)[col.field];
     if (col.type === 'date' && val) {
-      const dateOnly = typeof val === 'string' ? parseDateOnly(val) : null;
+      const dateOnly = typeof val === 'string' ? parseDateOnly(val) : isUtcMidnight(val) ? toCalendarDate(val as Date) : null;
       if (dateOnly) {
         return formatDate(dateOnly);
       }
@@ -445,11 +459,40 @@ export class DataTableComponent implements OnInit {
   }
 
   hasFilter(field: string): boolean {
-    return !this.isServerPaged() && field in this.filters();
+    return field in this.activeFilters();
+  }
+
+  isColumnSortable(col: ColumnDef): boolean {
+    return !!col.sortable && (!this.isServerPaged() || col.serverSortable !== false);
+  }
+
+  isColumnFilterable(col: ColumnDef): boolean {
+    if (col.filterable === false) return false;
+    return !this.isServerPaged() || (this.isServerFilterable() && col.serverFilterable !== false);
+  }
+
+  /**
+   * The request that reproduces this table's own sort, filters and page size against the
+   * server, from the first page. For a consumer that switches to server-paged mode and
+   * must fetch its first page before the table has asked for one.
+   */
+  serverRequest(): ServerPageRequest {
+    const sort = this.sortStates().find(s => {
+      const col = this.columns().find(c => c.field === s.field);
+      return !!col?.sortable && col.serverSortable !== false;
+    });
+    const col = sort ? this.columns().find(c => c.field === sort.field) : undefined;
+    return {
+      pageIndex: 0,
+      pageSize: this.pageSize(),
+      sort: col ? col.sortField ?? col.field : null,
+      order: sort?.direction ?? 'asc',
+      filters: this.serverFilterValues(),
+    };
   }
 
   onHeaderClick(col: ColumnDef, event: MouseEvent): void {
-    if (!col.sortable) return;
+    if (!this.isColumnSortable(col)) return;
     if (this.isServerPaged()) {
       const existing = this.getSortState(col.field);
       if (!existing) this.requestServerSort(col, 'asc');
@@ -496,6 +539,7 @@ export class DataTableComponent implements OnInit {
         pageSize: event.pageSize,
         sort: server.sort,
         order: server.order,
+        ...this.serverFiltersPart(),
       });
       this.debouncedSave();
       return;
@@ -519,7 +563,7 @@ export class DataTableComponent implements OnInit {
   }
 
   getAriaSort(col: ColumnDef): 'ascending' | 'descending' | 'none' | null {
-    if (!col.sortable) return null;
+    if (!this.isColumnSortable(col)) return null;
     const sort = this.getSortState(col.field);
     if (!sort) return 'none';
     return sort.direction === 'asc' ? 'ascending' : 'descending';
@@ -715,6 +759,7 @@ export class DataTableComponent implements OnInit {
     this.pageIndex.set(0);
     this.pruneSelectionToFiltered();
     this.debouncedSave();
+    this.requestServerFilters();
   }
 
   onFilterCleared(field: string): void {
@@ -724,6 +769,7 @@ export class DataTableComponent implements OnInit {
     this.pageIndex.set(0);
     this.pruneSelectionToFiltered();
     this.debouncedSave();
+    this.requestServerFilters();
   }
 
   closeFilter(): void {
@@ -816,6 +862,7 @@ export class DataTableComponent implements OnInit {
     this.pageIndex.set(0);
     this.pruneSelectionToFiltered();
     this.debouncedSave();
+    this.requestServerFilters();
   }
 
   contextHideColumn(): void {
@@ -919,7 +966,31 @@ export class DataTableComponent implements OnInit {
       pageSize: server.pageSize,
       sort: col ? col.sortField ?? col.field : null,
       order,
+      ...this.serverFiltersPart(),
     });
+  }
+
+  private requestServerFilters(): void {
+    const server = this.serverPaging();
+    if (!server || !this.isServerFilterable()) return;
+    this.serverPageChange.emit({
+      pageIndex: 0,
+      pageSize: server.pageSize,
+      sort: server.sort,
+      order: server.order,
+      filters: this.serverFilterValues(),
+    });
+  }
+
+  private serverFiltersPart(): Pick<ServerPageRequest, 'filters'> {
+    return this.isServerFilterable() ? { filters: this.serverFilterValues() } : {};
+  }
+
+  private serverFilterValues(): Record<string, unknown> {
+    const allowed = new Set(this.columns()
+      .filter(c => c.filterable !== false && c.serverFilterable !== false)
+      .map(c => c.field));
+    return Object.fromEntries(Object.entries(this.filters()).filter(([field]) => allowed.has(field)));
   }
 
   protected getTrackValue(row: unknown): unknown {
@@ -943,6 +1014,12 @@ export class DataTableComponent implements OnInit {
 }
 
 const sortCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+
+function isUtcMidnight(value: unknown): boolean {
+  return value instanceof Date && !Number.isNaN(value.getTime())
+    && value.getUTCHours() === 0 && value.getUTCMinutes() === 0
+    && value.getUTCSeconds() === 0 && value.getUTCMilliseconds() === 0;
+}
 
 function isBlankSortValue(value: unknown): boolean {
   return value == null || value === '';

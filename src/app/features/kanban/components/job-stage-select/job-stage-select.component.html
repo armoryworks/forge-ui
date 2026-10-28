@@ -1,0 +1,28 @@
+@if (canOpen()) {
+  <button type="button" class="stage-select" data-testid="job-stage-select"
+          [style.--stage-color]="stageColor()"
+          [matMenuTriggerFor]="stageMenu"
+          [attr.aria-label]="'jobsTable.stageMenu' | translate: { job: jobNumber(), stage: stageName() }"
+          (click)="$event.stopPropagation()">
+    <span class="stage-select__dot" aria-hidden="true"></span>
+    <span class="stage-select__name">{{ stageName() }}</span>
+    <span class="material-icons-outlined stage-select__caret" aria-hidden="true">expand_more</span>
+  </button>
+  <mat-menu #stageMenu="matMenu">
+    @for (choice of choices(); track choice.stage.id) {
+      <span class="stage-select__item" [matTooltip]="choice.disabledReasonKey ? (choice.disabledReasonKey | translate) : ''"
+            [matTooltipDisabled]="!choice.disabledReasonKey" matTooltipPosition="right">
+        <button mat-menu-item type="button" [attr.data-testid]="'job-stage-option-' + choice.stage.id"
+                [disabled]="!!choice.disabledReasonKey" (click)="select(choice)">
+          <span class="stage-select__dot stage-select__dot--menu" [style.--stage-color]="choice.stage.color" aria-hidden="true"></span>
+          {{ choice.stage.name }}
+        </button>
+      </span>
+    }
+  </mat-menu>
+} @else {
+  <span class="stage-select stage-select--readonly" data-testid="job-stage-readonly" [style.--stage-color]="stageColor()">
+    <span class="stage-select__dot" aria-hidden="true"></span>
+    <span class="stage-select__name">{{ stageName() }}</span>
+  </span>
+}

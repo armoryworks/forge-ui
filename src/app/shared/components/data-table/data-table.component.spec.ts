@@ -67,6 +67,17 @@ describe('DataTableComponent · formatCellValue', () => {
     }
   });
 
+  it('renders a UTC-midnight Date, as the date interceptor hands over a date field, as that calendar date', () => {
+    const originalTz = process.env['TZ'];
+    process.env['TZ'] = 'America/Denver';
+    try {
+      expect(table.formatCellValue({ date: new Date('2026-11-01T00:00:00Z') }, dateCol)).toBe('11/01/2026');
+    } finally {
+      if (originalTz === undefined) delete process.env['TZ'];
+      else process.env['TZ'] = originalTz;
+    }
+  });
+
   it('keeps the date-time format for timestamps', () => {
     const stamp = new Date(2026, 9, 7, 14, 30);
     expect(table.formatCellValue({ date: stamp.toISOString() }, dateCol)).toBe('10/07/2026 02:30 PM');
@@ -610,7 +621,7 @@ describe('DataTableComponent · server paging', () => {
 
   let savedPrefs: { key: string; value: unknown }[];
 
-  function create(serverPaging: ServerPageState | null) {
+  function create(serverPaging: ServerPageState | null, tableColumns: ColumnDef[] = columns) {
     savedPrefs = [];
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -623,7 +634,7 @@ describe('DataTableComponent · server paging', () => {
     });
     const fixture = TestBed.createComponent(DataTableComponent);
     fixture.componentRef.setInput('tableId', 'test');
-    fixture.componentRef.setInput('columns', columns);
+    fixture.componentRef.setInput('columns', tableColumns);
     fixture.componentRef.setInput('data', rows);
     fixture.componentRef.setInput('serverPaging', serverPaging);
     const table = fixture.componentInstance;
@@ -709,6 +720,56 @@ describe('DataTableComponent · server paging', () => {
 
     expect(internals.pagedData()).toEqual(rows);
     expect(internals.hasFilter('partNumber')).toBe(false);
+  });
+
+  describe('with server-side filters', () => {
+    const filterable: ServerPageState = { ...page, filterable: true };
+    const clientOnly: ColumnDef = { field: 'progress', header: 'Progress', type: 'number', sortable: true, serverSortable: false, serverFilterable: false };
+
+    it('sends an applied or cleared column filter to the server from the first page', () => {
+      const { table, requests } = create(filterable);
+
+      table.onFilterApplied({ field: 'partNumber', value: 'P-01' });
+      table.onFilterCleared('partNumber');
+
+      expect(requests).toEqual([
+        { pageIndex: 0, pageSize: 25, sort: 'partNumber', order: 'asc', filters: { partNumber: 'P-01' } },
+        { pageIndex: 0, pageSize: 25, sort: 'partNumber', order: 'asc', filters: {} },
+      ]);
+    });
+
+    it('keeps the filters on page and sort requests', () => {
+      const { table, internals, requests } = create(filterable);
+      internals.filters.set({ partNumber: 'P-01' });
+
+      table.onPageChange({ pageIndex: 3, pageSize: 25, length: 480 });
+      table.onHeaderClick(columns[1], new MouseEvent('click'));
+
+      expect(requests.map(r => r.filters)).toEqual([{ partNumber: 'P-01' }, { partNumber: 'P-01' }]);
+      expect(internals.hasFilter('partNumber')).toBe(true);
+    });
+
+    it('withholds sorting and filtering on a column the server cannot handle, and only there', () => {
+      const { table, internals, requests } = create(filterable, [...columns, clientOnly]);
+      internals.filters.set({ partNumber: 'P-01', progress: { min: 1 } });
+
+      expect(table.isColumnSortable(clientOnly)).toBe(false);
+      expect(table.isColumnFilterable(clientOnly)).toBe(false);
+      expect(table.isColumnFilterable(columns[0])).toBe(true);
+      expect(table.activeFilters()).toEqual({ partNumber: 'P-01' });
+      table.onHeaderClick(clientOnly, new MouseEvent('click'));
+      expect(requests).toEqual([]);
+    });
+
+    it('builds the request that reproduces its own sort and filters for a consumer entering server mode', () => {
+      const { table, internals } = create(null);
+      internals.filters.set({ partNumber: 'P-01' });
+      table.onHeaderClick(columns[1], new MouseEvent('click'));
+
+      expect(table.serverRequest()).toEqual({
+        pageIndex: 0, pageSize: 25, sort: 'customerName', order: 'asc', filters: { partNumber: 'P-01' },
+      });
+    });
   });
 });
 

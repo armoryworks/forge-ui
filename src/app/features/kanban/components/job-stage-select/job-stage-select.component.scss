@@ -1,0 +1,55 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.stage-select {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  max-width: 100%;
+  padding: $sp-xxs $sp-sm;
+  border: $border-width-thin solid color-mix(in srgb, var(--stage-color, var(--border)) 60%, transparent);
+  background: color-mix(in srgb, var(--stage-color, var(--surface)) 12%, var(--surface));
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: color-mix(in srgb, var(--stage-color, var(--surface)) 24%, var(--surface));
+  }
+
+  &--readonly {
+    cursor: default;
+
+    &:hover {
+      background: color-mix(in srgb, var(--stage-color, var(--surface)) 12%, var(--surface));
+    }
+  }
+}
+
+.stage-select__dot {
+  flex-shrink: 0;
+  width: $dot-size-sm;
+  height: $dot-size-sm;
+  border-radius: 50%;
+  background: var(--stage-color, var(--text-muted));
+
+  &--menu {
+    display: inline-block;
+    margin-right: $sp-md;
+  }
+}
+
+.stage-select__name {
+  @include truncate;
+}
+
+.stage-select__caret {
+  font-size: $icon-size-xs;
+  color: var(--text-muted);
+}
+
+.stage-select__item {
+  display: block;
+}

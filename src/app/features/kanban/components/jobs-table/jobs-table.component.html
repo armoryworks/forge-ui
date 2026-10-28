@@ -1,0 +1,78 @@
+@if (filterChips().length > 0) {
+  <div class="jobs-table__chips" data-testid="jobs-table-filter-chips">
+    @for (chip of filterChips(); track chip.field) {
+      <span class="jobs-table__chip">
+        <span class="jobs-table__chip-label">{{ chip.header | translate }}:</span>
+        <span class="jobs-table__chip-value">{{ chip.summary }}</span>
+        <button type="button" class="jobs-table__chip-remove" [attr.data-testid]="'jobs-table-chip-remove-' + chip.field"
+                [attr.aria-label]="'jobsTable.removeFilter' | translate: { column: (chip.header | translate) }"
+                (click)="removeFilter(chip.field)">
+          <span class="material-icons-outlined" aria-hidden="true">close</span>
+        </button>
+      </span>
+    }
+    <button type="button" class="action-btn action-btn--link action-btn--sm" data-testid="jobs-table-clear-filters" (click)="clearFilters()">
+      {{ 'jobsTable.clearFilters' | translate }}
+    </button>
+  </div>
+}
+
+<app-data-table
+  class="jobs-table__table"
+  data-testid="jobs-table"
+  tableId="kanban-jobs"
+  [columns]="columns()"
+  [data]="rows()"
+  [loading]="loading()"
+  [selectable]="true"
+  [clickableRows]="true"
+  [stickyFirstColumn]="true"
+  [serverPaging]="serverState()"
+  emptyIcon="view_list"
+  emptyMessage="jobsTable.empty"
+  exportFileName="jobs"
+  (rowClick)="onRowClick($event)"
+  (selectionChange)="onSelectionChange($event)"
+  (serverPageChange)="onServerPageChange($event)">
+
+  <ng-template appColumnCell="jobNumber" let-row>
+    <span class="jobs-table__job-number">{{ row.jobNumber }}</span>
+  </ng-template>
+
+  <ng-template appColumnCell="currentStageId" let-row>
+    <app-job-stage-select
+      [jobNumber]="row.jobNumber"
+      [stageName]="row.stageName"
+      [stageColor]="row.stageColor"
+      [currentStageId]="row.currentStageId ?? null"
+      [stages]="stagesByTrack().get(row.trackTypeId) ?? []"
+      [readonly]="!canMove()"
+      [mayBill]="mayBill()"
+      (moveRequested)="moveStage(row, $event)" />
+  </ng-template>
+
+  <ng-template appColumnCell="assigneeId" let-row>
+    @if (row.assigneeId !== null) {
+      <span class="jobs-table__assignee">
+        <app-avatar [initials]="row.assigneeInitials ?? ''" [color]="row.assigneeColor ?? ''" size="sm" />
+        <span class="jobs-table__assignee-name">{{ row.assigneeName }}</span>
+      </span>
+    }
+  </ng-template>
+
+  <ng-template appColumnCell="onHold" let-row>
+    @if (row.onHold) {
+      <span class="chip chip--warning">{{ row.activeHolds.join(', ') }}</span>
+    }
+  </ng-template>
+
+  <ng-template appColumnCell="isOverdue" let-row>
+    @if (row.isOverdue) {
+      <span class="chip chip--error">{{ 'jobsTable.overdue' | translate }}</span>
+    }
+  </ng-template>
+
+  <ng-template appColumnCell="operationsProgress" let-row>
+    {{ operationsText(row) }}
+  </ng-template>
+</app-data-table>

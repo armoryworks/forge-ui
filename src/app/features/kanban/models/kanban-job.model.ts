@@ -33,4 +33,13 @@ export interface KanbanJob {
   inProgressSteps?: number[] | null;
   runningTimerCount?: number | null;
   estimatedRemainingMinutes?: number | null;
+  currentStageId?: number;
+  trackTypeId?: number;
+  trackTypeName?: string | null;
+  assigneeName?: string | null;
+  startDate?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  estimatedTotalCost?: number | null;
+  quotedPrice?: number | null;
 }

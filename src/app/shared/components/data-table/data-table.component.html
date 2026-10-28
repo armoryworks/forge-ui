@@ -34,7 +34,7 @@
             @for (col of visibleColumns(); track col.field; let first = $first) {
               <th
                 class="data-table__th"
-                [class.data-table__th--sortable]="col.sortable"
+                [class.data-table__th--sortable]="isColumnSortable(col)"
                 [class.data-table__th--right]="col.align === 'right'"
                 [class.data-table__th--center]="col.align === 'center'"
                 [class.data-table__th--sticky]="first && stickyFirstColumn()"
@@ -85,7 +85,7 @@
                   every column where filterable is not explicitly false
                   (default behavior — text filter applies everywhere).
                 -->
-                @if (col.filterable !== false && !isServerPaged()) {
+                @if (isColumnFilterable(col)) {
                   <ng-template
                     cdkConnectedOverlay
                     [cdkConnectedOverlayOrigin]="filterOrigin"
@@ -246,7 +246,7 @@
 
 <mat-menu #headerContextMenu="matMenu">
   @if (contextMenuCol(); as col) {
-    @if (col.sortable) {
+    @if (isColumnSortable(col)) {
       <button mat-menu-item (click)="contextSortAsc()">
         <span class="material-icons-outlined">arrow_upward</span>
         <span>{{ 'shared.sortAscending' | translate }}</span>
@@ -269,7 +269,7 @@
       of filtering is rare (action-only columns can set filterable: false to
       hide the row, but the default is filter-on).
     -->
-    @if (col.filterable !== false && !isServerPaged()) {
+    @if (isColumnFilterable(col)) {
       <button mat-menu-item (click)="contextFilter()">
         <span class="material-icons-outlined">filter_list</span>
         <span>{{ 'shared.filterEllipsis' | translate }}</span>

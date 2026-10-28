@@ -13,6 +13,12 @@ import {
   AccountingViewMode,
   DEFAULT_ACCOUNTING_VIEW,
 } from '../../../../shared/models/accounting-view.model';
+import {
+  DEFAULT_JOBS_VIEW,
+  JOBS_VIEW_OPTIONS,
+  JOBS_VIEW_PREF_KEY,
+  JobsViewMode,
+} from '../../../../shared/models/jobs-view.model';
 import { CONFIRM_BEFORE_SEND_PREF_KEY } from '../../../../shared/services/confirm-send.service';
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
@@ -72,6 +78,19 @@ export class AccountCustomizationComponent {
     { nonNullable: true },
   );
 
+  /** The jobs-view preference only matters to users who can open the jobs board. */
+  protected readonly showJobsView = this.navTree.canReach('/kanban');
+
+  /** How the jobs screen opens: the kanban board or the jobs table (desktop widths only). */
+  protected readonly jobsViewOptions: SelectOption[] = JOBS_VIEW_OPTIONS.map((o) => ({
+    value: o.value,
+    label: this.translate.instant(o.labelKey),
+  }));
+  protected readonly jobsViewControl = new FormControl<JobsViewMode>(
+    this.preferences.get<JobsViewMode>(JOBS_VIEW_PREF_KEY) === 'table' ? 'table' : DEFAULT_JOBS_VIEW,
+    { nonNullable: true },
+  );
+
   /** Confirm-before-send safety prompt — ON by default when never set. */
   protected readonly confirmBeforeSendControl = new FormControl<boolean>(
     this.preferences.get<boolean>(CONFIRM_BEFORE_SEND_PREF_KEY) ?? true,
@@ -93,6 +112,12 @@ export class AccountCustomizationComponent {
       } else {
         this.preferences.set(LANDING_ROUTE_PREF_KEY, value);
       }
+    });
+
+    this.jobsViewControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(value => {
+      this.preferences.set(JOBS_VIEW_PREF_KEY, value);
     });
 
     this.accountingViewControl.valueChanges.pipe(

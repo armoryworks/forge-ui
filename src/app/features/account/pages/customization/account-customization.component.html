@@ -56,6 +56,18 @@
     </div>
   }
 
+  @if (showJobsView) {
+    <div class="account-page__card">
+      <span class="account-page__section-label">{{ 'account.jobsView' | translate }}</span>
+      <p class="customization__hint">{{ 'account.jobsViewHint' | translate }}</p>
+      <app-select
+        data-testid="account-jobs-view"
+        [label]="'account.jobsView' | translate"
+        [options]="jobsViewOptions"
+        [formControl]="jobsViewControl" />
+    </div>
+  }
+
   <!-- Text Size -->
   <div class="account-page__card">
     <span class="account-page__section-label">{{ 'account.displayPreferences' | translate }}</span>

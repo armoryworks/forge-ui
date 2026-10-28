@@ -1,0 +1,72 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: $sp-sm $sp-lg;
+  gap: $sp-sm;
+  overflow: auto;
+}
+
+.jobs-table__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.jobs-table__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  padding: $sp-xxs $sp-xs $sp-xxs $sp-md;
+  border: $border-width-thin solid var(--primary);
+  background: var(--primary-light);
+  font-size: var(--font-size-xs);
+}
+
+.jobs-table__chip-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.jobs-table__chip-value {
+  @include truncate;
+  max-width: 240px;
+}
+
+.jobs-table__chip-remove {
+  @include flex-center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.jobs-table__job-number {
+  font-family: $font-family-mono;
+  font-weight: 600;
+}
+
+.jobs-table__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  max-width: 100%;
+}
+
+.jobs-table__assignee-name {
+  @include truncate;
+}

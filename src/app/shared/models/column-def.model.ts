@@ -33,4 +33,8 @@ export interface ColumnDef {
   exportable?: boolean;
   /** Hide this column by default at phone width; a visibility the user saved in the column manager still wins. */
   phoneHidden?: boolean;
+  /** Set to `false` when the server cannot sort by this column; it then sorts only while the table pages locally. */
+  serverSortable?: boolean;
+  /** Set to `false` when the server cannot filter by this column; it then filters only while the table pages locally. */
+  serverFilterable?: boolean;
 }

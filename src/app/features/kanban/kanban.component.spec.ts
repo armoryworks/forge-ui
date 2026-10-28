@@ -4,6 +4,7 @@ import { ActivatedRoute, NavigationExtras, ParamMap, Router, convertToParamMap }
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 
 import { FormControl } from '@angular/forms';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
@@ -23,6 +24,8 @@ import { ScannerService } from '../../shared/services/scanner.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { JobsTableQuery } from './models/jobs-table-query.model';
+import { TrackType } from '../../shared/models/track-type.model';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
@@ -118,8 +121,22 @@ interface ComponentInternals {
   selectedJobIds: { set(ids: Set<number>): void };
   disabledBulkStageIds: () => Set<number>;
   bulkStageDisabledReasons: () => Map<number, string>;
-  viewMode: () => 'board' | 'team';
-  setViewMode(mode: 'board' | 'team'): void;
+  viewMode: () => 'board' | 'team' | 'table';
+  setViewMode(mode: 'board' | 'team' | 'table'): void;
+  setJobsView(mode: 'board' | 'table'): void;
+  setDefaultJobsView(): void;
+  isDefaultJobsView: () => boolean;
+  isWide: () => boolean;
+  tableQuery: () => JobsTableQuery;
+  tableReloadToken: () => number;
+  showAllTrackTypes(): void;
+  pickTrackType(id: number): void;
+  toggleIncludeArchived(): void;
+  onTableSelection(jobs: KanbanJob[]): void;
+  bulkStages: () => Stage[];
+  selectionCount: () => number;
+  trackTypes: { set(types: TrackType[]): void };
+  toggleOnHold(): void;
   onJobNumberClicked(event: { job: KanbanJob; event: Event }): void;
   onAccountingRefClicked(event: { job: KanbanJob; event: Event }): void;
   bulkMoveToStage(stage: Stage): void;
@@ -146,6 +163,7 @@ describe('KanbanComponent', () => {
   let navigate: ReturnType<typeof vi.fn>;
   let queryParams: BehaviorSubject<ParamMap>;
   let roles: string[];
+  let wide: boolean;
 
   function createComponent(): void {
     component = TestBed.createComponent(KanbanComponent)
@@ -154,6 +172,7 @@ describe('KanbanComponent', () => {
 
   beforeEach(() => {
     roles = ['Manager'];
+    wide = true;
     getBoard = vi.fn(() => of({ columns: [], totalCount: 0, loadedCount: 0 }));
     getTeams = vi.fn(() => of([]));
     updateJobPosition = vi.fn(() => of(undefined));
@@ -217,6 +236,7 @@ describe('KanbanComponent', () => {
         { provide: AuthService, useValue: { user: () => null, hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: UserPreferencesService, useValue: { get: (key: string) => storedPrefs[key] ?? null, set: prefsSet } },
         { provide: DraftResumeService, useValue: { consume: () => false } },
+        { provide: BreakpointObserver, useValue: { observe: () => of({ matches: wide, breakpoints: {} }), isMatched: () => wide } },
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
         { provide: Router, useValue: { navigate } },
         {
@@ -936,6 +956,102 @@ describe('KanbanComponent', () => {
 
       component.setViewMode('board');
       expect(component.viewMode()).toBe('board');
+    });
+
+    it('opens the table from ?view=table and keeps it out of the URL once it is the default', () => {
+      component.setJobsView('table');
+      expect(navigate).toHaveBeenLastCalledWith([], { queryParams: { view: 'table' }, queryParamsHandling: 'merge', replaceUrl: true });
+      expect(component.viewMode()).toBe('table');
+      expect(component.isDefaultJobsView()).toBe(false);
+
+      component.setDefaultJobsView();
+      expect(prefsSet).toHaveBeenCalledWith('kanban:defaultView', 'table');
+      expect(component.isDefaultJobsView()).toBe(true);
+
+      component.setJobsView('board');
+      expect(navigate).toHaveBeenLastCalledWith([], { queryParams: { view: 'board' }, queryParamsHandling: 'merge', replaceUrl: true });
+      expect(component.viewMode()).toBe('board');
+    });
+
+    it('opens in the table when that is the saved default and the URL names no view', () => {
+      storedPrefs['kanban:defaultView'] = 'table';
+      createComponent();
+      expect(component.viewMode()).toBe('table');
+
+      queryParams.next(convertToParamMap({ view: 'board' }));
+      expect(component.viewMode()).toBe('board');
+    });
+
+    it('falls back to the board on a narrow screen, even from ?view=table or a table default', () => {
+      wide = false;
+      storedPrefs['kanban:defaultView'] = 'table';
+      queryParams.next(convertToParamMap({ view: 'table' }));
+      createComponent();
+
+      expect(component.isWide()).toBe(false);
+      expect(component.viewMode()).toBe('board');
+    });
+
+    it('does not load the board behind the table, and loads it on the way back', () => {
+      queryParams.next(convertToParamMap({ view: 'table' }));
+      createComponent();
+      getBoard.mockClear();
+
+      component.selectTrackType(1);
+      expect(getBoard).not.toHaveBeenCalled();
+
+      component.setJobsView('board');
+      TestBed.tick();
+      expect(getBoard).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('table view', () => {
+    beforeEach(() => {
+      queryParams.next(convertToParamMap({ view: 'table' }));
+      createComponent();
+      component.selectTrackType(5);
+    });
+
+    it('hands the board filters, the order type and the archived switch to the table', () => {
+      component.toggleOnHold();
+      component.toggleIncludeArchived();
+
+      expect(component.tableQuery()).toMatchObject({
+        trackTypeId: 5,
+        includeArchived: true,
+        filters: { onHoldOnly: true, activeOnly: true },
+        assigneeIds: [],
+        myWorkUserId: null,
+      });
+
+      component.showAllTrackTypes();
+      expect(component.tableQuery().trackTypeId).toBeNull();
+
+      component.pickTrackType(5);
+      expect(component.tableQuery().trackTypeId).toBe(5);
+    });
+
+    it('reloads the table instead of the board when a filter or a live update asks', () => {
+      const before = component.tableReloadToken();
+      component.toggleActiveOnly();
+      expect(component.tableReloadToken()).toBe(before + 1);
+      expect(getBoard).not.toHaveBeenCalled();
+    });
+
+    it('offers the bulk move only for a selection within one order type', () => {
+      const stages = [stage({ id: 2, name: 'Build', sortOrder: 2 }), stage({ id: 1, name: 'Open', sortOrder: 1 })];
+      component.trackTypes.set([
+        { id: 5, name: 'Production', code: 'p', description: null, isDefault: true, sortOrder: 1, stages },
+        { id: 6, name: 'Service', code: 's', description: null, isDefault: false, sortOrder: 2, stages: [] },
+      ]);
+
+      component.onTableSelection([boardJob(1, 'Open', { trackTypeId: 5 }), boardJob(2, 'Build', { trackTypeId: 5 })]);
+      expect(component.selectionCount()).toBe(2);
+      expect(component.bulkStages().map(s => s.id)).toEqual([1, 2]);
+
+      component.onTableSelection([boardJob(1, 'Open', { trackTypeId: 5 }), boardJob(3, 'Open', { trackTypeId: 6 })]);
+      expect(component.bulkStages()).toEqual([]);
     });
   });
 });

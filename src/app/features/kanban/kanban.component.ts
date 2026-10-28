@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal, untracked, viewChild } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, map, skip, Subscription, switchMap } from 'rxjs';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatDialog } from '@angular/material/dialog';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { MatMenuModule } from '@angular/material/menu';
@@ -13,6 +14,8 @@ import { BoardColumnComponent } from './components/board-column.component';
 import { JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult } from './components/job-detail-dialog.component';
 import { JobDialogComponent, DialogMode } from './components/job-dialog.component';
 import { JobCardComponent } from './components/job-card.component';
+import { JobsTableComponent } from './components/jobs-table/jobs-table.component';
+import { JobsTableQuery } from './models/jobs-table-query.model';
 import { KanbanService } from './services/kanban.service';
 import { BoardColumn } from './models/board-column.model';
 import { KanbanBoard } from './models/kanban-board.model';
@@ -31,6 +34,14 @@ import { SelectComponent } from '../../shared/components/select/select.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggle/view-mode-toggle.component';
+import {
+  DEFAULT_JOBS_VIEW,
+  JOBS_TABLE_MIN_WIDTH,
+  JOBS_VIEW_PREF_KEY,
+  JOBS_VIEW_TOGGLE_OPTIONS,
+  JobsViewMode,
+} from '../../shared/models/jobs-view.model';
 import { CapDirective } from '../../shared/directives/cap.directive';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -46,7 +57,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { JOB_CREATE_ROLES, JOB_EDIT_ROLES } from './job-roles';
 
-export type ViewMode = 'board' | 'team';
+export type ViewMode = 'board' | 'team' | 'table';
 
 @Component({
   selector: 'app-kanban',
@@ -54,7 +65,7 @@ export type ViewMode = 'board' | 'team';
   imports: [
     ReactiveFormsModule,
     BoardColumnComponent, JobDialogComponent, JobCardComponent,
-    PageHeaderComponent, MatMenuModule, MatTooltipModule,
+    PageHeaderComponent, ViewModeToggleComponent, JobsTableComponent, MatMenuModule, MatTooltipModule,
     CdkDropList, CdkDrag,
     SelectComponent, InputComponent, AvatarComponent,
     CapDirective,
@@ -79,6 +90,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly draftResume = inject(DraftResumeService);
+  private readonly breakpoints = inject(BreakpointObserver);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly mayBill = computed(() => this.authService.hasAnyRole([...BILLING_STAGE_ROLES]));
@@ -227,14 +239,53 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   // ── View Mode ──
-  protected readonly viewMode = toSignal(
-    this.route.queryParamMap.pipe(map(p => KanbanComponent.parseViewMode(p.get('view')))),
-    { initialValue: KanbanComponent.parseViewMode(this.route.snapshot.queryParamMap.get('view')) },
+  private static readonly WIDE_QUERY = `(min-width: ${JOBS_TABLE_MIN_WIDTH}px)`;
+  protected readonly jobsViewOptions = JOBS_VIEW_TOGGLE_OPTIONS;
+  protected readonly isWide = toSignal(
+    this.breakpoints.observe(KanbanComponent.WIDE_QUERY).pipe(map(state => state.matches)),
+    { initialValue: this.breakpoints.isMatched(KanbanComponent.WIDE_QUERY) },
   );
+  protected readonly preferredJobsView = signal<JobsViewMode>(
+    this.userPreferences.get<JobsViewMode>(JOBS_VIEW_PREF_KEY) === 'table' ? 'table' : DEFAULT_JOBS_VIEW,
+  );
+  private readonly requestedView = toSignal(
+    this.route.queryParamMap.pipe(map(p => p.get('view'))),
+    { initialValue: this.route.snapshot.queryParamMap.get('view') },
+  );
+  protected readonly viewMode = computed<ViewMode>(() => {
+    const raw = this.requestedView();
+    const requested: ViewMode = raw === 'team' || raw === 'board' || raw === 'table' ? raw : this.preferredJobsView();
+    return requested === 'table' && !this.isWide() ? 'board' : requested;
+  });
+  protected readonly jobsView = computed<JobsViewMode>(() => this.viewMode() === 'table' ? 'table' : 'board');
+  protected readonly isDefaultJobsView = computed(() => this.jobsView() === this.preferredJobsView());
 
-  private static parseViewMode(raw: string | null): ViewMode {
-    return raw === 'team' ? 'team' : 'board';
-  }
+  private readonly queryParams = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
+  protected readonly tableAllTracks = computed(() => this.queryParams().get('track') === 'all');
+  protected readonly includeArchived = computed(() => this.queryParams().get('archived') === 'true');
+  protected readonly tableReloadToken = signal(0);
+  private readonly tableSelection = signal<KanbanJob[]>([]);
+  private readonly jobsTable = viewChild(JobsTableComponent);
+
+  protected readonly tableQuery = computed<JobsTableQuery>(() => ({
+    trackTypeId: this.tableAllTracks() ? null : this.selectedTrackTypeId(),
+    filters: this.boardFilters(),
+    includeArchived: this.includeArchived(),
+    assigneeIds: this.teamUserIdsSignal() ?? [],
+    myWorkUserId: this.myWorkOnly() ? this.authService.user()?.id ?? null : null,
+  }), { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) });
+
+  private lastView: ViewMode = this.viewMode();
+  private readonly viewSwitch = effect(() => {
+    const view = this.viewMode();
+    const previous = this.lastView;
+    this.lastView = view;
+    if (previous === view || (previous !== 'table' && view !== 'table')) return;
+    untracked(() => {
+      this.clearSelection();
+      if (view !== 'table') this.reloadBoard();
+    });
+  });
   protected readonly teamUserIds = new FormControl<number[]>([]);
   private readonly teamUserIdsSignal = toSignal(this.teamUserIds.valueChanges, { initialValue: [] as number[] });
 
@@ -418,11 +469,41 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected setViewMode(mode: ViewMode): void {
+    const isDefault = mode !== 'team' && mode === this.preferredJobsView();
     this.router.navigate([], {
-      queryParams: { view: mode === 'team' ? 'team' : null },
+      queryParams: { view: isDefault ? null : mode },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  protected setJobsView(mode: JobsViewMode): void {
+    this.setViewMode(mode);
+  }
+
+  protected setDefaultJobsView(): void {
+    const view = this.jobsView();
+    this.preferredJobsView.set(view);
+    this.userPreferences.set(JOBS_VIEW_PREF_KEY, view);
+    this.snackbar.success(this.translate.instant(view === 'table' ? 'jobsTable.defaultSavedTable' : 'jobsTable.defaultSavedBoard'));
+  }
+
+  protected showAllTrackTypes(): void {
+    this.setFilterParams({ track: 'all' });
+  }
+
+  protected toggleIncludeArchived(): void {
+    this.setFilterParams({ archived: this.includeArchived() ? null : 'true' });
+  }
+
+  protected pickTrackType(trackTypeId: number): void {
+    if (this.tableAllTracks()) this.setFilterParams({ track: null });
+    this.selectTrackType(trackTypeId);
+  }
+
+  protected onTableSelection(jobs: KanbanJob[]): void {
+    this.tableSelection.set(jobs);
+    this.selectedJobIds.set(new Set(jobs.map(j => j.id)));
   }
 
   protected selectTrackType(trackTypeId: number): void {
@@ -432,6 +513,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.boardHub.joinBoard(trackTypeId);
 
     this.boardLoad?.unsubscribe();
+    if (this.viewMode() === 'table') return;
     this.boardLoad = this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId, this.boardFilters()))
       .subscribe({
         next: (board) => this.applyBoard(board),
@@ -503,6 +585,8 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected clearSelection(): void {
     this.selectedJobIds.set(new Set());
+    this.tableSelection.set([]);
+    this.jobsTable()?.clearSelection();
   }
 
   protected openJobDetail(jobId: number): void {
@@ -552,10 +636,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const selected = this.selectedJobIds();
     if (selected.size === 0) return disabled;
 
-    const cols = this.columns();
-    const stages = cols.map(c => c.stage);
+    const stages = this.bulkStages();
     const stageByName = new Map(stages.map(s => [s.name, s]));
-    const selectedJobs = cols.flatMap(c => c.jobs).filter(j => selected.has(j.id));
+    const selectedJobs = this.viewMode() === 'table'
+      ? this.tableSelection()
+      : this.columns().flatMap(c => c.jobs).filter(j => selected.has(j.id));
 
     for (const target of stages) {
       if (this.billingLocked(target)) {
@@ -576,6 +661,19 @@ export class KanbanComponent implements OnInit, OnDestroy {
       if (!anyAllowed) disabled.set(target.id, this.translate.instant('kanban.bulkMoveBlockedReason'));
     }
     return disabled;
+  });
+
+  /**
+   * Bulk-move targets: the board's columns, or in the table the stages of the selected jobs'
+   * track type. A table selection that spans track types has no common stage set and offers none.
+   */
+  protected readonly bulkStages = computed<Stage[]>(() => {
+    if (this.viewMode() !== 'table') return this.currentStages();
+    const trackIds = new Set(this.tableSelection().map(j => j.trackTypeId));
+    if (trackIds.size !== 1) return [];
+    const [trackId] = trackIds;
+    const stages = this.trackTypes().find(t => t.id === trackId)?.stages ?? [];
+    return [...stages].sort((a, b) => a.sortOrder - b.sortOrder);
   });
 
   protected bulkMoveToStage(stage: Stage): void {
@@ -651,6 +749,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   private reloadBoard(): void {
+    if (this.viewMode() === 'table') {
+      this.tableReloadToken.update(n => n + 1);
+      return;
+    }
     const trackTypeId = this.selectedTrackTypeId();
     if (!trackTypeId) return;
     this.boardLoad?.unsubscribe();
