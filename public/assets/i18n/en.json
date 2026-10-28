@@ -642,7 +642,17 @@
     "overdue": "Overdue",
     "onHold": "On hold",
     "unknownCustomer": "Customer #{{id}} wasn't found, so the board shows every customer.",
-    "unknownTeam": "Team #{{id}} wasn't found, so the board shows every team."
+    "unknownTeam": "Team #{{id}} wasn't found, so the board shows every team.",
+    "show": "Show",
+    "showActive": "Active",
+    "showAll": "All",
+    "showAllArchived": "All + archived",
+    "quickFilters": "Quick filters",
+    "filters": "Filters",
+    "filtersCount": "Filters, {{count}} active",
+    "teamChip": "Team: {{name}}",
+    "customerChip": "Customer: {{name}}",
+    "removeChip": "Remove {{label}}"
   },
   "kanban": {
     "title": "Board",

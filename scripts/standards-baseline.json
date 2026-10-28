@@ -10,7 +10,6 @@
     "src/app/features/ai/ai.component.scss": 1,
     "src/app/features/customers/components/credit-status-card/credit-status-card.component.scss": 1,
     "src/app/features/dashboard/components/ambient-mode.component.scss": 4,
-    "src/app/features/kanban/kanban.component.scss": 1,
     "src/app/features/mobile/pages/mobile-scan.component.scss": 1,
     "src/app/features/onboarding/onboarding-wizard.component.scss": 1,
     "src/app/features/parts/components/routing/routing.component.scss": 1,

@@ -108,7 +108,19 @@ interface ComponentInternals {
   boardTruncated: () => boolean;
   boardTotalCount: () => number;
   boardLoadedCount: () => number;
-  toggleActiveOnly(): void;
+  setShowMode(mode: 'active' | 'all' | 'archived'): void;
+  showMode: () => 'active' | 'all' | 'archived';
+  showOptions: () => { value: unknown; label: string }[];
+  showControl: FormControl<'active' | 'all' | 'archived'>;
+  viewOptions: () => readonly { mode: string }[];
+  users: { set(users: { id: number; name: string; initials: string; color: string; canBeAssignedJobs: boolean }[]): void };
+  teamUserIds: FormControl<number[] | null>;
+  filterPanelCount: () => number;
+  activeFilterChips: () => { kind: 'member' | 'team' | 'customer'; id: number; icon: string; label: string }[];
+  removeFilterChip(chip: { kind: 'member' | 'team' | 'customer'; id: number; icon: string; label: string }): void;
+  hasActiveFilters: () => boolean;
+  clearFilters(): void;
+  toggleMyWork(): void;
   toggleOverdue(): void;
   toggleOnHold(): void;
   overdueOnly: () => boolean;
@@ -123,7 +135,6 @@ interface ComponentInternals {
   bulkStageDisabledReasons: () => Map<number, string>;
   viewMode: () => 'board' | 'team' | 'table';
   setViewMode(mode: 'board' | 'team' | 'table'): void;
-  setJobsView(mode: 'board' | 'table'): void;
   setDefaultJobsView(): void;
   isDefaultJobsView: () => boolean;
   isWide: () => boolean;
@@ -131,7 +142,6 @@ interface ComponentInternals {
   tableReloadToken: () => number;
   showAllTrackTypes(): void;
   pickTrackType(id: number): void;
-  toggleIncludeArchived(): void;
   onTableSelection(jobs: KanbanJob[]): void;
   bulkStages: () => Stage[];
   selectionCount: () => number;
@@ -444,7 +454,7 @@ describe('KanbanComponent', () => {
     it('shows every work order once toggled off and remembers the choice', () => {
       component.columns.set(mixedBoard());
 
-      component.toggleActiveOnly();
+      component.setShowMode('all');
 
       expect(component.filteredColumns()[0].jobs.map(j => j.id)).toEqual([1, 2, 3, 4]);
       expect(prefsSet).toHaveBeenCalledWith('kanban:activeOnly', false);
@@ -563,7 +573,7 @@ describe('KanbanComponent', () => {
     it('asks the server again when active only is toggled', () => {
       component.selectTrackType(1);
 
-      component.toggleActiveOnly();
+      component.setShowMode('all');
 
       expect(lastBoardFilters()).toEqual(expect.objectContaining({ activeOnly: false }));
     });
@@ -645,7 +655,7 @@ describe('KanbanComponent', () => {
     });
 
     it('spreads cards that share a position so the new order sticks', () => {
-      component.toggleActiveOnly();
+      component.setShowMode('all');
       component.columns.set([{
         stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
         jobs: [
@@ -669,7 +679,7 @@ describe('KanbanComponent', () => {
     });
 
     it('does not re-save cards whose position did not change', () => {
-      component.toggleActiveOnly();
+      component.setShowMode('all');
       component.columns.set([{
         stage: stage({ id: 1, name: 'Queued', sortOrder: 1 }),
         jobs: [
@@ -959,7 +969,7 @@ describe('KanbanComponent', () => {
     });
 
     it('opens the table from ?view=table and keeps it out of the URL once it is the default', () => {
-      component.setJobsView('table');
+      component.setViewMode('table');
       expect(navigate).toHaveBeenLastCalledWith([], { queryParams: { view: 'table' }, queryParamsHandling: 'merge', replaceUrl: true });
       expect(component.viewMode()).toBe('table');
       expect(component.isDefaultJobsView()).toBe(false);
@@ -968,7 +978,7 @@ describe('KanbanComponent', () => {
       expect(prefsSet).toHaveBeenCalledWith('kanban:defaultView', 'table');
       expect(component.isDefaultJobsView()).toBe(true);
 
-      component.setJobsView('board');
+      component.setViewMode('board');
       expect(navigate).toHaveBeenLastCalledWith([], { queryParams: { view: 'board' }, queryParamsHandling: 'merge', replaceUrl: true });
       expect(component.viewMode()).toBe('board');
     });
@@ -1000,7 +1010,7 @@ describe('KanbanComponent', () => {
       component.selectTrackType(1);
       expect(getBoard).not.toHaveBeenCalled();
 
-      component.setJobsView('board');
+      component.setViewMode('board');
       TestBed.tick();
       expect(getBoard).toHaveBeenCalledOnce();
     });
@@ -1015,12 +1025,12 @@ describe('KanbanComponent', () => {
 
     it('hands the board filters, the order type and the archived switch to the table', () => {
       component.toggleOnHold();
-      component.toggleIncludeArchived();
+      component.setShowMode('archived');
 
       expect(component.tableQuery()).toMatchObject({
         trackTypeId: 5,
         includeArchived: true,
-        filters: { onHoldOnly: true, activeOnly: true },
+        filters: { onHoldOnly: true, activeOnly: false },
         assigneeIds: [],
         myWorkUserId: null,
       });
@@ -1034,7 +1044,7 @@ describe('KanbanComponent', () => {
 
     it('reloads the table instead of the board when a filter or a live update asks', () => {
       const before = component.tableReloadToken();
-      component.toggleActiveOnly();
+      component.setShowMode('all');
       expect(component.tableReloadToken()).toBe(before + 1);
       expect(getBoard).not.toHaveBeenCalled();
     });
@@ -1052,6 +1062,109 @@ describe('KanbanComponent', () => {
 
       component.onTableSelection([boardJob(1, 'Open', { trackTypeId: 5 }), boardJob(3, 'Open', { trackTypeId: 6 })]);
       expect(component.bulkStages()).toEqual([]);
+    });
+  });
+  describe('show scope', () => {
+    it('offers active and all on the board, and archived only in the table', () => {
+      expect(component.showOptions().map(o => o.value)).toEqual(['active', 'all']);
+
+      component.setViewMode('table');
+      expect(component.showOptions().map(o => o.value)).toEqual(['active', 'all', 'archived']);
+    });
+
+    it('turns active only off and remembers it when all is chosen', () => {
+      component.showControl.setValue('all');
+
+      expect(component.activeOnly()).toBe(false);
+      expect(component.showMode()).toBe('all');
+      expect(prefsSet).toHaveBeenCalledWith('kanban:activeOnly', false);
+    });
+
+    it('puts archived in the URL for all plus archived, and takes it out again for active', () => {
+      queryParams.next(convertToParamMap({ view: 'table' }));
+      createComponent();
+
+      component.setShowMode('archived');
+      expect(queryParams.value.get('archived')).toBe('true');
+      expect(component.activeOnly()).toBe(false);
+      expect(component.showMode()).toBe('archived');
+      TestBed.tick();
+      expect(component.showControl.value).toBe('archived');
+
+      component.setShowMode('active');
+      expect(queryParams.value.get('archived')).toBeNull();
+      expect(component.showMode()).toBe('active');
+      expect(component.tableQuery().filters.activeOnly).toBe(true);
+    });
+
+    it('ignores archived in the URL on the board', () => {
+      queryParams.next(convertToParamMap({ archived: 'true' }));
+      createComponent();
+
+      expect(component.showMode()).toBe('active');
+    });
+  });
+
+  describe('view toggle', () => {
+    it('offers board, team and table on a wide screen', () => {
+      expect(component.viewOptions().map(o => o.mode)).toEqual(['board', 'team', 'table']);
+    });
+
+    it('drops the table on a narrow screen', () => {
+      wide = false;
+      createComponent();
+
+      expect(component.viewOptions().map(o => o.mode)).toEqual(['board', 'team']);
+    });
+  });
+
+  describe('filters panel', () => {
+    beforeEach(() => {
+      getTeams.mockReturnValue(of([{ id: 3, name: 'Machining', color: null }]));
+      queryParams.next(convertToParamMap({ team: '3', customer: '42' }));
+      createComponent();
+      (component as unknown as { ngOnInit(): void }).ngOnInit();
+      component.users.set([
+        { id: 7, name: 'Avery Kim', initials: 'AK', color: '#000', canBeAssignedJobs: true },
+        { id: 8, name: 'Sam Ortiz', initials: 'SO', color: '#000', canBeAssignedJobs: true },
+      ]);
+      component.teamUserIds.setValue([7, 8]);
+    });
+
+    it('counts each kind of active filter once and lists a chip for each value', () => {
+      expect(component.filterPanelCount()).toBe(3);
+      expect(component.activeFilterChips().map(c => `${c.kind}:${c.id}`)).toEqual(['member:7', 'member:8', 'team:3', 'customer:42']);
+      expect(component.activeFilterChips()[0].label).toBe('Avery Kim');
+    });
+
+    it('removes just the filter behind a chip', () => {
+      const [first, , team, customer] = component.activeFilterChips();
+
+      component.removeFilterChip(first);
+      expect(component.teamUserIds.value).toEqual([8]);
+
+      component.removeFilterChip(team);
+      expect(queryParams.value.get('team')).toBeNull();
+
+      component.removeFilterChip(customer);
+      expect(queryParams.value.get('customer')).toBeNull();
+      expect(component.filterPanelCount()).toBe(1);
+    });
+
+    it('clears search, quick filters and panel filters together, leaving the view and scope alone', () => {
+      queryParams.next(convertToParamMap({ ...Object.fromEntries(queryParams.value.keys.map(k => [k, queryParams.value.get(k)!])), q: 'J-1', overdue: 'true', onHold: 'true', myWork: 'true', view: 'team' }));
+      expect(component.hasActiveFilters()).toBe(true);
+
+      component.clearFilters();
+
+      expect(component.teamUserIds.value).toEqual([]);
+      expect(component.searchControl.value).toBe('');
+      for (const key of ['q', 'customer', 'team', 'overdue', 'onHold', 'myWork']) {
+        expect(queryParams.value.get(key)).toBeNull();
+      }
+      expect(queryParams.value.get('view')).toBe('team');
+      expect(component.hasActiveFilters()).toBe(false);
+      expect(component.activeOnly()).toBe(true);
     });
   });
 });
