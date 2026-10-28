@@ -6,6 +6,8 @@ import { debounceTime, distinctUntilChanged, map, skip, Subscription, switchMap 
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { MatDialog } from '@angular/material/dialog';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { MatMenuModule } from '@angular/material/menu';
@@ -21,6 +23,8 @@ import { BoardColumn } from './models/board-column.model';
 import { KanbanBoard } from './models/kanban-board.model';
 import { BoardFilters } from './models/board-filters.model';
 import { CustomerRef } from './models/customer-ref.model';
+import { ActiveFilterChip } from './models/active-filter-chip.model';
+import { JobsShowMode } from './models/jobs-show-mode.type';
 import { JobDetail } from './models/job-detail.model';
 import { KanbanJob } from './models/kanban-job.model';
 import { SwimlaneRow } from './models/swimlane-row.model';
@@ -38,11 +42,14 @@ import { ViewModeToggleComponent } from '../../shared/components/view-mode-toggl
 import {
   DEFAULT_JOBS_VIEW,
   JOBS_TABLE_MIN_WIDTH,
+  JOBS_SCREEN_VIEW_OPTIONS,
   JOBS_VIEW_PREF_KEY,
-  JOBS_VIEW_TOGGLE_OPTIONS,
   JobsViewMode,
 } from '../../shared/models/jobs-view.model';
 import { CapDirective } from '../../shared/directives/cap.directive';
+import { TabDirective, TabListDirective } from '../../shared/directives/tab-list.directive';
+import { ScrollCueDirective } from '../../shared/directives/scroll-cue.directive';
+import { ViewModeOption } from '../../shared/models/view-mode-option.model';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -66,9 +73,9 @@ export type ViewMode = 'board' | 'team' | 'table';
     ReactiveFormsModule,
     BoardColumnComponent, JobDialogComponent, JobCardComponent,
     PageHeaderComponent, ViewModeToggleComponent, JobsTableComponent, MatMenuModule, MatTooltipModule,
-    CdkDropList, CdkDrag,
+    CdkDropList, CdkDrag, CdkConnectedOverlay, CdkOverlayOrigin, CdkTrapFocus,
     SelectComponent, InputComponent, AvatarComponent,
-    CapDirective,
+    CapDirective, TabListDirective, TabDirective, ScrollCueDirective,
     TranslatePipe,
   ],
   templateUrl: './kanban.component.html',
@@ -160,10 +167,30 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected readonly activeOnly = signal(this.userPreferences.get<boolean>('kanban:activeOnly') ?? true);
 
-  protected toggleActiveOnly(): void {
-    const next = !this.activeOnly();
-    this.activeOnly.set(next);
-    this.userPreferences.set('kanban:activeOnly', next);
+  protected readonly showMode = computed<JobsShowMode>(() => {
+    if (this.viewMode() === 'table' && this.includeArchived()) return 'archived';
+    return this.activeOnly() ? 'active' : 'all';
+  });
+  protected readonly showOptions = computed<SelectOption[]>(() => [
+    { value: 'active', label: this.translate.instant('boardFilters.showActive') },
+    { value: 'all', label: this.translate.instant('boardFilters.showAll') },
+    ...(this.viewMode() === 'table' ? [{ value: 'archived', label: this.translate.instant('boardFilters.showAllArchived') }] : []),
+  ]);
+  protected readonly showControl = new FormControl<JobsShowMode>('active', { nonNullable: true });
+  private readonly showModeToControl = effect(() => {
+    const mode = this.showMode();
+    untracked(() => this.showControl.setValue(mode, { emitEvent: false }));
+  });
+  private readonly showControlToMode = this.showControl.valueChanges.pipe(takeUntilDestroyed())
+    .subscribe(mode => this.setShowMode(mode));
+
+  protected setShowMode(mode: JobsShowMode): void {
+    const activeOnly = mode === 'active';
+    const archived = mode === 'archived';
+    if (archived !== this.includeArchived()) this.setFilterParams({ archived: archived ? 'true' : null });
+    if (activeOnly === this.activeOnly()) return;
+    this.activeOnly.set(activeOnly);
+    this.userPreferences.set('kanban:activeOnly', activeOnly);
     this.reloadBoard();
   }
 
@@ -229,7 +256,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   private boardFilters(): BoardFilters {
-    return { ...this.urlFilters(), teamId: this.teamFilterId(), activeOnly: this.activeOnly() };
+    return { ...this.urlFilters(), teamId: this.teamFilterId(), activeOnly: this.showMode() === 'active' };
   }
 
   private boardLoad: Subscription | null = null;
@@ -240,7 +267,8 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   // ── View Mode ──
   private static readonly WIDE_QUERY = `(min-width: ${JOBS_TABLE_MIN_WIDTH}px)`;
-  protected readonly jobsViewOptions = JOBS_VIEW_TOGGLE_OPTIONS;
+  protected readonly viewOptions = computed<readonly ViewModeOption<ViewMode>[]>(() =>
+    this.isWide() ? JOBS_SCREEN_VIEW_OPTIONS : JOBS_SCREEN_VIEW_OPTIONS.filter(o => o.mode !== 'table'));
   protected readonly isWide = toSignal(
     this.breakpoints.observe(KanbanComponent.WIDE_QUERY).pipe(map(state => state.matches)),
     { initialValue: this.breakpoints.isMatched(KanbanComponent.WIDE_QUERY) },
@@ -263,6 +291,8 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly queryParams = toSignal(this.route.queryParamMap, { initialValue: this.route.snapshot.queryParamMap });
   protected readonly tableAllTracks = computed(() => this.queryParams().get('track') === 'all');
   protected readonly includeArchived = computed(() => this.queryParams().get('archived') === 'true');
+  protected readonly activeTrackTypeId = computed(() =>
+    this.viewMode() === 'table' && this.tableAllTracks() ? null : this.selectedTrackTypeId());
   protected readonly tableReloadToken = signal(0);
   private readonly tableSelection = signal<KanbanJob[]>([]);
   private readonly jobsTable = viewChild(JobsTableComponent);
@@ -292,6 +322,58 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly userOptions = computed<SelectOption[]>(() =>
     this.users().map(u => ({ value: u.id, label: u.name })),
   );
+
+  protected readonly filtersOpen = signal(false);
+  protected readonly filterPanelCount = computed(() =>
+    ((this.teamUserIdsSignal() ?? []).length > 0 ? 1 : 0)
+    + (this.teamFilterId() !== null ? 1 : 0)
+    + (this.urlFilters().customerId !== null ? 1 : 0));
+
+  protected readonly activeFilterChips = computed<ActiveFilterChip[]>(() => {
+    const chips: ActiveFilterChip[] = [];
+    for (const id of this.teamUserIdsSignal() ?? []) {
+      const user = this.users().find(u => u.id === id);
+      if (user) chips.push({ kind: 'member', id, icon: 'person', label: user.name });
+    }
+    const teamId = this.teamFilterId();
+    const team = teamId === null ? undefined : this.teams().find(t => t.id === teamId);
+    if (team) chips.push({ kind: 'team', id: team.id, icon: 'groups', label: this.translate.instant('boardFilters.teamChip', { name: team.name }) });
+    const customerId = this.urlFilters().customerId;
+    const customer = customerId === null ? undefined : this.customers().find(c => c.id === customerId);
+    if (customer) chips.push({ kind: 'customer', id: customer.id, icon: 'business', label: this.translate.instant('boardFilters.customerChip', { name: customer.name }) });
+    return chips;
+  });
+
+  protected readonly hasActiveFilters = computed(() => {
+    const f = this.urlFilters();
+    return f.search !== '' || f.overdueOnly || f.onHoldOnly || this.myWorkOnly() || this.filterPanelCount() > 0;
+  });
+
+  protected toggleFilters(): void {
+    this.filtersOpen.update(open => !open);
+  }
+
+  protected closeFilters(): void {
+    this.filtersOpen.set(false);
+  }
+
+  protected onFiltersEscape(event: Event): void {
+    if ((event.target as HTMLElement | null)?.getAttribute('aria-expanded') === 'true') return;
+    this.closeFilters();
+  }
+
+  protected removeFilterChip(chip: ActiveFilterChip): void {
+    if (chip.kind === 'member') this.teamUserIds.setValue((this.teamUserIds.value ?? []).filter(id => id !== chip.id));
+    else if (chip.kind === 'team') this.teamFilter.setValue(null);
+    else this.customerFilter.setValue(null);
+  }
+
+  protected clearFilters(): void {
+    this.teamUserIds.setValue([]);
+    this.searchControl.setValue('');
+    if (this.myWorkOnly()) this.userPreferences.set('kanban:myWorkOnly', false);
+    this.setFilterParams({ q: null, customer: null, team: null, overdue: null, onHold: null, myWork: null });
+  }
 
   // Columns filtered by selected team members and/or My Work toggle (applies to board view)
   protected readonly filteredColumns = computed<BoardColumn[]>(() => {
@@ -477,10 +559,6 @@ export class KanbanComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected setJobsView(mode: JobsViewMode): void {
-    this.setViewMode(mode);
-  }
-
   protected setDefaultJobsView(): void {
     const view = this.jobsView();
     this.preferredJobsView.set(view);
@@ -490,10 +568,6 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected showAllTrackTypes(): void {
     this.setFilterParams({ track: 'all' });
-  }
-
-  protected toggleIncludeArchived(): void {
-    this.setFilterParams({ archived: this.includeArchived() ? null : 'true' });
   }
 
   protected pickTrackType(trackTypeId: number): void {

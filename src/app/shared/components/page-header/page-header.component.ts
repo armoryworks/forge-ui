@@ -20,6 +20,7 @@ export class PageHeaderComponent {
   readonly subtitle = input<string>();
   readonly helpTourId = input<string>();
   readonly wrap = input(false);
+  readonly spacer = input(true);
 
   protected startTour(): void {
     const tourId = this.helpTourId();

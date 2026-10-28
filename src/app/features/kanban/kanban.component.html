@@ -4,108 +4,107 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board" [wrap]="true">
-    <div class="page-header__track-types" data-tour="track-type-switcher">
+  <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board" [wrap]="true" [spacer]="false">
+    <div class="tab-bar jobs-header__tabs" appTabList appScrollCue data-tour="track-type-switcher" [attr.aria-label]="'kanban.trackType' | translate">
       @if (viewMode() === 'table') {
-        <button
-          class="track-type-btn"
-          data-testid="track-type-all-btn"
-          [class.track-type-btn--active]="tableAllTracks()"
-          [attr.aria-pressed]="tableAllTracks()"
-          (click)="showAllTrackTypes()">
+        <button class="tab track-type-btn" data-testid="track-type-all-btn" [appTab]="tableAllTracks()" (click)="showAllTrackTypes()">
           {{ 'jobsTable.allTrackTypes' | translate }}
         </button>
       }
       @for (tt of trackTypes(); track tt.id) {
-        <button
-          class="track-type-btn"
-          [class.track-type-btn--active]="tt.id === selectedTrackTypeId() && !(viewMode() === 'table' && tableAllTracks())"
-          (click)="pickTrackType(tt.id)">
+        <button class="tab track-type-btn" [appTab]="tt.id === activeTrackTypeId()" (click)="pickTrackType(tt.id)">
           {{ tt.name }}
         </button>
       }
     </div>
 
-    @if (isWide()) {
-      <app-view-mode-toggle data-testid="jobs-view-toggle" [mode]="jobsView()" [options]="jobsViewOptions" (modeChange)="setJobsView($event)" />
-      <button class="my-work-btn" data-testid="jobs-view-default-btn"
-              [class.my-work-btn--active]="isDefaultJobsView()"
-              [disabled]="isDefaultJobsView()"
-              [matTooltip]="(isDefaultJobsView() ? 'jobsTable.isDefaultHint' : 'jobsTable.setDefaultHint') | translate"
-              matTooltipPosition="above"
-              (click)="setDefaultJobsView()">
-        <span class="material-icons-outlined">{{ isDefaultJobsView() ? 'check' : 'push_pin' }}</span>
-        {{ (isDefaultJobsView() ? 'jobsTable.isDefault' : 'jobsTable.setDefault') | translate }}
-      </button>
-    }
-
-    @if (viewMode() !== 'table') {
-      <div class="view-toggle">
-        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [attr.aria-label]="'kanban.boardView' | translate" [attr.aria-pressed]="viewMode() === 'board'" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
-          <span class="material-icons-outlined">view_column</span>
+    <div class="jobs-header__actions">
+      <app-view-mode-toggle data-testid="jobs-view-toggle" [mode]="viewMode()" [options]="viewOptions()" (modeChange)="setViewMode($event)" />
+      @if (isWide()) {
+        <span [matTooltip]="(isDefaultJobsView() ? 'jobsTable.isDefaultHint' : 'jobsTable.setDefaultHint') | translate" matTooltipPosition="above">
+          <button class="icon-btn jobs-header__pin" data-testid="jobs-view-default-btn"
+                  [class.icon-btn--active]="isDefaultJobsView()"
+                  [disabled]="isDefaultJobsView()"
+                  [attr.aria-label]="(isDefaultJobsView() ? 'jobsTable.isDefault' : 'jobsTable.setDefault') | translate"
+                  (click)="setDefaultJobsView()">
+            <span class="material-icons-outlined">{{ isDefaultJobsView() ? 'check' : 'push_pin' }}</span>
+          </button>
+        </span>
+      }
+      @if (canCreateJobs()) {
+        <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="action-btn action-btn--create new-job-btn" (click)="openCreateDialog()">
+          <span class="material-icons-outlined">add</span>
+          {{ 'jobs.createJob' | translate }}
         </button>
-        <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [attr.aria-label]="'kanban.teamView' | translate" [attr.aria-pressed]="viewMode() === 'team'" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
-          <span class="material-icons-outlined">people</span>
+      }
+    </div>
+
+    <div class="jobs-header__filters">
+      <app-input class="jobs-header__search" data-testid="board-search" [label]="'boardFilters.search' | translate" [formControl]="searchControl" [placeholder]="'boardFilters.searchPlaceholder' | translate" prefix="search" />
+
+      <div class="jobs-header__quick" role="group" [attr.aria-label]="'boardFilters.quickFilters' | translate">
+        <button class="quick-filter" data-testid="my-work-btn" [class.quick-filter--active]="myWorkOnly()" [attr.aria-pressed]="myWorkOnly()" (click)="toggleMyWork()">
+          <span class="material-icons-outlined">person</span>
+          {{ 'kanban.myWork' | translate }}
+        </button>
+        <button class="quick-filter" data-testid="board-overdue-btn" [class.quick-filter--active]="overdueOnly()" [attr.aria-pressed]="overdueOnly()" (click)="toggleOverdue()">
+          <span class="material-icons-outlined">event_busy</span>
+          {{ 'boardFilters.overdue' | translate }}
+        </button>
+        <button class="quick-filter" data-testid="board-on-hold-btn" [class.quick-filter--active]="onHoldOnly()" [attr.aria-pressed]="onHoldOnly()" (click)="toggleOnHold()">
+          <span class="material-icons-outlined">pause_circle</span>
+          {{ 'boardFilters.onHold' | translate }}
         </button>
       </div>
-    }
 
-    <app-input data-testid="board-search" [label]="'boardFilters.search' | translate" [formControl]="searchControl" [placeholder]="'boardFilters.searchPlaceholder' | translate" prefix="search" />
+      <app-select class="jobs-header__show" data-testid="jobs-show-select" [label]="'boardFilters.show' | translate" [formControl]="showControl" [options]="showOptions()" />
 
-    <app-select data-tour="board-filters" [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
-
-    @if (teams().length > 0 || teamFilterId() !== null) {
-      <app-select data-testid="board-team-filter" [label]="'kanban.teamFilter' | translate" [formControl]="teamFilter" [options]="teamFilterOptions()" [placeholder]="'kanban.allTeams' | translate"
-                  [matTooltip]="'kanban.teamFilterHint' | translate" matTooltipPosition="above" />
-    }
-
-    <button class="my-work-btn" [class.my-work-btn--active]="myWorkOnly()"
-            (click)="toggleMyWork()"
-            [matTooltip]="myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate)"
-            matTooltipPosition="above"
-            data-testid="my-work-btn">
-      <span class="material-icons-outlined">person</span>
-      {{ myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate) }}
-    </button>
-
-    <button class="my-work-btn" data-testid="active-only-btn" [class.my-work-btn--active]="activeOnly()"
-            (click)="toggleActiveOnly()"
-            [attr.aria-pressed]="activeOnly()">
-      <span class="material-icons-outlined">filter_alt</span>
-      {{ 'kanban.activeOnly' | translate }}
-    </button>
-
-    @if (viewMode() === 'table') {
-      <button class="my-work-btn" data-testid="jobs-archived-btn" [class.my-work-btn--active]="includeArchived()"
-              (click)="toggleIncludeArchived()"
-              [attr.aria-pressed]="includeArchived()">
-        <span class="material-icons-outlined">inventory_2</span>
-        {{ 'jobsTable.includeArchived' | translate }}
+      <button class="action-btn jobs-header__filters-btn" data-testid="board-filters-btn" data-tour="board-filters"
+              cdkOverlayOrigin #filtersOrigin="cdkOverlayOrigin"
+              [class.jobs-header__filters-btn--active]="filterPanelCount() > 0"
+              [attr.aria-expanded]="filtersOpen()"
+              aria-haspopup="dialog"
+              [attr.aria-label]="'boardFilters.filtersCount' | translate: { count: filterPanelCount() }"
+              (click)="toggleFilters()">
+        <span class="material-icons-outlined">tune</span>
+        {{ 'boardFilters.filters' | translate }}
+        @if (filterPanelCount() > 0) {
+          <span class="jobs-header__badge" aria-hidden="true">{{ filterPanelCount() }}</span>
+        }
       </button>
-    }
 
-    <app-select data-testid="board-customer-filter" [label]="'boardFilters.customer' | translate" [formControl]="customerFilter" [options]="customerOptions()" [placeholder]="'boardFilters.allCustomers' | translate" />
+      <ng-template cdkConnectedOverlay
+                   [cdkConnectedOverlayOrigin]="filtersOrigin"
+                   [cdkConnectedOverlayOpen]="filtersOpen()"
+                   [cdkConnectedOverlayHasBackdrop]="true"
+                   cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                   (backdropClick)="closeFilters()"
+                   (detach)="closeFilters()">
+        <div class="filters-panel" role="dialog" data-testid="board-filters-panel" [attr.aria-label]="'boardFilters.filters' | translate" cdkTrapFocus cdkTrapFocusAutoCapture (keydown.escape)="onFiltersEscape($event)">
+          <app-select data-testid="board-members-filter" [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
+          @if (teams().length > 0 || teamFilterId() !== null) {
+            <app-select data-testid="board-team-filter" [label]="'kanban.teamFilter' | translate" [formControl]="teamFilter" [options]="teamFilterOptions()" [placeholder]="'kanban.allTeams' | translate"
+                        [matTooltip]="'kanban.teamFilterHint' | translate" matTooltipPosition="right" />
+          }
+          <app-select data-testid="board-customer-filter" [label]="'boardFilters.customer' | translate" [formControl]="customerFilter" [options]="customerOptions()" [placeholder]="'boardFilters.allCustomers' | translate" />
+        </div>
+      </ng-template>
 
-    <button class="my-work-btn" data-testid="board-overdue-btn" [class.my-work-btn--active]="overdueOnly()"
-            (click)="toggleOverdue()"
-            [attr.aria-pressed]="overdueOnly()">
-      <span class="material-icons-outlined">event_busy</span>
-      {{ 'boardFilters.overdue' | translate }}
-    </button>
-
-    <button class="my-work-btn" data-testid="board-on-hold-btn" [class.my-work-btn--active]="onHoldOnly()"
-            (click)="toggleOnHold()"
-            [attr.aria-pressed]="onHoldOnly()">
-      <span class="material-icons-outlined">pause_circle</span>
-      {{ 'boardFilters.onHold' | translate }}
-    </button>
-
-    @if (canCreateJobs()) {
-      <button *appCap="'CAP-MFG-WO-RELEASE'" data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
-        <span class="material-icons-outlined">add</span>
-        {{ 'jobs.createJob' | translate }}
-      </button>
-    }
+      @for (chip of activeFilterChips(); track chip.kind + chip.id) {
+        <span class="filter-chip" data-testid="active-filter-chip">
+          <span class="material-icons-outlined filter-chip__icon">{{ chip.icon }}</span>
+          <span class="filter-chip__label">{{ chip.label }}</span>
+          <button class="filter-chip__remove" [attr.aria-label]="'boardFilters.removeChip' | translate: { label: chip.label }" (click)="removeFilterChip(chip)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </span>
+      }
+      @if (hasActiveFilters()) {
+        <button class="action-btn action-btn--link jobs-header__clear" data-testid="board-clear-filters-btn" (click)="clearFilters()">
+          {{ 'shared.clear' | translate }}
+        </button>
+      }
+    </div>
   </app-page-header>
 
   @if (selectionCount() === 0 && viewMode() !== 'table') {

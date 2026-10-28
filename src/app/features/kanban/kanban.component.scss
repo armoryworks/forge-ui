@@ -59,46 +59,47 @@
   color: var(--text);
 }
 
-.page-header__track-types {
+.jobs-header__tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: $sp-lg;
+  align-self: stretch;
+  background: none;
+  border-bottom: none;
+}
+
+.jobs-header__actions {
   display: flex;
-  gap: $sp-xs;
+  align-items: center;
+  gap: $sp-md;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.track-type-btn {
-  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
-  padding: $sp-xxs $sp-md;
-  border: $border-width solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-  cursor: pointer;
-  border-radius: $border-radius;
-
-  &:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
-
-  &--active {
-    background: var(--primary);
-    color: var(--primary-btn-text);
-    border-color: var(--primary);
-  }
+.jobs-header__filters {
+  flex: 1 0 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $sp-sm $sp-md;
+  min-width: 0;
 }
 
-:host ::ng-deep .page-header :is(app-select, app-input) {
-  flex: 0 1 170px;
-  min-width: 140px;
-
-  mat-form-field { width: 100%; }
+.jobs-header__search {
+  flex: 0 1 260px;
+  min-width: 180px;
 }
 
-@media (max-width: 2199px) {
-  :host ::ng-deep .page-header__subtitle { display: none; }
+.jobs-header__show {
+  flex: 0 0 150px;
 }
 
-// ─── Compact team filter in header ───
+.jobs-header__quick {
+  display: flex;
+  gap: $sp-sm;
+}
+
 :host ::ng-deep .page-header :is(app-select, app-input) mat-form-field {
-  // Match the height of neighboring buttons in the toolbar
   .mat-mdc-text-field-wrapper {
     padding-top: 0;
     padding-bottom: 0;
@@ -111,51 +112,29 @@
   }
 }
 
-// ─── View Toggle ───
-.view-toggle {
-  display: flex;
-  border: $border-width-thin solid var(--border);
-
-  &__btn {
-    @include flex-center;
-    width: $btn-icon-size + $sp-md;
-    height: $btn-icon-size;
-    border: none;
-    background: var(--surface);
-    color: var(--text-muted);
-    cursor: pointer;
-
-    .material-icons-outlined { font-size: $icon-size-md; }
-
-    &:hover { background: var(--bg); color: var(--text); }
-
-    &--active {
-      background: var(--primary);
-      color: var(--primary-btn-text);
-      &:hover { background: var(--primary-dark); color: var(--primary-btn-text); }
-    }
-
-    & + & { border-left: $border-width-thin solid var(--border); }
-  }
+@media (max-width: 2199px) {
+  :host ::ng-deep .page-header__subtitle { display: none; }
 }
 
-.my-work-btn {
+.quick-filter {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
+  @include touch-target(height);
   gap: $sp-sm;
-  padding: $sp-xxs $sp-md;
-  border: $border-width solid var(--border);
+  height: $input-height;
+  padding: 0 $sp-md;
+  border: $border-width-thin solid var(--border);
   background: var(--surface);
   color: var(--text-secondary);
   cursor: pointer;
   border-radius: $border-radius;
+  font-family: $font-family-primary;
 
   .material-icons-outlined { font-size: $icon-size-xs; }
 
   &:hover {
     background: var(--bg);
     color: var(--text);
-    border-color: var(--primary);
   }
 
   &--active {
@@ -165,26 +144,79 @@
   }
 }
 
-// "New Job" is a create action — green per the button taxonomy (matches
-// "+ New Customer" / "+ New Part"), not the teal primary/commit color.
-.new-job-btn {
-  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
+.jobs-header__filters-btn {
+  min-width: auto;
+  padding: 0 $sp-md;
+
+  &--active {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+.jobs-header__badge {
   @include flex-center;
-  gap: $sp-sm;
-  padding: $sp-xxs $sp-md;
-  border: $border-width solid var(--action-create);
-  background: var(--action-create);
-  color: #ffffff;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-xs;
+  background: var(--primary);
+  color: var(--primary-btn-text);
+  font-size: var(--font-size-xxs);
+  font-weight: 700;
+}
+
+.filters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  width: 280px;
+  margin-top: $sp-xs;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  box-shadow: $shadow-dropdown;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  max-width: 240px;
+  height: $btn-icon-size;
+  padding: 0 $sp-xs 0 $sp-sm;
+  border: $border-width-thin solid var(--primary);
+  background: var(--primary-light);
+  color: var(--text);
+  font-size: var(--font-size-xs);
+}
+
+.filter-chip__icon {
+  font-size: $icon-size-xs;
+  color: var(--primary);
+}
+
+.filter-chip__label {
+  @include truncate;
+}
+
+.filter-chip__remove {
+  @include flex-center;
+  @include touch-target;
+  width: $icon-size-sm;
+  height: $icon-size-sm;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
   cursor: pointer;
-  border-radius: $border-radius;
-  margin-left: auto;
 
   .material-icons-outlined { font-size: $icon-size-xs; }
 
-  &:hover {
-    background: var(--action-create-hover);
-    border-color: var(--action-create-hover);
-  }
+  &:hover { color: var(--text); }
+}
+
+.jobs-header__clear {
+  height: $btn-icon-size;
 }
 
 .board {
@@ -394,10 +426,6 @@
 @include mobile {
   .board {
     padding: $sp-sm;
-  }
-
-  .page-header__track-types {
-    flex-wrap: wrap;
   }
 
   .bulk-bar {

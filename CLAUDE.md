@@ -729,7 +729,7 @@ All list views must show `<app-empty-state>` when data is empty — icon + messa
 | `ToggleComponent` | `shared/components/toggle/` | Material slide-toggle wrapper (CVA) |
 | `CurrencyInputComponent` | `shared/components/currency-input/` | Currency-amount wrapper (CVA) — uses Material `matTextPrefix` slot to avoid the recurring `<app-input prefix="$">` floating-label overlap |
 | `DialogComponent` | `shared/components/dialog/` | Shared dialog shell (content projection) |
-| `PageHeaderComponent` | `shared/components/page-header/` | Standard page header bar |
+| `PageHeaderComponent` | `shared/components/page-header/` | Standard page header bar. `[wrap]="true"` lets projected content wrap onto further rows; `[spacer]="false"` drops the built-in spacer so projected content (e.g. a tab bar) sits beside the title — the jobs board header uses both for its two-row layout |
 | `AvatarComponent` | `shared/components/avatar/` | User avatar with initials fallback |
 | `KpiChipComponent` | `shared/components/kpi-chip/` | Compact metric display |
 | `StatusBadgeComponent` | `shared/components/status-badge/` | Colored status indicator |

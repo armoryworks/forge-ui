@@ -642,7 +642,17 @@
     "overdue": "Vencidas",
     "onHold": "En espera",
     "unknownCustomer": "No se encontró el cliente n.º {{id}}, así que el tablero muestra todos los clientes.",
-    "unknownTeam": "No se encontró el equipo n.º {{id}}, así que el tablero muestra todos los equipos."
+    "unknownTeam": "No se encontró el equipo n.º {{id}}, así que el tablero muestra todos los equipos.",
+    "show": "Mostrar",
+    "showActive": "Activas",
+    "showAll": "Todas",
+    "showAllArchived": "Todas + archivadas",
+    "quickFilters": "Filtros rápidos",
+    "filters": "Filtros",
+    "filtersCount": "Filtros, {{count}} activos",
+    "teamChip": "Equipo: {{name}}",
+    "customerChip": "Cliente: {{name}}",
+    "removeChip": "Quitar {{label}}"
   },
   "kanban": {
     "title": "Tablero",
