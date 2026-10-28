@@ -110,6 +110,8 @@
     margin: 0;
     font-size: $font-size-md;
     color: var(--error);
+
+    &--soft { color: var(--warning); }
   }
 
   &__primary,

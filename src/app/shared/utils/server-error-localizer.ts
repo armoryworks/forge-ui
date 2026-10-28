@@ -22,6 +22,7 @@ const CODE_KEYS: Record<string, string> = {
   'andon-type-required': 'apiErrors.codes.andonTypeRequired',
   'material-category-conflict': 'apiErrors.codes.materialCategoryConflict',
   'operation-progress-empty': 'apiErrors.codes.operationProgressEmpty',
+  'operation-overrun-limit': 'apiErrors.codes.operationOverrunLimit',
   'activation-code-invalid': 'apiErrors.codes.activationCodeInvalid',
   'preset-compare-count': 'apiErrors.codes.presetCompareCount',
   'cron-invalid': 'apiErrors.codes.cronInvalid',

@@ -1,14 +1,16 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { startWith } from 'rxjs';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
@@ -24,7 +26,7 @@ import { ProductionRunsService } from '../../services/production-runs.service';
 @Component({
   selector: 'app-production-run-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, ValidationButtonComponent],
   templateUrl: './production-run-dialog.component.html',
   styleUrl: './production-run-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,7 +62,16 @@ export class ProductionRunDialogComponent implements OnInit {
     setupTimeMinutes: new FormControl<number | null>(this.data.run?.setupTimeMinutes ?? null, [Validators.min(0)]),
     runTimeMinutes: new FormControl<number | null>(this.data.run?.runTimeMinutes ?? null, [Validators.min(0)]),
     notes: new FormControl<string>(this.data.run?.notes ?? '', { nonNullable: true, validators: [Validators.maxLength(2000)] }),
+    overrunAck: new FormControl<boolean>(false, { nonNullable: true }),
   });
+
+  private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)), { initialValue: this.form.value });
+  protected readonly overrun = computed(() => {
+    const run = this.data.run;
+    const good = Number(this.value().completedQuantity ?? 0);
+    return run && good > run.targetQuantity && good > run.completedQuantity ? good - run.targetQuantity : 0;
+  });
+  protected readonly overrunBlocked = computed(() => this.overrun() > 0 && this.value().overrunAck !== true);
 
   readonly violations = FormValidationService.getViolations(this.form, {
     targetQuantity: this.translate.instant('productionRuns.targetQuantity'),
@@ -105,7 +116,7 @@ export class ProductionRunDialogComponent implements OnInit {
   }
 
   save(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.form.invalid || this.overrunBlocked() || this.saving()) return;
     this.saving.set(true);
     const raw = this.form.getRawValue();
     const run = this.data.run;

@@ -12,6 +12,7 @@
     <app-operation-quantity-sheet
       [label]="edit.row.stepNumber + ' ' + edit.row.title"
       [jobQuantity]="data()?.jobQuantity ?? 0"
+      [targetQuantity]="data()?.targetQuantity ?? null"
       [completed]="edit.row.completedQuantity"
       [scrap]="edit.row.scrapQuantity"
       [reasons]="reasons()"

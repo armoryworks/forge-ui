@@ -2,7 +2,7 @@
   <p class="op-qty__summary" [class.op-qty__summary--touch]="touch" data-testid="operation-qty-summary">
     {{ 'jobOperations.dialog.summary' | translate: {
       done: (data.completedQuantity | number:'1.0-4'),
-      total: (data.jobQuantity | number:'1.0-4'),
+      total: (target | number:'1.0-4'),
       remaining: (remaining | number:'1.0-4') } }}
   </p>
   <div [formGroup]="form">
@@ -64,6 +64,27 @@
           total: ((newCompleted() + newScrap()) | number:'1.0-4'),
           planned: (data.plannedQuantity | number:'1.0-4') } }}
       </p>
+    }
+    @if (overrun() > 0) {
+      <div class="op-qty__gate" role="alert" data-testid="operation-qty-overrun">
+        <span class="material-icons-outlined op-qty__gate-icon" aria-hidden="true">warning</span>
+        <div class="op-qty__gate-body">
+          <p class="op-qty__gate-line" data-testid="operation-qty-overrun-text">
+            @if (startsExtra) {
+              {{ 'jobOperations.dialog.overrunTarget' | translate: {
+                over: (overrun() | number:'1.0-4'),
+                target: (target | number:'1.0-4'),
+                start: (data.jobQuantity | number:'1.0-4') } }}
+            } @else {
+              {{ 'jobOperations.dialog.overrun' | translate: {
+                over: (overrun() | number:'1.0-4'),
+                quantity: (target | number:'1.0-4') } }}
+            }
+          </p>
+          <app-toggle data-testid="operation-qty-overrun-ack" formControlName="overrunAck"
+                      [label]="'jobOperations.dialog.overrunAck' | translate" />
+        </div>
+      </div>
     }
     @if (gate && gateShown()) {
       <div class="op-qty__gate" [class.op-qty__gate--block]="gate.mode === 'Block'" role="alert" data-testid="operation-qty-gate">

@@ -10,7 +10,7 @@
 >
   <span class="qty-sheet__title">{{ label() }}</span>
 
-  <span class="qty-sheet__label">{{ 'mobileApp.operations.goodPieces' | translate: { total: jobQuantity() } }}</span>
+  <span class="qty-sheet__label">{{ 'mobileApp.operations.goodPieces' | translate: { total: target() } }}</span>
   <div class="qty-sheet__stepper">
     <button type="button" class="qty-sheet__step qty-sheet__step--small" [attr.aria-label]="'mobileApp.operations.lessTen' | translate" data-testid="operation-qty-minus-10" (click)="bumpGood(-10)">−10</button>
     <button type="button" class="qty-sheet__step" [attr.aria-label]="'mobileApp.move.less' | translate" data-testid="operation-qty-minus" (click)="bumpGood(-1)">−</button>
@@ -91,26 +91,36 @@
     }
   </div>
 
-  @if (over()) {
-    <p class="qty-sheet__warning" role="alert" data-testid="operation-qty-over">
-      {{ 'mobileApp.operations.overQuantity' | translate: { good: goodCount(), scrap: scrapCount(), total: jobQuantity() } }}
+  @if (overrun() > 0) {
+    <p class="qty-sheet__warning qty-sheet__warning--soft" role="alert" data-testid="operation-qty-over">
+      @if (target() < jobQuantity()) {
+        {{ 'mobileApp.operations.overrunTarget' | translate: { over: overrun(), target: target(), start: jobQuantity() } }}
+      } @else {
+        {{ 'mobileApp.operations.overrun' | translate: { over: overrun(), total: target() } }}
+      }
     </p>
+    <div class="qty-sheet__chips" role="group" [attr.aria-label]="'mobileApp.operations.overrunAck' | translate">
+      <button type="button" class="qty-sheet__chip" [class.qty-sheet__chip--on]="overrunAck()" [attr.aria-pressed]="overrunAck()"
+              data-testid="operation-qty-overrun-ack" (click)="overrunAck.set(!overrunAck())">
+        {{ 'mobileApp.operations.overrunAck' | translate }}
+      </button>
+    </div>
   }
 
   <button
     type="button"
     class="qty-sheet__primary"
-    [disabled]="over() || busy()"
+    [disabled]="blocked() || busy()"
     data-testid="operation-qty-done"
     (click)="submit(true)"
   >
     <span class="material-icons-outlined" aria-hidden="true">check</span>
-    {{ 'mobileApp.operations.doneCount' | translate: { count: goodCount(), total: jobQuantity() } }}
+    {{ 'mobileApp.operations.doneCount' | translate: { count: goodCount(), total: target() } }}
   </button>
   <button
     type="button"
     class="qty-sheet__secondary"
-    [disabled]="over() || busy()"
+    [disabled]="blocked() || busy()"
     data-testid="operation-qty-record"
     (click)="submit(false)"
   >

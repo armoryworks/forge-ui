@@ -33,7 +33,9 @@ export class OperationQuantityDialogComponent {
   private readonly matDialog = inject(MatDialog);
   protected readonly data = inject<OperationQuantityDialogData>(MAT_DIALOG_DATA);
 
-  protected readonly remaining = Math.max(this.data.jobQuantity - this.data.completedQuantity - this.data.scrapQuantity, 0);
+  protected readonly target = Math.min(this.data.targetQuantity ?? this.data.jobQuantity, this.data.jobQuantity);
+  protected readonly startsExtra = this.target < this.data.jobQuantity;
+  protected readonly remaining = Math.max(this.target - this.data.completedQuantity, 0);
   protected readonly stopMode = this.data.mode === 'stop';
   protected readonly steps = [1, 5, 10];
   protected readonly showScrap = signal(this.stopMode);
@@ -53,6 +55,7 @@ export class OperationQuantityDialogComponent {
     reason: new FormControl<string | null>(null),
     gateAck: new FormControl<boolean>(false, { nonNullable: true }),
     gateReason: new FormControl<string | null>(null),
+    overrunAck: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
   private readonly value = toSignal(this.form.valueChanges.pipe(startWith(this.form.value)), { initialValue: this.form.value });
@@ -62,10 +65,14 @@ export class OperationQuantityDialogComponent {
   protected readonly addedRework = computed(() => toCount(this.value().rework));
   protected readonly newCompleted = computed(() => this.data.completedQuantity + this.added());
   protected readonly newScrap = computed(() => this.data.scrapQuantity + this.addedScrap());
-  protected readonly isAll = computed(() => this.newCompleted() + this.newScrap() >= this.data.jobQuantity);
+  protected readonly isAll = computed(() => this.newCompleted() >= this.target);
   protected readonly doneCompleted = computed(() => this.stopMode && this.value().quantity == null
-    ? Math.max(this.data.completedQuantity, this.data.jobQuantity - this.newScrap())
+    ? Math.max(this.data.completedQuantity, this.target)
     : this.newCompleted());
+  protected readonly recordOverrun = computed(() => this.overrunOf(this.newCompleted()));
+  protected readonly doneOverrun = computed(() => this.overrunOf(this.doneCompleted()));
+  protected readonly overrun = computed(() => Math.max(this.recordOverrun(), this.doneOverrun()));
+  protected readonly overrunAcked = computed(() => this.value().overrunAck === true);
   protected readonly gate = this.data.gate ?? null;
   protected readonly gateWaitingOn = (this.data.gate?.waitingOnSteps ?? []).join(', ');
   private readonly previousTotal = this.data.completedQuantity + this.data.scrapQuantity;
@@ -97,12 +104,6 @@ export class OperationQuantityDialogComponent {
         ? this.translate.instant('jobOperations.dialog.wholeNumbers')
         : this.translate.instant('jobOperations.dialog.decimals', { places }));
     }
-    if (this.newCompleted() + this.newScrap() > this.data.jobQuantity) {
-      issues.push(this.translate.instant('jobOperations.dialog.overQuantity', {
-        total: this.newCompleted() + this.newScrap(),
-        quantity: this.data.jobQuantity,
-      }));
-    }
     return issues;
   });
 
@@ -111,15 +112,18 @@ export class OperationQuantityDialogComponent {
     return planned != null && planned > 0 && this.newCompleted() + this.newScrap() > planned;
   });
 
-  protected readonly doneViolations = computed(() => this.doneGated() && !this.gateCleared()
-    ? [...this.violations(), this.translate.instant(this.gate?.canOverride
-      ? 'jobOperations.gate.confirmFirst'
-      : 'jobOperations.gate.askSupervisor')]
-    : this.violations());
+  protected readonly doneViolations = computed(() => [
+    ...this.violations(),
+    ...(this.doneGated() && !this.gateCleared()
+      ? [this.translate.instant(this.gate?.canOverride ? 'jobOperations.gate.confirmFirst' : 'jobOperations.gate.askSupervisor')]
+      : []),
+    ...(this.doneOverrun() > 0 && !this.overrunAcked() ? [this.translate.instant('jobOperations.dialog.overrunConfirmFirst')] : []),
+  ]);
 
   protected readonly canRecord = computed(() =>
     this.violations().length === 0
     && (!this.recordGated() || this.gateCleared())
+    && (this.recordOverrun() === 0 || this.overrunAcked())
     && (this.stopMode || this.added() > 0 || this.addedScrap() > 0 || this.addedRework() > 0));
   protected readonly canComplete = computed(() => this.doneViolations().length === 0);
 
@@ -186,7 +190,7 @@ export class OperationQuantityDialogComponent {
 
   protected complete(): void {
     if (!this.canComplete()) return;
-    if (this.doneCompleted() + this.newScrap() >= this.data.jobQuantity) {
+    if (this.doneCompleted() >= this.target) {
       this.dialogRef.close(this.result(true));
       return;
     }
@@ -198,7 +202,7 @@ export class OperationQuantityDialogComponent {
         message: this.translate.instant('jobOperations.dialog.shortCloseMessage', {
           done: result.completedQuantity,
           scrap: result.scrapQuantity,
-          quantity: this.data.jobQuantity,
+          quantity: this.target,
         }),
         confirmLabel: this.translate.instant('jobOperations.dialog.shortCloseConfirm'),
         severity: 'warn',
@@ -212,6 +216,10 @@ export class OperationQuantityDialogComponent {
     const available = this.data.gate?.available;
     if (available === null || available === undefined) return this.remaining;
     return Math.min(this.remaining, Math.max(available - this.data.completedQuantity - this.data.scrapQuantity, 0));
+  }
+
+  private overrunOf(good: number): number {
+    return good > this.target && good > this.data.completedQuantity ? good - this.target : 0;
   }
 
   private exceedsGate(total: number): boolean {

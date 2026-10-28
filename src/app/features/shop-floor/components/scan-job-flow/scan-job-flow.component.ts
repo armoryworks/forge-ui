@@ -239,6 +239,7 @@ export class ScanJobFlowComponent implements OnInit {
     const ops = this.jobOperations();
     return {
       jobQuantity: ops?.jobQuantity ?? 0,
+      targetQuantity: ops?.targetQuantity ?? null,
       decimalPlaces: ops?.quantityDecimalPlaces ?? null,
       reasons: this.reasons(),
       gating: ops?.stepGating ?? null,
@@ -341,6 +342,7 @@ export class ScanJobFlowComponent implements OnInit {
         data: {
           title: this.translate.instant('shopFloor.operations.quantityTitle', { step: row.stepNumber, title: row.title }),
           jobQuantity: this.jobOperations()?.jobQuantity ?? 0,
+          targetQuantity: this.jobOperations()?.targetQuantity ?? null,
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
           reasons: this.reasons(),

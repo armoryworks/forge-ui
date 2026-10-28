@@ -5,3 +5,18 @@
   color: var(--text-muted);
   font-size: $font-size-sm;
 }
+
+.production-run-dialog__overrun {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  margin: $sp-sm 0;
+  padding: $sp-sm $sp-md;
+  border: $border-width solid var(--warning);
+  background: var(--warning-light);
+}
+
+.production-run-dialog__overrun-text {
+  margin: 0;
+  font-size: $font-size-md;
+}

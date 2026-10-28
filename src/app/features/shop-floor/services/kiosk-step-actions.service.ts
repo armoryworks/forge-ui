@@ -32,6 +32,7 @@ export class KioskStepActionsService {
           row,
           context: {
             jobQuantity: ops.jobQuantity,
+            targetQuantity: ops.targetQuantity ?? null,
             decimalPlaces: ops.quantityDecimalPlaces ?? null,
             reasons: config.reasons ?? [],
             gating: ops.stepGating ?? null,
@@ -94,6 +95,7 @@ export class KioskStepActionsService {
         data: {
           title: this.translate.instant('shopFloor.operations.quantityTitle', { step: row.stepNumber, title: row.title }),
           jobQuantity: context.jobQuantity,
+          targetQuantity: context.targetQuantity ?? null,
           completedQuantity: row.completedQuantity,
           scrapQuantity: row.scrapQuantity,
           reasons: context.reasons,

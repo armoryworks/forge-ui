@@ -13,10 +13,11 @@ class FakeLoader implements TranslateLoader {
 describe('OperationQuantitySheetComponent', () => {
   let fixture: ComponentFixture<OperationQuantitySheetComponent>;
 
-  function render(completed: number, scrap: number, finishing: boolean): HTMLElement {
+  function render(completed: number, scrap: number, finishing: boolean, targetQuantity: number | null = null): HTMLElement {
     fixture = TestBed.createComponent(OperationQuantitySheetComponent);
     fixture.componentRef.setInput('label', '20 Deburr');
     fixture.componentRef.setInput('jobQuantity', 40);
+    fixture.componentRef.setInput('targetQuantity', targetQuantity);
     fixture.componentRef.setInput('completed', completed);
     fixture.componentRef.setInput('scrap', scrap);
     fixture.componentRef.setInput('finishing', finishing);
@@ -39,10 +40,10 @@ describe('OperationQuantitySheetComponent', () => {
     });
   });
 
-  it('from Done, starts at everything not scrapped and shows the scrap already recorded', () => {
+  it('from Done, starts at the job quantity, since scrap does not count, and shows the scrap already recorded', () => {
     const el = render(12, 1, true);
 
-    expect(text(el, 'operation-qty-good')).toBe('39');
+    expect(text(el, 'operation-qty-good')).toBe('40');
     expect(text(el, 'operation-qty-scrap')).toBe('1');
   });
 
@@ -67,7 +68,7 @@ describe('OperationQuantitySheetComponent', () => {
     expect(text(el, 'operation-qty-good')).toBe('0');
   });
 
-  it('flags more than the job quantity and refuses to send it', () => {
+  it('lets scrap go past the job quantity without a warning', () => {
     const el = render(40, 0, false);
     const recorded = vi.fn();
     fixture.componentInstance.recorded.subscribe(recorded);
@@ -75,10 +76,47 @@ describe('OperationQuantitySheetComponent', () => {
     click(el, 'operation-scrap-open');
     click(el, 'operation-scrap-plus');
 
+    expect(el.querySelector('[data-testid="operation-qty-over"]')).toBeNull();
+    click(el, 'operation-qty-record');
+    expect(recorded).toHaveBeenCalledWith(expect.objectContaining({ completed: 40, scrap: 1 }));
+  });
+
+  it('warns about good pieces over the job quantity and sends them once the overrun is confirmed', () => {
+    const el = render(40, 0, false);
+    const recorded = vi.fn();
+    fixture.componentInstance.recorded.subscribe(recorded);
+
+    click(el, 'operation-qty-plus');
+    click(el, 'operation-qty-plus');
+
     expect(el.querySelector('[data-testid="operation-qty-over"]')).not.toBeNull();
     expect(el.querySelector<HTMLButtonElement>('[data-testid="operation-qty-done"]')!.disabled).toBe(true);
     click(el, 'operation-qty-record');
     expect(recorded).not.toHaveBeenCalled();
+
+    click(el, 'operation-qty-overrun-ack');
+    expect(el.querySelector<HTMLButtonElement>('[data-testid="operation-qty-done"]')!.disabled).toBe(false);
+    click(el, 'operation-qty-done');
+    expect(recorded).toHaveBeenCalledWith(expect.objectContaining({ completed: 42, complete: true }));
+  });
+
+  it('asks again when the count changes after the overrun was confirmed', () => {
+    const el = render(40, 0, false);
+
+    click(el, 'operation-qty-plus');
+    click(el, 'operation-qty-overrun-ack');
+    click(el, 'operation-qty-plus');
+
+    expect(el.querySelector<HTMLButtonElement>('[data-testid="operation-qty-record"]')!.disabled).toBe(true);
+  });
+
+  it('measures the overrun against the target when the job starts extra pieces', () => {
+    const el = render(30, 4, true, 36);
+
+    expect(text(el, 'operation-qty-good')).toBe('36');
+    expect(el.querySelector('[data-testid="operation-qty-over"]')).toBeNull();
+    click(el, 'operation-qty-plus');
+    expect(el.querySelector('[data-testid="operation-qty-over"]')).not.toBeNull();
   });
 
   it('sends the counts, finished or not', () => {
