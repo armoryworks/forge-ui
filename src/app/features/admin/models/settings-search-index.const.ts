@@ -1,5 +1,5 @@
 export const SETTINGS_SEARCH_INDEX: { key: string; textKeys: string[] }[] = [
-  { key: 'company-profile', textKeys: ['admin.companyProfile', 'admin.companyName', 'common.phone', 'common.email', 'admin.ein', 'admin.website'] },
+  { key: 'company-profile', textKeys: ['admin.companyProfile', 'admin.companyName', 'common.phone', 'common.email', 'admin.ein', 'admin.website', 'admin.companyTimeZone'] },
   { key: 'company-locations', textKeys: ['admin.locations', 'admin.newLocation'] },
   { key: 'pay-period', textKeys: ['admin.payPeriod', 'admin.lockPeriodHint'] },
   { key: 'telemetry', textKeys: ['admin.telemetry.title', 'admin.telemetry.description'] },
