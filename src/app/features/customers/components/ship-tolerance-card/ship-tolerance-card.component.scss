@@ -1,0 +1,16 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.ship-tolerance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: $sp-md;
+
+  app-input {
+    flex: 1 1 160px;
+  }
+}

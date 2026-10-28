@@ -11,6 +11,7 @@ import { SalesOrderLine } from '../../../sales-orders/models/sales-order-line.mo
 import { CarrierService } from '../../../admin/services/carrier.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ShipmentDialogComponent } from './shipment-dialog.component';
 
 function orderLine(id: number, remaining: number, partNumber: string): SalesOrderLine {
@@ -28,13 +29,15 @@ interface DialogInternals {
     carrierId: FormControl<number | null>;
     carrier: FormControl<string | null>;
   }>;
-  lineForm: FormGroup<{ salesOrderLineId: FormControl<number | null>; quantity: FormControl<number | null> }>;
-  lines(): { salesOrderLineId: number; quantity: number; partNumber: string }[];
+  lineForm: FormGroup<{ salesOrderLineId: FormControl<number | null>; quantity: FormControl<number | null>; overReason: FormControl<string> }>;
+  lines(): { salesOrderLineId: number; quantity: number; partNumber: string; overToleranceReason?: string }[];
+  entryOverTolerance(): boolean;
+  addLine(): void;
   orderLineOptions(): { value: unknown; label: string }[];
   usesListedCarrier(): boolean;
 }
 
-function setup(initialSalesOrderId: number | null, lines: SalesOrderLine[]) {
+function setup(initialSalesOrderId: number | null, lines: SalesOrderLine[], roles: string[] = []) {
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
@@ -47,6 +50,7 @@ function setup(initialSalesOrderId: number | null, lines: SalesOrderLine[]) {
       { provide: SnackbarService, useValue: { success: vi.fn(), error: vi.fn() } },
       { provide: TranslateService, useValue: { instant: (key: string) => key } },
       { provide: ManualNumberSettingsService, useValue: { isEnabled: () => false } },
+      { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
     ],
   });
   const component = TestBed.runInInjectionContext(() => new ShipmentDialogComponent());
@@ -83,7 +87,7 @@ describe('ShipmentDialogComponent', () => {
     expect(dialog.orderLineOptions().map(o => o.label)).toEqual(['RS-1 — Line 1 · 24,000 shipments.remainingShort']);
   });
 
-  it('marks a line quantity over what is left to ship as invalid, so Add stays disabled', () => {
+  it('refuses a line quantity over the tolerance for a user who cannot accept it', () => {
     const dialog = setup(null, [orderLine(1, 24000, 'RS-1')]);
     dialog.shipmentForm.controls.salesOrderId.setValue(40);
 
@@ -91,8 +95,37 @@ describe('ShipmentDialogComponent', () => {
     expect(dialog.lineForm.controls.quantity.value).toBe(24000);
     dialog.lineForm.controls.quantity.setValue(999999);
 
-    expect(dialog.lineForm.controls.quantity.errors).toEqual({ max: { max: 24000, actual: 999999 } });
-    expect(dialog.lineForm.invalid).toBe(true);
+    expect(dialog.entryOverTolerance()).toBe(true);
+    dialog.addLine();
+    expect(dialog.lines()).toEqual([]);
+  });
+
+  it('adds a line inside the over-ship tolerance without a reason', () => {
+    const dialog = setup(null, [{ ...orderLine(1, 100, 'RS-1'), maxShippableQuantity: 110, overShipTolerancePct: 10 }]);
+    dialog.shipmentForm.controls.salesOrderId.setValue(40);
+
+    dialog.lineForm.controls.salesOrderLineId.setValue(1);
+    dialog.lineForm.controls.quantity.setValue(108);
+    dialog.addLine();
+
+    expect(dialog.entryOverTolerance()).toBe(false);
+    expect(dialog.lines()).toEqual([expect.objectContaining({ salesOrderLineId: 1, quantity: 108 })]);
+    expect(dialog.lines()[0].overToleranceReason).toBeUndefined();
+  });
+
+  it('lets a manager add an over-tolerance line with a reason', () => {
+    const dialog = setup(null, [{ ...orderLine(1, 100, 'RS-1'), maxShippableQuantity: 110, overShipTolerancePct: 10 }], ['Manager']);
+    dialog.shipmentForm.controls.salesOrderId.setValue(40);
+
+    dialog.lineForm.controls.salesOrderLineId.setValue(1);
+    dialog.lineForm.controls.quantity.setValue(130);
+    dialog.addLine();
+    expect(dialog.lines()).toEqual([]);
+
+    dialog.lineForm.controls.overReason.setValue('Customer took the overrun');
+    dialog.addLine();
+
+    expect(dialog.lines()).toEqual([expect.objectContaining({ quantity: 130, overToleranceReason: 'Customer took the overrun' })]);
   });
 
   it('uses the free-text carrier only when no listed carrier is picked', () => {

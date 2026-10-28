@@ -70,8 +70,26 @@
     padding-right: 0;
   }
 
-  &__note-row td {
+  &__note-row td,
+  &__tolerance-row td {
     padding-top: 0;
+  }
+}
+
+.receive-tolerance {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  margin: 0 0 $sp-xs;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+
+  .material-icons-outlined {
+    font-size: var(--font-size-md);
+  }
+
+  &--warning {
+    color: var(--warning);
   }
 }
 

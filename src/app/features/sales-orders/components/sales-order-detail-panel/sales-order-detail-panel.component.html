@@ -445,13 +445,22 @@
                     </td>
                     <td>{{ line.description }}</td>
                     <!-- Phase 3 / WU-10 — fractional quantities; up to 4 decimals, trim trailing zeros. -->
-                    <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
+                    <td class="lines-table__right">
+                      {{ line.quantity | number:'1.0-4' }}
+                      <app-tolerance-band [overPercent]="line.overShipTolerancePct" [underPercent]="line.underShipTolerancePct"
+                        [minComplete]="line.minCompleteQuantity" [maxAccepted]="line.maxShippableQuantity" />
+                    </td>
                     <td class="lines-table__right">
                       <span [class.text-success]="line.isFullyShipped"
                             [class.text-warning]="line.shippedQuantity > 0 && !line.isFullyShipped">
                         {{ line.shippedQuantity | number:'1.0-4' }}
                       </span>
                       / {{ line.remainingQuantity | number:'1.0-4' }}
+                      @if (line.closedWithinTolerance) {
+                        <span class="chip chip--success" [attr.data-testid]="'so-line-closed-within-' + line.id">
+                          {{ 'tolerance.closedWithinQty' | translate: { quantity: (line.shortClosedQuantity ?? 0 | number:'1.0-4') } }}
+                        </span>
+                      }
                       @if (canReserve() && line.partId) {
                         <span class="line-reserved" [attr.data-testid]="'so-line-reserved-' + line.id">
                           {{ 'inventoryScreens.reserve.reservedOnLine' | translate: { qty: ((reservedByLine().get(line.id) ?? 0) | number:'1.0-4') } }}
@@ -575,6 +584,10 @@
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
               <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
               <app-currency-input [label]="'salesOrders.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+              <app-input [label]="'tolerance.overPercent' | translate" type="number" formControlName="overTolerancePct" min="0" step="0.1"
+                [placeholder]="'tolerance.inheritHint' | translate" data-testid="so-line-over-tolerance" />
+              <app-input [label]="'tolerance.underPercent' | translate" type="number" formControlName="underTolerancePct" min="0" max="100" step="0.1"
+                [placeholder]="'tolerance.inheritHint' | translate" data-testid="so-line-under-tolerance" />
               <app-atp-check [partId]="lineAtpPartId()" [quantity]="lineAtpQuantity()" [requestedDate]="so.requestedDeliveryDate" [salesOrderLineId]="lineAtpLineId()" />
               <div class="line-edit-form__actions">
                 <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>

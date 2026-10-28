@@ -98,6 +98,14 @@
       </div>
     </section>
 
+    @if (canSeeCredit) {
+      <section class="overview-section">
+        <h3 class="overview-section__title">{{ 'tolerance.customerTitle' | translate }}</h3>
+        <p class="overview-section__hint">{{ 'tolerance.customerHint' | translate }}</p>
+        <app-ship-tolerance-card [customer]="customer()" (saved)="customerUpdated.emit()" />
+      </section>
+    }
+
     <!-- Phase 1r / Batch 16 — reference-customer consent + notes. -->
     <section class="overview-section">
       <h3 class="overview-section__title">{{ 'customers.compliance.referenceTitle' | translate }}</h3>

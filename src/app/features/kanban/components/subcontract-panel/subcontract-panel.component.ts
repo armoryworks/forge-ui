@@ -22,7 +22,7 @@ import { SubcontractSendOutDialogComponent } from '../subcontract-send-out-dialo
 
 const SUBCONTRACT_CAPABILITY = 'CAP-P2P-SUBCONTRACT';
 const SUBCONTRACT_ROLES = ['Admin', 'Manager', 'Engineer', 'PM'];
-const OPEN_STATUSES: readonly SubcontractStatus[] = ['Pending', 'Sent', 'InProcess', 'Shipped', 'Received', 'QcPending'];
+const OPEN_STATUSES: readonly SubcontractStatus[] = ['Pending', 'Sent', 'InProcess', 'Shipped', 'Received', 'QcPending', 'PartiallyReceived'];
 
 const STATUS_LABEL_KEYS: Record<SubcontractStatus, string> = {
   Pending: 'subcontractUi.status.pending',
@@ -33,6 +33,7 @@ const STATUS_LABEL_KEYS: Record<SubcontractStatus, string> = {
   QcPending: 'subcontractUi.status.qcPending',
   Complete: 'subcontractUi.status.complete',
   Rejected: 'subcontractUi.status.rejected',
+  PartiallyReceived: 'subcontractUi.status.partiallyReceived',
 };
 
 const STATUS_CHIP_CLASSES: Record<SubcontractStatus, string> = {
@@ -44,6 +45,7 @@ const STATUS_CHIP_CLASSES: Record<SubcontractStatus, string> = {
   QcPending: 'chip chip--warning',
   Complete: 'chip chip--success',
   Rejected: 'chip chip--error',
+  PartiallyReceived: 'chip chip--warning',
 };
 
 @Component({
@@ -96,7 +98,7 @@ export class SubcontractPanelComponent {
   outQuantity(operation: SubcontractOperation): number {
     return this.orders()
       .filter(order => order.operationId === operation.operationId && this.isOpen(order))
-      .reduce((sum, order) => sum + order.quantity, 0);
+      .reduce((sum, order) => sum + Math.max(0, order.quantity - (order.receivedQuantity ?? 0) - (order.scrapQuantity ?? 0)), 0);
   }
 
   oldestOpenOrder(operation: SubcontractOperation): SubcontractOrder | null {

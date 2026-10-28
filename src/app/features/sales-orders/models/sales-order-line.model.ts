@@ -21,4 +21,12 @@ export interface SalesOrderLine {
   lineType?: DocumentLineType;
   taxable?: boolean;
   purchases?: SalesOrderLinePurchase[];
+  lineOverShipTolerancePct?: number | null;
+  lineUnderShipTolerancePct?: number | null;
+  overShipTolerancePct?: number;
+  underShipTolerancePct?: number;
+  maxShippableQuantity?: number;
+  minCompleteQuantity?: number;
+  shortClosedQuantity?: number;
+  closedWithinTolerance?: boolean;
 }

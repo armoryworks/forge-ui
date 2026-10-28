@@ -1,0 +1,10 @@
+<div class="ship-tolerance" [formGroup]="form" data-testid="customer-ship-tolerance">
+  <app-input [label]="'tolerance.overPercent' | translate" type="number" formControlName="over" min="0" step="0.1"
+    [placeholder]="'tolerance.inheritHint' | translate" data-testid="customer-over-ship-tolerance" />
+  <app-input [label]="'tolerance.underPercent' | translate" type="number" formControlName="under" min="0" max="100" step="0.1"
+    [placeholder]="'tolerance.inheritHint' | translate" data-testid="customer-under-ship-tolerance" />
+  <button class="action-btn action-btn--primary action-btn--sm" data-testid="customer-ship-tolerance-save"
+    [disabled]="saving() || form.invalid || form.pristine" (click)="save()">
+    {{ 'common.save' | translate }}
+  </button>
+</div>

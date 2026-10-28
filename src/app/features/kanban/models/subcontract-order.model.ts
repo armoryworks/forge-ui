@@ -22,4 +22,10 @@ export interface SubcontractOrder {
   returnTrackingNumber: string | null;
   notes: string | null;
   createdAt: string;
+  scrapQuantity?: number;
+  overTolerancePct?: number;
+  underTolerancePct?: number;
+  maxAcceptedQuantity?: number;
+  minCompleteQuantity?: number;
+  overToleranceReason?: string | null;
 }

@@ -22,6 +22,10 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { ToleranceBandComponent } from '../../../../shared/components/tolerance-band/tolerance-band.component';
+import { TOLERANCE_OVERRIDE_ROLES } from '../../../../shared/models/tolerance-override-roles.const';
+import { roomWithinTolerance } from '../../../../shared/utils/quantity-tolerance';
 
 interface LineEntry {
   salesOrderLineId: number;
@@ -29,6 +33,7 @@ interface LineEntry {
   partNumber: string;
   description: string;
   quantity: number;
+  overToleranceReason?: string;
 }
 
 /** Weight entry unit. Storage is canonical pounds; the toggle only changes entry/display. */
@@ -41,6 +46,7 @@ type WeightUnit = 'lbs' | 'oz' | 'kg';
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, TextareaComponent,
     AutocompleteComponent, SelectComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    ToleranceBandComponent,
   ],
   templateUrl: './shipment-dialog.component.html',
   styleUrl: './shipment-dialog.component.scss',
@@ -57,6 +63,7 @@ export class ShipmentDialogComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
+  private readonly auth = inject(AuthService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -92,6 +99,19 @@ export class ShipmentDialogComponent implements OnInit {
       .reduce((sum, l) => sum + l.quantity, 0);
     return line.remainingQuantity - added;
   }
+
+  /** How much more a line can take on this shipment before it needs an over-ship override. */
+  protected roomFor(salesOrderLineId: number): number {
+    const line = this.orderLines().find(l => l.id === salesOrderLineId);
+    if (!line) return 0;
+    const taken = line.quantity - (line.shortClosedQuantity ?? 0) - line.remainingQuantity;
+    const added = this.lines()
+      .filter(l => l.salesOrderLineId === salesOrderLineId)
+      .reduce((sum, l) => sum + l.quantity, 0);
+    return roomWithinTolerance(line.maxShippableQuantity ?? line.quantity, taken + added);
+  }
+
+  protected readonly canOverrideTolerance = this.auth.hasAnyRole([...TOLERANCE_OVERRIDE_ROLES]);
 
   // Only SO lines that still have something left to ship are pickable.
   protected readonly orderLineOptions = computed<AutocompleteOption[]>(() => {
@@ -165,6 +185,20 @@ export class ShipmentDialogComponent implements OnInit {
     salesOrderLineId: new FormControl<number | null>(null, [Validators.required]),
     // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
     quantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
+    overReason: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+  });
+
+  private readonly lineFormValue = toSignal(this.lineForm.valueChanges, { initialValue: this.lineForm.getRawValue() });
+
+  protected readonly selectedOrderLine = computed(() => {
+    const lineId = this.lineFormValue().salesOrderLineId;
+    return lineId == null ? null : this.orderLines().find(l => l.id === lineId) ?? null;
+  });
+
+  protected readonly entryOverTolerance = computed(() => {
+    const line = this.selectedOrderLine();
+    const qty = this.lineFormValue().quantity ?? 0;
+    return !!line && qty > this.roomFor(line.id);
   });
 
   protected readonly draftConfig: DraftConfig = {
@@ -194,7 +228,7 @@ export class ShipmentDialogComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((id) => {
         this.lines.set([]);
-        this.lineForm.reset({ salesOrderLineId: null, quantity: 1 });
+        this.lineForm.reset({ salesOrderLineId: null, quantity: 1, overReason: '' });
         const prefill = this.prefillOrderId === id;
         this.prefillOrderId = null;
         if (!id) { this.orderLines.set([]); return; }
@@ -213,9 +247,6 @@ export class ShipmentDialogComponent implements OnInit {
       .subscribe((lineId) => {
         const quantity = this.lineForm.controls.quantity;
         const remaining = lineId == null ? null : this.remainingFor(lineId);
-        quantity.setValidators(remaining == null
-          ? [Validators.required, Validators.min(0.0001)]
-          : [Validators.required, Validators.min(0.0001), Validators.max(remaining)]);
         if (remaining != null && remaining > 0) quantity.setValue(remaining);
         else quantity.updateValueAndValidity();
       });
@@ -261,12 +292,13 @@ export class ShipmentDialogComponent implements OnInit {
     const orderLine = this.orderLines().find(l => l.id === lineId);
     if (!orderLine) return;
 
-    const remaining = this.remainingFor(lineId);
+    const room = this.roomFor(lineId);
     const qty = f.quantity!;
-    if (qty > remaining) {
-      this.snackbar.error(this.translate.instant('shipments.exceedsRemaining', {
-        remaining, part: orderLine.partNumber || orderLine.description,
-      }));
+    const overReason = qty > room ? f.overReason.trim() : '';
+    if (qty > room && (!this.canOverrideTolerance || !overReason)) {
+      this.snackbar.error(this.canOverrideTolerance
+        ? this.translate.instant('tolerance.reasonRequired')
+        : this.translate.instant('shipments.exceedsRemaining', { remaining: room, part: orderLine.partNumber || orderLine.description }));
       return;
     }
 
@@ -276,8 +308,9 @@ export class ShipmentDialogComponent implements OnInit {
       partNumber: orderLine.partNumber ?? '',
       description: orderLine.description,
       quantity: qty,
+      ...(overReason ? { overToleranceReason: overReason } : {}),
     }]);
-    this.lineForm.reset({ salesOrderLineId: null, quantity: 1 });
+    this.lineForm.reset({ salesOrderLineId: null, quantity: 1, overReason: '' });
   }
 
   protected removeLine(index: number): void {
@@ -293,6 +326,7 @@ export class ShipmentDialogComponent implements OnInit {
       salesOrderLineId: l.salesOrderLineId,
       partId: l.partId ?? undefined,
       quantity: l.quantity,
+      ...(l.overToleranceReason ? { confirmOverTolerance: true, overToleranceReason: l.overToleranceReason } : {}),
     }));
 
     // Persist canonical pounds regardless of the entry unit; 0 = unspecified.

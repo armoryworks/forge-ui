@@ -350,12 +350,19 @@
                     @if (line.purchaseUnitLabel) {
                       <span class="text-muted" data-testid="po-line-purchase-unit">{{ line.purchaseUnitLabel }}</span>
                     }
+                    <app-tolerance-band [overPercent]="line.overReceiptTolerancePct" [underPercent]="line.underReceiptTolerancePct"
+                      [minComplete]="line.minCompleteQuantity" [maxAccepted]="line.maxReceivableQuantity" />
                   </td>
                   <td class="lines-table__right">
-                    <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity"
-                          [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity">
+                    <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity || line.closedWithinTolerance"
+                          [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity && !line.closedWithinTolerance">
                       {{ line.receivedQuantity | number:'1.0-4' }}
                     </span>
+                    @if (line.closedWithinTolerance) {
+                      <span class="chip chip--success" [attr.data-testid]="'po-line-closed-within-' + line.id">
+                        {{ 'tolerance.closedWithinQty' | translate: { quantity: (line.cancelledShortCloseQuantity | number:'1.0-4') } }}
+                      </span>
+                    }
                   </td>
                   @if (po.shortCloseReason) {
                     <td class="lines-table__right">
@@ -624,6 +631,10 @@
         step="0.0001" min="0.0001" [required]="true" data-testid="po-add-line-quantity" />
       <app-currency-input [label]="'purchaseOrders.unitPrice' | translate" formControlName="unitPrice"
         [min]="0" [required]="true" data-testid="po-add-line-unit-price" />
+      <app-input [label]="'tolerance.overPercent' | translate" type="number" formControlName="overReceiptTolerancePct"
+        min="0" step="0.1" [placeholder]="'tolerance.inheritHint' | translate" data-testid="po-add-line-over-tolerance" />
+      <app-input [label]="'tolerance.underPercent' | translate" type="number" formControlName="underReceiptTolerancePct"
+        min="0" max="100" step="0.1" [placeholder]="'tolerance.inheritHint' | translate" data-testid="po-add-line-under-tolerance" />
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showAddLineDialog.set(false)">{{ 'common.cancel' | translate }}</button>

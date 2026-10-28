@@ -4809,7 +4809,13 @@
       "qboRefundAccount": "QuickBooks refund bank account ID",
       "inventorySurplus": "Surplus stock",
       "surplusLocation": "Surplus stock location",
-      "noLocation": "None (off)"
+      "noLocation": "None (off)",
+      "purchasingTolerances": "Receipt tolerances",
+      "overReceiptPercent": "Over-receipt tolerance (%)",
+      "underReceiptPercent": "Under-receipt tolerance (%)",
+      "shippingTolerances": "Shipment tolerances",
+      "overShipPercent": "Over-ship tolerance (%)",
+      "underShipPercent": "Under-ship tolerance (%)"
     }
   },
   "teamsPanel": {
@@ -13165,8 +13171,10 @@
       "received": "Received",
       "qcPending": "Inspection pending",
       "complete": "Complete",
-      "rejected": "Rejected"
-    }
+      "rejected": "Rejected",
+      "partiallyReceived": "Partly back"
+    },
+    "alreadyBack": "{{quantity}} already came back on earlier receipts."
   },
   "payables": {
     "title": "Payables",
@@ -17442,5 +17450,27 @@
     "freightAccounts": "Freight income and freight-in accounts",
     "earlyPaymentDiscounts": "Early-payment discount terms",
     "freightTaxable": "Freight taxable by jurisdiction"
+  },
+  "tolerance": {
+    "band": "−{{under}}% / +{{over}}%",
+    "bandTooltip": "Complete at {{min}}; up to {{max}} accepted without an override",
+    "overPercent": "Over tolerance (%)",
+    "underPercent": "Under tolerance (%)",
+    "inheritHint": "Blank uses the default",
+    "overReason": "Reason for the extra",
+    "overWarning": "{{quantity}} is over the tolerance; up to {{room}} is accepted without an override.",
+    "overNeedsManager": "{{quantity}} is over the tolerance; up to {{room}} is accepted. A manager can accept the extra with a reason.",
+    "closesWithin": "Closes the line within tolerance; the remaining {{remaining}} will not be expected.",
+    "closedWithin": "Closed within tolerance",
+    "closedWithinQty": "Closed within tolerance ({{quantity}} short)",
+    "reasonRequired": "Give a reason to accept the quantity over tolerance.",
+    "closeShort": "Close short — the vendor will not send the rest",
+    "staysOpen": "{{returned}} of {{sent}} back; the order stays open for the rest.",
+    "vendorTitle": "Receipt tolerance",
+    "vendorHint": "How far over or under the ordered quantity a receipt may come in. Blank uses the company default; new purchase-order lines copy these values.",
+    "customerTitle": "Shipment tolerance",
+    "customerHint": "How far over or under the ordered quantity an order line may ship and still be complete. Blank uses the company default.",
+    "saved": "Tolerance saved",
+    "lineTitle": "Line tolerance"
   }
 }

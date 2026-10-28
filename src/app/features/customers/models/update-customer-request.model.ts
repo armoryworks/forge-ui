@@ -31,4 +31,8 @@ export interface UpdateCustomerRequest {
   clearFreightTerms?: boolean;
   defaultTaxCodeId?: number;
   clearDefaultTaxCode?: boolean;
+  overShipTolerancePct?: number;
+  underShipTolerancePct?: number;
+  clearOverShipTolerance?: boolean;
+  clearUnderShipTolerance?: boolean;
 }

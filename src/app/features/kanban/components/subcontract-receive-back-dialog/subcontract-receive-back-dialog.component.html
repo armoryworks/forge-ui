@@ -2,11 +2,41 @@
   <div [formGroup]="formGroup">
     <p class="text-muted" data-testid="subcontract-receive-back-summary">
       {{ 'subcontractUi.receiveBackSummary' | translate: { quantity: (data.order.quantity | number:'1.0-4'), vendor: data.order.vendorName } }}
+      <app-tolerance-band [overPercent]="data.order.overTolerancePct" [underPercent]="data.order.underTolerancePct"
+        [minComplete]="minComplete" [maxAccepted]="maxAccepted" />
     </p>
+    @if (returnedBefore > 0) {
+      <p class="text-muted" data-testid="subcontract-receive-back-earlier">
+        {{ 'subcontractUi.alreadyBack' | translate: { quantity: (returnedBefore | number:'1.0-4') } }}
+      </p>
+    }
     <div class="dialog-row">
       <app-input [label]="'subcontractUi.goodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-good" />
       <app-input [label]="'subcontractUi.scrapQuantity' | translate" formControlName="scrapQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-scrap" />
     </div>
+    @switch (outcome()) {
+      @case ('over') {
+        <p class="receive-back-warning" data-testid="subcontract-receive-back-over">
+          {{ (canOverrideTolerance ? 'tolerance.overWarning' : 'tolerance.overNeedsManager') | translate:
+            { quantity: (returnedTotal() - returnedBefore | number:'1.0-4'), room: (room | number:'1.0-4') } }}
+        </p>
+        @if (canOverrideTolerance) {
+          <app-input [label]="'tolerance.overReason' | translate" formControlName="overReason" [maxlength]="500" [required]="true"
+            data-testid="subcontract-receive-back-over-reason" />
+        }
+      }
+      @case ('staysOpen') {
+        <p class="text-muted" data-testid="subcontract-receive-back-stays-open">
+          {{ 'tolerance.staysOpen' | translate: { returned: (returnedTotal() | number:'1.0-4'), sent: (data.order.quantity | number:'1.0-4') } }}
+        </p>
+        <app-toggle [label]="'tolerance.closeShort' | translate" formControlName="closeShort" data-testid="subcontract-receive-back-close-short" />
+      }
+      @case ('closesWithin') {
+        <p class="text-muted" data-testid="subcontract-receive-back-closes-within">
+          {{ 'tolerance.closesWithin' | translate: { remaining: (data.order.quantity - returnedTotal() | number:'1.0-4') } }}
+        </p>
+      }
+    }
   </div>
 
   <div dialog-footer>

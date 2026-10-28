@@ -4,4 +4,6 @@ export interface CreateShipmentLineRequest {
   partId?: number;
   quantity: number;
   notes?: string;
+  confirmOverTolerance?: boolean;
+  overToleranceReason?: string;
 }

@@ -18,6 +18,7 @@ import { TextareaComponent } from '../../../../../shared/components/textarea/tex
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../../shared/services/auth.service';
 import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customer-roles';
+import { ShipToleranceCardComponent } from '../../../components/ship-tolerance-card/ship-tolerance-card.component';
 
 interface ComplianceFlagDef {
   key: 'isFdaRegulated' | 'isAerospace' | 'isAutomotive' | 'isItarControlled' | 'requiresCoa';
@@ -31,6 +32,7 @@ interface ComplianceFlagDef {
   imports: [
     DatePipe, TranslatePipe, MatSlideToggleModule, ReactiveFormsModule,
     CreditStatusCardComponent, OpenCreditsCardComponent, CapDirective, RecentCommunicationsComponent, TextareaComponent,
+    ShipToleranceCardComponent,
   ],
   templateUrl: './customer-overview-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',

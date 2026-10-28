@@ -21,7 +21,13 @@
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
+                  <td class="lines-table__right">
+                    {{ line.quantity | number:'1.0-4' }}
+                    @if (line.overToleranceReason) {
+                      <span class="material-icons-outlined lines-table__over" [matTooltip]="line.overToleranceReason"
+                        [attr.aria-label]="'tolerance.overReason' | translate" data-testid="shipment-line-over-flag">warning</span>
+                    }
+                  </td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
@@ -48,6 +54,24 @@
               {{ 'common.add' | translate }}
             </button>
           </div>
+          @if (selectedOrderLine(); as picked) {
+            <div class="add-line-tolerance">
+              <app-tolerance-band [overPercent]="picked.overShipTolerancePct" [underPercent]="picked.underShipTolerancePct"
+                [minComplete]="picked.minCompleteQuantity" [maxAccepted]="picked.maxShippableQuantity" />
+              @if (entryOverTolerance()) {
+                <p class="add-line-tolerance__warning" data-testid="shipment-line-over-tolerance">
+                  {{ (canOverrideTolerance ? 'tolerance.overWarning' : 'tolerance.overNeedsManager') | translate:
+                    { quantity: lineForm.controls.quantity.value, room: (roomFor(picked.id) | number:'1.0-4') } }}
+                </p>
+                @if (canOverrideTolerance) {
+                  <div [formGroup]="lineForm">
+                    <app-input [label]="'tolerance.overReason' | translate" formControlName="overReason" [maxlength]="500" [required]="true"
+                      data-testid="shipment-line-over-reason" />
+                  </div>
+                }
+              }
+            </div>
+          }
         } @else {
           <div class="lines-empty">{{ 'shipments.allLinesShipped' | translate }}</div>
         }

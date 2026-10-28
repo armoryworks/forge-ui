@@ -33,6 +33,14 @@
         <dt>{{ 'vendors.workflow.terms.offTierVariancePctLabel' | translate }}</dt>
         <dd>{{ v.offTierVariancePct }}%</dd>
       }
+      @if ((v.overReceiptTolerancePct ?? null) !== null) {
+        <dt>{{ 'tolerance.overPercent' | translate }}</dt>
+        <dd>{{ v.overReceiptTolerancePct }}%</dd>
+      }
+      @if ((v.underReceiptTolerancePct ?? null) !== null) {
+        <dt>{{ 'tolerance.underPercent' | translate }}</dt>
+        <dd>{{ v.underReceiptTolerancePct }}%</dd>
+      }
       @if (v.notes) {
         <dt>{{ 'vendors.workflow.terms.notesLabel' | translate }}</dt>
         <dd class="vendor-workflow-step__summary-notes">{{ v.notes }}</dd>

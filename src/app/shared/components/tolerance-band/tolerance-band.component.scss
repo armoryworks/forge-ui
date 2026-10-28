@@ -1,0 +1,10 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: inline-block;
+}
+
+.tolerance-band {
+  margin-left: $sp-xs;
+  white-space: nowrap;
+}

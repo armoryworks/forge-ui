@@ -17,4 +17,6 @@ export interface CreateVendorRequest {
   is1099?: boolean;
   taxId?: string;
   currencyId?: number;
+  overReceiptTolerancePct?: number;
+  underReceiptTolerancePct?: number;
 }

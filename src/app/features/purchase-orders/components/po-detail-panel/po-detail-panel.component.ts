@@ -52,6 +52,7 @@ import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 import { PO_STATUS_CHIP_CLASSES } from '../../models/po-status.const';
 import { PoFulfilmentInfoComponent } from '../po-fulfilment-info/po-fulfilment-info.component';
+import { ToleranceBandComponent } from '../../../../shared/components/tolerance-band/tolerance-band.component';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -68,6 +69,7 @@ import { PoFulfilmentInfoComponent } from '../po-fulfilment-info/po-fulfilment-i
     EntityPickerComponent, FileUploadZoneComponent,
     DetailLoadErrorComponent,
     PoFulfilmentInfoComponent,
+    ToleranceBandComponent,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -612,6 +614,8 @@ export class PoDetailPanelComponent implements OnInit {
       Validators.required, Validators.min(0),
       maxDecimalsValidator(UNIT_DECIMALS, this.translate.instant('purchaseOrders.unitPrice'), this.translate),
     ]),
+    overReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(999.99)]),
+    underReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
   });
 
   protected readonly addLineViolations = FormValidationService.getViolations(this.addLineForm, {
@@ -619,6 +623,8 @@ export class PoDetailPanelComponent implements OnInit {
     description: this.translate.instant('common.description'),
     quantity: this.translate.instant('common.quantity'),
     unitPrice: this.translate.instant('purchaseOrders.unitPrice'),
+    overReceiptTolerancePct: this.translate.instant('tolerance.overPercent'),
+    underReceiptTolerancePct: this.translate.instant('tolerance.underPercent'),
   });
 
   protected get addLineMissingDescription(): boolean {
@@ -627,7 +633,9 @@ export class PoDetailPanelComponent implements OnInit {
   }
 
   protected openAddLine(): void {
-    this.addLineForm.reset({ partId: null, description: '', quantity: null, unitPrice: null });
+    this.addLineForm.reset({
+      partId: null, description: '', quantity: null, unitPrice: null, overReceiptTolerancePct: null, underReceiptTolerancePct: null,
+    });
     this.showAddLineDialog.set(true);
   }
 
@@ -648,6 +656,8 @@ export class PoDetailPanelComponent implements OnInit {
       description: f.description.trim() || undefined,
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
+      overReceiptTolerancePct: f.overReceiptTolerancePct ?? undefined,
+      underReceiptTolerancePct: f.underReceiptTolerancePct ?? undefined,
     }).subscribe({
       next: () => {
         this.showAddLineDialog.set(false);

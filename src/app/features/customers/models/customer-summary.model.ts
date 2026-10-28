@@ -42,4 +42,6 @@ export interface CustomerSummary {
   currencyId?: number | null;
   currencyLocked?: boolean;
   defaultTaxCodeId?: number | null;
+  overShipTolerancePct?: number | null;
+  underShipTolerancePct?: number | null;
 }

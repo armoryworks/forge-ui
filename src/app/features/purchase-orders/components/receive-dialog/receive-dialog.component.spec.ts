@@ -7,6 +7,7 @@ import { Observable, of } from 'rxjs';
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { PurchaseOrderDetail } from '../../models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../../models/purchase-order-line.model';
 import { ReceiveItemsRequest } from '../../models/receive-items-request.model';
@@ -30,6 +31,9 @@ interface DialogInternals {
   lotControls(): FormControl<string>[];
   expiryControls(): FormControl<Date | null>[];
   noteControls(): FormControl<string>[];
+  reasonControls(): FormControl<string>[];
+  toleranceState(index: number): 'over' | 'closes' | null;
+  hasInvalidLineField: boolean;
   packingSlipCtrl: FormControl<string>;
   onBinSelected(index: number, entity: Record<string, unknown> | null): void;
   ngAfterViewInit(): void;
@@ -62,7 +66,7 @@ function line(overrides: Partial<PurchaseOrderLine>): PurchaseOrderLine {
   };
 }
 
-function setup(lines: PurchaseOrderLine[], disabledCapabilities: string[] = []) {
+function setup(lines: PurchaseOrderLine[], disabledCapabilities: string[] = [], roles: string[] = []) {
   const receiveItems = vi.fn((_id: number, _req: ReceiveItemsRequest) => of(undefined));
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -71,6 +75,7 @@ function setup(lines: PurchaseOrderLine[], disabledCapabilities: string[] = []) 
       { provide: PurchaseOrderService, useValue: { receiveItems } },
       { provide: SnackbarService, useValue: { success: vi.fn() } },
       { provide: CapabilityService, useValue: { isEnabled: (code: string) => !disabledCapabilities.includes(code) } },
+      { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
     ],
   });
 
@@ -339,5 +344,67 @@ describe('ReceiveDialogComponent — bin, lot and note per line', () => {
     internals.save();
 
     expect(receiveItems.mock.calls[0][1].lines[0].expirationDate).toBeUndefined();
+  });
+});
+
+describe('ReceiveDialogComponent — receipt tolerance', () => {
+  beforeEach(() => TestBed.resetTestingModule());
+
+  const banded = (overrides: Partial<PurchaseOrderLine> = {}) => line({
+    id: 1, orderedQuantity: 100, remainingQuantity: 100,
+    overReceiptTolerancePct: 10, underReceiptTolerancePct: 10, maxReceivableQuantity: 110, minCompleteQuantity: 90,
+    ...overrides,
+  });
+
+  it('accepts up to the over tolerance without a reason', () => {
+    const { internals, receiveItems } = setup([banded()]);
+
+    internals.lineControls()[0].setValue(110);
+
+    expect(internals.toleranceState(0)).toBeNull();
+    expect(internals.hasInvalidLineField).toBe(false);
+    internals.save();
+    expect(receiveItems.mock.calls[0][1].lines[0]).not.toHaveProperty('confirmOverTolerance');
+  });
+
+  it('flags a receipt that closes the line within the under tolerance', () => {
+    const { internals } = setup([banded()]);
+
+    internals.lineControls()[0].setValue(92);
+
+    expect(internals.toleranceState(0)).toBe('closes');
+  });
+
+  it('blocks an over-tolerance receipt for a user who cannot accept it', () => {
+    const { internals, receiveItems } = setup([banded()], [], ['Procurement']);
+
+    internals.lineControls()[0].setValue(120);
+
+    expect(internals.toleranceState(0)).toBe('over');
+    expect(internals.hasInvalidLineField).toBe(true);
+    internals.save();
+    expect(receiveItems).not.toHaveBeenCalled();
+  });
+
+  it('sends a manager-confirmed over-tolerance receipt with its reason', () => {
+    const { internals, receiveItems } = setup([banded()], [], ['Manager']);
+
+    internals.lineControls()[0].setValue(120);
+    expect(internals.hasInvalidLineField).toBe(true);
+    internals.reasonControls()[0].setValue('Vendor sent a full pallet');
+    expect(internals.hasInvalidLineField).toBe(false);
+    internals.save();
+
+    expect(receiveItems.mock.calls[0][1].lines[0]).toEqual(expect.objectContaining({
+      quantity: 120, confirmOverTolerance: true, overToleranceReason: 'Vendor sent a full pallet',
+    }));
+  });
+
+  it('treats a line without tolerance data as exact quantity', () => {
+    const { internals } = setup([line({ id: 1, orderedQuantity: 5, remainingQuantity: 5 })]);
+
+    internals.lineControls()[0].setValue(6);
+
+    expect(internals.toleranceState(0)).toBe('over');
   });
 });

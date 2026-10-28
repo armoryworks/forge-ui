@@ -38,6 +38,26 @@ export const CATALOG_SETTING_SECTIONS: CatalogSettingSection[] = [
     ],
   },
   {
+    key: 'purchasing-tolerances',
+    group: 'Purchasing',
+    titleKey: 'admin.catalogSettings.purchasingTolerances',
+    icon: 'inventory',
+    fields: [
+      { key: 'purchasing.over-receipt-percent', labelKey: 'admin.catalogSettings.overReceiptPercent' },
+      { key: 'purchasing.under-receipt-percent', labelKey: 'admin.catalogSettings.underReceiptPercent' },
+    ],
+  },
+  {
+    key: 'shipping-tolerances',
+    group: 'Sales',
+    titleKey: 'admin.catalogSettings.shippingTolerances',
+    icon: 'local_shipping',
+    fields: [
+      { key: 'sales.over-ship-percent', labelKey: 'admin.catalogSettings.overShipPercent' },
+      { key: 'sales.under-ship-percent', labelKey: 'admin.catalogSettings.underShipPercent' },
+    ],
+  },
+  {
     key: 'quotes',
     group: 'Sales',
     titleKey: 'admin.catalogSettings.quotes',

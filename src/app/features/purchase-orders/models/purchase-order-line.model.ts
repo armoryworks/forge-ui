@@ -31,4 +31,16 @@ export interface PurchaseOrderLine {
   salesOrderId?: number | null;
   salesOrderNumber?: string | null;
   salesOrderLineNumber?: number | null;
+  /** The line's own receipt tolerance override; null inherits the vendor's, then the company default. */
+  lineOverReceiptTolerancePct?: number | null;
+  lineUnderReceiptTolerancePct?: number | null;
+  /** Effective receipt tolerance after the vendor / company fallback. */
+  overReceiptTolerancePct?: number;
+  underReceiptTolerancePct?: number;
+  /** Receipts may bring the line up to this without an override. */
+  maxReceivableQuantity?: number;
+  /** Reaching this closes the line within tolerance. */
+  minCompleteQuantity?: number;
+  closedWithinTolerance?: boolean;
+  shortCloseReason?: string | null;
 }

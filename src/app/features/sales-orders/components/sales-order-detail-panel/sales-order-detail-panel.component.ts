@@ -44,6 +44,7 @@ import { ScheduleMilestone } from '../../models/schedule-milestone.model';
 import { ShipmentDialogComponent } from '../../../shipments/components/shipment-dialog/shipment-dialog.component';
 import { SalesOrderStagesTabComponent } from '../sales-order-stages-tab/sales-order-stages-tab.component';
 import { SoLinePurchasingComponent } from '../so-line-purchasing/so-line-purchasing.component';
+import { ToleranceBandComponent } from '../../../../shared/components/tolerance-band/tolerance-band.component';
 import { CustomerPoDocument } from '../../models/customer-po-document.model';
 import { AccountingService } from '../../../../shared/services/accounting.service';
 import { InvoiceDialogComponent } from '../../../invoices/components/invoice-dialog/invoice-dialog.component';
@@ -108,6 +109,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
     DetailLoadErrorComponent, EdiSendActionComponent,
     ReserveStockDialogComponent, AtpCheckComponent,
     SalesOrderStagesTabComponent, SoLinePurchasingComponent,
+    ToleranceBandComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -158,6 +160,8 @@ export class SalesOrderDetailPanelComponent {
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
     unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    overTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(999.99)]),
+    underTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
   });
   private readonly lineFormValue = toSignal(this.lineForm.valueChanges, { initialValue: this.lineForm.getRawValue() });
   protected readonly lineAtpPartId = computed(() => this.lineFormValue().partId ?? null);
@@ -1084,7 +1088,7 @@ export class SalesOrderDetailPanelComponent {
   protected canEditLines(status: string): boolean { return status === 'Draft'; }
 
   protected startAddLine(): void {
-    this.lineForm.reset({ partId: null, description: '', quantity: 1, unitPrice: 0 });
+    this.lineForm.reset({ partId: null, description: '', quantity: 1, unitPrice: 0, overTolerancePct: null, underTolerancePct: null });
     this.editingLineId.set(0);
   }
 
@@ -1094,6 +1098,8 @@ export class SalesOrderDetailPanelComponent {
       description: line.description,
       quantity: line.quantity,
       unitPrice: line.unitPrice,
+      overTolerancePct: line.lineOverShipTolerancePct ?? null,
+      underTolerancePct: line.lineUnderShipTolerancePct ?? null,
     });
     this.editingLineId.set(line.id);
   }
@@ -1151,11 +1157,15 @@ export class SalesOrderDetailPanelComponent {
           description: v.description,
           quantity: v.quantity,
           unitPrice: v.unitPrice,
+          overShipTolerancePct: v.overTolerancePct ?? undefined,
+          underShipTolerancePct: v.underTolerancePct ?? undefined,
         })
       : this.soService.updateSalesOrderLine(so.id, editing, {
           description: v.description,
           quantity: v.quantity,
           unitPrice: v.unitPrice,
+          overTolerancePct: v.overTolerancePct ?? undefined,
+          underTolerancePct: v.underTolerancePct ?? undefined,
         });
     req.subscribe({
       next: (detail) => {

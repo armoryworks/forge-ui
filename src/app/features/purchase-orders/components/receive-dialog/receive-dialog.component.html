@@ -36,7 +36,11 @@
           <tr>
             <td class="receive-table__mono">{{ line.partNumber ?? '—' }}</td>
             <td>{{ line.description }}</td>
-            <td class="receive-table__right">{{ line.orderedQuantity }}</td>
+            <td class="receive-table__right">
+              {{ line.orderedQuantity }}
+              <app-tolerance-band [overPercent]="line.overReceiptTolerancePct" [underPercent]="line.underReceiptTolerancePct"
+                [minComplete]="line.minCompleteQuantity" [maxAccepted]="line.maxReceivableQuantity" />
+            </td>
             <td class="receive-table__right">{{ line.receivedQuantity }}</td>
             <td class="receive-table__right">{{ line.remainingQuantity }}</td>
             <td class="receive-table__input">
@@ -88,6 +92,37 @@
               </button>
             </td>
           </tr>
+          @switch (toleranceState(i)) {
+            @case ('over') {
+              <tr class="receive-table__tolerance-row" [attr.data-testid]="'receive-over-tolerance-' + line.id">
+                <td [attr.colspan]="binsEnabled() ? 9 : 8">
+                  <p class="receive-tolerance receive-tolerance--warning">
+                    <span class="material-icons-outlined" aria-hidden="true">warning</span>
+                    {{ (canOverrideTolerance ? 'tolerance.overWarning' : 'tolerance.overNeedsManager') | translate:
+                      { quantity: lineControls()[i].value, room: (roomFor(line) | number:'1.0-4') } }}
+                  </p>
+                  @if (canOverrideTolerance) {
+                    <app-input
+                      [label]="'tolerance.overReason' | translate"
+                      [formControl]="reasonControls()[i]"
+                      [maxlength]="500"
+                      [required]="true"
+                      [attr.data-testid]="'receive-over-reason-' + line.id" />
+                  }
+                </td>
+              </tr>
+            }
+            @case ('closes') {
+              <tr class="receive-table__tolerance-row" [attr.data-testid]="'receive-closes-within-' + line.id">
+                <td [attr.colspan]="binsEnabled() ? 9 : 8">
+                  <p class="receive-tolerance">
+                    <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                    {{ 'tolerance.closesWithin' | translate: { remaining: (remainingAfter(i) | number:'1.0-4') } }}
+                  </p>
+                </td>
+              </tr>
+            }
+          }
           @if (isNoteOpen(line.id)) {
             <tr class="receive-table__note-row">
               <td [attr.colspan]="binsEnabled() ? 9 : 8">

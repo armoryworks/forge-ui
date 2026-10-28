@@ -43,6 +43,8 @@ export interface SalesOrderLineInput {
   quantity: number;
   unitPrice: number;
   notes?: string;
+  overShipTolerancePct?: number;
+  underShipTolerancePct?: number;
 }
 
 /** Payload to edit an existing sales-order line (part link fixed at add time). */
@@ -51,6 +53,10 @@ export interface UpdateSalesOrderLineInput {
   quantity: number;
   unitPrice: number;
   notes?: string;
+  /** Line over-ship tolerance in percent; omit to leave it as it is. */
+  overTolerancePct?: number;
+  /** Line under-ship tolerance in percent; omit to leave it as it is. */
+  underTolerancePct?: number;
 }
 
 @Injectable({ providedIn: 'root' })

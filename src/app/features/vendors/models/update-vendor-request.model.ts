@@ -36,4 +36,12 @@ export interface UpdateVendorRequest {
   autoPoMode?: AutoPoMode;
   /** True returns the vendor to the global auto-PO mode. */
   clearAutoPoMode?: boolean;
+  /** Over-receipt tolerance in percent; omit to leave it untouched. */
+  overReceiptTolerancePct?: number;
+  /** Under-receipt tolerance in percent; omit to leave it untouched. */
+  underReceiptTolerancePct?: number;
+  /** True returns the vendor to the company over-receipt default. */
+  clearOverReceiptTolerance?: boolean;
+  /** True returns the vendor to the company under-receipt default. */
+  clearUnderReceiptTolerance?: boolean;
 }

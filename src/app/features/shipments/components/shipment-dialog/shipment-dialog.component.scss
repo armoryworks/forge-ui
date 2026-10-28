@@ -57,3 +57,20 @@
     }
   }
 }
+
+.add-line-tolerance {
+  margin-top: $sp-xs;
+
+  &__warning {
+    margin: $sp-xs 0;
+    color: var(--warning);
+    font-size: var(--font-size-xs);
+  }
+}
+
+.lines-table__over {
+  margin-left: $sp-xs;
+  color: var(--warning);
+  font-size: var(--font-size-md);
+  vertical-align: middle;
+}

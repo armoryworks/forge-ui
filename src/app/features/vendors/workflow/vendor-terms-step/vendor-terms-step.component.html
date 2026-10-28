@@ -21,6 +21,19 @@
       formControlName="offTierVariancePct"
       suffix="%"
       data-testid="vendor-terms-off-tier-pct" />
+    <app-input
+      [label]="'tolerance.overPercent' | translate"
+      [info]="'tolerance.vendorHint' | translate"
+      type="number"
+      formControlName="overReceiptTolerancePct"
+      suffix="%"
+      data-testid="vendor-terms-over-receipt-pct" />
+    <app-input
+      [label]="'tolerance.underPercent' | translate"
+      type="number"
+      formControlName="underReceiptTolerancePct"
+      suffix="%"
+      data-testid="vendor-terms-under-receipt-pct" />
     <app-textarea
       [label]="'vendors.workflow.terms.notesLabel' | translate"
       formControlName="notes"

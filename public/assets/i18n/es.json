@@ -4809,7 +4809,13 @@
       "qboRefundAccount": "ID de la cuenta bancaria de reembolsos en QuickBooks",
       "inventorySurplus": "Existencias excedentes",
       "surplusLocation": "Ubicación de existencias excedentes",
-      "noLocation": "Ninguna (desactivado)"
+      "noLocation": "Ninguna (desactivado)",
+      "purchasingTolerances": "Tolerancias de recepción",
+      "overReceiptPercent": "Tolerancia de recepción en exceso (%)",
+      "underReceiptPercent": "Tolerancia de recepción en defecto (%)",
+      "shippingTolerances": "Tolerancias de envío",
+      "overShipPercent": "Tolerancia de envío en exceso (%)",
+      "underShipPercent": "Tolerancia de envío en defecto (%)"
     }
   },
   "teamsPanel": {
@@ -13165,8 +13171,10 @@
       "received": "Recibido",
       "qcPending": "Inspección pendiente",
       "complete": "Completo",
-      "rejected": "Rechazado"
-    }
+      "rejected": "Rechazado",
+      "partiallyReceived": "Devuelta en parte"
+    },
+    "alreadyBack": "Ya se devolvieron {{quantity}} en recepciones anteriores."
   },
   "payables": {
     "title": "Cuentas por Pagar",
@@ -17442,5 +17450,27 @@
     "freightAccounts": "Cuentas de ingresos por flete y fletes de compra",
     "earlyPaymentDiscounts": "Condiciones de descuento por pronto pago",
     "freightTaxable": "Flete gravable por jurisdicción"
+  },
+  "tolerance": {
+    "band": "−{{under}}% / +{{over}}%",
+    "bandTooltip": "Completa con {{min}}; se aceptan hasta {{max}} sin autorización",
+    "overPercent": "Tolerancia en exceso (%)",
+    "underPercent": "Tolerancia en defecto (%)",
+    "inheritHint": "En blanco usa el valor predeterminado",
+    "overReason": "Motivo del excedente",
+    "overWarning": "{{quantity}} supera la tolerancia; se aceptan hasta {{room}} sin autorización.",
+    "overNeedsManager": "{{quantity}} supera la tolerancia; se aceptan hasta {{room}}. Un gerente puede aceptar el excedente con un motivo.",
+    "closesWithin": "Cierra la línea dentro de la tolerancia; ya no se esperarán las {{remaining}} restantes.",
+    "closedWithin": "Cerrada dentro de la tolerancia",
+    "closedWithinQty": "Cerrada dentro de la tolerancia (faltan {{quantity}})",
+    "reasonRequired": "Indique un motivo para aceptar la cantidad por encima de la tolerancia.",
+    "closeShort": "Cerrar incompleta: el proveedor no enviará el resto",
+    "staysOpen": "{{returned}} de {{sent}} devueltas; la orden sigue abierta por el resto.",
+    "vendorTitle": "Tolerancia de recepción",
+    "vendorHint": "Cuánto por encima o por debajo de la cantidad pedida puede llegar una recepción. En blanco usa el valor de la empresa; las nuevas líneas de orden de compra copian estos valores.",
+    "customerTitle": "Tolerancia de envío",
+    "customerHint": "Cuánto por encima o por debajo de la cantidad pedida puede enviarse una línea y quedar completa. En blanco usa el valor de la empresa.",
+    "saved": "Tolerancia guardada",
+    "lineTitle": "Tolerancia de la línea"
   }
 }

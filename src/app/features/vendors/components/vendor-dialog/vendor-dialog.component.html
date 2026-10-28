@@ -58,6 +58,24 @@
           min="0"
           [placeholder]="'vendors.offTierVariancePctPlaceholder' | translate"
           data-testid="vendor-off-tier-variance" />
+        <app-input
+          [label]="'tolerance.overPercent' | translate"
+          [info]="'tolerance.vendorHint' | translate"
+          type="number"
+          formControlName="overReceiptTolerancePct"
+          step="0.1"
+          min="0"
+          [placeholder]="'tolerance.inheritHint' | translate"
+          data-testid="vendor-over-receipt-tolerance" />
+        <app-input
+          [label]="'tolerance.underPercent' | translate"
+          type="number"
+          formControlName="underReceiptTolerancePct"
+          step="0.1"
+          min="0"
+          max="100"
+          [placeholder]="'tolerance.inheritHint' | translate"
+          data-testid="vendor-under-receipt-tolerance" />
         @if (showAutoPoMode()) {
           <app-select [label]="'vendors.autoPoMode' | translate" formControlName="autoPoMode" [options]="autoPoModeOptions"
             data-testid="vendor-auto-po-mode" />

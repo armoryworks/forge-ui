@@ -1,0 +1,6 @@
+@if (visible()) {
+  <span class="chip chip--info tolerance-band" data-testid="tolerance-band"
+    [matTooltip]="'tolerance.bandTooltip' | translate: { min: (minComplete() ?? 0 | number:'1.0-4'), max: (maxAccepted() ?? 0 | number:'1.0-4') }">
+    {{ 'tolerance.band' | translate: { under: (underPercent() ?? 0 | number:'1.0-2'), over: (overPercent() ?? 0 | number:'1.0-2') } }}
+  </span>
+}

@@ -1,1 +1,1 @@
-export type SubcontractStatus = 'Pending' | 'Sent' | 'InProcess' | 'Shipped' | 'Received' | 'QcPending' | 'Complete' | 'Rejected';
+export type SubcontractStatus = 'Pending' | 'Sent' | 'InProcess' | 'Shipped' | 'Received' | 'QcPending' | 'Complete' | 'Rejected' | 'PartiallyReceived';

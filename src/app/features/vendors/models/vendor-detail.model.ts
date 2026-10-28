@@ -36,4 +36,6 @@ export interface VendorDetail {
   currencyCode?: string | null;
   currencyLocked?: boolean;
   autoPoMode?: AutoPoMode | null;
+  overReceiptTolerancePct?: number | null;
+  underReceiptTolerancePct?: number | null;
 }

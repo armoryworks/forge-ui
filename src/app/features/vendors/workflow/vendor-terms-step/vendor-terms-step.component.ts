@@ -53,6 +53,8 @@ export class VendorTermsStepComponent {
     paymentTermsId: new FormControl<number | null>(null),
     minOrderAmount: new FormControl<number | null>(null, [Validators.min(0)]),
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
+    overReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(999.99)]),
+    underReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
     notes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(4000)] }),
   });
 
@@ -63,6 +65,8 @@ export class VendorTermsStepComponent {
       this.form.patchValue({
         paymentTermsId: vendor.paymentTermsId ?? null,
         offTierVariancePct: vendor.offTierVariancePct,
+        overReceiptTolerancePct: vendor.overReceiptTolerancePct ?? null,
+        underReceiptTolerancePct: vendor.underReceiptTolerancePct ?? null,
         notes: vendor.notes ?? '',
       }, { emitEvent: false });
       this.workflowService.refreshStepForm();
@@ -74,6 +78,8 @@ export class VendorTermsStepComponent {
         paymentTermsId: this.translate.instant('vendors.workflow.terms.paymentTermsLabel'),
         minOrderAmount: this.translate.instant('vendors.workflow.terms.minOrderAmountLabel'),
         offTierVariancePct: this.translate.instant('vendors.workflow.terms.offTierVariancePctLabel'),
+        overReceiptTolerancePct: this.translate.instant('tolerance.overPercent'),
+        underReceiptTolerancePct: this.translate.instant('tolerance.underPercent'),
         notes: this.translate.instant('vendors.workflow.terms.notesLabel'),
       },
       () => this.save(),
@@ -96,6 +102,8 @@ export class VendorTermsStepComponent {
       ...this.termsFields(value.paymentTermsId),
       minOrderAmount: value.minOrderAmount,
       offTierVariancePct: value.offTierVariancePct,
+      overReceiptTolerancePct: value.overReceiptTolerancePct,
+      underReceiptTolerancePct: value.underReceiptTolerancePct,
       notes: value.notes.trim() || null,
     }).pipe(
       switchMap((run) => {

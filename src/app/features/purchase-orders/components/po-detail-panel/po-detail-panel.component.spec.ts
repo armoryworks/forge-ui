@@ -176,7 +176,7 @@ describe('PoDetailPanelComponent', () => {
 
     it('adds a line through the service and reloads the PO', () => {
       const panel = create(detail());
-      panel.addLineForm.setValue({ partId: 5, description: ' Bar stock ', quantity: 4, unitPrice: 12.5 });
+      panel.addLineForm.setValue({ partId: 5, description: ' Bar stock ', quantity: 4, unitPrice: 12.5, overReceiptTolerancePct: null, underReceiptTolerancePct: null });
 
       panel.saveAddLine();
 
@@ -186,9 +186,20 @@ describe('PoDetailPanelComponent', () => {
       expect(poService.getPurchaseOrderById).toHaveBeenCalledWith(7);
     });
 
+    it('sends a line receipt tolerance when one is entered', () => {
+      const panel = create(detail());
+      panel.addLineForm.setValue({ partId: 5, description: 'Bar stock', quantity: 100, unitPrice: 1, overReceiptTolerancePct: 10, underReceiptTolerancePct: 5 });
+
+      panel.saveAddLine();
+
+      expect(poService.addPurchaseOrderLine).toHaveBeenCalledWith(7, expect.objectContaining({
+        overReceiptTolerancePct: 10, underReceiptTolerancePct: 5,
+      }));
+    });
+
     it('requires a description when the line has no part', () => {
       const panel = create(detail());
-      panel.addLineForm.setValue({ partId: null, description: '  ', quantity: 1, unitPrice: 0 });
+      panel.addLineForm.setValue({ partId: null, description: '  ', quantity: 1, unitPrice: 0, overReceiptTolerancePct: null, underReceiptTolerancePct: null });
 
       expect(panel.addLineMissingDescription).toBe(true);
       panel.saveAddLine();

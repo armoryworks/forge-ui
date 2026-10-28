@@ -8,4 +8,6 @@ export interface ReceiveLineRequest {
   manualFreight?: number;
   lotNumber?: string;
   expirationDate?: string;
+  confirmOverTolerance?: boolean;
+  overToleranceReason?: string;
 }

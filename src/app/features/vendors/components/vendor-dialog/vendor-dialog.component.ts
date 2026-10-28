@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { VendorService } from '../../services/vendor.service';
 import { VendorDetail } from '../../models/vendor-detail.model';
+import { UpdateVendorRequest } from '../../models/update-vendor-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -84,6 +85,8 @@ export class VendorDialogComponent implements OnInit {
     taxId: new FormControl('', [Validators.maxLength(32)]),
     // Bought-parts effort PR4 — per-vendor variance threshold override.
     offTierVariancePct: new FormControl<number | null>(null, [Validators.min(0)]),
+    overReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(999.99)]),
+    underReceiptTolerancePct: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),
     currencyId: new FormControl<number | null>(null),
     autoPoMode: new FormControl<string>(USE_DEFAULT_AUTO_PO_MODE, { nonNullable: true }),
   });
@@ -103,6 +106,8 @@ export class VendorDialogComponent implements OnInit {
     is1099: '1099 Vendor',
     taxId: 'Tax ID',
     offTierVariancePct: this.translate.instant('vendors.offTierVariancePct'),
+    overReceiptTolerancePct: this.translate.instant('tolerance.overPercent'),
+    underReceiptTolerancePct: this.translate.instant('tolerance.underPercent'),
   });
 
   protected readonly paymentTermsOptions = this.paymentTerms.options;
@@ -128,6 +133,8 @@ export class VendorDialogComponent implements OnInit {
         is1099: v.is1099 ?? false,
         taxId: v.taxId ?? '',
         offTierVariancePct: v.offTierVariancePct ?? null,
+        overReceiptTolerancePct: v.overReceiptTolerancePct ?? null,
+        underReceiptTolerancePct: v.underReceiptTolerancePct ?? null,
         currencyId: v.currencyId ?? null,
         autoPoMode: v.autoPoMode ?? USE_DEFAULT_AUTO_PO_MODE,
       });
@@ -143,6 +150,17 @@ export class VendorDialogComponent implements OnInit {
     if (!this.showAutoPoMode() || !this.form.controls.autoPoMode.dirty) return {};
     const mode = this.form.controls.autoPoMode.value;
     return mode === USE_DEFAULT_AUTO_PO_MODE ? { clearAutoPoMode: true } : { autoPoMode: mode as AutoPoMode };
+  }
+
+  private tolerancePayload(): Pick<UpdateVendorRequest,
+    'overReceiptTolerancePct' | 'underReceiptTolerancePct' | 'clearOverReceiptTolerance' | 'clearUnderReceiptTolerance'> {
+    const over = this.form.controls.overReceiptTolerancePct;
+    const under = this.form.controls.underReceiptTolerancePct;
+    const editing = !!this.vendor();
+    return {
+      ...(over.value != null ? { overReceiptTolerancePct: over.value } : editing && over.dirty ? { clearOverReceiptTolerance: true } : {}),
+      ...(under.value != null ? { underReceiptTolerancePct: under.value } : editing && under.dirty ? { clearUnderReceiptTolerance: true } : {}),
+    };
   }
 
   protected get isEditing(): boolean {
@@ -174,6 +192,7 @@ export class VendorDialogComponent implements OnInit {
       is1099: f.is1099 ?? false,
       taxId: f.taxId?.trim() || undefined,
       offTierVariancePct: f.offTierVariancePct,
+      ...this.tolerancePayload(),
       currencyId: this.documentCurrency()?.visible() && !this.currencyLocked() && (!v || this.form.controls.currencyId.dirty) ? (f.currencyId ?? undefined) : undefined,
     };
 

@@ -23,6 +23,12 @@ import { DecimalInputDirective } from '../../../../shared/directives/decimal-inp
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { defaultLotExpiry } from '../../../../shared/utils/lot-expiry';
+import { ToleranceBandComponent } from '../../../../shared/components/tolerance-band/tolerance-band.component';
+import { AuthService } from '../../../../shared/services/auth.service';
+import { TOLERANCE_OVERRIDE_ROLES } from '../../../../shared/models/tolerance-override-roles.const';
+import { closesWithinTolerance, roomWithinTolerance } from '../../../../shared/utils/quantity-tolerance';
+
+type ReceiptToleranceState = 'over' | 'closes' | null;
 
 @Component({
   selector: 'app-receive-dialog',
@@ -31,7 +37,7 @@ import { defaultLotExpiry } from '../../../../shared/utils/lot-expiry';
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, EmptyStateComponent, CurrencyInputComponent, SelectComponent,
     InputComponent, TextareaComponent, EntityPickerComponent, DecimalInputDirective, DatepickerComponent,
-    TranslatePipe,
+    TranslatePipe, ToleranceBandComponent,
   ],
   templateUrl: './receive-dialog.component.html',
   styleUrl: './receive-dialog.component.scss',
@@ -46,6 +52,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly capabilities = inject(CapabilityService);
+  private readonly auth = inject(AuthService);
 
   readonly purchaseOrder = input.required<PurchaseOrderDetail>();
   readonly closed = output<void>();
@@ -62,6 +69,8 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
   protected readonly lotControls = signal<FormControl<string>[]>([]);
   protected readonly expiryControls = signal<FormControl<Date | null>[]>([]);
   protected readonly noteControls = signal<FormControl<string>[]>([]);
+  protected readonly reasonControls = signal<FormControl<string>[]>([]);
+  protected readonly canOverrideTolerance = this.auth.hasAnyRole([...TOLERANCE_OVERRIDE_ROLES]);
   protected readonly openNotes = signal<ReadonlySet<number>>(new Set());
   protected readonly packingSlipCtrl = new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] });
 
@@ -95,11 +104,12 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
     const lines = po.lines.filter(l => l.remainingQuantity > 0);
     this.receivableLines.set(lines);
     this.lineControls.set(
-      lines.map(l => new FormControl<number>(0, {
+      lines.map(() => new FormControl<number>(0, {
         nonNullable: true,
-        validators: [Validators.min(0), Validators.max(l.remainingQuantity)],
+        validators: [Validators.min(0)],
       }))
     );
+    this.reasonControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] })));
     this.binControls.set(lines.map(l => new FormControl<number | null>(l.partId ? l.partDefaultBinId ?? null : null)));
     this.binLabels.set(lines.map(l => (l.partId ? l.partDefaultBinPath ?? null : null)));
     this.lotControls.set(lines.map(() => new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] })));
@@ -195,6 +205,31 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
       });
   }
 
+  /** Room left on a line before a receipt needs an over-tolerance override. */
+  protected roomFor(line: PurchaseOrderLine): number {
+    return roomWithinTolerance(line.maxReceivableQuantity ?? line.receivedQuantity + line.remainingQuantity, line.receivedQuantity);
+  }
+
+  protected toleranceState(index: number): ReceiptToleranceState {
+    const line = this.receivableLines()[index];
+    const qty = this.lineControls()[index]?.value ?? 0;
+    if (!line || qty <= 0) return null;
+    if (qty > this.roomFor(line)) return 'over';
+    const ordered = line.receivedQuantity + line.remainingQuantity;
+    return closesWithinTolerance(ordered, line.minCompleteQuantity ?? ordered, line.receivedQuantity, qty) ? 'closes' : null;
+  }
+
+  protected remainingAfter(index: number): number {
+    const line = this.receivableLines()[index];
+    const qty = this.lineControls()[index]?.value ?? 0;
+    return line ? Math.max(0, Math.round((line.remainingQuantity - qty) * 10000) / 10000) : 0;
+  }
+
+  private get hasUnacceptedOverTolerance(): boolean {
+    return this.receivableLines().some((_, i) => this.toleranceState(i) === 'over'
+      && (!this.canOverrideTolerance || !this.reasonControls()[i].value.trim()));
+  }
+
   protected get hasAnyQuantity(): boolean {
     return this.lineControls().some(c => (c.value ?? 0) > 0);
   }
@@ -204,7 +239,9 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
       || this.lineControls().some(c => c.hasError('numberFormat'))
       || this.lotControls().some(c => c.invalid)
       || this.receivableLines().some((l, i) => (this.lineControls()[i]?.value ?? 0) > 0 && this.expiryControls()[i]?.invalid)
-      || this.noteControls().some(c => c.invalid);
+      || this.noteControls().some(c => c.invalid)
+      || this.reasonControls().some(c => c.invalid)
+      || this.hasUnacceptedOverTolerance;
   }
 
   protected isNoteOpen(lineId: number): boolean {
@@ -245,6 +282,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
         const stocked = !!l.partId;
         const lot = stocked ? lots[i].value.trim() : '';
         const note = notes[i].value.trim();
+        const overReason = this.toleranceState(i) === 'over' ? this.reasonControls()[i].value.trim() : '';
         receiveLines.push({
           lineId: l.id,
           quantity: qty,
@@ -252,6 +290,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
           lotNumber: lot || undefined,
           expirationDate: stocked && l.lotTracked ? toIsoDate(expiries[i].value) ?? undefined : undefined,
           notes: note || undefined,
+          ...(overReason ? { confirmOverTolerance: true, overToleranceReason: overReason } : {}),
         });
       }
     });
