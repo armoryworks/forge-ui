@@ -1,3 +1,4 @@
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 import { CreateQuoteLineRequest } from './create-quote-line-request.model';
 
 export interface CreateQuoteRequest {
@@ -8,6 +9,8 @@ export interface CreateQuoteRequest {
   expirationDate?: string;
   notes?: string;
   taxRate: number;
+  taxOverrideReason?: TaxOverrideReason;
+  taxOverrideNote?: string;
   customerPO?: string;
   lines: CreateQuoteLineRequest[];
   currencyId?: number;

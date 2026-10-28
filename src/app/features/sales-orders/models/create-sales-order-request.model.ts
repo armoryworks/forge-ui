@@ -1,3 +1,4 @@
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 import { CreateSalesOrderLineRequest } from './create-sales-order-line-request.model';
 
 import { FreightTerms } from '../../../shared/models/freight-terms.const';
@@ -14,6 +15,8 @@ export interface CreateSalesOrderRequest {
   customerPO?: string;
   notes?: string;
   taxRate: number;
+  taxOverrideReason?: TaxOverrideReason;
+  taxOverrideNote?: string;
   lines: CreateSalesOrderLineRequest[];
   freightTerms?: FreightTerms;
   currencyId?: number;

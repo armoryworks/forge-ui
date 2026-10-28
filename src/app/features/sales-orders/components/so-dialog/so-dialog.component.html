@@ -111,6 +111,10 @@
               role="img" [attr.aria-label]="'quotes.taxLockedTooltip' | translate">lock</span>
           }
         </div>
+        @if (taxOverridden() && !taxLocked()) {
+          <app-tax-override-fields [reasonControl]="form.controls.taxOverrideReason" [noteControl]="form.controls.taxOverrideNote"
+            [certificateOnFile]="!!taxEditability()?.activeDocumentId" testIdPrefix="so-tax-override" />
+        }
       </div>
 
       <div class="dlg-sidebar-section">

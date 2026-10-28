@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,6 +30,9 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { roundMoney, UNIT_DECIMALS } from '../../../../shared/utils/money';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
+import { TaxOverrideFieldsComponent } from '../../../../shared/components/tax-override-fields/tax-override-fields.component';
+import { TaxOverrideReason } from '../../../../shared/models/tax-override-reason.type';
+import { isTaxOverride, syncTaxOverrideValidators, taxOverridePayload } from '../../../../shared/utils/tax-override.utils';
 
 interface LineEntry {
   partId: number | null;
@@ -51,6 +54,7 @@ interface LineEntry {
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, DatepickerComponent, TextareaComponent,
     EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule, DocumentCurrencyComponent,
+    TaxOverrideFieldsComponent,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',
@@ -87,9 +91,9 @@ export class QuoteDialogComponent {
   protected readonly taxAutoFilled = signal(false);
   /** Display label for the auto-filled tax rate (e.g. "CA 7.25%"). */
   protected readonly taxAutoLabel = signal('');
-  /** S1 — server verdict on whether this customer's tax rate may be overridden. */
+  /** Server verdict on whether the caller may override this customer's tax rate. */
   protected readonly taxEditability = signal<CustomerTaxEditability | null>(null);
-  /** S1 — tax field locked: editability is known and no verified certificate is on file. */
+  /** Tax field locked: editability is known and the caller's role may not override the rate. */
   protected readonly taxLocked = computed(() => this.taxEditability()?.canEditTax === false);
   protected readonly creditStatus = signal<CreditStatus | null>(null);
   protected readonly creditHoldMessage = computed(() => {
@@ -100,11 +104,15 @@ export class QuoteDialogComponent {
       })
       : null;
   });
-  /** True once the user manually edits the tax rate away from the auto-filled default. */
-  protected readonly taxOverridden = signal(false);
-  /** S1 — the manual override is backed by a verified certificate (badge cue). */
+  /** The customer's computed tax rate in percent; 0 when none is configured. */
+  private readonly defaultTaxPercent = signal(0);
+  private readonly customerPicked = signal(false);
+  /** True while the tax rate differs from the customer's computed rate, so an exemption reason is needed. */
+  protected readonly taxOverridden = computed(
+    () => this.customerPicked() && isTaxOverride(this.taxRateValue(), this.defaultTaxPercent()));
+  /** The override is backed by a verified certificate on file (badge cue). */
   protected readonly taxCertBacked = computed(
-    () => this.taxOverridden() && this.taxEditability()?.canEditTax === true);
+    () => this.taxOverridden() && this.taxEditability()?.activeDocumentId != null);
 
   protected readonly customerFilters: Record<string, string> = { isActive: 'true' };
   protected readonly partFilters: Record<string, string> = { isActive: 'true' };
@@ -115,6 +123,8 @@ export class QuoteDialogComponent {
     quoteNumber: new FormControl('', [Validators.maxLength(20)]),
     expirationDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    taxOverrideReason: new FormControl<TaxOverrideReason | null>(null),
+    taxOverrideNote: new FormControl<string | null>(''),
     customerPO: new FormControl('', [Validators.maxLength(50)]),
     notes: new FormControl(''),
     currencyId: new FormControl<number | null>(null),
@@ -125,6 +135,8 @@ export class QuoteDialogComponent {
     customerId: 'Customer',
     expirationDate: 'Expiration Date',
     taxRate: 'Tax Rate',
+    taxOverrideReason: this.translate.instant('taxOverride.reason'),
+    taxOverrideNote: this.translate.instant('taxOverride.note'),
     customerPO: 'Customer P.O.',
     notes: 'Notes',
   });
@@ -188,8 +200,8 @@ export class QuoteDialogComponent {
     this.form.controls.customerId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customerId) => {
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
-      // S1 — reset the tax-override gate until the new customer's verdict arrives.
-      this.taxOverridden.set(false);
+      this.defaultTaxPercent.set(0);
+      this.customerPicked.set(customerId != null);
       this.taxEditability.set(null);
       this.creditStatus.set(null);
       this.form.controls.taxRate.enable({ emitEvent: false });
@@ -205,6 +217,7 @@ export class QuoteDialogComponent {
         next: (rate) => {
           if (rate == null) return;
           const pct = +(rate.rate * 100).toFixed(4);
+          this.defaultTaxPercent.set(pct);
           this.form.controls.taxRate.setValue(pct, { emitEvent: false });
           this.taxRateValue.set(pct);
           this.taxAutoFilled.set(true);
@@ -213,9 +226,6 @@ export class QuoteDialogComponent {
           );
         },
       });
-      // S1 — the tax rate stays editable only when the customer has a
-      // Verified, unexpired tax certificate; otherwise lock the control on
-      // the auto-filled default (the server enforces the same gate).
       this.customerService.getTaxEditability(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (editability) => {
           this.taxEditability.set(editability);
@@ -231,8 +241,14 @@ export class QuoteDialogComponent {
       this.taxRateValue.set(value ?? 0);
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
-      // S1 — a manual edit is an override (cert-backed badge when allowed).
-      this.taxOverridden.set(true);
+    });
+
+    this.form.controls.taxOverrideReason.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() =>
+      syncTaxOverrideValidators(this.form.controls.taxOverrideReason, this.form.controls.taxOverrideNote, this.taxOverridden()));
+
+    effect(() => {
+      syncTaxOverrideValidators(this.form.controls.taxOverrideReason, this.form.controls.taxOverrideNote, this.taxOverridden());
+      this.form.updateValueAndValidity({ emitEvent: false });
     });
 
     this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
@@ -326,6 +342,7 @@ export class QuoteDialogComponent {
       quoteNumber: this.allowManualQuoteNumbers() ? (f.quoteNumber?.trim() || undefined) : undefined,
       expirationDate: f.expirationDate ? toIsoDate(f.expirationDate)! : undefined,
       taxRate: taxRateDecimal,
+      ...taxOverridePayload(this.taxOverridden(), f.taxOverrideReason, f.taxOverrideNote),
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
       currencyId: this.documentCurrency()?.visible() ? (f.currencyId ?? undefined) : undefined,

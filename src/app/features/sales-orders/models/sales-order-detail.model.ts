@@ -1,4 +1,5 @@
 import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 import { SalesOrderLine } from './sales-order-line.model';
 import { SalesOrderShipment } from './sales-order-shipment.model';
 import { SalesOrderReturn } from './sales-order-return.model';
@@ -21,6 +22,8 @@ export interface SalesOrderDetail {
   customerPO: string | null;
   notes: string | null;
   taxRate: number;
+  taxOverrideReason?: TaxOverrideReason | null;
+  taxOverrideNote?: string | null;
   subtotal: number;
   taxAmount: number;
   total: number;

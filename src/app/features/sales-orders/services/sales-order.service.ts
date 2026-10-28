@@ -16,6 +16,7 @@ import { CustomerAddress } from '../../../shared/models/customer-address.model';
 import { ConfirmSalesOrderResponse } from '../models/confirm-sales-order-response.model';
 import { CreateMissingJobsResponse } from '../models/create-missing-jobs-response.model';
 import { CancelSalesOrderRequest } from '../models/cancel-sales-order-request.model';
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 
 /** Payload to create/update a staged-schedule stage. */
 export interface UpsertStageInput {
@@ -145,6 +146,8 @@ export class SalesOrderService {
     customerPO?: string;
     notes?: string;
     taxRate?: number;
+    taxOverrideReason?: TaxOverrideReason;
+    taxOverrideNote?: string;
     currencyId?: number;
     fxRate?: number | null;
   }): Observable<void> {

@@ -34,6 +34,9 @@ import { discountDateForTerms, dueDateForTerms } from '../../../../shared/utils/
 import { CustomerDetail } from '../../../customers/models/customer-detail.model';
 import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
 import { SalesTaxRate } from '../../../admin/models/sales-tax-rate.model';
+import { TaxOverrideFieldsComponent } from '../../../../shared/components/tax-override-fields/tax-override-fields.component';
+import { TaxOverrideReason } from '../../../../shared/models/tax-override-reason.type';
+import { isTaxOverride, syncTaxOverrideValidators, taxOverridePayload } from '../../../../shared/utils/tax-override.utils';
 
 interface LineEntry {
   partId: number | null;
@@ -54,7 +57,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, DecimalPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, EntityPickerComponent, DatepickerComponent, TextareaComponent,
-    CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule, DocumentCurrencyComponent,
+    CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule, DocumentCurrencyComponent, TaxOverrideFieldsComponent,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrl: './invoice-dialog.component.scss',
@@ -115,6 +118,8 @@ export class InvoiceDialogComponent {
     dueDate: new FormControl<Date | null>(null, [Validators.required]),
     paymentTermsId: new FormControl<number | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    taxOverrideReason: new FormControl<TaxOverrideReason | null>(null),
+    taxOverrideNote: new FormControl<string | null>(''),
     currencyId: new FormControl<number | null>(null),
     fxRate: new FormControl<number | null>(1, [Validators.min(0.00000001)]),
     notes: new FormControl(''),
@@ -124,6 +129,11 @@ export class InvoiceDialogComponent {
       end: this.translate.instant('invoices.dueDate'),
     }))],
   });
+
+  private readonly selectedCustomerId = toSignal(
+    this.invoiceForm.controls.customerId.valueChanges.pipe(startWith(this.invoiceForm.controls.customerId.value)),
+    { initialValue: this.invoiceForm.controls.customerId.value },
+  );
 
   private readonly selectedSalesOrderId = toSignal(
     this.invoiceForm.controls.salesOrderId.valueChanges.pipe(
@@ -154,6 +164,8 @@ export class InvoiceDialogComponent {
     dueDate: this.translate.instant('invoices.dueDate'),
     paymentTermsId: this.translate.instant('invoices.creditTerms'),
     taxRate: this.translate.instant('invoices.taxRate'),
+    taxOverrideReason: this.translate.instant('taxOverride.reason'),
+    taxOverrideNote: this.translate.instant('taxOverride.note'),
     currencyId: this.translate.instant('accounting.currency.currency'),
     fxRate: this.translate.instant('accounting.currency.fxRate'),
     notes: this.translate.instant('common.notes'),
@@ -241,6 +253,21 @@ export class InvoiceDialogComponent {
   });
 
   protected readonly effectiveTaxRate = computed(() => (this.customerTaxExempt() ? 0 : (this.taxRateValue() ?? 0)));
+
+  private readonly taxOverrideReasonValue = toSignal(
+    this.invoiceForm.controls.taxOverrideReason.valueChanges.pipe(startWith(this.invoiceForm.controls.taxOverrideReason.value)),
+    { initialValue: this.invoiceForm.controls.taxOverrideReason.value },
+  );
+
+  /** True when the typed rate differs from both the customer's computed rate and the picked sales order's rate. */
+  protected readonly taxOverridden = computed(() => {
+    if (this.customerTaxExempt() || this.selectedCustomerId() == null) return false;
+    const rate = this.taxRateValue();
+    const salesOrderId = this.selectedSalesOrderId();
+    const order = salesOrderId == null ? undefined : this.sources().salesOrders.find(so => so.id === salesOrderId);
+    if (order && !isTaxOverride(rate, order.taxRate * 100)) return false;
+    return isTaxOverride(rate, (this.jurisdiction()?.rate ?? 0) * 100);
+  });
   protected readonly taxAmount = computed(() => roundMoney(this.effectiveTaxRate() / 100 * this.taxableTotal()));
   protected readonly grandTotal = computed(() => roundMoney(this.lineTotal() + this.taxAmount()));
 
@@ -300,6 +327,13 @@ export class InvoiceDialogComponent {
     ).subscribe(customer => {
       this.customerDetail.set(customer);
       if (controls.salesOrderId.value == null) this.applyDefaultTerms(this.customerTermsId(customer));
+    });
+
+    effect(() => {
+      this.taxOverrideReasonValue();
+      const { taxOverrideReason, taxOverrideNote } = this.invoiceForm.controls;
+      syncTaxOverrideValidators(taxOverrideReason, taxOverrideNote, this.taxOverridden());
+      this.invoiceForm.updateValueAndValidity({ emitEvent: false });
     });
 
     effect(() => {
@@ -535,6 +569,7 @@ export class InvoiceDialogComponent {
       dueDate: toIsoDate(f.dueDate!)!,
       paymentTermsId: f.paymentTermsId ?? undefined,
       taxRate: this.effectiveTaxRate() / 100,
+      ...taxOverridePayload(this.taxOverridden(), f.taxOverrideReason, f.taxOverrideNote),
       currencyId,
       fxRate,
       notes: f.notes || undefined,

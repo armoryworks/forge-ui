@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, CanActivateFn, provideRouter, Route, Router, RouterStateSnapshot } from '@angular/router';
 
 import { routes } from './app.routes';
+import { EXPENSES_ROUTES } from './features/expenses/expenses.routes';
+import { ROUTE_ACCESS } from './shared/models/route-access.model';
 import { RouteStatusPageComponent } from './shared/components/route-status-page/route-status-page.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { AuthService } from './shared/services/auth.service';
@@ -57,10 +59,19 @@ describe('top-level setup routes', () => {
 });
 
 describe('expenses route', () => {
-  it('is role-guarded so production workers cannot reach it by URL', () => {
+  it('lets every employee reach their own expenses behind the expenses capability', () => {
     const expenses = routes.flatMap(r => r.children ?? []).find(r => r.path === 'expenses');
 
     expect(expenses?.canActivate?.length).toBe(1);
+    expect(ROUTE_ACCESS['expenses']).toEqual({ capabilities: ['CAP-ACCT-EXPENSES'] });
+  });
+
+  it('keeps the approval queue with the reviewers and the recurring ledger with the office', () => {
+    expect(ROUTE_ACCESS['expenses/approval'].roles).toEqual(['Admin', 'Manager', 'OfficeManager']);
+    expect(ROUTE_ACCESS['expenses/upcoming'].roles).toEqual(['Admin', 'Manager', 'Engineer', 'OfficeManager']);
+    for (const path of ['approval', 'upcoming']) {
+      expect(EXPENSES_ROUTES.find(r => r.path === path)?.canActivate?.length, path).toBe(2);
+    }
   });
 });
 

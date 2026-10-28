@@ -1,0 +1,20 @@
+@use 'styles/variables' as *;
+
+.tax-override {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.tax-override__hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  &--muted {
+    color: var(--text-muted);
+  }
+}

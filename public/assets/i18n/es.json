@@ -3584,7 +3584,9 @@
     "recurringMessages": {
       "deleteTitle": "¿Eliminar gasto recurrente?",
       "deleteMessage": "Esto quitará \"{{description}}\" de los gastos recurrentes."
-    }
+    },
+    "titleMine": "Mis gastos",
+    "subtitleMine": "Presente sus gastos, adjunte recibos y siga su aprobación"
   },
   "timeTracking": {
     "title": "Control de Tiempo",
@@ -7378,9 +7380,9 @@
     "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta cotización?",
     "confirmSendTitle": "¿Enviar cotización?",
     "confirmSendMessage": "¿Enviar la cotización {{number}} al cliente?",
-    "taxLockedTooltip": "La tasa de impuesto está bloqueada; para editarla se requiere un certificado fiscal estatal verificado en el expediente de este cliente.",
+    "taxLockedTooltip": "La tasa de impuesto está bloqueada; solo un administrador, gerente, gerente de oficina o contralor puede cambiarla respecto de la tasa del cliente.",
     "certBacked": "CERT",
-    "certBackedTooltip": "Modificación respaldada por un certificado fiscal verificado.",
+    "certBackedTooltip": "Cambio respaldado por un certificado de exención fiscal verificado.",
     "paymentSchedule": {
       "title": "Calendario de pagos",
       "addSchedule": "Agregar calendario de pagos",
@@ -17302,6 +17304,21 @@
       "overAllocated": "Línea {{line}}: como máximo {{available}} pueden ir en esta etapa.",
       "linesSaved": "Líneas en {{name}} guardadas.",
       "noLines": "Aún no hay líneas asignadas."
+    }
+  },
+  "taxOverride": {
+    "title": "Cambio de la tasa de impuesto",
+    "hint": "Esta tasa es distinta de la tasa de impuesto del cliente. Indique el motivo de la exención; queda registrado en la auditoría y se muestra en el documento.",
+    "reason": "Motivo de la exención",
+    "note": "Nota de la exención",
+    "certificateHint": "Los motivos de reventa, organización exenta y gobierno requieren un certificado de exención fiscal verificado en el expediente del cliente.",
+    "shownLabel": "Exención de impuesto",
+    "reasons": {
+      "Resale": "Reventa",
+      "ExemptOrganization": "Organización exenta",
+      "Government": "Gobierno",
+      "OutOfJurisdiction": "Fuera de la jurisdicción",
+      "Other": "Otro"
     }
   }
 }

@@ -1,4 +1,5 @@
 import { PaymentTermsSummary } from '../../../shared/models/payment-terms-summary.model';
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 import { InvoiceLine } from './invoice-line.model';
 import { CreditMemoApplication } from '../../credit-memos/models/credit-memo-application.model';
 
@@ -16,6 +17,8 @@ export interface InvoiceDetail {
   dueDate: Date;
   creditTerms: string | null;
   taxRate: number;
+  taxOverrideReason?: TaxOverrideReason | null;
+  taxOverrideNote?: string | null;
   subtotal: number;
   taxAmount: number;
   total: number;

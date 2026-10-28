@@ -236,6 +236,12 @@
           <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate * 100 | number:'1.0-4' }}%)</span>
           <span class="totals-value"><app-currency-display [value]="quote.taxAmount" [currency]="quote.currencyCode ?? null" /></span>
         </div>
+        @if (quote.taxOverrideReason) {
+          <div class="totals-row" data-testid="quote-tax-override">
+            <span class="info-label">{{ 'taxOverride.shownLabel' | translate }}</span>
+            <span class="totals-value">{{ ('taxOverride.reasons.' + quote.taxOverrideReason) | translate }}@if (quote.taxOverrideNote) { — {{ quote.taxOverrideNote }} }</span>
+          </div>
+        }
         <div class="totals-row totals-row--total">
           <span class="info-label">{{ 'common.total' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="quote.total" [currency]="quote.currencyCode ?? null" /></span>

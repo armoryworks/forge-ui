@@ -152,6 +152,12 @@
           <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate * 100 | number:'1.0-4' }}%)</span>
           <span class="totals-value"><app-currency-display [value]="inv.taxAmount" [currency]="currencyCode()" /></span>
         </div>
+        @if (inv.taxOverrideReason) {
+          <div class="totals-row" data-testid="invoice-tax-override">
+            <span class="totals-label">{{ 'taxOverride.shownLabel' | translate }}</span>
+            <span class="totals-value">{{ ('taxOverride.reasons.' + inv.taxOverrideReason) | translate }}@if (inv.taxOverrideNote) { — {{ inv.taxOverrideNote }} }</span>
+          </div>
+        }
         <div class="totals-row totals-row--total">
           <span class="totals-label">{{ 'common.total' | translate }}</span>
           <span class="totals-value"><app-currency-display [value]="inv.total" [currency]="currencyCode()" /></span>

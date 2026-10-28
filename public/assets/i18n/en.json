@@ -3584,7 +3584,9 @@
     "recurringMessages": {
       "deleteTitle": "Delete Recurring Expense?",
       "deleteMessage": "This will remove \"{{description}}\" from recurring expenses."
-    }
+    },
+    "titleMine": "My expenses",
+    "subtitleMine": "Submit your expenses, attach receipts, and follow their approval"
   },
   "timeTracking": {
     "title": "Time Tracking",
@@ -7385,9 +7387,9 @@
     "deleteLineMessage": "Remove \"{{description}}\" from this quote?",
     "confirmSendTitle": "Send Quote?",
     "confirmSendMessage": "Send quote {{number}} to the customer?",
-    "taxLockedTooltip": "Tax rate is locked — editing it requires a verified state tax certificate on file for this customer.",
+    "taxLockedTooltip": "Tax rate is locked — only an Admin, Manager, Office Manager or Controller can change it from the customer's rate.",
     "certBacked": "CERT",
-    "certBackedTooltip": "Override backed by a verified tax certificate.",
+    "certBackedTooltip": "Override backed by a verified tax exemption certificate.",
     "paymentSchedule": {
       "title": "Payment Schedule",
       "addSchedule": "Add payment schedule",
@@ -17302,6 +17304,21 @@
       "overAllocated": "Line {{line}}: at most {{available}} can go in this stage.",
       "linesSaved": "Lines in {{name}} saved.",
       "noLines": "No lines assigned yet."
+    }
+  },
+  "taxOverride": {
+    "title": "Tax rate override",
+    "hint": "This rate differs from the customer's tax rate. Give the exemption reason; it is recorded in the audit trail and shown on the document.",
+    "reason": "Exemption reason",
+    "note": "Exemption note",
+    "certificateHint": "Resale, exempt organization and government reasons need a verified tax exemption certificate on file for the customer.",
+    "shownLabel": "Tax exemption",
+    "reasons": {
+      "Resale": "Resale",
+      "ExemptOrganization": "Exempt organization",
+      "Government": "Government",
+      "OutOfJurisdiction": "Out of jurisdiction",
+      "Other": "Other"
     }
   }
 }

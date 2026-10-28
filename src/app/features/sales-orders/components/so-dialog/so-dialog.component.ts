@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, output, signal, Signal, ViewChild, viewChild } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -37,6 +37,9 @@ import { CUSTOMER_COMMERCIAL_TERMS_ROLES } from '../../../customers/customer-rol
 import { DocumentLineType } from '../../../../shared/models/document-line-type.type';
 import { FREIGHT_TERMS, FreightTerms } from '../../../../shared/models/freight-terms.const';
 import { SalesTaxRate } from '../../../admin/models/sales-tax-rate.model';
+import { TaxOverrideFieldsComponent } from '../../../../shared/components/tax-override-fields/tax-override-fields.component';
+import { TaxOverrideReason } from '../../../../shared/models/tax-override-reason.type';
+import { isTaxOverride, syncTaxOverrideValidators, taxOverridePayload } from '../../../../shared/utils/tax-override.utils';
 
 interface LineEntry {
   partId: number | null;
@@ -55,6 +58,7 @@ interface LineEntry {
     ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     EntityPickerComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule, DocumentCurrencyComponent,
+    TaxOverrideFieldsComponent,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -133,6 +137,8 @@ export class SoDialogComponent {
     paymentTermsId: new FormControl<number | null>(null),
     requestedDeliveryDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
+    taxOverrideReason: new FormControl<TaxOverrideReason | null>(null),
+    taxOverrideNote: new FormControl<string | null>(''),
     freightTerms: new FormControl<FreightTerms | null>(null),
     notes: new FormControl(''),
     currencyId: new FormControl<number | null>(null),
@@ -147,6 +153,8 @@ export class SoDialogComponent {
     paymentTermsId: 'Credit Terms',
     requestedDeliveryDate: 'Delivery Date',
     taxRate: 'Tax Rate',
+    taxOverrideReason: this.translate.instant('taxOverride.reason'),
+    taxOverrideNote: this.translate.instant('taxOverride.note'),
     notes: 'Notes',
   });
 
@@ -171,6 +179,17 @@ export class SoDialogComponent {
     this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
     { initialValue: this.form.controls.taxRate.value ?? 0 }
   );
+  private readonly customerIdValue = toSignal(
+    this.form.controls.customerId.valueChanges.pipe(startWith(this.form.controls.customerId.value)),
+    { initialValue: this.form.controls.customerId.value },
+  );
+  private readonly taxOverrideReasonValue = toSignal(
+    this.form.controls.taxOverrideReason.valueChanges.pipe(startWith(this.form.controls.taxOverrideReason.value)),
+    { initialValue: this.form.controls.taxOverrideReason.value },
+  );
+  /** True while the tax rate differs from the customer's computed rate, so an exemption reason is needed. */
+  protected readonly taxOverridden = computed(() =>
+    this.customerIdValue() != null && isTaxOverride(this.taxRateValue(), (this.jurisdiction()?.rate ?? 0) * 100));
   protected readonly freightTotal = computed(() =>
     this.lines().filter(l => l.lineType === 'Freight').reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
@@ -246,6 +265,12 @@ export class SoDialogComponent {
     ).subscribe(rate => {
       this.jurisdiction.set(rate ?? null);
       this.form.controls.taxRate.setValue(rate == null ? 0 : +(rate.rate * 100).toFixed(4));
+    });
+
+    effect(() => {
+      this.taxOverrideReasonValue();
+      syncTaxOverrideValidators(this.form.controls.taxOverrideReason, this.form.controls.taxOverrideNote, this.taxOverridden());
+      this.form.updateValueAndValidity({ emitEvent: false });
     });
 
     customerChanges.pipe(
@@ -428,6 +453,7 @@ export class SoDialogComponent {
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
       taxRate: (f.taxRate ?? 0) / 100,
+      ...taxOverridePayload(this.taxOverridden(), f.taxOverrideReason, f.taxOverrideNote),
       freightTerms: f.freightTerms ?? undefined,
       currencyId: this.documentCurrency()?.visible() ? (f.currencyId ?? undefined) : undefined,
       fxRate: this.documentCurrency()?.visible() && this.documentCurrency()?.isForeign() ? f.fxRate : undefined,

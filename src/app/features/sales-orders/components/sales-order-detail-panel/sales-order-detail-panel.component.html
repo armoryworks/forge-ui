@@ -249,6 +249,10 @@
                       role="img" [attr.aria-label]="'quotes.taxLockedTooltip' | translate">lock</span>
                   }
                 </div>
+                @if (headerTaxOverridden() && !headerTaxLocked()) {
+                  <app-tax-override-fields [reasonControl]="headerForm.controls.taxOverrideReason" [noteControl]="headerForm.controls.taxOverrideNote"
+                    [certificateOnFile]="!!headerTaxEditability()?.activeDocumentId" testIdPrefix="so-header-tax-override" />
+                }
                 @if (headerError(); as message) {
                   <div class="header-edit-error" role="alert" data-testid="so-header-error">
                     <span class="material-icons-outlined" aria-hidden="true">error_outline</span>
@@ -300,6 +304,12 @@
               <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ taxPercent() | number:'1.0-4' }}%)</span>
               <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="so.currencyCode ?? null" /></span>
             </div>
+            @if (so.taxOverrideReason) {
+              <div class="info-item" data-testid="so-tax-override">
+                <span class="info-label">{{ 'taxOverride.shownLabel' | translate }}</span>
+                <span class="info-value">{{ ('taxOverride.reasons.' + so.taxOverrideReason) | translate }}@if (so.taxOverrideNote) { — {{ so.taxOverrideNote }} }</span>
+              </div>
+            }
             <div class="info-item">
               <span class="info-label">{{ 'common.total' | translate }}</span>
               <span class="info-value info-value--bold"><app-currency-display [value]="so.total" [currency]="so.currencyCode ?? null" /></span>

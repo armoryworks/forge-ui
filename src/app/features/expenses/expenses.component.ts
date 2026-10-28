@@ -35,6 +35,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
 import { VendorService } from '../vendors/services/vendor.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { EXPENSE_REVIEWER_ROLES } from './models/expense-reviewer-roles.const';
 
 @Component({
   selector: 'app-expenses',
@@ -137,7 +138,9 @@ export class ExpensesComponent implements OnInit {
 
   protected readonly categoryOptions = signal<SelectOption[]>([]);
 
-  protected readonly canSettleWithVendor = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager']);
+  protected readonly canSettleWithVendor = this.auth.hasAnyRole([...EXPENSE_REVIEWER_ROLES]);
+  /** Reviewers see everyone's expenses and act on them; everyone else sees and files only their own. */
+  protected readonly isReviewer = this.auth.hasAnyRole([...EXPENSE_REVIEWER_ROLES]);
 
   protected readonly vendorOptions = signal<SelectOption[]>([
     { value: null, label: this.translate.instant('expenses.noVendor') },

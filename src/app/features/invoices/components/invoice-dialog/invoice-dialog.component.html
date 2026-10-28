@@ -113,6 +113,10 @@
             {{ 'invoices.taxExemptNote' | translate: { id: customerDetail()?.taxExemptionId ?? '' } }}
           </div>
         }
+        @if (taxOverridden()) {
+          <app-tax-override-fields [reasonControl]="invoiceForm.controls.taxOverrideReason" [noteControl]="invoiceForm.controls.taxOverrideNote"
+            testIdPrefix="invoice-tax-override" />
+        }
         <app-document-currency [currencyControl]="invoiceForm.controls.currencyId" [fxRateControl]="invoiceForm.controls.fxRate"
           [documentDate]="invoiceDateValue()" [defaultCurrencyId]="defaultCurrencyId()" testIdPrefix="invoice" />
         <app-select [label]="'invoices.shipmentId' | translate" formControlName="shipmentId" [options]="shipmentOptions()" data-testid="invoice-shipment" />

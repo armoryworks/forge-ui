@@ -71,6 +71,10 @@ import { ScrollCueDirective } from '../../../../shared/directives/scroll-cue.dir
 import { DateTimePipe } from '../../../../shared/pipes/date-time.pipe';
 import { LanguageService, SupportedLanguage } from '../../../../shared/services/language.service';
 import { EdiSendActionComponent } from '../../../admin/components/edi-send-action/edi-send-action.component';
+import { AdminService } from '../../../admin/services/admin.service';
+import { TaxOverrideFieldsComponent } from '../../../../shared/components/tax-override-fields/tax-override-fields.component';
+import { TaxOverrideReason } from '../../../../shared/models/tax-override-reason.type';
+import { isTaxOverride, syncTaxOverrideValidators, taxOverridePayload } from '../../../../shared/utils/tax-override.utils';
 
 /** Capability gating the whole customer-acceptance feature. */
 const CAP_SO_ACCEPTANCE = 'CAP-O2C-SO-ACCEPTANCE';
@@ -94,7 +98,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'stages' | 'shipments' | 'retur
   standalone: true,
   imports: [TabListDirective, TabDirective, ScrollCueDirective, NumberLockInfoComponent, 
     DatePipe, DateTimePipe, DateOnlyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
-    MatTooltipModule, LoadingBlockDirective,
+    MatTooltipModule, LoadingBlockDirective, TaxOverrideFieldsComponent,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
     EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
@@ -121,6 +125,7 @@ export class SalesOrderDetailPanelComponent {
   private readonly auth = inject(AuthService);
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly customerService = inject(CustomerService);
+  private readonly adminService = inject(AdminService);
   private readonly fileDownload = inject(FileDownloadService);
   private readonly language = inject(LanguageService);
   private readonly inventoryService = inject(InventoryService);
@@ -369,8 +374,18 @@ export class SalesOrderDetailPanelComponent {
     billingAddressId: new FormControl<number | null>(null),
     shippingAddressId: new FormControl<number | null>(null),
     taxRate: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+    taxOverrideReason: new FormControl<TaxOverrideReason | null>(null),
+    taxOverrideNote: new FormControl<string | null>(''),
   });
   protected readonly headerTaxEditability = signal<CustomerTaxEditability | null>(null);
+  private readonly headerDefaultTaxPercent = signal(0);
+  private readonly headerTaxValue = toSignal(this.headerForm.controls.taxRate.valueChanges, { initialValue: 0 });
+  private readonly headerTaxReasonValue = toSignal(this.headerForm.controls.taxOverrideReason.valueChanges, { initialValue: null });
+  /** True while the edited rate is a change that differs from the customer's computed rate, so an exemption reason is needed. */
+  protected readonly headerTaxOverridden = computed(() =>
+    this.editingHeader()
+    && isTaxOverride(this.headerTaxValue(), this.taxPercent())
+    && isTaxOverride(this.headerTaxValue(), this.headerDefaultTaxPercent()));
   protected readonly headerTaxLocked = computed(() => this.headerTaxEditability()?.canEditTax === false);
   protected readonly headerError = signal<string | null>(null);
   protected readonly canEditHeader = computed(() => {
@@ -450,6 +465,13 @@ export class SalesOrderDetailPanelComponent {
   });
 
   constructor() {
+    effect(() => {
+      this.headerTaxReasonValue();
+      const { taxOverrideReason, taxOverrideNote } = this.headerForm.controls;
+      syncTaxOverrideValidators(taxOverrideReason, taxOverrideNote, this.headerTaxOverridden());
+      this.headerForm.updateValueAndValidity({ emitEvent: false });
+    });
+
     effect(() => {
       const id = this.salesOrderId();
       if (id) {
@@ -1156,6 +1178,8 @@ export class SalesOrderDetailPanelComponent {
       billingAddressId: so.billingAddressId ?? null,
       shippingAddressId: so.shippingAddressId ?? null,
       taxRate: this.taxPercent(),
+      taxOverrideReason: null,
+      taxOverrideNote: '',
     });
     this.headerError.set(null);
     this.addressesCustomerId = null;
@@ -1166,6 +1190,10 @@ export class SalesOrderDetailPanelComponent {
 
   private loadHeaderTaxEditability(customerId: number): void {
     this.headerTaxEditability.set(null);
+    this.headerDefaultTaxPercent.set(0);
+    this.adminService.getTaxRateForCustomer(customerId).subscribe({
+      next: (rate) => this.headerDefaultTaxPercent.set(rate == null ? 0 : +(rate.rate * 100).toFixed(4)),
+    });
     this.headerForm.controls.taxRate.enable();
     this.customerService.getTaxEditability(customerId).subscribe({
       next: (editability) => {
@@ -1208,6 +1236,7 @@ export class SalesOrderDetailPanelComponent {
       billingAddressId: v.billingAddressId ?? undefined,
       shippingAddressId: v.shippingAddressId ?? undefined,
       taxRate: taxChanged ? Number(v.taxRate) / 100 : undefined,
+      ...taxOverridePayload(taxChanged && this.headerTaxOverridden(), v.taxOverrideReason, v.taxOverrideNote),
     }).subscribe({
       next: () => {
         this.savingHeader.set(false);

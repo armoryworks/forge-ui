@@ -439,7 +439,7 @@ describe('SoDialogComponent', () => {
       flushTax(httpMock, customerId, rate, canEditTax);
     }
 
-    it('fills the customer rate and locks it without a verified certificate', () => {
+    it('fills the customer rate and locks it for a role that may not override it', () => {
       const { component, internals, httpMock } = setup();
 
       pickCustomer(component, httpMock, 0.0725, false);
@@ -450,7 +450,7 @@ describe('SoDialogComponent', () => {
       httpMock.verify();
     });
 
-    it('fills the rate but leaves it editable with a verified certificate', () => {
+    it('fills the rate but leaves it editable for a role that may override it', () => {
       const { component, internals, httpMock } = setup();
 
       pickCustomer(component, httpMock, 0.05, true);
@@ -485,6 +485,31 @@ describe('SoDialogComponent', () => {
 
       const req = httpMock.expectOne(r => r.method === 'POST' && r.url === `${api}/orders`);
       expect(req.request.body.taxRate).toBeCloseTo(0.0725, 6);
+      expect(req.request.body.taxOverrideReason).toBeUndefined();
+      req.flush({});
+      httpMock.verify();
+    });
+
+    it('asks for an exemption reason when the rate is overridden and sends it on save', () => {
+      const { component, internals, httpMock } = setup([part({ id: 20 })]);
+      internals.dialogRef = { clearDraft: vi.fn() };
+      pickCustomer(component, httpMock, 0.0725, true);
+      pickPart(internals, 20);
+      expectPriceLookup(httpMock, 5, 20, 10);
+      internals.addLine();
+
+      component.form.controls.taxRate.setValue(0);
+      TestBed.tick();
+      expect(component.form.controls.taxOverrideReason.hasError('required')).toBe(true);
+      component.form.controls.taxOverrideReason.setValue('OutOfJurisdiction');
+      component.form.controls.taxOverrideNote.setValue('  Ships to Nevada ');
+      TestBed.tick();
+      internals.save();
+
+      const req = httpMock.expectOne(r => r.method === 'POST' && r.url === `${api}/orders`);
+      expect(req.request.body.taxRate).toBe(0);
+      expect(req.request.body.taxOverrideReason).toBe('OutOfJurisdiction');
+      expect(req.request.body.taxOverrideNote).toBe('Ships to Nevada');
       req.flush({});
       httpMock.verify();
     });

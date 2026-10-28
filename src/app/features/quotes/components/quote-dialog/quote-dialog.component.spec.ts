@@ -99,16 +99,18 @@ function selectCustomer(
   component: QuoteDialogComponent,
   httpMock: HttpTestingController,
   editability: CustomerTaxEditability,
+  rate: number | null = null,
 ): void {
   component.form.controls.customerId.setValue(5);
-  httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`).flush(null);
+  httpMock.expectOne(`${environment.apiUrl}/sales-tax-rates/for-customer/5`)
+    .flush(rate == null ? null : { id: 1, stateCode: 'CA', rate });
   httpMock.expectOne(`${environment.apiUrl}/customers/5/tax-editability`).flush(editability);
 }
 
-describe('QuoteDialogComponent — S1 tax-rate gate', () => {
+describe('QuoteDialogComponent — tax-rate override gate', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('disables the tax-rate control when the customer has no verified certificate', () => {
+  it('disables the tax-rate control when the caller may not override the rate', () => {
     const { component, internals, httpMock } = setup();
 
     selectCustomer(component, httpMock, makeEditability({ canEditTax: false }));
@@ -118,7 +120,7 @@ describe('QuoteDialogComponent — S1 tax-rate gate', () => {
     httpMock.verify();
   });
 
-  it('keeps the tax-rate control editable when a verified certificate is on file', () => {
+  it('keeps the tax-rate control editable for a role that may override the rate', () => {
     const { component, internals, httpMock } = setup();
 
     selectCustomer(component, httpMock, makeEditability({
@@ -130,18 +132,41 @@ describe('QuoteDialogComponent — S1 tax-rate gate', () => {
     httpMock.verify();
   });
 
-  it('marks a manual override as cert-backed only when editing is allowed', () => {
+  it('marks a rate that differs from the customer rate as an override, cert-backed when a certificate is on file', () => {
     const { component, internals, httpMock } = setup();
 
     selectCustomer(component, httpMock, makeEditability({
       canEditTax: true, reason: null, activeDocumentId: 5, stateCode: 'CA',
-    }));
+    }), 0.0725);
+    expect(internals.taxOverridden()).toBe(false);
     expect(internals.taxCertBacked()).toBe(false);
 
     component.form.controls.taxRate.setValue(0);
 
     expect(internals.taxOverridden()).toBe(true);
     expect(internals.taxCertBacked()).toBe(true);
+    httpMock.verify();
+  });
+
+  it('needs an exemption reason while overridden, and a note when the reason is Other', () => {
+    const { component, httpMock } = setup();
+    selectCustomer(component, httpMock, makeEditability({ canEditTax: true, reason: null }), 0.0725);
+    const { taxOverrideReason, taxOverrideNote } = component.form.controls;
+
+    component.form.controls.taxRate.setValue(0);
+    TestBed.tick();
+    expect(taxOverrideReason.hasError('required')).toBe(true);
+
+    taxOverrideReason.setValue('Other');
+    expect(taxOverrideNote.hasError('required')).toBe(true);
+
+    taxOverrideNote.setValue('Sample, no charge');
+    expect(taxOverrideReason.valid && taxOverrideNote.valid).toBe(true);
+
+    component.form.controls.taxRate.setValue(7.25);
+    TestBed.tick();
+    taxOverrideReason.setValue(null);
+    expect(taxOverrideReason.valid).toBe(true);
     httpMock.verify();
   });
 

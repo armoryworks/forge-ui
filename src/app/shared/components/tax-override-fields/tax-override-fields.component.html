@@ -1,0 +1,15 @@
+<div class="tax-override" role="group" [attr.aria-label]="'taxOverride.title' | translate" [attr.data-testid]="testIdPrefix() + '-fields'">
+  <p class="tax-override__hint">
+    <span class="material-icons-outlined" aria-hidden="true">gavel</span>
+    {{ 'taxOverride.hint' | translate }}
+  </p>
+  <app-select [label]="'taxOverride.reason' | translate" [formControl]="reasonControl()" [options]="reasonOptions" [required]="true"
+    [attr.data-testid]="testIdPrefix() + '-reason'" />
+  <app-textarea [label]="'taxOverride.note' | translate" [formControl]="noteControl()" [rows]="2"
+    [attr.data-testid]="testIdPrefix() + '-note'" />
+  @if (!certificateOnFile()) {
+    <p class="tax-override__hint tax-override__hint--muted" [attr.data-testid]="testIdPrefix() + '-certificate-hint'">
+      {{ 'taxOverride.certificateHint' | translate }}
+    </p>
+  }
+</div>

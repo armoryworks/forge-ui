@@ -1,3 +1,4 @@
+import { TaxOverrideReason } from '../../../shared/models/tax-override-reason.type';
 import { CreateInvoiceLineRequest } from './create-invoice-line-request.model';
 
 export interface CreateInvoiceRequest {
@@ -11,6 +12,8 @@ export interface CreateInvoiceRequest {
   creditTerms?: string;
   paymentTermsId?: number;
   taxRate: number;
+  taxOverrideReason?: TaxOverrideReason;
+  taxOverrideNote?: string;
   notes?: string;
   /**
    * Multi-currency (additive). Null/omitted → the active book's functional

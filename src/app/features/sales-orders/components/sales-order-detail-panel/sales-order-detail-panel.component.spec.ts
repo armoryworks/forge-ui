@@ -22,6 +22,7 @@ import { ConfirmDialogData } from '../../../../shared/components/confirm-dialog/
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { SalesOrderAcceptance } from '../../models/sales-order-acceptance.model';
 import { InventoryService } from '../../../inventory/services/inventory.service';
+import { AdminService } from '../../../admin/services/admin.service';
 
 function line(overrides: Partial<SalesOrderLine> = {}): SalesOrderLine {
   return {
@@ -163,6 +164,7 @@ describe('SalesOrderDetailPanelComponent', () => {
         { provide: SalesOrderService, useValue: soService },
         { provide: SalesOrderAcceptanceService, useValue: { list: vi.fn(() => of([])), requestPortal } },
         { provide: CustomerService, useValue: customerService },
+        { provide: AdminService, useValue: { getTaxRateForCustomer: vi.fn(() => of(null)) } },
         { provide: SnackbarService, useValue: snackbar },
         { provide: MatDialog, useValue: { open: dialogOpen } },
         {

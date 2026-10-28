@@ -110,6 +110,10 @@
         @if (taxLocked()) {
           <p class="tax-hint" data-testid="quote-tax-lock-hint">{{ 'quotes.taxLockedTooltip' | translate }}</p>
         }
+        @if (taxOverridden() && !taxLocked()) {
+          <app-tax-override-fields [reasonControl]="form.controls.taxOverrideReason" [noteControl]="form.controls.taxOverrideNote"
+            [certificateOnFile]="!!taxEditability()?.activeDocumentId" testIdPrefix="quote-tax-override" />
+        }
         <app-input data-testid="quote-customer-po" [label]="'quotes.customerPo' | translate" formControlName="customerPO" [maxlength]="50" />
       </div>
 
