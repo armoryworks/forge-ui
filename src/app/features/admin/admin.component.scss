@@ -427,6 +427,37 @@
   }
 }
 
+.settings-elsewhere {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__link {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+    color: var(--text);
+    font-size: $font-size-sm;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--primary) 12%, transparent);
+    }
+  }
+
+  &__where {
+    flex: 1;
+    color: var(--text-secondary);
+  }
+}
+
 .settings-section--highlight {
   outline: $border-width-thin solid var(--primary);
   outline-offset: $sp-sm;

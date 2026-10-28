@@ -221,6 +221,29 @@
           </div>
         }
 
+        @if (settingsElsewhere().length > 0) {
+          <div class="settings-section" data-testid="settings-elsewhere">
+            <div class="settings-section__header">
+              <h3 class="settings-section__title">
+                <span class="material-icons-outlined">open_in_new</span>
+                {{ 'settingsDirectory.elsewhereTitle' | translate }}
+              </h3>
+            </div>
+            <ul class="settings-elsewhere" role="list">
+              @for (entry of settingsElsewhere(); track entry.key) {
+                <li role="listitem">
+                  <a class="settings-elsewhere__link" [routerLink]="[entry.route]" [queryParams]="entry.queryParams ?? null"
+                    [attr.data-testid]="'settings-elsewhere-' + entry.key">
+                    <strong>{{ entry.textKeys[0] | translate }}</strong>
+                    <span class="settings-elsewhere__where">{{ 'settingsDirectory.setOn' | translate: { screen: (entry.whereKey | translate) } }}</span>
+                    <span class="material-icons-outlined">chevron_right</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
         <!-- Company Profile -->
         @if (visibleSettings().has('company-profile')) {
           <div class="settings-section"
@@ -466,6 +489,22 @@
               }
             </div>
           </div>
+        }
+
+        @for (section of catalogSections; track section.key) {
+          @if (visibleSettings().has(section.key)) {
+            <div class="settings-section"
+              [attr.data-setting-key]="section.key"
+              [class.settings-section--highlight]="highlightedSetting() === section.key">
+              <div class="settings-section__header">
+                <h3 class="settings-section__title">
+                  <span class="material-icons-outlined">{{ section.icon }}</span>
+                  {{ section.titleKey | translate }}
+                </h3>
+              </div>
+              <app-catalog-settings-section [section]="section" />
+            </div>
+          }
         }
 
         <!-- System Settings -->

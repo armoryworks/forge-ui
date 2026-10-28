@@ -379,7 +379,8 @@
     },
     "breadcrumb": "Ruta de navegación",
     "searchFailed": "La búsqueda no está disponible en este momento. Inténtelo de nuevo en un momento.",
-    "suggestions": "Sugerencias"
+    "suggestions": "Sugerencias",
+    "settingResult": "Configuración"
   },
   "app": {
     "updateAvailable": "Hay una nueva versión disponible.",
@@ -4711,6 +4712,27 @@
       "lastSentLabel": "Último envío",
       "sent": "Invitación de configuración enviada a {{email}}",
       "failed": "No se pudo enviar la invitación de configuración"
+    },
+    "catalogSettings": {
+      "shopFloorRules": "Mano de obra y alertas de planta",
+      "laborSplit": "Reparto de mano de obra entre temporizadores simultáneos",
+      "backflushDefault": "Consumo automático predeterminado de componentes de la lista de materiales",
+      "stepGating": "Control de pasos",
+      "recentJobDays": "Trabajos recientes en el quiosco (días)",
+      "staleTimerHours": "Alerta de temporizador olvidado (horas)",
+      "paymentsCredits": "Pagos, descuentos y créditos",
+      "discountBase": "Base del descuento por pronto pago",
+      "discountGraceDays": "Días de gracia del descuento por pronto pago",
+      "restockingFeePercent": "Porcentaje de cargo por reposición en devoluciones",
+      "writeOffReversesTax": "Las cancelaciones de saldo revierten el impuesto sobre ventas",
+      "paymentModificationPolicy": "Política de modificación de pagos",
+      "quotes": "Cotizaciones",
+      "quoteValidDays": "Vigencia de cotizaciones configuradas (días)",
+      "quickBooksItems": "Artículos de QuickBooks",
+      "qboFreightItem": "ID del artículo de flete en QuickBooks",
+      "qboBadDebtItem": "ID del artículo de cuentas incobrables en QuickBooks",
+      "qboRefundItem": "ID del artículo de reembolso en QuickBooks",
+      "qboRefundAccount": "ID de la cuenta bancaria de reembolsos en QuickBooks"
     }
   },
   "teamsPanel": {
@@ -17320,5 +17342,15 @@
       "OutOfJurisdiction": "Fuera de la jurisdicción",
       "Other": "Otro"
     }
+  },
+  "settingsDirectory": {
+    "elsewhereTitle": "Se configura en otras pantallas",
+    "setOn": "Se configura en {{screen}}",
+    "fiscalYearStart": "Inicio del año fiscal",
+    "fiscalCalendar": "Calendario y períodos fiscales",
+    "bookSettings": "Configuración del libro",
+    "freightAccounts": "Cuentas de ingresos por flete y fletes de compra",
+    "earlyPaymentDiscounts": "Condiciones de descuento por pronto pago",
+    "freightTaxable": "Flete gravable por jurisdicción"
   }
 }

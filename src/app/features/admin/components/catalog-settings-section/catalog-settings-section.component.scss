@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+
+.catalog-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  max-width: 640px;
+}
+
+.catalog-settings__row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.catalog-settings__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.catalog-settings__actions {
+  display: flex;
+  justify-content: flex-end;
+}

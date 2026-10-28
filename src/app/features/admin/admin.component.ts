@@ -1,7 +1,7 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, Injector, OnInit, signal, WritableSignal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -14,6 +14,11 @@ import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { CatalogToggleRow } from './models/catalog-toggle-row.model';
 import { SETTINGS_SEARCH_INDEX } from './models/settings-search-index.const';
+import { CATALOG_SETTING_SECTIONS } from './models/catalog-setting-sections.const';
+import { CatalogSettingsSectionComponent } from './components/catalog-settings-section/catalog-settings-section.component';
+import { SETTINGS_DIRECTORY } from '../../shared/models/settings-directory.const';
+import { LayoutService } from '../../shared/services/layout.service';
+import { matchSettingsDirectory } from '../../shared/utils/settings-directory.utils';
 import { NUMBERING_SETTING_LABELS } from './models/numbering-setting-labels.const';
 import { SystemSettingDefinition } from './models/system-setting-definition.model';
 import { SYSTEM_SETTING_DEFAULTS } from './models/system-setting-defaults.const';
@@ -98,7 +103,7 @@ import { timeZoneOptions } from '../../shared/utils/time-zone-options';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent, TerminologyPanelComponent,
-    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, DateTimePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, UserSetupInviteComponent, CapDirective, TelemetryConsentDialogComponent,
+    LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BankingSettingsPanelComponent, CatalogSettingsSectionComponent, RouterLink, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, DateTimePipe, LowerCasePipe, TranslatePipe, MatTooltipModule, AddDeviceDialogComponent, UserSetupInviteComponent, CapDirective, TelemetryConsentDialogComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -122,6 +127,7 @@ export class AdminComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly adminSettings = inject(AdminSettingsService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly layout = inject(LayoutService);
   private readonly injector = inject(Injector);
   private readonly navTree = inject(NavTreeService);
 
@@ -290,7 +296,13 @@ export class AdminComponent implements OnInit {
     if (['branding', 'lockups', ...this.settingDefinitions.map(def => def.key)].some(key => visible.has(key))) visible.add('system-settings');
     return visible;
   });
-  protected readonly settingsSearchEmpty = computed(() => this.settingsQuery() !== '' && this.visibleSettings().size === 0);
+  protected readonly catalogSections = CATALOG_SETTING_SECTIONS;
+  /** Settings set on other screens that match the search and that the signed-in user may open. */
+  protected readonly settingsElsewhere = computed(() => matchSettingsDirectory(
+    SETTINGS_DIRECTORY, this.settingsQuery(), key => this.translate.instant(key) as string,
+    entry => this.layout.canOpen(entry.route) && this.layout.passes(entry.access)));
+  protected readonly settingsSearchEmpty = computed(
+    () => this.settingsQuery() !== '' && this.visibleSettings().size === 0 && this.settingsElsewhere().length === 0);
 
   // Company Profile
   private readonly profileLoaded = signal(false);

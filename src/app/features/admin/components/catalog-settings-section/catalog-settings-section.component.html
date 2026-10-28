@@ -1,0 +1,30 @@
+<div class="catalog-settings" [appLoadingBlock]="loading()" [formGroup]="form" [attr.data-testid]="'catalog-settings-' + section().key">
+  @for (row of rows(); track row.key) {
+    <div class="catalog-settings__row" [attr.data-setting-key]="row.key">
+      @switch (row.kind) {
+        @case ('toggle') {
+          <app-toggle [label]="row.labelKey | translate" [formControlName]="row.key" [attr.data-testid]="'catalog-setting-' + row.key" />
+        }
+        @case ('select') {
+          <app-select [label]="row.labelKey | translate" [formControlName]="row.key" [options]="row.options" [attr.data-testid]="'catalog-setting-' + row.key" />
+        }
+        @case ('number') {
+          <app-input [label]="row.labelKey | translate" type="number" [formControlName]="row.key" [attr.data-testid]="'catalog-setting-' + row.key" />
+        }
+        @default {
+          <app-input [label]="row.labelKey | translate" [formControlName]="row.key" [attr.data-testid]="'catalog-setting-' + row.key" />
+        }
+      }
+      @if (row.hint) {
+        <p class="catalog-settings__hint">{{ row.hint }}</p>
+      }
+    </div>
+  }
+  <div class="catalog-settings__actions">
+    <button class="action-btn action-btn--primary action-btn--sm" [attr.data-testid]="'catalog-settings-save-' + section().key"
+      [disabled]="saving() || loading() || !form.dirty" (click)="save()">
+      <span class="material-icons-outlined">save</span>
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</div>

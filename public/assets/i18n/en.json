@@ -379,7 +379,8 @@
     },
     "breadcrumb": "Breadcrumb",
     "searchFailed": "Search is unavailable right now. Try again in a moment.",
-    "suggestions": "Suggestions"
+    "suggestions": "Suggestions",
+    "settingResult": "Setting"
   },
   "app": {
     "updateAvailable": "A new version is available.",
@@ -4711,6 +4712,27 @@
       "lastSentLabel": "Last sent",
       "sent": "Setup invite sent to {{email}}",
       "failed": "Could not send the setup invite"
+    },
+    "catalogSettings": {
+      "shopFloorRules": "Shop floor labor and alerts",
+      "laborSplit": "Labor split for overlapping timers",
+      "backflushDefault": "Backflush default for BOM components",
+      "stepGating": "Step gating",
+      "recentJobDays": "Recent jobs on the kiosk (days)",
+      "staleTimerHours": "Stale timer alert (hours)",
+      "paymentsCredits": "Payments, discounts and credits",
+      "discountBase": "Early-payment discount base",
+      "discountGraceDays": "Early-payment discount grace days",
+      "restockingFeePercent": "Return restocking fee percent",
+      "writeOffReversesTax": "Write-offs reverse sales tax",
+      "paymentModificationPolicy": "Payment modification policy",
+      "quotes": "Quotes",
+      "quoteValidDays": "Configured quote validity (days)",
+      "quickBooksItems": "QuickBooks items",
+      "qboFreightItem": "QuickBooks freight item ID",
+      "qboBadDebtItem": "QuickBooks bad debt item ID",
+      "qboRefundItem": "QuickBooks refund item ID",
+      "qboRefundAccount": "QuickBooks refund bank account ID"
     }
   },
   "teamsPanel": {
@@ -17320,5 +17342,15 @@
       "OutOfJurisdiction": "Out of jurisdiction",
       "Other": "Other"
     }
+  },
+  "settingsDirectory": {
+    "elsewhereTitle": "Set on other screens",
+    "setOn": "Set on {{screen}}",
+    "fiscalYearStart": "Fiscal year start",
+    "fiscalCalendar": "Fiscal calendar and periods",
+    "bookSettings": "Book settings",
+    "freightAccounts": "Freight income and freight-in accounts",
+    "earlyPaymentDiscounts": "Early-payment discount terms",
+    "freightTaxable": "Freight taxable by jurisdiction"
   }
 }

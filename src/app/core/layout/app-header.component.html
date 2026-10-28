@@ -69,6 +69,16 @@
               <span class="search-result__type">{{ 'header.pageResult' | translate }}</span>
             </button>
           }
+          @for (setting of settingMatches(); track setting.key) {
+            <button class="search-result" [attr.data-testid]="'search-setting-item-' + setting.key" (mousedown)="navigateToSetting(setting)">
+              <span class="material-icons-outlined search-result__icon">tune</span>
+              <div class="search-result__content">
+                <span class="search-result__title">{{ setting.textKeys[0] | translate }}</span>
+                <span class="search-result__subtitle">{{ 'settingsDirectory.setOn' | translate: { screen: (setting.whereKey | translate) } }}</span>
+              </div>
+              <span class="search-result__type">{{ 'header.settingResult' | translate }}</span>
+            </button>
+          }
           @for (result of searchResults(); track result.entityId + result.entityType) {
             <button class="search-result" data-testid="search-result-item" (mousedown)="navigateToResult(result)">
               <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
@@ -83,7 +93,7 @@
           }
           @if (searchFailed()) {
             <div class="search-results__empty search-results__empty--error" role="alert" data-testid="search-error">{{ 'header.searchFailed' | translate }}</div>
-          } @else if (searchResults().length === 0 && navMatches().length === 0) {
+          } @else if (searchResults().length === 0 && navMatches().length === 0 && settingMatches().length === 0) {
             <div class="search-results__empty">{{ 'header.noMatches' | translate }}</div>
           }
         </div>

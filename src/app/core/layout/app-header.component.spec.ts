@@ -408,3 +408,73 @@ describe('AppHeaderComponent Escape', () => {
     expect(header.userMenuOpen()).toBe(true);
   });
 });
+
+describe('AppHeaderComponent settings search', () => {
+  type SettingsHarness = {
+    searchControl: { setValue(v: string): void };
+    settingMatches: () => { key: string; route: string }[];
+    navigateToSetting(entry: { route: string; queryParams?: Record<string, string> }): void;
+  };
+  let roles: string[];
+  let navigate: ReturnType<typeof vi.fn>;
+  let component: SettingsHarness;
+
+  beforeEach(() => {
+    roles = [];
+    navigate = vi.fn();
+    const labels: Record<string, string> = {
+      'settingsDirectory.fiscalYearStart': 'Fiscal year start',
+      'admin.companyTimeZone': 'Company time zone',
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: { user: signal(null) } },
+        { provide: Router, useValue: { events: of(), url: '/dashboard', navigate } },
+        { provide: TranslateService, useValue: { instant: (k: string) => labels[k] ?? k } },
+        { provide: LanguageService, useValue: { currentLanguage: signal('en'), availableLanguages: [] } },
+        { provide: NotificationService, useValue: { unreadCount: signal(0), panelOpen: signal(false) } },
+        { provide: NavTreeService, useValue: { breadcrumbTrail: signal([]), flatLeaves: signal([]), recordCrumb: signal(null) } },
+        { provide: ThemeService, useValue: { theme: signal('light') } },
+        { provide: CapabilityService, useValue: { isEnabled: () => true } },
+        { provide: AiService, useValue: { available: signal(false) } },
+        { provide: SearchService, useValue: { search: () => of([]) } },
+        { provide: VersionService, useValue: {} },
+        { provide: BrandingService, useValue: {} },
+        {
+          provide: LayoutService,
+          useValue: {
+            canOpen: () => true,
+            passes: (access: { roles?: readonly string[] }) => !access.roles?.length || access.roles.some(r => roles.includes(r)),
+            closeMobileMenu: vi.fn(),
+          },
+        },
+      ],
+    });
+    component = TestBed.runInInjectionContext(() => new AppHeaderComponent()) as unknown as SettingsHarness;
+  });
+
+  it('finds the fiscal year start for the Controller and links to period close', () => {
+    roles = ['Controller'];
+    component.searchControl.setValue('fiscal');
+
+    const match = component.settingMatches().find(m => m.key === 'fiscal-year-start');
+    expect(match?.route).toBe('/accounting/period-close');
+
+    component.navigateToSetting(match!);
+    expect(navigate).toHaveBeenCalledWith(['/accounting/period-close'], { queryParams: undefined });
+  });
+
+  it('does not offer the fiscal year start to an Admin, who may not open period close', () => {
+    roles = ['Admin'];
+    component.searchControl.setValue('fiscal');
+
+    expect(component.settingMatches().map(m => m.key)).not.toContain('fiscal-year-start');
+  });
+
+  it('offers an Admin the company time zone on Admin > Settings', () => {
+    roles = ['Admin'];
+    component.searchControl.setValue('time zone');
+
+    expect(component.settingMatches().map(m => m.key)).toContain('company-profile');
+  });
+});

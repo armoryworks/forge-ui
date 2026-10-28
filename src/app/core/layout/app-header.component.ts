@@ -33,6 +33,10 @@ import { TrainingContextPanelComponent } from '../../shared/components/training-
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { collapseRepeatedCrumbs } from './breadcrumb.utils';
 import { humanizeIdentifier } from '../../shared/utils/humanize-identifier';
+import { SETTINGS_DIRECTORY } from '../../shared/models/settings-directory.const';
+import { SettingsDirectoryEntry } from '../../shared/models/settings-directory-entry.model';
+import { matchSettingsDirectory } from '../../shared/utils/settings-directory.utils';
+import { ADMIN_SETTINGS_DIRECTORY } from '../../features/admin/models/admin-settings-directory.const';
 
 @Component({
   selector: 'app-header',
@@ -155,6 +159,14 @@ export class AppHeaderComponent implements OnInit {
         || leaf.route.toLowerCase().includes(term))
       .slice(0, 5);
   });
+  /** Settings matching the term, on any screen the signed-in user may open, linked to where each is set. */
+  protected readonly settingMatches = computed<SettingsDirectoryEntry[]>(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (term.length < 2) return [];
+    return matchSettingsDirectory(
+      [...SETTINGS_DIRECTORY, ...ADMIN_SETTINGS_DIRECTORY], term, key => this.translate.instant(key) as string,
+      entry => this.layout.canOpen(entry.route) && this.layout.passes(entry.access)).slice(0, 5);
+  });
   protected readonly aiSuggestions = signal<AiSearchSuggestion[]>([]);
   protected readonly ragResults = signal<RagSearchResult[]>([]);
   protected readonly ragAnswer = signal<string | null>(null);
@@ -174,7 +186,7 @@ export class AppHeaderComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe(v => {
       this.searchTerm.set(v ?? '');
-      if (this.navMatches().length > 0) this.showResults.set(true);
+      if (this.navMatches().length > 0 || this.settingMatches().length > 0) this.showResults.set(true);
     });
 
     this.searchControl.valueChanges.pipe(
@@ -238,7 +250,7 @@ export class AppHeaderComponent implements OnInit {
       this.ragResults.set([]);
       this.ragAnswer.set(null);
       this.aiLoading.set(false);
-      this.showResults.set(this.navMatches().length > 0);
+      this.showResults.set(this.navMatches().length > 0 || this.settingMatches().length > 0);
     });
   }
 
@@ -255,7 +267,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected onSearchFocus(): void {
     this.searchFocused.set(true);
-    if (this.searchResults().length > 0 || this.navMatches().length > 0 || this.aiSuggestions().length > 0 || this.ragResults().length > 0 || this.ragAnswer()) {
+    if (this.searchResults().length > 0 || this.navMatches().length > 0 || this.settingMatches().length > 0 || this.aiSuggestions().length > 0 || this.ragResults().length > 0 || this.ragAnswer()) {
       this.showResults.set(true);
     }
   }
@@ -292,7 +304,7 @@ export class AppHeaderComponent implements OnInit {
     this.searchFailed.set(results === null);
     this.searchResults.set(results ?? []);
     this.showResults.set(
-      results === null || results.length > 0 || this.navMatches().length > 0
+      results === null || results.length > 0 || this.navMatches().length > 0 || this.settingMatches().length > 0
       || this.aiService.available() || this.aiSuggestions().length > 0);
   }
 
@@ -307,6 +319,16 @@ export class AppHeaderComponent implements OnInit {
       this.searchControl.setValue('');
       event.preventDefault();
     }
+  }
+
+  protected navigateToSetting(entry: SettingsDirectoryEntry): void {
+    this.layout.closeMobileMenu();
+    this.showResults.set(false);
+    this.searchControl.setValue('', { emitEvent: false });
+    this.searchTerm.set('');
+    this.searchResults.set([]);
+    this.aiSuggestions.set([]);
+    this.router.navigate([entry.route], { queryParams: entry.queryParams });
   }
 
   protected navigateToPage(leaf: NavLeaf): void {

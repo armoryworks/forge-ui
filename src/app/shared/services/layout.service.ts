@@ -9,7 +9,7 @@ import { CapabilityService } from './capability.service';
 import { DesktopPreferenceService } from './desktop-preference.service';
 import { UserPreferencesService } from './user-preferences.service';
 import { LANDING_ROUTE_PREF_KEY, resolveRoleLanding } from '../models/role-landing.model';
-import { routeAccessFor } from '../models/route-access.model';
+import { RouteAccess, routeAccessFor } from '../models/route-access.model';
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -185,7 +185,11 @@ export class LayoutService {
    */
   canOpen(url: string): boolean {
     const access = routeAccessFor(url);
-    if (!access) return true;
+    return !access || this.passes(access);
+  }
+
+  /** Whether the signed-in user passes one role and capability rule (a capability not known yet counts as on). */
+  passes(access: RouteAccess): boolean {
     if (access.roles?.length && !this.auth.hasAnyRole([...access.roles])) return false;
     if (access.anyCapabilities?.length && !access.anyCapabilities.some((code) => this.capabilities.isEnabled(code, true))) return false;
     return (access.capabilities ?? []).every((code) => this.capabilities.isEnabled(code, true));

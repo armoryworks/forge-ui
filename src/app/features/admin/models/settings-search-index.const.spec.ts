@@ -29,4 +29,10 @@ describe('SETTINGS_SEARCH_INDEX', () => {
     expect(sectionsMatching(en, 'time zone')).toContain('company-profile');
     expect(sectionsMatching(es, 'zona horaria')).toContain('company-profile');
   });
+
+  it('finds the catalog-backed sections by their setting names', () => {
+    expect(sectionsMatching(en, 'restocking')).toContain('payments-credits');
+    expect(sectionsMatching(en, 'stale timer')).toContain('shop-floor-rules');
+    expect(sectionsMatching(es, 'quickbooks')).toContain('quickbooks-items');
+  });
 });
