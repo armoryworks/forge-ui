@@ -65,13 +65,13 @@
     "@aparajita/capacitor-biometric-auth": "^9.1.2",
     "@aparajita/capacitor-secure-storage": "^7.1.6",
     "@capacitor-mlkit/barcode-scanning": "^7.5.0",
-    "@capacitor/android": "^7.6.8",
+    "@capacitor/android": "^7.6.9",
     "@capacitor/app": "^7.1.2",
     "@capacitor/camera": "^7.0.5",
-    "@capacitor/core": "^7.6.8",
+    "@capacitor/core": "^7.6.9",
     "@capacitor/device": "^7.0.5",
     "@capacitor/haptics": "^7.0.5",
-    "@capacitor/ios": "^7.6.8",
+    "@capacitor/ios": "^7.6.9",
     "@capacitor/network": "^7.0.4",
     "@danielhokanson/ng-dynamic-forms-core": "^22.0.0",
     "@danielhokanson/ng-dynamic-forms-ui-material": "^22.0.0",
@@ -115,7 +115,7 @@
     "@angular/build": "^22.1.6",
     "@angular/cli": "^22.1.6",
     "@angular/compiler-cli": "^22.1.4",
-    "@capacitor/cli": "^7.6.8",
+    "@capacitor/cli": "^7.6.9",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@typescript-eslint/eslint-plugin": "^8.57.0",
@@ -135,5 +135,10 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.57.0",
     "vitest": "^4.0.8"
+  },
+  "overrides": {
+    "@angular/forms": {
+      "zod": "^4.6.7"
+    }
   }
 }
