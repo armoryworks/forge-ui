@@ -15,12 +15,16 @@ import { TabListDirective, TabDirective } from './tab-list.directive';
       @if (showC()) {
         <button class="tab" [appTab]="active() === 'c'" (click)="active.set('c')">C</button>
       }
+      @if (showD()) {
+        <button class="tab" [appTab]="active() === 'd'" (click)="active.set('d')">D</button>
+      }
     </div>
   `,
 })
 class HostComponent {
   readonly active = signal('a');
   readonly showC = signal(true);
+  readonly showD = signal(false);
 }
 
 describe('TabListDirective', () => {
@@ -70,6 +74,20 @@ describe('TabListDirective', () => {
 
     expect(shown.map(t => t.getAttribute('aria-selected'))).toEqual(['false', 'false']);
     expect(shown.map(t => t.getAttribute('tabindex'))).toEqual(['0', '-1']);
+  });
+
+  it('renders tabs added together when the active one comes after an inactive one', () => {
+    fixture.componentInstance.showC.set(false);
+    fixture.componentInstance.active.set('d');
+    fixture.detectChanges();
+
+    fixture.componentInstance.showC.set(true);
+    fixture.componentInstance.showD.set(true);
+    fixture.detectChanges();
+    const shown = Array.from(list.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+
+    expect(shown.map(t => t.getAttribute('aria-selected'))).toEqual(['false', 'false', 'false', 'true']);
+    expect(shown.map(t => t.getAttribute('tabindex'))).toEqual(['-1', '-1', '-1', '0']);
   });
 
   it('moves focus between tabs with the arrow, Home and End keys, skipping non-tab buttons', () => {

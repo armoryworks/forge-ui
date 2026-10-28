@@ -51,7 +51,7 @@ export class TabListDirective {
 export class TabDirective {
   private readonly list = inject(TabListDirective, { optional: true });
 
-  readonly appTab = input.required<boolean>();
+  readonly appTab = input(false);
 
   protected readonly tabIndex = computed(() => {
     if (this.appTab()) return 0;
