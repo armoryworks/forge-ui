@@ -327,7 +327,7 @@
                 </div>
                 <span class="part-item__qty">
                   x
-                  <app-input class="part-item__qty-input" type="number" [min]="0.0001" step="any"
+                  <app-input class="part-item__qty-input" type="calc-number" [min]="0.0001" step="any"
                     [label]="'kanban.addPartQty' | translate" [formControl]="partQtyEditControl(jp)"
                     [isReadonly]="partQtyReadonly(jp)"
                     (focusout)="savePartQty(jp)" (keydown.enter)="commitPartQtyOnEnter($event)"
@@ -354,7 +354,7 @@
               secondaryDisplayField="name"
               [formControl]="partPickerControl"
               (selected)="onPartPicked($event)" />
-            <app-input class="part-add__qty" type="number" [min]="0.0001" step="any"
+            <app-input class="part-add__qty" type="calc-number" [min]="0.0001" step="any"
               [label]="'kanban.addPartQty' | translate" [formControl]="partQtyControl"
               [placeholder]="newPartTakesLineQuantity() ? ('kanban.addPartQtyFromLine' | translate) : ''"
               (keydown.enter)="addPart()" data-testid="job-part-add-qty" />
@@ -507,11 +507,11 @@
           }
           @if (canEditQuantity()) {
             <div class="jd-detail-row">
-              <app-input class="jd-detail-qty" type="number" [min]="0.0001" step="any"
+              <app-input class="jd-detail-qty" type="calc-number" [min]="0.0001" step="any"
                 [label]="quantityLabelKey() | translate" [formControl]="quantityControl"
                 (focusout)="saveQuantity()" (keydown.enter)="commitQuantityOnEnter($event)"
                 data-testid="job-detail-quantity" />
-              <app-input class="jd-detail-qty" type="number" [min]="0" step="1"
+              <app-input class="jd-detail-qty" type="calc-number" [min]="0" step="1"
                 [label]="'kanban.extraPieces' | translate" [formControl]="extraPiecesControl"
                 (focusout)="saveExtraPieces()" (keydown.enter)="commitQuantityOnEnter($event)"
                 data-testid="job-detail-extra-pieces" />

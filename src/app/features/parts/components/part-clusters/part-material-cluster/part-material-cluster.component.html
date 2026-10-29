@@ -20,7 +20,7 @@
   <div class="cluster__form-row">
     <app-input data-testid="part-material-weight"
       [label]="'parts.detail.material.weight' | translate"
-      type="number"
+      type="calc-number"
       formControlName="weight"
       [isReadonly]="!editing()" />
     <app-select data-testid="part-material-weight-unit"
@@ -31,11 +31,11 @@
   </div>
 
   <div class="cluster__form-row">
-    <app-input label="Length" type="number" formControlName="length" [isReadonly]="!editing()" />
-    <app-input label="Width" type="number" formControlName="width" [isReadonly]="!editing()" />
+    <app-input label="Length" type="calc-number" formControlName="length" [isReadonly]="!editing()" />
+    <app-input label="Width" type="calc-number" formControlName="width" [isReadonly]="!editing()" />
   </div>
   <div class="cluster__form-row">
-    <app-input label="Height" type="number" formControlName="height" [isReadonly]="!editing()" />
+    <app-input label="Height" type="calc-number" formControlName="height" [isReadonly]="!editing()" />
     <app-select data-testid="part-material-dim-unit"
       label="Unit"
       formControlName="dimensionDisplayUnit"
@@ -46,7 +46,7 @@
   <div class="cluster__form-row">
     <app-input data-testid="part-material-volume"
       [label]="'parts.detail.material.volume' | translate"
-      type="number"
+      type="calc-number"
       formControlName="volume"
       [isReadonly]="!editing()" />
     <app-select data-testid="part-material-volume-unit"

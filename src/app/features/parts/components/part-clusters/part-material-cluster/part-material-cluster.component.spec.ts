@@ -114,6 +114,39 @@ describe('PartMaterialClusterComponent', () => {
     expect(cb.mock.calls[0][0].weightDisplayUnit).toBe('kg');
   });
 
+  it('stores 0.75 in as 19.05 mm and 13/16 in as 20.6375 mm', () => {
+    const component = TestBed.runInInjectionContext(() => new PartMaterialClusterComponent());
+    mockSignalInputs(component, { part: makePart(), editing: true, saving: false });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { patchValue(v: Record<string, unknown>): void };
+      onSave(): void;
+    };
+    c.form.patchValue({ length: 0.75, width: 13 / 16, height: null, dimensionDisplayUnit: 'in' });
+    const cb = vi.fn();
+    component.save.subscribe(cb);
+    c.onSave();
+    expect(cb.mock.calls[0][0].lengthMm).toBe(19.05);
+    expect(cb.mock.calls[0][0].widthMm).toBe(20.6375);
+    expect(cb.mock.calls[0][0].heightMm).toBeNull();
+  });
+
+  it('shows stored millimetres in inches without float noise', () => {
+    const component = TestBed.runInInjectionContext(() => new PartMaterialClusterComponent());
+    mockSignalInputs(component, {
+      part: makePart({ lengthMm: 19.05, widthMm: 20.6375, heightMm: 30.1625, dimensionDisplayUnit: 'in' }),
+      editing: false,
+      saving: false,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { form: { getRawValue(): Record<string, unknown> } };
+    const v = c.form.getRawValue();
+    expect(v['length']).toBe(0.75);
+    expect(v['width']).toBe(0.8125);
+    expect(v['height']).toBe(1.1875);
+    expect(v['dimensionDisplayUnit']).toBe('in');
+  });
+
   describe('new material', () => {
     const aluminum: ReferenceDataItem = {
       id: 1, groupCode: 'part.material_spec', code: 'aluminum', label: 'Aluminum',

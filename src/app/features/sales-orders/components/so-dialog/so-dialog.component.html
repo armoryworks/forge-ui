@@ -52,9 +52,9 @@
             (selected)="onPartPicked($event)" data-testid="so-line-part" />
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities. -->
-          <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="so-line-qty" />
+          <app-input [label]="'salesOrders.qty' | translate" type="calc-number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="so-line-qty" />
           <div class="price-field">
-            <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" data-testid="so-line-price" />
+            <app-input [label]="'common.price' | translate" type="calc-number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" data-testid="so-line-price" />
             @if (priceIsListPrice()) {
               <span class="price-badge" data-testid="so-line-list-price">{{ 'salesOrders.listPrice' | translate }}</span>
             }

@@ -6260,7 +6260,10 @@
       "helpForThisPage": "Help for this page",
       "noTrainingModulesForThisPage": "No training modules for this page yet",
       "trainingHelpForThisPage": "Training help for this page"
-    }
+    },
+    "calcHint": "Type a number or simple math: 360+64, 3/4, 1 3/16",
+    "calcInvalid": "{{label}} must be a number or simple math such as 3/4 or 360+64",
+    "calcDivideByZero": "{{label}} divides by zero"
   },
   "address": {
     "street": "Street",

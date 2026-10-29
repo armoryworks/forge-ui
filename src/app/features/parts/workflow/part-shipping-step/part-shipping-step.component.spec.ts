@@ -112,6 +112,37 @@ describe('PartShippingStepComponent (Phase 5 — save-on-Continue)', () => {
     expect(saveResult).toEqual({ ok: true });
   });
 
+  it('round-trips 0.75 in and 13/16 in through canonical millimetres', () => {
+    const component = TestBed.runInInjectionContext(() => new PartShippingStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'shipping', componentName: 'PartShippingStepComponent',
+      runId: 7, entityId: 42, entity: buildPart({ lengthMm: 19.05, widthMm: 20.6375, dimensionDisplayUnit: 'in' }),
+    });
+    TestBed.flushEffects();
+
+    const form = (component as unknown as {
+      form: { getRawValue(): Record<string, unknown>; patchValue(v: unknown): void; markAsDirty(): void };
+    }).form;
+    expect(form.getRawValue()['length']).toBe(0.75);
+    expect(form.getRawValue()['width']).toBe(0.8125);
+
+    form.patchValue({ height: 0.75 });
+    form.markAsDirty();
+    workflowService.saveCurrentStep().subscribe();
+
+    const req = httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`);
+    expect(req.request.body.fields.lengthMm).toBe(19.05);
+    expect(req.request.body.fields.widthMm).toBe(20.6375);
+    expect(req.request.body.fields.heightMm).toBe(19.05);
+    expect(req.request.body.fields.dimensionDisplayUnit).toBe('in');
+    req.flush({
+      id: 7, entityType: 'Part', entityId: 42, definitionId: 'd', currentStepId: 'shipping',
+      mode: 'guided', startedAt: '', startedByUserId: 1, completedAt: null,
+      abandonedAt: null, abandonedReason: null, lastActivityAt: '', version: 1,
+    });
+    httpMock.expectOne(`${environment.apiUrl}/parts/42`).flush(buildPart());
+  });
+
   it('does NOT round-trip when the form is pristine — Back/Jump on a never-touched step is a no-op', () => {
     const component = TestBed.runInInjectionContext(() => new PartShippingStepComponent());
     mockSignalInputs(component, {

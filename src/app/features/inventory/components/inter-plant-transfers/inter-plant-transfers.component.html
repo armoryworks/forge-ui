@@ -100,7 +100,7 @@
             <app-select [label]="'inventoryScreens.transfers.fromBin' | translate" formControlName="sourceBinContentId" [options]="lineBinOptions()[line.controls.key.value]" [required]="true"
               [placeholder]="(line.controls.partId.value ? 'replenishmentUi.selectBin' : 'replenishmentUi.pickPartFirst') | translate" [attr.data-testid]="'transfer-line-from-' + i" />
             <app-entity-picker [label]="'inventoryScreens.transfers.toBin' | translate" entityType="inventory/locations/bins" displayField="locationPath" formControlName="toLocationId" [required]="true" [attr.data-testid]="'transfer-line-to-' + i" />
-            <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" [required]="true" [attr.data-testid]="'transfer-line-qty-' + i" />
+            <app-input [label]="'common.quantity' | translate" type="calc-number" formControlName="quantity" [required]="true" [attr.data-testid]="'transfer-line-qty-' + i" />
             <button type="button" class="icon-btn icon-btn--danger" [disabled]="lineGroups.length === 1" [attr.aria-label]="'inventoryScreens.transfers.removeLine' | translate"
               [attr.data-testid]="'transfer-line-remove-' + i" (click)="removeLine(i)">
               <span class="material-icons-outlined">delete</span>
@@ -145,7 +145,7 @@
             <span class="transfers__number">{{ line.partNumber }}</span>
             <span class="text-muted">{{ 'inventoryScreens.transfers.plannedBin' | translate: { bin: line.toLocationPath ?? '—' } }}</span>
           </div>
-          <app-input [label]="'inventoryScreens.transfers.receivedQty' | translate" type="number" [formControl]="receiveLines.at(i).controls.receivedQuantity" [attr.data-testid]="'transfer-receive-qty-' + i" />
+          <app-input [label]="'inventoryScreens.transfers.receivedQty' | translate" type="calc-number" [formControl]="receiveLines.at(i).controls.receivedQuantity" [attr.data-testid]="'transfer-receive-qty-' + i" />
           <app-entity-picker [label]="'inventoryScreens.transfers.otherBin' | translate" entityType="inventory/locations/bins" displayField="locationPath" [formControl]="receiveLines.at(i).controls.toLocationId" [attr.data-testid]="'transfer-receive-bin-' + i" />
         </div>
       }

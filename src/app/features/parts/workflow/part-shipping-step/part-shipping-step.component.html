@@ -8,7 +8,7 @@
     <div class="part-shipping-step__row">
       <app-input
         [label]="'parts.workflow.shipping.weightLabel' | translate"
-        type="number"
+        type="calc-number"
         formControlName="weight"
         data-testid="shipping-weight" />
       <app-select
@@ -21,17 +21,17 @@
     <div class="part-shipping-step__row part-shipping-step__row--quad">
       <app-input
         [label]="'parts.workflow.shipping.lengthLabel' | translate"
-        type="number"
+        type="calc-number"
         formControlName="length"
         data-testid="shipping-length" />
       <app-input
         [label]="'parts.workflow.shipping.widthLabel' | translate"
-        type="number"
+        type="calc-number"
         formControlName="width"
         data-testid="shipping-width" />
       <app-input
         [label]="'parts.workflow.shipping.heightLabel' | translate"
-        type="number"
+        type="calc-number"
         formControlName="height"
         data-testid="shipping-height" />
       <app-select
@@ -44,7 +44,7 @@
     <div class="part-shipping-step__row">
       <app-input
         [label]="'parts.workflow.shipping.volumeLabel' | translate"
-        type="number"
+        type="calc-number"
         formControlName="volume"
         data-testid="shipping-volume" />
       <app-select

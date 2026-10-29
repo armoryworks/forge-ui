@@ -894,7 +894,7 @@
         <p class="dialog-hint" data-testid="transfer-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
       <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
-      <app-input data-testid="transfer-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="number" [min]="0.0001" step="any" [max]="transferSourceBin()?.availableQuantity ?? null" />
+      <app-input data-testid="transfer-quantity" [label]="'common.quantity' | translate" formControlName="quantity" type="calc-number" [min]="0.0001" step="any" [max]="transferSourceBin()?.availableQuantity ?? null" />
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
@@ -918,7 +918,7 @@
       @if (showNoBinsHint(adjustForm.controls.partId.value, adjustBinOptions())) {
         <p class="dialog-hint" data-testid="adjust-no-bins">{{ 'replenishmentUi.noBins' | translate }}</p>
       }
-      <app-input data-testid="adjust-new-quantity" [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
+      <app-input data-testid="adjust-new-quantity" [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="calc-number" />
       <app-input data-testid="adjust-reason" [label]="'inventory.dialogs.reason' | translate" formControlName="reason" />
       <app-textarea data-testid="adjust-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>

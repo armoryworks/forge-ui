@@ -89,8 +89,8 @@
               [options]="accountOptions()"
               formControlName="glAccountId"
               [required]="true" />
-            <app-currency-input class="je-line__amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
-            <app-currency-input class="je-line__amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
+            <app-currency-input calc class="je-line__amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
+            <app-currency-input calc class="je-line__amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
             <app-input class="je-line__desc" [label]="'accounting.common.description' | translate" formControlName="description" />
             <button
               type="button"

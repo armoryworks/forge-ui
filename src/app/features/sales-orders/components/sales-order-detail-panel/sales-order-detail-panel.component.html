@@ -582,8 +582,8 @@
                   (selected)="onPartSelected($event)" />
               }
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
-              <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
-              <app-currency-input [label]="'salesOrders.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+              <app-input [label]="'salesOrders.qty' | translate" type="calc-number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+              <app-currency-input calc [label]="'salesOrders.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
               <app-input [label]="'tolerance.overPercent' | translate" type="number" formControlName="overTolerancePct" min="0" step="0.1"
                 [placeholder]="'tolerance.inheritHint' | translate" data-testid="so-line-over-tolerance" />
               <app-input [label]="'tolerance.underPercent' | translate" type="number" formControlName="underTolerancePct" min="0" max="100" step="0.1"

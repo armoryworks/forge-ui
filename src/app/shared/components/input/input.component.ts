@@ -36,8 +36,11 @@ import { EMPTY, merge } from 'rxjs';
 
 import { FormValidationService } from '../../services/form-validation.service';
 import { LanguageService } from '../../services/language.service';
+import { CalcErrorCode, CalcResult, evaluateCalcExpression } from '../../utils/calc-expression';
 import { decimalPlaces, formatLocaleNumber, parseLocaleNumber } from '../../utils/locale-number';
+import { roundToPlaces } from '../../utils/round-to-places';
 import { controlIsRequired } from '../../validators/control-is-required';
+import { wholeNumber } from '../../validators/whole-number.validator';
 
 @Component({
   selector: 'app-input',
@@ -67,7 +70,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   private readonly parentForm = inject(FormGroupDirective, { optional: true }) ?? inject(NgForm, { optional: true });
 
   readonly label = input.required<string>();
-  readonly type = input<'text' | 'number' | 'email' | 'password' | 'time' | 'datetime-local'>('text');
+  readonly type = input<'text' | 'number' | 'calc-number' | 'email' | 'password' | 'time' | 'datetime-local'>('text');
   readonly info = input<string>('');
   readonly placeholder = input<string>('');
   readonly prefix = input<string>('');
@@ -86,6 +89,10 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
 
   protected readonly disabled = signal(false);
   protected readonly showPassword = signal(false);
+  protected readonly isCalc = computed(() => this.type() === 'calc-number');
+  protected readonly showCalcHint = computed(() => this.isCalc() && !this.isReadonly() && !this.disabled());
+  protected readonly calcHint = computed(() =>
+    this.showCalcHint() ? this.message('shared.calcHint', 'Type a number or simple math: 360+64, 3/4, 1 3/16') : null);
 
   private readonly control = signal<AbstractControl | null>(null);
   private readonly controlState = signal(0);
@@ -125,6 +132,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   private readonly textLength = signal(0);
   private edited = false;
   private invalidNumber = false;
+  private calcError: CalcErrorCode | null = null;
 
   constructor() {
     effect(() => {
@@ -141,11 +149,12 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
   }
 
   protected get isNumeric(): boolean {
-    return this.type() === 'number' || this.mask() === 'currency';
+    return this.type() === 'number' || this.isCalc() || this.mask() === 'currency';
   }
 
   protected get inputMode(): string | null {
     if (!this.isNumeric) return null;
+    if (this.isCalc()) return 'text';
     const min = this.toNumber(this.min());
     return this.mask() === 'currency' || (min !== null && min >= 0) ? 'decimal' : 'text';
   }
@@ -186,6 +195,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     this.edited = false;
     if (this.isNumeric) {
       this.invalidNumber = false;
+      this.calcError = null;
       if (value === null || value === undefined || value === '') {
         this.setText('');
         return;
@@ -215,6 +225,7 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
 
   validate(control: AbstractControl): ValidationErrors | null {
     if (!this.isNumeric) return null;
+    if (this.isCalc()) return this.validateCalc(control);
     if (this.invalidNumber) {
       return { numberFormat: { message: this.message('shared.numberFormat', `${this.label()} must be a number`) } };
     }
@@ -234,6 +245,13 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     this.text = el.value;
     this.edited = true;
 
+    if (this.isCalc()) {
+      const result = this.resolveCalc(this.text);
+      this.calcError = result.error;
+      this.onChange(result.value);
+      return;
+    }
+
     if (this.isNumeric) {
       const parsed = parseLocaleNumber(this.text, this.lang());
       this.invalidNumber = parsed !== null && Number.isNaN(parsed);
@@ -250,8 +268,14 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
     this.onChange(this.text);
   }
 
+  protected onEnter(): void {
+    if (this.isCalc()) this.commitCalc();
+  }
+
   protected onBlur(): void {
-    if (this.isNumeric) {
+    if (this.isCalc()) {
+      this.commitCalc();
+    } else if (this.isNumeric) {
       const parsed = parseLocaleNumber(this.text, this.lang());
       if (parsed !== null && !Number.isNaN(parsed)) this.setText(this.formatNumber(parsed));
     } else if (this.edited && (this.mask() === 'phone' || this.mask() === 'zip')) {
@@ -262,6 +286,58 @@ export class InputComponent implements ControlValueAccessor, Validator, AfterCon
       }
     }
     this.onTouched();
+  }
+
+  private commitCalc(): void {
+    const result = this.resolveCalc(this.text);
+    this.calcError = result.error;
+    if (result.error !== null || result.value === null) return;
+    const formatted = this.formatNumber(result.value);
+    if (formatted !== this.text) {
+      this.setText(formatted);
+      this.onChange(result.value);
+    }
+  }
+
+  private resolveCalc(text: string): CalcResult {
+    const result = evaluateCalcExpression(text, this.lang());
+    const places = this.calcPlaces();
+    if (result.value === null || places === null) return result;
+    const literal = parseLocaleNumber(text, this.lang());
+    if (literal !== null && !Number.isNaN(literal)) return result;
+    return { value: roundToPlaces(result.value, places), error: null };
+  }
+
+  private calcPlaces(): number | null {
+    const step = this.toNumber(this.step());
+    if (step === null || step <= 0 || Number.isInteger(step)) return null;
+    return decimalPlaces(String(this.step()));
+  }
+
+  private isWholeNumberField(control: AbstractControl): boolean {
+    const step = this.toNumber(this.step());
+    return (step !== null && step > 0 && Number.isInteger(step)) || control.hasValidator(wholeNumber);
+  }
+
+  private validateCalc(control: AbstractControl): ValidationErrors | null {
+    if (this.calcError === 'divideByZero') {
+      return { calcExpression: { message: this.message('shared.calcDivideByZero', `${this.label()} divides by zero`) } };
+    }
+    if (this.calcError !== null) {
+      return {
+        calcExpression: {
+          message: this.message('shared.calcInvalid', `${this.label()} must be a number or simple math such as 3/4`),
+        },
+      };
+    }
+    const value: unknown = control.value;
+    if (typeof value !== 'number') return null;
+    if (this.isWholeNumberField(control) && !Number.isInteger(value)) return { wholeNumber: true };
+    const min = this.toNumber(this.min());
+    if (min !== null && value < min) return { min: { min, actual: value } };
+    const max = this.toNumber(this.max());
+    if (max !== null && value > max) return { max: { max, actual: value } };
+    return null;
   }
 
   private setText(text: string): void {

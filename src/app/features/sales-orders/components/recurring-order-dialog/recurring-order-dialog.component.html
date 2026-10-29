@@ -45,9 +45,9 @@
             <app-input [label]="'salesOrders.recurring.lineDescription' | translate"
               formControlName="description" [required]="true" />
             <app-input [label]="'salesOrders.recurring.lineQty' | translate"
-              type="number" formControlName="quantity" [required]="true" />
+              type="calc-number" formControlName="quantity" [required]="true" />
             <app-input [label]="'salesOrders.recurring.lineUnitPrice' | translate"
-              type="number" formControlName="unitPrice" [required]="true" />
+              type="calc-number" formControlName="unitPrice" [required]="true" />
             <button class="icon-btn icon-btn--danger" type="button"
                     [attr.aria-label]="'common.delete' | translate"
                     [disabled]="lines.length <= 1"

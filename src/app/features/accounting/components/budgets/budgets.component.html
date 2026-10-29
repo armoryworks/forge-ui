@@ -48,7 +48,7 @@
             <tr>
               <td>{{ row.account.accountNumber }} · {{ row.account.name }}</td>
               <td class="num budget-amount-cell">
-                <app-currency-input [label]="row.account.accountNumber" [formControlName]="row.controlName" />
+                <app-currency-input calc [label]="row.account.accountNumber" [formControlName]="row.controlName" />
               </td>
             </tr>
           } @empty {

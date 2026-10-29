@@ -216,8 +216,8 @@
                 (selected)="onPartSelected($event)" />
             }
             <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
-            <app-input [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
-            <app-currency-input [label]="'quotes.unitPrice' | translate" formControlName="unitPrice" [required]="true" step="0.0001" />
+            <app-input [label]="'quotes.qty' | translate" type="calc-number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+            <app-currency-input calc [label]="'quotes.unitPrice' | translate" formControlName="unitPrice" [required]="true" step="0.0001" />
             <div class="line-edit-form__actions">
               <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
               <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>

@@ -112,8 +112,8 @@
                     [options]="accountOptions()"
                     formControlName="glAccountId"
                     [required]="true" />
-                  <app-currency-input class="oj__line-amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
-                  <app-currency-input class="oj__line-amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
+                  <app-currency-input calc class="oj__line-amt" [label]="'accounting.common.debit' | translate" formControlName="debit" />
+                  <app-currency-input calc class="oj__line-amt" [label]="'accounting.common.credit' | translate" formControlName="credit" />
                   <app-input class="oj__line-desc" [label]="'accounting.common.description' | translate" formControlName="description" />
                   @if (inventoryLines()[i]) {
                     <span class="oj__line-flag" data-testid="oj-inventory-line">{{ 'accounting.openingJournal.inventoryLineFlag' | translate }}</span>

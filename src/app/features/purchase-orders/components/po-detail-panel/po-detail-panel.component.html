@@ -627,9 +627,9 @@
       <app-input [label]="'common.description' | translate" formControlName="description" [maxlength]="500"
         [required]="addLineForm.controls.partId.value === null"
         data-testid="po-add-line-description" />
-      <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity"
+      <app-input [label]="'common.quantity' | translate" type="calc-number" formControlName="quantity"
         step="0.0001" min="0.0001" [required]="true" data-testid="po-add-line-quantity" />
-      <app-currency-input [label]="'purchaseOrders.unitPrice' | translate" formControlName="unitPrice"
+      <app-currency-input calc [label]="'purchaseOrders.unitPrice' | translate" formControlName="unitPrice"
         [min]="0" [required]="true" data-testid="po-add-line-unit-price" />
       <app-input [label]="'tolerance.overPercent' | translate" type="number" formControlName="overReceiptTolerancePct"
         min="0" step="0.1" [placeholder]="'tolerance.inheritHint' | translate" data-testid="po-add-line-over-tolerance" />

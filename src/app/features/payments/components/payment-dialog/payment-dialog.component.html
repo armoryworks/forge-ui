@@ -46,8 +46,8 @@
         <!-- Add Application Form -->
         <div class="add-line add-line--4col" [formGroup]="appForm">
           <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0" [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="payment-app-invoice" />
-          <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [max]="applicationRemaining()" data-testid="payment-app-amount" />
-          <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" data-testid="payment-app-discount" />
+          <app-input [label]="'payments.amount' | translate" type="calc-number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [max]="applicationRemaining()" data-testid="payment-app-amount" />
+          <app-input [label]="'paymentTerms.discount' | translate" type="calc-number" formControlName="discount" data-testid="payment-app-discount" />
           <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid" aria-label="Add invoice application">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
@@ -67,7 +67,7 @@
           [filters]="customerFilters" formControlName="customerId" [required]="true" [placeholder]="'customers.searchPlaceholder' | translate"
           (selected)="onCustomerSelected($event)" />
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
-        <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
+        <app-input [label]="'payments.amount' | translate" type="calc-number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
         <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="payment-date" />
         <app-document-currency [currencyControl]="paymentForm.controls.currencyId" [fxRateControl]="paymentForm.controls.fxRate"
           [documentDate]="paymentDateValue()" [defaultCurrencyId]="customerCurrencyId()" testIdPrefix="payment" />

@@ -6260,7 +6260,10 @@
       "helpForThisPage": "Ayuda para esta página",
       "noTrainingModulesForThisPage": "Aún no hay módulos de capacitación para esta página",
       "trainingHelpForThisPage": "Ayuda de capacitación para esta página"
-    }
+    },
+    "calcHint": "Escriba un número o una operación sencilla: 360+64, 3/4, 1 3/16",
+    "calcInvalid": "{{label}} debe ser un número o una operación sencilla como 3/4 o 360+64",
+    "calcDivideByZero": "{{label}} divide entre cero"
   },
   "addressForm": {
     "streetAddress": "Dirección",

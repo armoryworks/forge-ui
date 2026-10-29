@@ -4,7 +4,7 @@
       <span>{{ 'creditMemos.refundAvailable' | translate }}</span>
       <app-currency-display [value]="maxAmount()" [currency]="currencyCode()" />
     </div>
-    <app-input [label]="'creditMemos.refundAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+    <app-input [label]="'creditMemos.refundAmount' | translate" type="calc-number" formControlName="amount" step="0.01" min="0.01"
       [required]="true" data-testid="refund-amount" />
     <app-select [label]="'creditMemos.refundMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="refund-method" />
     <app-datepicker [label]="'creditMemos.refundDate' | translate" formControlName="refundDate" [required]="true" data-testid="refund-date" />

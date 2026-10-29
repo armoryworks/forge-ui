@@ -9,6 +9,9 @@ import { ValidationButtonComponent } from '../../../../../shared/components/vali
 import { AuthService } from '../../../../../shared/services/auth.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { ReferenceDataItem, ReferenceDataService } from '../../../../../shared/services/reference-data.service';
+import {
+  fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
+} from '../../../../../shared/utils/measure-units';
 import { PartDetail } from '../../../models/part-detail.model';
 import {
   MaterialSpecDialogComponent, MaterialSpecDialogData,
@@ -55,47 +58,9 @@ export class PartMaterialClusterComponent implements OnInit {
   protected readonly materialSpecOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
   private readonly materialSpecItems = signal<ReferenceDataItem[]>([]);
 
-  // ── Conversion factors ──
-  // Canonical: weight in grams, dimensions in mm, volume in mL.
-  private readonly weightToGrams: Record<string, number> = {
-    g: 1,
-    kg: 1000,
-    lb: 453.59237,
-    oz: 28.3495,
-  };
-  private readonly dimensionToMm: Record<string, number> = {
-    mm: 1,
-    cm: 10,
-    m: 1000,
-    in: 25.4,
-    ft: 304.8,
-  };
-  private readonly volumeToMl: Record<string, number> = {
-    mL: 1,
-    L: 1000,
-    gal: 3785.41,
-  };
-
-  protected readonly weightUnitOptions: SelectOption[] = [
-    { value: 'g', label: 'g' },
-    { value: 'kg', label: 'kg' },
-    { value: 'lb', label: 'lb' },
-    { value: 'oz', label: 'oz' },
-  ];
-
-  protected readonly dimensionUnitOptions: SelectOption[] = [
-    { value: 'mm', label: 'mm' },
-    { value: 'cm', label: 'cm' },
-    { value: 'm', label: 'm' },
-    { value: 'in', label: 'in' },
-    { value: 'ft', label: 'ft' },
-  ];
-
-  protected readonly volumeUnitOptions: SelectOption[] = [
-    { value: 'mL', label: 'mL' },
-    { value: 'L', label: 'L' },
-    { value: 'gal', label: 'gal' },
-  ];
+  protected readonly weightUnitOptions = measureUnitOptions('weight');
+  protected readonly dimensionUnitOptions = measureUnitOptions('length');
+  protected readonly volumeUnitOptions = measureUnitOptions('volume');
 
   protected readonly form = new FormGroup({
     materialSpecId: new FormControl<number | null>(null),
@@ -155,22 +120,19 @@ export class PartMaterialClusterComponent implements OnInit {
   constructor() {
     effect(() => {
       const p = this.part();
-      const weight = this.gramsToDisplay(p.weightEach, p.weightDisplayUnit);
-      const dim = this.mmToDisplay(
-        { length: p.lengthMm, width: p.widthMm, height: p.heightMm },
-        p.dimensionDisplayUnit,
-      );
-      const vol = this.mlToDisplay(p.volumeMl, p.volumeDisplayUnit);
+      const dimensionUnit = measureDisplayUnit('length', p.dimensionDisplayUnit);
+      const weightUnit = measureDisplayUnit('weight', p.weightDisplayUnit);
+      const volumeUnit = measureDisplayUnit('volume', p.volumeDisplayUnit);
       this.form.reset({
         materialSpecId: p.materialSpecId,
-        weight: weight.value,
-        weightDisplayUnit: weight.unit,
-        length: dim.length,
-        width: dim.width,
-        height: dim.height,
-        dimensionDisplayUnit: dim.unit,
-        volume: vol.value,
-        volumeDisplayUnit: vol.unit,
+        weight: fromCanonicalMeasure('weight', p.weightEach, weightUnit),
+        weightDisplayUnit: weightUnit,
+        length: fromCanonicalMeasure('length', p.lengthMm, dimensionUnit),
+        width: fromCanonicalMeasure('length', p.widthMm, dimensionUnit),
+        height: fromCanonicalMeasure('length', p.heightMm, dimensionUnit),
+        dimensionDisplayUnit: dimensionUnit,
+        volume: fromCanonicalMeasure('volume', p.volumeMl, volumeUnit),
+        volumeDisplayUnit: volumeUnit,
       });
       if (this.editing()) {
         this.form.enable();
@@ -180,56 +142,19 @@ export class PartMaterialClusterComponent implements OnInit {
     });
   }
 
-  private gramsToDisplay(grams: number | null, unit: string | null): { value: number | null; unit: string } {
-    const u = unit && this.weightToGrams[unit] ? unit : 'g';
-    if (grams === null) return { value: null, unit: u };
-    return { value: grams / this.weightToGrams[u], unit: u };
-  }
-
-  private mmToDisplay(
-    dims: { length: number | null; width: number | null; height: number | null },
-    unit: string | null,
-  ): { length: number | null; width: number | null; height: number | null; unit: string } {
-    const u = unit && this.dimensionToMm[unit] ? unit : 'mm';
-    const factor = this.dimensionToMm[u];
-    return {
-      length: dims.length === null ? null : dims.length / factor,
-      width: dims.width === null ? null : dims.width / factor,
-      height: dims.height === null ? null : dims.height / factor,
-      unit: u,
-    };
-  }
-
-  private mlToDisplay(ml: number | null, unit: string | null): { value: number | null; unit: string } {
-    const u = unit && this.volumeToMl[unit] ? unit : 'mL';
-    if (ml === null) return { value: null, unit: u };
-    return { value: ml / this.volumeToMl[u], unit: u };
-  }
-
   protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
 
-    const weightEach = v.weight === null
-      ? null
-      : v.weight * (this.weightToGrams[v.weightDisplayUnit] ?? 1);
-    const dimFactor = this.dimensionToMm[v.dimensionDisplayUnit] ?? 1;
-    const lengthMm = v.length === null ? null : v.length * dimFactor;
-    const widthMm = v.width === null ? null : v.width * dimFactor;
-    const heightMm = v.height === null ? null : v.height * dimFactor;
-    const volumeMl = v.volume === null
-      ? null
-      : v.volume * (this.volumeToMl[v.volumeDisplayUnit] ?? 1);
-
     (close ? this.saveAndClose : this.save).emit({
       materialSpecId: v.materialSpecId ?? null,
-      weightEach,
+      weightEach: toCanonicalMeasure('weight', v.weight, v.weightDisplayUnit),
       weightDisplayUnit: v.weightDisplayUnit,
-      lengthMm,
-      widthMm,
-      heightMm,
+      lengthMm: toCanonicalMeasure('length', v.length, v.dimensionDisplayUnit),
+      widthMm: toCanonicalMeasure('length', v.width, v.dimensionDisplayUnit),
+      heightMm: toCanonicalMeasure('length', v.height, v.dimensionDisplayUnit),
       dimensionDisplayUnit: v.dimensionDisplayUnit,
-      volumeMl,
+      volumeMl: toCanonicalMeasure('volume', v.volume, v.volumeDisplayUnit),
       volumeDisplayUnit: v.volumeDisplayUnit,
     });
   }

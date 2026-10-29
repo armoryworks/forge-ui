@@ -196,3 +196,79 @@ describe('CurrencyInputComponent', () => {
     expect(input.value).toBe('42.25');
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, CurrencyInputComponent],
+  template: `
+    <app-currency-input label="Amount" calc [formControl]="amount" />
+    <app-currency-input label="Rate" calc step="0.0001" [formControl]="rate" />
+    <app-currency-input label="Plain" [formControl]="plain" />
+  `,
+})
+class CalcHostComponent {
+  amount = new FormControl<number | null>(null);
+  rate = new FormControl<number | null>(null);
+  plain = new FormControl<number | null>(null);
+}
+
+describe('CurrencyInputComponent · calc', () => {
+  function render() {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [CalcHostComponent],
+      providers: [provideAnimations(), provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } })],
+    });
+    TestBed.inject(LanguageService).currentLanguage.set('en');
+    const fixture = TestBed.createComponent(CalcHostComponent);
+    fixture.detectChanges();
+    const field = (i: number) => fixture.nativeElement.querySelectorAll('input')[i] as HTMLInputElement;
+    const type = (text: string, i = 0) => {
+      field(i).value = text;
+      field(i).dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+    const blur = (i = 0) => {
+      field(i).dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+    };
+    return { fixture, host: fixture.componentInstance, field, type, blur };
+  }
+
+  it('evaluates math to a number and shows it as money on blur', () => {
+    const { host, field, type, blur } = render();
+    type('120+35.5');
+    expect(host.amount.value).toBe(155.5);
+    blur();
+    expect(field(0).value).toBe('155.50');
+    expect(field(0).getAttribute('inputmode')).toBe('text');
+  });
+
+  it('rounds a math result to the cent, or to the step decimals', () => {
+    const { host, type } = render();
+    type('100/3');
+    expect(host.amount.value).toBe(33.33);
+    type('1/3', 1);
+    expect(host.rate.value).toBe(0.3333);
+  });
+
+  it('flags malformed math and division by zero', () => {
+    const { host, type } = render();
+    type('12*');
+    expect(host.amount.value).toBeNull();
+    expect(host.amount.getError('calcExpression')?.message).toBe('Amount must be a number or simple math such as 3/4');
+    type('12/0');
+    expect(host.amount.getError('calcExpression')?.message).toBe('Amount divides by zero');
+    type('12/4');
+    expect(host.amount.valid).toBe(true);
+    expect(host.amount.value).toBe(3);
+  });
+
+  it('leaves a field without calc as a plain number field', () => {
+    const { host, fixture, type } = render();
+    type('1+1', 2);
+    expect(host.plain.value).toBeNull();
+    expect(host.plain.hasError('numberFormat')).toBe(true);
+    expect(fixture.nativeElement.querySelectorAll('[data-testid="currency-input-calc-hint"]').length).toBe(2);
+  });
+});

@@ -6,7 +6,7 @@
     </div>
 
     <div class="dialog-row">
-      <app-currency-input [label]="'payables.amount' | translate" formControlName="amount" [required]="true" data-testid="vendor-payment-amount" />
+      <app-currency-input calc [label]="'payables.amount' | translate" formControlName="amount" [required]="true" data-testid="vendor-payment-amount" />
       <app-datepicker [label]="'payables.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="vendor-payment-date" />
     </div>
 
@@ -42,8 +42,8 @@
                 }
               </span>
               <span class="app-line__right"><app-currency-display [value]="payableBills()[i].balanceDue" [currency]="documentCurrencyCode()" /></span>
-              <app-input [label]="'payables.amountToApply' | translate" type="number" formControlName="amount" min="0" [max]="payableBills()[i].balanceDue" step="0.01" data-testid="vendor-payment-app-amount" />
-              <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" min="0" step="0.01" data-testid="vendor-payment-app-discount" />
+              <app-input [label]="'payables.amountToApply' | translate" type="calc-number" formControlName="amount" min="0" [max]="payableBills()[i].balanceDue" step="0.01" data-testid="vendor-payment-app-amount" />
+              <app-input [label]="'paymentTerms.discount' | translate" type="calc-number" formControlName="discount" min="0" step="0.01" data-testid="vendor-payment-app-discount" />
             </div>
           }
         </div>

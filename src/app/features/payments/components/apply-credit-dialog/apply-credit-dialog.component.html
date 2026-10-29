@@ -38,9 +38,9 @@
   <div class="add-line" [class.add-line--4col]="!showSettlementFxRate()" [class.add-line--5col]="showSettlementFxRate()" [formGroup]="appForm">
     <app-autocomplete [label]="'payments.invoice' | translate" [options]="invoiceOptions()" formControlName="invoiceId" [minChars]="0"
       [placeholder]="'payments.invoicePlaceholder' | translate" data-testid="apply-credit-invoice" />
-    <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount"
+    <app-input [label]="'payments.amount' | translate" type="calc-number" formControlName="amount"
       [placeholder]="'payments.amountPlaceholder' | translate" data-testid="apply-credit-amount" />
-    <app-input [label]="'paymentTerms.discount' | translate" type="number" formControlName="discount" data-testid="apply-credit-discount" />
+    <app-input [label]="'paymentTerms.discount' | translate" type="calc-number" formControlName="discount" data-testid="apply-credit-discount" />
     @if (showSettlementFxRate()) {
       <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate"
         step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" />

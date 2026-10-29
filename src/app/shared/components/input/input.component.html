@@ -15,7 +15,9 @@
     [autocomplete]="autocomplete()"
     [disabled]="disabled()"
     [errorStateMatcher]="errorStateMatcher"
+    [attr.aria-description]="calcHint()"
     (input)="onInput($event)"
+    (keydown.enter)="onEnter()"
     (blur)="onBlur()" />
   @if (type() === 'password') {
     <button matSuffix type="button" class="input__password-toggle"
@@ -28,6 +30,10 @@
   }
   @if (suffix()) {
     <span matSuffix>&nbsp;{{ suffix() }}</span>
+  }
+  @if (showCalcHint()) {
+    <span matSuffix class="material-icons-outlined input__calc-hint" data-testid="input-calc-hint" aria-hidden="true"
+      [matTooltip]="calcHint() ?? ''" matTooltipPosition="above">calculate</span>
   }
   @if (info()) {
     <span matSuffix class="material-icons-outlined info-icon"

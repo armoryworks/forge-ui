@@ -49,9 +49,9 @@
           <app-entity-picker data-testid="quote-line-part" [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name"
             [filters]="partFilters" formControlName="partId" [required]="true" [placeholder]="'parts.searchPlaceholder' | translate"
             (selected)="onPartPicked($event)" />
-          <app-input data-testid="quote-line-qty" [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+          <app-input data-testid="quote-line-qty" [label]="'quotes.qty' | translate" type="calc-number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
           <div class="price-field">
-            <app-input data-testid="quote-line-price" [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" />
+            <app-input data-testid="quote-line-price" [label]="'common.price' | translate" type="calc-number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" />
             @if (priceIsDefault()) {
               <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
             }

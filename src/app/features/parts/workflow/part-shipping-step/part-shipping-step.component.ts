@@ -4,10 +4,13 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import {
+  fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
+} from '../../../../shared/utils/measure-units';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 
@@ -17,8 +20,7 @@ import { PartsService } from '../../services/parts.service';
  * cube calculations. Persists in canonical SI (grams / mm / mL) with a
  * per-field display unit so the user can type whichever unit they prefer.
  *
- * Conversion math mirrors `PartMaterialClusterComponent` — kept as a copy
- * for now; can be extracted to a shared util once a third caller appears.
+ * Conversion math is the shared `measure-units` util, as in `PartMaterialClusterComponent`.
  *
  * Save model: explicit save-on-Continue (registered with WorkflowService).
  */
@@ -48,28 +50,9 @@ export class PartShippingStepComponent {
 
   protected readonly saving = signal(false);
 
-  // Canonical: weight in grams, dimensions in mm, volume in mL.
-  private readonly weightToGrams: Record<string, number> = {
-    g: 1, kg: 1000, lb: 453.59237, oz: 28.3495,
-  };
-  private readonly dimensionToMm: Record<string, number> = {
-    mm: 1, cm: 10, m: 1000, in: 25.4, ft: 304.8,
-  };
-  private readonly volumeToMl: Record<string, number> = {
-    mL: 1, L: 1000, gal: 3785.41,
-  };
-
-  protected readonly weightUnitOptions: SelectOption[] = [
-    { value: 'g', label: 'g' }, { value: 'kg', label: 'kg' },
-    { value: 'lb', label: 'lb' }, { value: 'oz', label: 'oz' },
-  ];
-  protected readonly dimensionUnitOptions: SelectOption[] = [
-    { value: 'mm', label: 'mm' }, { value: 'cm', label: 'cm' },
-    { value: 'm', label: 'm' }, { value: 'in', label: 'in' }, { value: 'ft', label: 'ft' },
-  ];
-  protected readonly volumeUnitOptions: SelectOption[] = [
-    { value: 'mL', label: 'mL' }, { value: 'L', label: 'L' }, { value: 'gal', label: 'gal' },
-  ];
+  protected readonly weightUnitOptions = measureUnitOptions('weight');
+  protected readonly dimensionUnitOptions = measureUnitOptions('length');
+  protected readonly volumeUnitOptions = measureUnitOptions('volume');
 
   protected readonly form = new FormGroup({
     weight: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -86,21 +69,18 @@ export class PartShippingStepComponent {
     effect(() => {
       const part = this.entity() as PartDetail | null;
       if (!part) return;
-      const weight = this.gramsToDisplay(part.weightEach, part.weightDisplayUnit);
-      const dim = this.mmToDisplay(
-        { length: part.lengthMm, width: part.widthMm, height: part.heightMm },
-        part.dimensionDisplayUnit,
-      );
-      const vol = this.mlToDisplay(part.volumeMl, part.volumeDisplayUnit);
+      const dimensionUnit = measureDisplayUnit('length', part.dimensionDisplayUnit);
+      const weightUnit = measureDisplayUnit('weight', part.weightDisplayUnit);
+      const volumeUnit = measureDisplayUnit('volume', part.volumeDisplayUnit);
       this.form.patchValue({
-        weight: weight.value,
-        weightDisplayUnit: weight.unit,
-        length: dim.length,
-        width: dim.width,
-        height: dim.height,
-        dimensionDisplayUnit: dim.unit,
-        volume: vol.value,
-        volumeDisplayUnit: vol.unit,
+        weight: fromCanonicalMeasure('weight', part.weightEach, weightUnit),
+        weightDisplayUnit: weightUnit,
+        length: fromCanonicalMeasure('length', part.lengthMm, dimensionUnit),
+        width: fromCanonicalMeasure('length', part.widthMm, dimensionUnit),
+        height: fromCanonicalMeasure('length', part.heightMm, dimensionUnit),
+        dimensionDisplayUnit: dimensionUnit,
+        volume: fromCanonicalMeasure('volume', part.volumeMl, volumeUnit),
+        volumeDisplayUnit: volumeUnit,
       }, { emitEvent: false });
       this.workflowService.refreshStepForm();
     });
@@ -122,58 +102,21 @@ export class PartShippingStepComponent {
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
-  private gramsToDisplay(grams: number | null, unit: string | null): { value: number | null; unit: string } {
-    const u = unit && this.weightToGrams[unit] ? unit : 'g';
-    if (grams === null) return { value: null, unit: u };
-    return { value: grams / this.weightToGrams[u], unit: u };
-  }
-
-  private mmToDisplay(
-    dims: { length: number | null; width: number | null; height: number | null },
-    unit: string | null,
-  ): { length: number | null; width: number | null; height: number | null; unit: string } {
-    const u = unit && this.dimensionToMm[unit] ? unit : 'mm';
-    const factor = this.dimensionToMm[u];
-    return {
-      length: dims.length === null ? null : dims.length / factor,
-      width: dims.width === null ? null : dims.width / factor,
-      height: dims.height === null ? null : dims.height / factor,
-      unit: u,
-    };
-  }
-
-  private mlToDisplay(ml: number | null, unit: string | null): { value: number | null; unit: string } {
-    const u = unit && this.volumeToMl[unit] ? unit : 'mL';
-    if (ml === null) return { value: null, unit: u };
-    return { value: ml / this.volumeToMl[u], unit: u };
-  }
-
   private save(): Observable<unknown> {
     const runId = this.runId();
     if (runId == null) return of(null);
     if (this.form.pristine) return of(null);
     const v = this.form.getRawValue();
 
-    const weightEach = v.weight === null
-      ? null
-      : v.weight * (this.weightToGrams[v.weightDisplayUnit] ?? 1);
-    const dimFactor = this.dimensionToMm[v.dimensionDisplayUnit] ?? 1;
-    const lengthMm = v.length === null ? null : v.length * dimFactor;
-    const widthMm = v.width === null ? null : v.width * dimFactor;
-    const heightMm = v.height === null ? null : v.height * dimFactor;
-    const volumeMl = v.volume === null
-      ? null
-      : v.volume * (this.volumeToMl[v.volumeDisplayUnit] ?? 1);
-
     this.saving.set(true);
     return this.workflowService.patchStep(runId, this.stepId(), {
-      weightEach,
+      weightEach: toCanonicalMeasure('weight', v.weight, v.weightDisplayUnit),
       weightDisplayUnit: v.weightDisplayUnit,
-      lengthMm,
-      widthMm,
-      heightMm,
+      lengthMm: toCanonicalMeasure('length', v.length, v.dimensionDisplayUnit),
+      widthMm: toCanonicalMeasure('length', v.width, v.dimensionDisplayUnit),
+      heightMm: toCanonicalMeasure('length', v.height, v.dimensionDisplayUnit),
       dimensionDisplayUnit: v.dimensionDisplayUnit,
-      volumeMl,
+      volumeMl: toCanonicalMeasure('volume', v.volume, v.volumeDisplayUnit),
       volumeDisplayUnit: v.volumeDisplayUnit,
     }).pipe(
       switchMap((run) => {

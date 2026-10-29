@@ -21,7 +21,7 @@
 
     <div class="dialog-row">
       <div class="tax-amount-field">
-        <app-currency-input [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
+        <app-currency-input calc [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
         @if (billForm.controls.taxAmount.hasError('min')) {
           <p class="field-error" role="alert" data-testid="bill-tax-error">{{ 'payables.taxNegative' | translate }}</p>
         }
@@ -57,8 +57,8 @@
                 </span>
                 <span class="po-line__right">{{ poLineMeta()[i].receivedQuantity | number:'1.0-4' }}</span>
                 <span class="po-line__right">{{ 'payables.billableUpToValue' | translate:{ max: poLineMeta()[i].unbilledReceivedQuantity } }}</span>
-                <app-input [label]="'payables.qtyToBill' | translate" type="number" formControlName="quantityToBill" min="0" [max]="poLineMeta()[i].unbilledReceivedQuantity" step="0.0001" data-testid="bill-po-line-qty" />
-                <app-input [label]="'payables.unitPrice' | translate" type="number" formControlName="unitPrice" min="0" step="0.0001" data-testid="bill-po-line-price" />
+                <app-input [label]="'payables.qtyToBill' | translate" type="calc-number" formControlName="quantityToBill" min="0" [max]="poLineMeta()[i].unbilledReceivedQuantity" step="0.0001" data-testid="bill-po-line-qty" />
+                <app-input [label]="'payables.unitPrice' | translate" type="calc-number" formControlName="unitPrice" min="0" step="0.0001" data-testid="bill-po-line-price" />
               </div>
             }
           </div>
@@ -76,8 +76,8 @@
             <div class="line-row" [class.line-row--with-account]="accountOptions().length > 0" [formGroupName]="i">
               <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
               <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" data-testid="bill-line-desc" />
-              <app-input [label]="'payables.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="bill-line-qty" />
-              <app-input [label]="'payables.unitPrice' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="bill-line-price" />
+              <app-input [label]="'payables.qty' | translate" type="calc-number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="bill-line-qty" />
+              <app-input [label]="'payables.unitPrice' | translate" type="calc-number" formControlName="unitPrice" step="0.0001" min="0" data-testid="bill-line-price" />
               @if (accountOptions().length > 0) {
                 <app-select [label]="'payables.glAccount' | translate" formControlName="glAccountId" [options]="accountOptions()" data-testid="bill-line-gl-account" />
               }
@@ -100,7 +100,7 @@
         @for (group of freightLines.controls; track group; let i = $index) {
           <div class="line-row line-row--freight" [formGroupName]="i">
             <app-input [label]="'common.description' | translate" formControlName="description" data-testid="bill-freight-desc" />
-            <app-currency-input [label]="'freight.freightAmount' | translate" formControlName="amount" data-testid="bill-freight-amount" />
+            <app-currency-input calc [label]="'freight.freightAmount' | translate" formControlName="amount" data-testid="bill-freight-amount" />
             <app-select [label]="'freight.forPurchaseOrder' | translate" formControlName="purchaseOrderId" [options]="freightPoOptions()" data-testid="bill-freight-po" />
             @if (!group.controls.purchaseOrderId.value) {
               <app-select [label]="'freight.freightAccount' | translate" formControlName="accountKey" [options]="freightAccountOptions" data-testid="bill-freight-account" />

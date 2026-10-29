@@ -9,7 +9,7 @@
     } @else {
       <app-select [label]="'creditMemos.invoice' | translate" formControlName="invoiceId" [options]="invoiceOptions()" [required]="true"
         data-testid="apply-credit-memo-invoice" />
-      <app-input [label]="'creditMemos.applyAmount' | translate" type="number" formControlName="amount" step="0.01" min="0.01"
+      <app-input [label]="'creditMemos.applyAmount' | translate" type="calc-number" formControlName="amount" step="0.01" min="0.01"
         [required]="true" data-testid="apply-credit-memo-amount" />
     }
   </div>

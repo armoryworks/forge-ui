@@ -9,8 +9,14 @@
     [errorStateMatcher]="errorStateMatcher"
     [readonly]="isReadonly()"
     [disabled]="disabled()"
+    [attr.aria-description]="calcHint()"
     (input)="onInput($event)"
+    (keydown.enter)="onEnter()"
     (blur)="onBlur()" />
+  @if (showCalcHint()) {
+    <span matSuffix class="material-icons-outlined currency-input__calc-hint" data-testid="currency-input-calc-hint"
+      aria-hidden="true" [matTooltip]="calcHint() ?? ''" matTooltipPosition="above">calculate</span>
+  }
 </mat-form-field>
 @if (errorMessage(); as message) {
   <span class="currency-input__error" role="alert" data-testid="currency-input-error">{{ message }}</span>

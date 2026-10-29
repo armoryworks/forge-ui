@@ -244,16 +244,18 @@ Never raw `<input>`, `<select>`, or `<textarea>` in feature templates.
 
 | Component | Selector | Key Inputs |
 |-----------|----------|------------|
-| `InputComponent` | `<app-input>` | `label`, `type`, `placeholder`, `prefix`, `suffix`, `maxlength`, `isReadonly`, `mask`, `required` |
+| `InputComponent` | `<app-input>` | `label`, `type` (`text`, `number`, `calc-number`, `email`, `password`, `time`, `datetime-local`), `placeholder`, `prefix`, `suffix`, `maxlength`, `isReadonly`, `mask`, `required`, `step`, `min`, `max` |
 | `SelectComponent` | `<app-select>` | `label`, `options: SelectOption[]`, `multiple`, `placeholder`, `required` |
 | `TextareaComponent` | `<app-textarea>` | `label`, `rows`, `maxlength` |
 | `DatepickerComponent` | `<app-datepicker>` | `label` |
 | `ToggleComponent` | `<app-toggle>` | `label` |
-| `CurrencyInputComponent` | `<app-currency-input>` | `label`, `placeholder`, `currencySymbol` (default `$`), `min`, `max`, `step`, `required`. Use for any monetary amount. Avoids the recurring `<app-input prefix="$">` floating-label overlap (`$lanual cost override`) by laying the symbol out via Material's `matTextPrefix` slot. Emits `number \| null`. |
+| `CurrencyInputComponent` | `<app-currency-input>` | `label`, `placeholder`, `currencySymbol` (default `$`), `min`, `max`, `step`, `required`, `calc`. Use for any monetary amount. Avoids the recurring `<app-input prefix="$">` floating-label overlap (`$lanual cost override`) by laying the symbol out via Material's `matTextPrefix` slot. Emits `number \| null`. |
 
 All implement `ControlValueAccessor`. Use with `ReactiveFormsModule` (`FormGroup`/`FormControl`) — never `ngModel` / `FormsModule`.
 
 **Required field indicator:** When a field has `Validators.required`, pass `[required]="true"` to the shared wrapper. This adds the HTML `required` attribute which Angular Material uses to append `*` to the label automatically. Always pair `Validators.required` in the FormControl with `[required]="true"` on the template wrapper.
+
+**Calculator fields — `type="calc-number"`:** a numeric field that also takes simple math, so a user can type `360+64`, `3/4`, `13/16` or the mixed number `1 3/16` (whole and fraction separated by a space) and have the result saved. Parsing is the hand-written `evaluateCalcExpression` in `shared/utils/calc-expression.ts` (no `eval`): numbers in the app language's separators, unary minus, `+ - * /`, parentheses, `×` / `÷` aliases. On blur or Enter the text is replaced with the result; the control value is always a `number` (or `null` when blank), never the expression. Malformed math and division by zero raise a `calcExpression` error (`shared.calcInvalid` / `shared.calcDivideByZero`). A math result is rounded to the decimals of a fractional `step` (`step="0.0001"` → 4 places; a number typed outright is not rounded, so `maxDecimals` validators still see it); a whole-number field (`step="1"` or the `wholeNumber` validator) reports a fractional result as `wholeNumber` instead of rounding it; `min` / `max` are enforced. A `calculate` icon carries the `shared.calcHint` tooltip. `<app-currency-input calc>` is the money twin (rounds math to the `step` decimals, cents by default; `min` / `max` stay unenforced as on the plain currency field). Use it on desktop quantity, measurement and money fields; **do not** use it on the phone app (`features/mobile-app/`) or kiosk/shop-floor numeric-keypad fields — those keep `type="number"` and the decimal keypad. Length/weight/volume unit conversion for part measurements is `shared/utils/measure-units.ts` (canonical mm/g/mL rounded to 4 places on save, display rounded per unit).
 
 **Input masks:** `InputComponent` supports `mask="phone"` (formats `(XXX) XXX-XXXX`), `mask="zip"` (formats `XXXXX` or `XXXXX-XXXX`), and `mask="ssn"` (formats `XXX-XX-XXXX`). Pair masks with corresponding `Validators.pattern()` on the FormControl.
 

@@ -103,9 +103,9 @@
           <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
                need fractional quantities (lb, kg, hr, gal). 4 decimals on price is industry-
                standard for unit prices. -->
-          <app-input data-testid="po-line-qty" [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" step="0.0001" min="0.0001" />
+          <app-input data-testid="po-line-qty" [label]="'purchaseOrders.qty' | translate" type="calc-number" formControlName="orderedQuantity" [required]="true" step="0.0001" min="0.0001" />
           <div class="price-field" (focusout)="onPriceCommitted()">
-            <app-input data-testid="po-line-price" [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" />
+            <app-input data-testid="po-line-price" [label]="'common.price' | translate" type="calc-number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" />
             @if (priceIsDefault() && !lineForm.controls.nonStock.value) {
               <span class="price-badge" [matTooltip]="'purchaseOrders.listPriceTooltip' | translate" matTooltipPosition="above">{{ 'purchaseOrders.listPriceBadge' | translate }}</span>
             }

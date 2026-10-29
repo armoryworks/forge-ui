@@ -8,6 +8,7 @@ import { Observable, of } from 'rxjs';
 
 import { InputComponent } from './input.component';
 import { LanguageService } from '../../services/language.service';
+import { wholeNumber } from '../../validators/whole-number.validator';
 
 @Component({
   selector: 'app-input-host',
@@ -422,5 +423,213 @@ describe('InputComponent · character counter', () => {
     inputEl.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     expect(counter()).toBe('8 / 10');
+  });
+});
+
+@Component({
+  selector: 'app-calc-host',
+  standalone: true,
+  imports: [ReactiveFormsModule, InputComponent],
+  template: `
+    <app-input label="Length" type="calc-number" [formControl]="length" />
+    <app-input label="Quantity" type="calc-number" step="0.0001" min="0" max="1000" [formControl]="quantity" />
+    <app-input label="Pieces" type="calc-number" step="1" [formControl]="pieces" />
+    <app-input label="Boxes" type="calc-number" [formControl]="boxes" />
+    <app-input label="Locked" type="calc-number" [isReadonly]="true" [formControl]="locked" />
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class CalcHostComponent {
+  readonly length = new FormControl<number | null>(null);
+  readonly quantity = new FormControl<number | null>(null, Validators.required);
+  readonly pieces = new FormControl<number | null>(null);
+  readonly boxes = new FormControl<number | null>(null, wholeNumber);
+  readonly locked = new FormControl<number | null>(5);
+}
+
+describe('InputComponent · calc-number', () => {
+  let fixture: ComponentFixture<CalcHostComponent>;
+  let host: CalcHostComponent;
+
+  async function render(lang: 'en' | 'es' = 'en'): Promise<void> {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    });
+    TestBed.inject(LanguageService).currentLanguage.set(lang);
+    fixture = TestBed.createComponent(CalcHostComponent);
+    host = fixture.componentInstance;
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
+
+  function field(index = 0): HTMLInputElement {
+    return fixture.nativeElement.querySelectorAll('input')[index] as HTMLInputElement;
+  }
+
+  function type(text: string, index = 0): void {
+    field(index).value = text;
+    field(index).dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
+  function blur(index = 0): void {
+    field(index).dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+  }
+
+  function enter(index = 0): void {
+    field(index).dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    fixture.detectChanges();
+  }
+
+  function errorText(): string | null {
+    return fixture.nativeElement.querySelector('[data-testid="input-error"]')?.textContent?.trim() ?? null;
+  }
+
+  it('is a text field with a text keyboard so / and + can be typed', async () => {
+    await render();
+    expect(field().type).toBe('text');
+    expect(field().getAttribute('inputmode')).toBe('text');
+  });
+
+  it.each([
+    ['360+64', 424, '424'],
+    ['3/4', 0.75, '0.75'],
+    ['13/16', 0.8125, '0.8125'],
+    ['1 3/16', 1.1875, '1.1875'],
+    ['2×3', 6, '6'],
+  ])('saves %s as the number %d and shows %s on blur', async (text, value, shown) => {
+    await render();
+    type(text);
+    expect(host.length.value).toBe(value);
+    expect(field().value).toBe(text);
+    blur();
+    expect(field().value).toBe(shown);
+    expect(host.length.value).toBe(value);
+    expect(host.length.valid).toBe(true);
+  });
+
+  it('replaces the expression with the result on Enter', async () => {
+    await render();
+    type('100-1/4');
+    enter();
+    expect(field().value).toBe('99.75');
+    expect(host.length.value).toBe(99.75);
+  });
+
+  it('never puts the expression string in the control', async () => {
+    await render();
+    for (const text of ['3', '3/', '3/4']) {
+      type(text);
+      expect(typeof host.length.value === 'number' || host.length.value === null).toBe(true);
+    }
+  });
+
+  it('flags malformed math with an i18n message and keeps the typed text', async () => {
+    await render();
+    type('3/');
+    expect(host.length.value).toBeNull();
+    expect(host.length.hasError('calcExpression')).toBe(true);
+    blur();
+    expect(field().value).toBe('3/');
+    expect(errorText()).toBe('Length must be a number or simple math such as 3/4');
+  });
+
+  it('reports division by zero', async () => {
+    await render();
+    type('4/0');
+    blur();
+    expect(host.length.value).toBeNull();
+    expect(errorText()).toBe('Length divides by zero');
+  });
+
+  it('clears the error once the math is fixed', async () => {
+    await render();
+    type('4/0');
+    blur();
+    type('4/2');
+    blur();
+    expect(host.length.valid).toBe(true);
+    expect(errorText()).toBeNull();
+    expect(host.length.value).toBe(2);
+  });
+
+  it('emits null for blank text so required still applies', async () => {
+    await render();
+    type('5', 1);
+    type('', 1);
+    expect(host.quantity.value).toBeNull();
+    expect(host.quantity.hasError('required')).toBe(true);
+    expect(host.quantity.hasError('calcExpression')).toBe(false);
+  });
+
+  it('rounds a math result to the decimals the field step defines', async () => {
+    await render();
+    type('1/3', 1);
+    expect(host.quantity.value).toBe(0.3333);
+    blur(1);
+    expect(field(1).value).toBe('0.3333');
+  });
+
+  it('does not round a number typed outright, leaving precision checks to the field', async () => {
+    await render();
+    type('1.123456', 1);
+    expect(host.quantity.value).toBe(1.123456);
+  });
+
+  it('keeps full precision where the field defines no decimals', async () => {
+    await render();
+    type('1/3');
+    expect(host.length.value).toBe(0.333333333333333);
+  });
+
+  it('enforces min and max on the result', async () => {
+    await render();
+    type('1-2', 1);
+    expect(host.quantity.value).toBe(-1);
+    expect(host.quantity.hasError('min')).toBe(true);
+    type('999+2', 1);
+    expect(host.quantity.hasError('max')).toBe(true);
+    type('999+1', 1);
+    expect(host.quantity.valid).toBe(true);
+  });
+
+  it('rejects a fractional result in a whole-number field rather than rounding it', async () => {
+    await render();
+    type('7/2', 2);
+    expect(host.pieces.value).toBe(3.5);
+    expect(host.pieces.hasError('wholeNumber')).toBe(true);
+    type('7/2', 3);
+    expect(host.boxes.value).toBe(3.5);
+    expect(host.boxes.hasError('wholeNumber')).toBe(true);
+    type('8/2', 2);
+    expect(host.pieces.value).toBe(4);
+    expect(host.pieces.valid).toBe(true);
+  });
+
+  it('shows a stored number in the field', async () => {
+    await render();
+    host.length.setValue(0.8125);
+    fixture.detectChanges();
+    expect(field().value).toBe('0.8125');
+  });
+
+  it('reads the es decimal separator (es-US conventions)', async () => {
+    await render('es');
+    type('1.5+1');
+    expect(host.length.value).toBe(2.5);
+    type('1,5');
+    expect(host.length.hasError('calcExpression')).toBe(true);
+  });
+
+  it('offers the math hint on editable fields only', async () => {
+    await render();
+    const hints = fixture.nativeElement.querySelectorAll('[data-testid="input-calc-hint"]');
+    expect(hints.length).toBe(4);
+    expect(field().getAttribute('aria-description')).toBe('Type a number or simple math: 360+64, 3/4, 1 3/16');
+    expect(field(4).getAttribute('aria-description')).toBeNull();
   });
 });

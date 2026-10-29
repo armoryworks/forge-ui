@@ -1,14 +1,18 @@
 const LOCALES: Record<string, string> = { en: 'en-US', es: 'es-US' };
 
-interface Separators { decimal: string; group: string }
+export interface NumberSeparators { decimal: string; group: string }
 
-const separatorCache = new Map<string, Separators>();
+const separatorCache = new Map<string, NumberSeparators>();
 
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function separatorsFor(lang: string): Separators {
+/**
+ * The decimal and group separators of the given app language (`en`, `es`) or Intl locale, as
+ * `parseLocaleNumber` and `formatLocaleNumber` use them.
+ */
+export function numberSeparators(lang: string): NumberSeparators {
   const locale = LOCALES[lang] ?? lang;
   let separators = separatorCache.get(locale);
   if (!separators) {
@@ -32,7 +36,7 @@ function separatorsFor(lang: string): Separators {
 export function parseLocaleNumber(text: string | null | undefined, lang: string): number | null {
   const trimmed = (text ?? '').trim();
   if (trimmed === '') return null;
-  const { decimal, group } = separatorsFor(lang);
+  const { decimal, group } = numberSeparators(lang);
   const d = escapeRegExp(decimal);
   const g = escapeRegExp(group);
   const pattern = new RegExp(`^([+-]?)(\\d+|[1-9]\\d{0,2}(?:${g}\\d{3})+)?(?:${d}(\\d*))?$`);
