@@ -513,7 +513,7 @@
             {{ 'purchaseOrders.acknowledge' | translate }}
           </button>
         }
-        @if (canReceive(po.status) && po.fulfilmentType !== 'DropShip') {
+        @if (canReceive(po) && po.fulfilmentType !== 'DropShip') {
           <button data-testid="po-receive-btn" class="action-btn action-btn--primary" (click)="openReceiveDialog()">
             <span class="material-icons-outlined">inventory</span>
             {{ 'purchaseOrders.receiveItems' | translate }}

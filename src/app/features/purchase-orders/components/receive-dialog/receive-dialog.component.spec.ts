@@ -19,6 +19,7 @@ class FakeLoader implements TranslateLoader {
 }
 
 interface DialogInternals {
+  receivableLines: () => PurchaseOrderLine[];
   purchaseOrder: () => PurchaseOrderDetail;
   dialogRef: { clearDraft: () => void };
   lineControls(): FormControl<number>[];
@@ -398,6 +399,20 @@ describe('ReceiveDialogComponent — receipt tolerance', () => {
     expect(receiveItems.mock.calls[0][1].lines[0]).toEqual(expect.objectContaining({
       quantity: 120, confirmOverTolerance: true, overToleranceReason: 'Vendor sent a full pallet',
     }));
+  });
+
+  it('lists a line that is closed or full but still has room inside its tolerance, and no line without room', () => {
+    const closedShort = banded({ id: 1, receivedQuantity: 92, remainingQuantity: 0, closedWithinTolerance: true });
+    const fullWithOverRoom = banded({ id: 2, receivedQuantity: 100, remainingQuantity: 0 });
+    const atTheLimit = banded({ id: 3, receivedQuantity: 110, remainingQuantity: 0 });
+    const { internals } = setup([closedShort, fullWithOverRoom, atTheLimit]);
+
+    expect(internals.receivableLines().map(l => l.id)).toEqual([1, 2]);
+
+    internals.lineControls()[0].setValue(18);
+    expect(internals.toleranceState(0)).toBeNull();
+    internals.lineControls()[0].setValue(19);
+    expect(internals.toleranceState(0)).toBe('over');
   });
 
   it('treats a line without tolerance data as exact quantity', () => {

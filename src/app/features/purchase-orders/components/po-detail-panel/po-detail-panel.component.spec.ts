@@ -21,7 +21,7 @@ import { PoDetailPanelComponent } from './po-detail-panel.component';
 interface PanelInternals {
   purchaseOrderId: () => number;
   po: ReturnType<typeof signal<PurchaseOrderDetail | null>>;
-  canReceive(status: string): boolean;
+  canReceive(po: PurchaseOrderDetail): boolean;
   canEditLines(status: string): boolean;
   canDeleteLine(po: PurchaseOrderDetail): boolean;
   canCancel(status: string): boolean;
@@ -105,11 +105,21 @@ describe('PoDetailPanelComponent', () => {
 
   describe('receive availability', () => {
     it.each(['Submitted', 'Acknowledged', 'PartiallyReceived'])('offers Receive Items on a %s PO', (status) => {
-      expect(create(detail()).canReceive(status)).toBe(true);
+      expect(create(detail()).canReceive(detail({ status }))).toBe(true);
     });
 
     it.each(['Draft', 'PendingApproval', 'Received', 'Closed', 'Cancelled'])('hides Receive Items on a %s PO', (status) => {
-      expect(create(detail()).canReceive(status)).toBe(false);
+      expect(create(detail()).canReceive(detail({ status }))).toBe(false);
+    });
+
+    it('offers Receive Items on a Received PO while a line has room inside its tolerance', () => {
+      const closedShort = { id: 1, orderedQuantity: 100, receivedQuantity: 90, remainingQuantity: 0, maxReceivableQuantity: 100 };
+      const full = { id: 2, orderedQuantity: 100, receivedQuantity: 100, remainingQuantity: 0, maxReceivableQuantity: 100 };
+      const panel = create(detail());
+
+      expect(panel.canReceive(detail({ status: 'Received', lines: [closedShort, full] as PurchaseOrderDetail['lines'] }))).toBe(true);
+      expect(panel.canReceive(detail({ status: 'Received', lines: [full] as PurchaseOrderDetail['lines'] }))).toBe(false);
+      expect(panel.canReceive(detail({ status: 'Closed', lines: [closedShort] as PurchaseOrderDetail['lines'] }))).toBe(false);
     });
   });
 

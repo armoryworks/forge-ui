@@ -101,7 +101,7 @@ export class ReceiveDialogComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     const po = this.purchaseOrder();
-    const lines = po.lines.filter(l => l.remainingQuantity > 0);
+    const lines = po.lines.filter(l => this.roomFor(l) > 0);
     this.receivableLines.set(lines);
     this.lineControls.set(
       lines.map(() => new FormControl<number>(0, {

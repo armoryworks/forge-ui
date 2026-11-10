@@ -588,8 +588,9 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected canSubmit(status: string): boolean { return status === 'Draft'; }
   protected canAcknowledge(status: string): boolean { return status === 'Submitted'; }
-  protected canReceive(status: string): boolean {
-    return status === 'Submitted' || status === 'Acknowledged' || status === 'PartiallyReceived';
+  protected canReceive(po: PurchaseOrderDetail): boolean {
+    if (po.status === 'Submitted' || po.status === 'Acknowledged' || po.status === 'PartiallyReceived') return true;
+    return po.status === 'Received' && po.lines.some(l => (l.maxReceivableQuantity ?? 0) > l.receivedQuantity);
   }
   protected canEditLines(status: string): boolean { return status === 'Draft'; }
 
