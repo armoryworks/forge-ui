@@ -33,7 +33,7 @@ function numberPattern(decimal: string, group: string): RegExp {
     const d = escapeRegExp(decimal);
     const grouped = group.trim() === '' || group === decimal
       ? ''
-      : `\\d{1,3}(?:${escapeRegExp(group)}\\d{3})+(?!\\d)|`;
+      : `[1-9]\\d{0,2}(?:${escapeRegExp(group)}\\d{3})+(?!\\d)|`;
     pattern = new RegExp(`(?:${grouped}\\d+)(?:${d}\\d*)?|${d}\\d+`, 'y');
     numberPatternCache.set(key, pattern);
   }
