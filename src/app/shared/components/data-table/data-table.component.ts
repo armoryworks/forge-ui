@@ -188,7 +188,8 @@ export class DataTableComponent implements OnInit {
 
   /** The column filters in effect: in server-paged mode, only those the server applies. */
   readonly activeFilters = computed<Record<string, unknown>>(() => {
-    const all = this.filters();
+    const fields = new Set(this.columns().map(c => c.field));
+    const all = Object.fromEntries(Object.entries(this.filters()).filter(([field]) => fields.has(field)));
     if (!this.isServerPaged()) return all;
     if (!this.isServerFilterable()) return {};
     const allowed = new Set(this.columns().filter(c => c.serverFilterable !== false).map(c => c.field));
@@ -221,8 +222,9 @@ export class DataTableComponent implements OnInit {
         if (filterVal == null) return true;
 
         const col = this.columns().find(c => c.field === field);
+        if (!col) return true;
         const cellVal = rec[field];
-        const type = col?.type ?? 'text';
+        const type = col.type ?? 'text';
 
         switch (type) {
           case 'text': {
@@ -261,11 +263,13 @@ export class DataTableComponent implements OnInit {
             return true;
           }
           case 'date': {
-            const range = filterVal as { from?: Date; to?: Date };
+            const range = filterVal as { from?: Date | string; to?: Date | string };
+            const from = range.from ? new Date(range.from) : null;
+            const to = range.to ? new Date(range.to) : null;
             const date = cellVal ? parseDateOnly(String(cellVal)) ?? new Date(cellVal as string) : null;
             if (!date) return false;
-            if (range.from && date < range.from) return false;
-            if (range.to && date > range.to) return false;
+            if (from && date < from) return false;
+            if (to && date > to) return false;
             return true;
           }
           case 'enum': {

@@ -230,6 +230,39 @@ describe('JobsTableComponent', () => {
     expect(opened).toHaveBeenCalledWith(2);
   });
 
+  it('stays on the current server page when the board asks for a reload, and returns to the first on a new query', () => {
+    total = JOBS_TABLE_LOCAL_LIMIT + 1;
+    create();
+    component.onServerPageChange({ pageIndex: 2, pageSize: 25, sort: null, order: 'asc', filters: {} });
+    getPage.mockClear();
+
+    fixture.componentRef.setInput('reloadToken', 1);
+    fixture.detectChanges();
+
+    expect(getPage.mock.calls.at(-1)![1]).toMatchObject({ page: 3, pageSize: 25 });
+    expect(component.serverState()).toMatchObject({ pageIndex: 2 });
+
+    fixture.componentRef.setInput('query', { ...query, includeArchived: true });
+    fixture.detectChanges();
+
+    expect(getPage.mock.calls.at(-1)![1]).toMatchObject({ page: 1, pageSize: 25 });
+    expect(component.serverState()).toMatchObject({ pageIndex: 0 });
+  });
+
+  it('steps back to the last page when a reload finds the current page gone', () => {
+    total = JOBS_TABLE_LOCAL_LIMIT + 60;
+    create();
+    component.onServerPageChange({ pageIndex: 10, pageSize: 25, sort: null, order: 'asc', filters: {} });
+    total = JOBS_TABLE_LOCAL_LIMIT + 1;
+    getPage.mockClear();
+
+    fixture.componentRef.setInput('reloadToken', 1);
+    fixture.detectChanges();
+
+    expect(getPage.mock.calls.at(-1)![1]).toMatchObject({ page: 9, pageSize: 25 });
+    expect(component.serverState()).toMatchObject({ pageIndex: 8, totalCount: JOBS_TABLE_LOCAL_LIMIT + 1 });
+  });
+
   it('reloads when the board filters change or the board asks', () => {
     create();
     getPage.mockClear();

@@ -86,6 +86,7 @@ export class JobsTableComponent {
   protected readonly loading = signal(false);
   protected readonly serverState = signal<ServerPageState | null>(null);
   private load: Subscription | null = null;
+  private loadedQuery: JobsTableQuery | null = null;
 
   protected readonly canMove = computed(() => this.auth.hasAnyRole(JOB_MOVE_ROLES));
   protected readonly mayBill = computed(() => this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
@@ -249,6 +250,8 @@ export class JobsTableComponent {
     this.load?.unsubscribe();
     this.loading.set(true);
     const query = this.query();
+    const pageIndex = query === this.loadedQuery ? this.serverState()?.pageIndex ?? 0 : 0;
+    this.loadedQuery = query;
     this.load = this.jobsTable.getPage(query, { page: 1, pageSize: JOBS_TABLE_LOCAL_LIMIT, sort: null, order: 'desc', filters: [] })
       .subscribe({
         next: page => {
@@ -258,8 +261,9 @@ export class JobsTableComponent {
             this.loading.set(false);
             return;
           }
-          this.fetchServerPage(this.table()?.serverRequest()
-            ?? { pageIndex: 0, pageSize: 25, sort: null, order: 'asc', filters: {} });
+          const request = this.table()?.serverRequest()
+            ?? { pageIndex: 0, pageSize: 25, sort: null, order: 'asc', filters: {} };
+          this.fetchServerPage({ ...request, pageIndex });
         },
         error: (err: HttpErrorResponse) => this.failed(err),
       });
@@ -276,6 +280,11 @@ export class JobsTableComponent {
       filters: toServerFilters(request.filters ?? {}, this.columns()),
     }).subscribe({
       next: page => {
+        const lastPage = Math.max(0, Math.ceil(page.totalCount / request.pageSize) - 1);
+        if (request.pageIndex > lastPage) {
+          this.fetchServerPage({ ...request, pageIndex: lastPage });
+          return;
+        }
         this.rows.set(page.items.map(toRow));
         this.serverState.set({
           pageIndex: request.pageIndex,

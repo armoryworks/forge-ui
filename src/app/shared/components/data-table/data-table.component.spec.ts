@@ -250,6 +250,27 @@ describe('DataTableComponent · behaviour', () => {
     expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2]);
   });
 
+  it('applies a saved date range that came back from preferences as ISO strings', () => {
+    setup([{ field: 'due', header: 'Due', type: 'date' }], [
+      { id: 1, due: '2026-02-15T00:00:00Z' }, { id: 2, due: '2026-03-10T00:00:00Z' },
+      { id: 3, due: '2026-04-02T00:00:00Z' }, { id: 4, due: null },
+    ]);
+    const saved = JSON.parse(JSON.stringify({ due: { from: new Date(2026, 2, 1), to: new Date(2026, 2, 31, 23, 59, 59) } }));
+
+    internals.filters.set(saved);
+
+    expect(internals.sortedData().map(r => (r as { id: number }).id)).toEqual([2]);
+  });
+
+  it('ignores a saved filter on a column the table no longer has', () => {
+    setup([{ field: 'name', header: 'Name' }], rows(3));
+
+    internals.filters.set({ customerName: 'acme' });
+
+    expect(internals.sortedData()).toHaveLength(3);
+    expect(table.activeFilters()).toEqual({});
+  });
+
   it('leaves blank cells out of a number range the way the server does', () => {
     setup([{ field: 'percent', header: 'Percent', type: 'number' }], [
       { id: 1, percent: 0 }, { id: 2, percent: 41 }, { id: 3, percent: null }, { id: 4, percent: 100 }, { id: 5 },
