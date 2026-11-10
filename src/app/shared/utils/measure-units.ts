@@ -69,3 +69,15 @@ export function fromCanonicalMeasure(kind: MeasureKind, value: number | null, un
   const u = unitFor(kind, unit);
   return roundToPlaces(value / u.factor, u.displayPlaces);
 }
+
+/**
+ * The canonical value to save for a field showing `value` in `unit`. While the field still shows
+ * what `stored` reads as in that unit, `stored` itself is kept, so saving a measure nobody edited
+ * never moves it (0.7938 mm reads 0.0313 in, which would otherwise save back as 0.795 mm).
+ */
+export function canonicalMeasureToSave(
+  kind: MeasureKind, value: number | null, unit: string | null | undefined, stored: number | null | undefined,
+): number | null {
+  if (value !== null && stored != null && fromCanonicalMeasure(kind, stored, unit) === value) return stored;
+  return toCanonicalMeasure(kind, value, unit);
+}

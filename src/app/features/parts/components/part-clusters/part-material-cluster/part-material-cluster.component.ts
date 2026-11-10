@@ -10,7 +10,7 @@ import { AuthService } from '../../../../../shared/services/auth.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { ReferenceDataItem, ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 import {
-  fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
+  canonicalMeasureToSave, fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions,
 } from '../../../../../shared/utils/measure-units';
 import { PartDetail } from '../../../models/part-detail.model';
 import {
@@ -145,16 +145,17 @@ export class PartMaterialClusterComponent implements OnInit {
   protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
+    const p = this.part();
 
     (close ? this.saveAndClose : this.save).emit({
       materialSpecId: v.materialSpecId ?? null,
-      weightEach: toCanonicalMeasure('weight', v.weight, v.weightDisplayUnit),
+      weightEach: canonicalMeasureToSave('weight', v.weight, v.weightDisplayUnit, p.weightEach),
       weightDisplayUnit: v.weightDisplayUnit,
-      lengthMm: toCanonicalMeasure('length', v.length, v.dimensionDisplayUnit),
-      widthMm: toCanonicalMeasure('length', v.width, v.dimensionDisplayUnit),
-      heightMm: toCanonicalMeasure('length', v.height, v.dimensionDisplayUnit),
+      lengthMm: canonicalMeasureToSave('length', v.length, v.dimensionDisplayUnit, p.lengthMm),
+      widthMm: canonicalMeasureToSave('length', v.width, v.dimensionDisplayUnit, p.widthMm),
+      heightMm: canonicalMeasureToSave('length', v.height, v.dimensionDisplayUnit, p.heightMm),
       dimensionDisplayUnit: v.dimensionDisplayUnit,
-      volumeMl: toCanonicalMeasure('volume', v.volume, v.volumeDisplayUnit),
+      volumeMl: canonicalMeasureToSave('volume', v.volume, v.volumeDisplayUnit, p.volumeMl),
       volumeDisplayUnit: v.volumeDisplayUnit,
     });
   }

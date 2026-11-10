@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
+  canonicalMeasureToSave, fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
 } from './measure-units';
 
 function roundTrip(kind: 'length' | 'weight' | 'volume', value: number, unit: string): number | null {
@@ -38,6 +38,22 @@ describe('measure units', () => {
     expect(roundTrip('weight', 1.25, 'kg')).toBe(1.25);
     expect(roundTrip('volume', 0.3, 'gal')).toBe(0.3);
     expect(roundTrip('volume', 1.5, 'L')).toBe(1.5);
+  });
+
+  it('keeps the stored value of a measure that still shows what was stored', () => {
+    expect(fromCanonicalMeasure('length', 0.7938, 'in')).toBe(0.0313);
+    expect(toCanonicalMeasure('length', 0.0313, 'in')).toBe(0.795);
+    expect(canonicalMeasureToSave('length', 0.0313, 'in', 0.7938)).toBe(0.7938);
+    expect(canonicalMeasureToSave('length', 0.013, 'mm', 0.0125)).toBe(0.0125);
+    expect(canonicalMeasureToSave('weight', 0.3333, 'lb', 151.1975)).toBe(151.1975);
+  });
+
+  it('converts a measure that was edited, re-united, newly entered or cleared', () => {
+    expect(canonicalMeasureToSave('length', 0.75, 'in', 0.7938)).toBe(19.05);
+    expect(canonicalMeasureToSave('length', 19.05, 'in', 19.05)).toBe(483.87);
+    expect(canonicalMeasureToSave('length', 0.75, 'in', null)).toBe(19.05);
+    expect(canonicalMeasureToSave('length', 0.75, 'in', undefined)).toBe(19.05);
+    expect(canonicalMeasureToSave('length', null, 'in', 19.05)).toBeNull();
   });
 
   it('passes null through', () => {

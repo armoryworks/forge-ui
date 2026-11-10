@@ -9,7 +9,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import {
-  fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions, toCanonicalMeasure,
+  canonicalMeasureToSave, fromCanonicalMeasure, measureDisplayUnit, measureUnitOptions,
 } from '../../../../shared/utils/measure-units';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
@@ -107,16 +107,17 @@ export class PartShippingStepComponent {
     if (runId == null) return of(null);
     if (this.form.pristine) return of(null);
     const v = this.form.getRawValue();
+    const part = this.entity() as PartDetail | null;
 
     this.saving.set(true);
     return this.workflowService.patchStep(runId, this.stepId(), {
-      weightEach: toCanonicalMeasure('weight', v.weight, v.weightDisplayUnit),
+      weightEach: canonicalMeasureToSave('weight', v.weight, v.weightDisplayUnit, part?.weightEach),
       weightDisplayUnit: v.weightDisplayUnit,
-      lengthMm: toCanonicalMeasure('length', v.length, v.dimensionDisplayUnit),
-      widthMm: toCanonicalMeasure('length', v.width, v.dimensionDisplayUnit),
-      heightMm: toCanonicalMeasure('length', v.height, v.dimensionDisplayUnit),
+      lengthMm: canonicalMeasureToSave('length', v.length, v.dimensionDisplayUnit, part?.lengthMm),
+      widthMm: canonicalMeasureToSave('length', v.width, v.dimensionDisplayUnit, part?.widthMm),
+      heightMm: canonicalMeasureToSave('length', v.height, v.dimensionDisplayUnit, part?.heightMm),
       dimensionDisplayUnit: v.dimensionDisplayUnit,
-      volumeMl: toCanonicalMeasure('volume', v.volume, v.volumeDisplayUnit),
+      volumeMl: canonicalMeasureToSave('volume', v.volume, v.volumeDisplayUnit, part?.volumeMl),
       volumeDisplayUnit: v.volumeDisplayUnit,
     }).pipe(
       switchMap((run) => {
