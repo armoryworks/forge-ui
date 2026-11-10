@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 
 import { Subscription, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -84,9 +83,16 @@ export class JobsTableComponent {
 
   protected readonly rows = signal<JobTableRow[]>([]);
   protected readonly loading = signal(false);
+  private readonly loadFailed = signal(false);
   protected readonly serverState = signal<ServerPageState | null>(null);
   private load: Subscription | null = null;
   private loadedQuery: JobsTableQuery | null = null;
+
+  protected readonly emptyState = computed(() => {
+    if (this.loading()) return { icon: 'hourglass_empty', message: 'common.loading' };
+    if (this.loadFailed()) return { icon: 'cloud_off', message: 'jobsTable.loadFailed' };
+    return { icon: 'view_list', message: 'jobsTable.empty' };
+  });
 
   protected readonly canMove = computed(() => this.auth.hasAnyRole(JOB_MOVE_ROLES));
   protected readonly mayBill = computed(() => this.auth.hasAnyRole([...BILLING_STAGE_ROLES]));
@@ -258,6 +264,7 @@ export class JobsTableComponent {
           if (page.totalCount <= page.items.length) {
             this.serverState.set(null);
             this.rows.set(page.items.map(toRow));
+            this.loadFailed.set(false);
             this.loading.set(false);
             return;
           }
@@ -265,7 +272,7 @@ export class JobsTableComponent {
             ?? { pageIndex: 0, pageSize: 25, sort: null, order: 'asc', filters: {} };
           this.fetchServerPage({ ...request, pageIndex });
         },
-        error: (err: HttpErrorResponse) => this.failed(err),
+        error: () => this.failed(),
       });
   }
 
@@ -294,14 +301,15 @@ export class JobsTableComponent {
           order: request.order,
           filterable: true,
         });
+        this.loadFailed.set(false);
         this.loading.set(false);
       },
-      error: (err: HttpErrorResponse) => this.failed(err),
+      error: () => this.failed(),
     });
   }
 
-  private failed(err: HttpErrorResponse): void {
-    if (err?.status === 0) return;
+  private failed(): void {
+    this.loadFailed.set(true);
     this.loading.set(false);
   }
 

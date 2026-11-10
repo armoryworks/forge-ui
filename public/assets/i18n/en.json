@@ -870,6 +870,7 @@
     "allTrackTypes": "All",
     "includeArchived": "Include archived",
     "empty": "No Jobs match these filters",
+    "loadFailed": "Jobs could not be loaded. Check your connection, then change a filter or reopen the table to try again.",
     "clearFilters": "Clear column filters",
     "removeFilter": "Remove the {{column}} filter",
     "overdue": "Overdue",

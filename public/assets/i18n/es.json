@@ -870,6 +870,7 @@
     "allTrackTypes": "Todos",
     "includeArchived": "Incluir archivados",
     "empty": "Ningún Trabajo coincide con estos filtros",
+    "loadFailed": "No se pudieron cargar los Trabajos. Revise su conexión y luego cambie un filtro o vuelva a abrir la tabla para intentarlo de nuevo.",
     "clearFilters": "Quitar filtros de columna",
     "removeFilter": "Quitar el filtro de {{column}}",
     "overdue": "Vencido",

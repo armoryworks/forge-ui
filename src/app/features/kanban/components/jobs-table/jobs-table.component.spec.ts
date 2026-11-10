@@ -23,6 +23,8 @@ interface Internals {
   columns: () => ColumnDef[];
   rows: () => JobTableRow[];
   serverState: () => ServerPageState | null;
+  loading: () => boolean;
+  emptyState: () => { icon: string; message: string };
   canMove: () => boolean;
   onServerPageChange(request: ServerPageRequest): void;
   moveStage(row: JobTableRow, stage: Stage): void;
@@ -261,6 +263,21 @@ describe('JobsTableComponent', () => {
 
     expect(getPage.mock.calls.at(-1)![1]).toMatchObject({ page: 9, pageSize: 25 });
     expect(component.serverState()).toMatchObject({ pageIndex: 8, totalCount: JOBS_TABLE_LOCAL_LIMIT + 1 });
+  });
+
+  it('says the load failed, and stops the spinner, when the jobs cannot be fetched', () => {
+    getPage.mockReturnValue(throwError(() => ({ status: 0 })));
+    create();
+
+    expect(component.loading()).toBe(false);
+    expect(component.emptyState().message).toBe('jobsTable.loadFailed');
+  });
+
+  it('says there are no matching jobs only once a load has come back empty', () => {
+    total = 0;
+    create();
+
+    expect(component.emptyState().message).toBe('jobsTable.empty');
   });
 
   it('reloads when the board filters change or the board asks', () => {
