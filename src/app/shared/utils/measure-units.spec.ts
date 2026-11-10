@@ -27,9 +27,20 @@ describe('measure units', () => {
   });
 
   it('rounds the display to the unit precision', () => {
-    expect(fromCanonicalMeasure('length', 0.7938, 'in')).toBe(0.0313);
-    expect(fromCanonicalMeasure('length', 1.23456, 'mm')).toBe(1.235);
-    expect(fromCanonicalMeasure('length', 20.6375, 'ft')).toBe(0.0677);
+    expect(fromCanonicalMeasure('length', 0.3969, 'in')).toBe(0.01563);
+    expect(fromCanonicalMeasure('length', 1.23456, 'mm')).toBe(1.2346);
+    expect(fromCanonicalMeasure('length', 20.6375, 'ft')).toBe(0.06771);
+  });
+
+  it('round-trips 1/32 in as 0.03125', () => {
+    expect(toCanonicalMeasure('length', 1 / 32, 'in')).toBe(0.7938);
+    expect(roundTrip('length', 1 / 32, 'in')).toBe(0.03125);
+  });
+
+  it('shows the canonical units at the precision they are stored in', () => {
+    expect(fromCanonicalMeasure('length', 0.0125, 'mm')).toBe(0.0125);
+    expect(fromCanonicalMeasure('weight', 151.1975, 'g')).toBe(151.1975);
+    expect(fromCanonicalMeasure('volume', 2.0001, 'mL')).toBe(2.0001);
   });
 
   it('round-trips weights and volumes', () => {
@@ -41,11 +52,11 @@ describe('measure units', () => {
   });
 
   it('keeps the stored value of a measure that still shows what was stored', () => {
-    expect(fromCanonicalMeasure('length', 0.7938, 'in')).toBe(0.0313);
-    expect(toCanonicalMeasure('length', 0.0313, 'in')).toBe(0.795);
-    expect(canonicalMeasureToSave('length', 0.0313, 'in', 0.7938)).toBe(0.7938);
-    expect(canonicalMeasureToSave('length', 0.013, 'mm', 0.0125)).toBe(0.0125);
-    expect(canonicalMeasureToSave('weight', 0.3333, 'lb', 151.1975)).toBe(151.1975);
+    expect(fromCanonicalMeasure('length', 0.3969, 'in')).toBe(0.01563);
+    expect(toCanonicalMeasure('length', 0.01563, 'in')).toBe(0.397);
+    expect(canonicalMeasureToSave('length', 0.01563, 'in', 0.3969)).toBe(0.3969);
+    expect(canonicalMeasureToSave('length', 0.0013, 'cm', 0.0127)).toBe(0.0127);
+    expect(canonicalMeasureToSave('weight', 0.33333, 'lb', 151.1975)).toBe(151.1975);
   });
 
   it('converts a measure that was edited, re-united, newly entered or cleared', () => {

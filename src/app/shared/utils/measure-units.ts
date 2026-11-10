@@ -14,22 +14,22 @@ export const CANONICAL_MEASURE_PLACES = 4;
 
 const UNITS: Record<MeasureKind, readonly MeasureUnit[]> = {
   length: [
-    { unit: 'mm', factor: 1, displayPlaces: 3 },
+    { unit: 'mm', factor: 1, displayPlaces: 4 },
     { unit: 'cm', factor: 10, displayPlaces: 4 },
     { unit: 'm', factor: 1000, displayPlaces: 6 },
-    { unit: 'in', factor: 25.4, displayPlaces: 4 },
-    { unit: 'ft', factor: 304.8, displayPlaces: 4 },
+    { unit: 'in', factor: 25.4, displayPlaces: 5 },
+    { unit: 'ft', factor: 304.8, displayPlaces: 5 },
   ],
   weight: [
-    { unit: 'g', factor: 1, displayPlaces: 3 },
+    { unit: 'g', factor: 1, displayPlaces: 4 },
     { unit: 'kg', factor: 1000, displayPlaces: 6 },
-    { unit: 'lb', factor: 453.59237, displayPlaces: 4 },
-    { unit: 'oz', factor: 28.349523125, displayPlaces: 4 },
+    { unit: 'lb', factor: 453.59237, displayPlaces: 5 },
+    { unit: 'oz', factor: 28.349523125, displayPlaces: 5 },
   ],
   volume: [
-    { unit: 'mL', factor: 1, displayPlaces: 3 },
+    { unit: 'mL', factor: 1, displayPlaces: 4 },
     { unit: 'L', factor: 1000, displayPlaces: 6 },
-    { unit: 'gal', factor: 3785.411784, displayPlaces: 4 },
+    { unit: 'gal', factor: 3785.411784, displayPlaces: 5 },
   ],
 };
 
@@ -61,7 +61,7 @@ export function toCanonicalMeasure(kind: MeasureKind, value: number | null, unit
 
 /**
  * Converts a canonical value (mm, g, mL) to `unit` for display, rounded to that unit's
- * display precision (in, ft, lb, oz 4 places; mm, g, mL 3; cm 4; m, kg, L 6) so a stored
+ * display precision (in, ft, lb, oz, gal 5 places; mm, g, mL, cm 4; m, kg, L 6) so a stored
  * 19.05 mm reads 0.75 in rather than 0.7499999999999999.
  */
 export function fromCanonicalMeasure(kind: MeasureKind, value: number | null, unit: string | null | undefined): number | null {
@@ -73,7 +73,7 @@ export function fromCanonicalMeasure(kind: MeasureKind, value: number | null, un
 /**
  * The canonical value to save for a field showing `value` in `unit`. While the field still shows
  * what `stored` reads as in that unit, `stored` itself is kept, so saving a measure nobody edited
- * never moves it (0.7938 mm reads 0.0313 in, which would otherwise save back as 0.795 mm).
+ * never moves it (0.3969 mm reads 0.01563 in, which would otherwise save back as 0.397 mm).
  */
 export function canonicalMeasureToSave(
   kind: MeasureKind, value: number | null, unit: string | null | undefined, stored: number | null | undefined,
