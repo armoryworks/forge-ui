@@ -13182,11 +13182,11 @@
     "alreadyBack": "{{quantity}} already came back on earlier receipts.",
     "rejectedQuantity": "Rejected quantity",
     "rejectedHint": "Pieces that came back and failed inspection. They are not counted on the step; send them out again or scrap them.",
-    "rejectedBack": "Rejected",
     "overLimit": "At most {{max}} more can go out on this job.",
     "overrun": "{{over}} over the job's start quantity of {{start}} once this goes out. Check the count, then confirm.",
     "overrunAck": "Yes, send the extra",
-    "overrunConfirmFirst": "Confirm the extra quantity first."
+    "overrunConfirmFirst": "Confirm the extra quantity first.",
+    "rejectedCount": "{{quantity}} rejected"
   },
   "payables": {
     "title": "Payables",

@@ -80,7 +80,6 @@ export class SubcontractPanelComponent {
     { field: 'expectedReturnDate', header: this.translate.instant('subcontractUi.expectedReturn'), sortable: true, type: 'date', width: '110px' },
     { field: 'status', header: this.translate.instant('subcontractUi.statusHeader'), sortable: true, width: '110px' },
     { field: 'receivedQuantity', header: this.translate.instant('subcontractUi.goodBack'), type: 'number', width: '80px', align: 'right' },
-    { field: 'rejectedQuantity', header: this.translate.instant('subcontractUi.rejectedBack'), type: 'number', width: '80px', align: 'right' },
     { field: 'poNumber', header: this.translate.instant('subcontractUi.purchaseOrder'), width: '110px' },
     { field: 'actions', header: '', width: '130px', align: 'right' },
   ];

@@ -38,6 +38,18 @@
         <ng-template appColumnCell="status" let-row>
           <span [class]="statusChipClass(row.status)" [attr.data-testid]="'subcontract-order-status-' + row.id">{{ statusLabelKey(row.status) | translate }}</span>
         </ng-template>
+        <ng-template appColumnCell="receivedQuantity" let-row>
+          <span class="subcontract__back">
+            @if (row.receivedQuantity !== null) {
+              <span>{{ row.receivedQuantity | number:'1.0-4' }}</span>
+            }
+            @if ((row.rejectedQuantity ?? 0) > 0) {
+              <span class="subcontract__rejected" [attr.data-testid]="'subcontract-order-rejected-' + row.id">
+                {{ 'subcontractUi.rejectedCount' | translate: { quantity: (row.rejectedQuantity | number:'1.0-4') } }}
+              </span>
+            }
+          </span>
+        </ng-template>
         <ng-template appColumnCell="poNumber" let-row>
           @if (row.purchaseOrderId) {
             <app-entity-link type="purchase-order" [entityId]="row.purchaseOrderId">{{ row.poNumber }}</app-entity-link>
@@ -47,7 +59,7 @@
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           @if (isOpen(row)) {
-            <button type="button" class="action-btn action-btn--sm" [attr.data-testid]="'subcontract-receive-order-' + row.id" (click)="receiveBack(row)">
+            <button type="button" class="action-btn action-btn--sm subcontract__row-action" [attr.data-testid]="'subcontract-receive-order-' + row.id" (click)="receiveBack(row)">
               {{ 'subcontractUi.receiveBack' | translate }}
             </button>
           }

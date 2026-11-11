@@ -13182,11 +13182,11 @@
     "alreadyBack": "Ya se devolvieron {{quantity}} en recepciones anteriores.",
     "rejectedQuantity": "Cantidad rechazada",
     "rejectedHint": "Piezas que regresaron y no pasaron la inspección. No se cuentan en el paso; envíelas de nuevo o deséchelas.",
-    "rejectedBack": "Rechazadas",
     "overLimit": "Como máximo {{max}} más pueden salir en este trabajo.",
     "overrun": "{{over}} por encima de la cantidad inicial del trabajo de {{start}} una vez que esto salga. Revise el conteo y luego confirme.",
     "overrunAck": "Sí, enviar el excedente",
-    "overrunConfirmFirst": "Confirme primero la cantidad excedente."
+    "overrunConfirmFirst": "Confirme primero la cantidad excedente.",
+    "rejectedCount": "{{quantity}} rechazadas"
   },
   "payables": {
     "title": "Cuentas por Pagar",

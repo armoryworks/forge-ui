@@ -41,4 +41,19 @@
     display: flex;
     gap: $sp-sm;
   }
+
+  &__back {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  &__rejected {
+    color: var(--warning);
+    font-size: $font-size-xs;
+  }
+
+  &__row-action {
+    white-space: nowrap;
+  }
 }
