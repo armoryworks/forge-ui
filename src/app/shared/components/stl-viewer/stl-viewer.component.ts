@@ -1,13 +1,17 @@
+import { HttpClient } from '@angular/common/http';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   OnDestroy,
+  inject,
   input,
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
@@ -19,6 +23,9 @@ import { TranslatePipe } from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StlViewerComponent implements AfterViewInit, OnDestroy {
+  private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly url = input.required<string>();
   readonly height = input<string>('400px');
 
@@ -100,9 +107,16 @@ export class StlViewerComponent implements AfterViewInit, OnDestroy {
 
       // Load STL
       const loader = new STLLoader();
-      loader.load(
-        this.url(),
-        (geometry) => {
+      this.http.get(this.url(), { responseType: 'arraybuffer' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (model) => {
+          let geometry: import('three').BufferGeometry;
+          try {
+            geometry = loader.parse(model);
+          } catch {
+            this.loading.set(false);
+            this.error.set('Failed to load 3D model');
+            return;
+          }
           geometry.computeVertexNormals();
           this.disposables.push(geometry);
 
@@ -142,12 +156,11 @@ export class StlViewerComponent implements AfterViewInit, OnDestroy {
 
           this.loading.set(false);
         },
-        undefined,
-        () => {
+        error: () => {
           this.loading.set(false);
           this.error.set('Failed to load 3D model');
         },
-      );
+      });
 
       // Animation loop
       const animate = (): void => {
