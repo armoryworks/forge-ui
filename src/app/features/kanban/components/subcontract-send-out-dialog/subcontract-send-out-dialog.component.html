@@ -5,6 +5,12 @@
       <app-input [label]="'subcontractUi.quantity' | translate" formControlName="quantity" type="number" [min]="0" [required]="true" data-testid="subcontract-send-out-quantity" />
       <app-datepicker [label]="'subcontractUi.expectedReturn' | translate" formControlName="expectedReturnDate" [min]="minReturnDate" data-testid="subcontract-send-out-return-date" />
     </div>
+    @if (overrun() > 0) {
+      <p class="send-out-warning" role="alert" data-testid="subcontract-send-out-overrun">
+        {{ 'subcontractUi.overrun' | translate: { over: (overrun() | number:'1.0-4'), start: (data.operation.jobQuantity | number:'1.0-4') } }}
+      </p>
+      <app-toggle [label]="'subcontractUi.overrunAck' | translate" formControlName="overrunAck" data-testid="subcontract-send-out-overrun-ack" />
+    }
     <app-toggle [label]="'subcontractUi.createDraftPo' | translate" formControlName="createPurchaseOrder" data-testid="subcontract-send-out-create-po" />
     @if (formGroup.controls.createPurchaseOrder.value) {
       <p class="text-muted" data-testid="subcontract-send-out-price-hint">

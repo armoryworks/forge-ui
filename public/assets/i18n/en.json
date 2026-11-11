@@ -13162,7 +13162,7 @@
     "poPriceUnknown": "The routing has no price for this step. Set it on the draft PO.",
     "goodQuantity": "Good quantity",
     "scrapQuantity": "Scrap quantity",
-    "nothingBack": "Enter a good or scrap quantity.",
+    "nothingBack": "Enter a good, rejected or scrap quantity.",
     "overSent": "Good plus scrap can't be more than the {{quantity}} sent.",
     "sent": "Sent out to {{vendor}}.",
     "sentWithPo": "Sent out to {{vendor}} on draft {{po}}.",
@@ -13179,7 +13179,14 @@
       "rejected": "Rejected",
       "partiallyReceived": "Partly back"
     },
-    "alreadyBack": "{{quantity}} already came back on earlier receipts."
+    "alreadyBack": "{{quantity}} already came back on earlier receipts.",
+    "rejectedQuantity": "Rejected quantity",
+    "rejectedHint": "Pieces that came back and failed inspection. They are not counted on the step; send them out again or scrap them.",
+    "rejectedBack": "Rejected",
+    "overLimit": "At most {{max}} more can go out on this job.",
+    "overrun": "{{over}} over the job's start quantity of {{start}} once this goes out. Check the count, then confirm.",
+    "overrunAck": "Yes, send the extra",
+    "overrunConfirmFirst": "Confirm the extra quantity first."
   },
   "payables": {
     "title": "Payables",
@@ -15403,7 +15410,8 @@
       "depositLineManual": "Deposit lines are added from the sales order's deposit invoices.",
       "depositInvoiceInUse": "This deposit invoice can't be voided: later invoices for the order have already used its deposit. Void those invoices first.",
       "creditMemoLineOverInvoiced": "A credit for an invoice line can't be priced above what was invoiced, and all the credits on that line can't add up to more than its amount.",
-      "toleranceRaiseNotAllowed": "Only an Admin or Manager can raise an over tolerance. It is {{comparisonValue}}% now; lower it or leave it."
+      "toleranceRaiseNotAllowed": "Only an Admin or Manager can raise an over tolerance. It is {{comparisonValue}}% now; lower it or leave it.",
+      "subcontractSendOverLimit": "That is more than this job allows on this step: at most {{comparisonValue}} more can go out."
     },
     "validators": {
       "required": "{{field}} is required.",

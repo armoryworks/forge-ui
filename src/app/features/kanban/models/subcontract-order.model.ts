@@ -23,6 +23,7 @@ export interface SubcontractOrder {
   notes: string | null;
   createdAt: string;
   scrapQuantity?: number;
+  rejectedQuantity?: number;
   overTolerancePct?: number;
   underTolerancePct?: number;
   maxAcceptedQuantity?: number;

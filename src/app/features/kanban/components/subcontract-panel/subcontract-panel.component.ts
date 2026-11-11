@@ -80,6 +80,7 @@ export class SubcontractPanelComponent {
     { field: 'expectedReturnDate', header: this.translate.instant('subcontractUi.expectedReturn'), sortable: true, type: 'date', width: '110px' },
     { field: 'status', header: this.translate.instant('subcontractUi.statusHeader'), sortable: true, width: '110px' },
     { field: 'receivedQuantity', header: this.translate.instant('subcontractUi.goodBack'), type: 'number', width: '80px', align: 'right' },
+    { field: 'rejectedQuantity', header: this.translate.instant('subcontractUi.rejectedBack'), type: 'number', width: '80px', align: 'right' },
     { field: 'poNumber', header: this.translate.instant('subcontractUi.purchaseOrder'), width: '110px' },
     { field: 'actions', header: '', width: '130px', align: 'right' },
   ];
@@ -98,7 +99,8 @@ export class SubcontractPanelComponent {
   outQuantity(operation: SubcontractOperation): number {
     return this.orders()
       .filter(order => order.operationId === operation.operationId && this.isOpen(order))
-      .reduce((sum, order) => sum + Math.max(0, order.quantity - (order.receivedQuantity ?? 0) - (order.scrapQuantity ?? 0)), 0);
+      .reduce((sum, order) => sum + Math.max(0,
+        order.quantity - (order.receivedQuantity ?? 0) - (order.rejectedQuantity ?? 0) - (order.scrapQuantity ?? 0)), 0);
   }
 
   oldestOpenOrder(operation: SubcontractOperation): SubcontractOrder | null {
@@ -116,14 +118,11 @@ export class SubcontractPanelComponent {
   }
 
   sendOut(operation: SubcontractOperation): void {
-    const alreadySent = this.orders()
-      .filter(order => order.operationId === operation.operationId && order.status !== 'Rejected')
-      .reduce((sum, order) => sum + order.quantity, 0);
-    const remaining = operation.jobQuantity - alreadySent;
+    const remaining = operation.remainingQuantity ?? operation.jobQuantity;
     const data: SubcontractSendOutDialogData = {
       jobId: this.jobId(),
       operation,
-      defaultQuantity: remaining > 0 ? remaining : operation.jobQuantity,
+      defaultQuantity: remaining > 0 ? remaining : null,
     };
     this.dialog.open(SubcontractSendOutDialogComponent, { data, width: '480px' })
       .afterClosed()

@@ -99,14 +99,34 @@ describe('SubcontractPanelComponent', () => {
     expect(component.oldestOpenOrder(anodize)).toBeNull();
   });
 
-  it('opens send-out defaulted to what has not been sent yet', () => {
-    const { component, open } = setup([order({ quantity: 15 }), order({ id: 2, quantity: 10, status: 'Rejected' })]);
+  it('opens send-out defaulted to what the job still has to send', () => {
+    const { component, open } = setup([order({ quantity: 15 })]);
+    const step = { ...anodize, remainingQuantity: 25 };
 
-    component.sendOut(anodize);
+    component.sendOut(step);
 
     expect(open).toHaveBeenCalledWith(SubcontractSendOutDialogComponent, expect.objectContaining({
-      data: { jobId: 7, operation: anodize, defaultQuantity: 25 },
+      data: { jobId: 7, operation: step, defaultQuantity: 25 },
     }));
+  });
+
+  it('opens send-out with no quantity once nothing is left to send', () => {
+    const { component, open } = setup([order({ quantity: 40 })]);
+    const step = { ...anodize, remainingQuantity: 0 };
+
+    component.sendOut(step);
+
+    expect(open).toHaveBeenCalledWith(SubcontractSendOutDialogComponent, expect.objectContaining({
+      data: { jobId: 7, operation: step, defaultQuantity: null },
+    }));
+  });
+
+  it('does not count rejected or scrapped pieces as still out', () => {
+    const { component } = setup([
+      order({ quantity: 20, status: 'PartiallyReceived', receivedQuantity: 5, rejectedQuantity: 4, scrapQuantity: 1 }),
+    ]);
+
+    expect(component.outQuantity(anodize)).toBe(10);
   });
 
   it('opens receive-back for an order', () => {

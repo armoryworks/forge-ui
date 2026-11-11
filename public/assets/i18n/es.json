@@ -13162,7 +13162,7 @@
     "poPriceUnknown": "La ruta no tiene precio para este paso. Ingréselo en la OC en borrador.",
     "goodQuantity": "Cantidad buena",
     "scrapQuantity": "Cantidad de desecho",
-    "nothingBack": "Ingrese una cantidad buena o de desecho.",
+    "nothingBack": "Ingrese una cantidad buena, rechazada o de desecho.",
     "overSent": "Lo bueno más el desecho no puede superar los {{quantity}} enviados.",
     "sent": "Enviado a {{vendor}}.",
     "sentWithPo": "Enviado a {{vendor}} con la OC en borrador {{po}}.",
@@ -13179,7 +13179,14 @@
       "rejected": "Rechazado",
       "partiallyReceived": "Devuelta en parte"
     },
-    "alreadyBack": "Ya se devolvieron {{quantity}} en recepciones anteriores."
+    "alreadyBack": "Ya se devolvieron {{quantity}} en recepciones anteriores.",
+    "rejectedQuantity": "Cantidad rechazada",
+    "rejectedHint": "Piezas que regresaron y no pasaron la inspección. No se cuentan en el paso; envíelas de nuevo o deséchelas.",
+    "rejectedBack": "Rechazadas",
+    "overLimit": "Como máximo {{max}} más pueden salir en este trabajo.",
+    "overrun": "{{over}} por encima de la cantidad inicial del trabajo de {{start}} una vez que esto salga. Revise el conteo y luego confirme.",
+    "overrunAck": "Sí, enviar el excedente",
+    "overrunConfirmFirst": "Confirme primero la cantidad excedente."
   },
   "payables": {
     "title": "Cuentas por Pagar",
@@ -15403,7 +15410,8 @@
       "depositLineManual": "Las líneas de anticipo se agregan a partir de las facturas de anticipo de la orden de venta.",
       "depositInvoiceInUse": "No se puede anular esta factura de anticipo: otras facturas posteriores de la orden ya usaron su anticipo. Anule primero esas facturas.",
       "creditMemoLineOverInvoiced": "Un crédito para una línea de factura no puede tener un precio mayor que el facturado, y la suma de los créditos de esa línea no puede superar su importe.",
-      "toleranceRaiseNotAllowed": "Solo un Administrador o Gerente puede subir una tolerancia de exceso. Ahora es {{comparisonValue}}%; bájela o déjela como está."
+      "toleranceRaiseNotAllowed": "Solo un Administrador o Gerente puede subir una tolerancia de exceso. Ahora es {{comparisonValue}}%; bájela o déjela como está.",
+      "subcontractSendOverLimit": "Es más de lo que este trabajo permite en este paso: como máximo {{comparisonValue}} más pueden salir."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",

@@ -23,6 +23,7 @@ const CODE_KEYS: Record<string, string> = {
   'material-category-conflict': 'apiErrors.codes.materialCategoryConflict',
   'operation-progress-empty': 'apiErrors.codes.operationProgressEmpty',
   'operation-overrun-limit': 'apiErrors.codes.operationOverrunLimit',
+  'subcontract-send-over-limit': 'apiErrors.codes.subcontractSendOverLimit',
   'tolerance-raise-not-allowed': 'apiErrors.codes.toleranceRaiseNotAllowed',
   'activation-code-invalid': 'apiErrors.codes.activationCodeInvalid',
   'preset-compare-count': 'apiErrors.codes.presetCompareCount',

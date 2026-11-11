@@ -14,6 +14,8 @@
       <app-input [label]="'subcontractUi.goodQuantity' | translate" formControlName="goodQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-good" />
       <app-input [label]="'subcontractUi.scrapQuantity' | translate" formControlName="scrapQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-scrap" />
     </div>
+    <app-input [label]="'subcontractUi.rejectedQuantity' | translate" [info]="'subcontractUi.rejectedHint' | translate"
+      formControlName="rejectedQuantity" type="number" [min]="0" [required]="true" data-testid="subcontract-receive-back-rejected" />
     @switch (outcome()) {
       @case ('over') {
         <p class="receive-back-warning" data-testid="subcontract-receive-back-over">

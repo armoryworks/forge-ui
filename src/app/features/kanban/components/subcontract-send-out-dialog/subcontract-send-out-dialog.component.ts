@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -19,8 +20,12 @@ import { SubcontractService } from '../../services/subcontract.service';
 @Component({
   selector: 'app-subcontract-send-out-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, TranslatePipe, DialogComponent, InputComponent, DatepickerComponent, ToggleComponent, ValidationButtonComponent],
+  imports: [
+    ReactiveFormsModule, CurrencyPipe, DecimalPipe, TranslatePipe, DialogComponent, InputComponent, DatepickerComponent,
+    ToggleComponent, ValidationButtonComponent,
+  ],
   templateUrl: './subcontract-send-out-dialog.component.html',
+  styleUrl: './subcontract-send-out-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubcontractSendOutDialogComponent {
@@ -29,21 +34,37 @@ export class SubcontractSendOutDialogComponent {
   private readonly subcontractService = inject(SubcontractService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
   protected readonly minReturnDate = todayStart();
+  private readonly committed = this.data.operation.committedQuantity ?? 0;
+  private readonly maxSend = this.data.operation.maxSendQuantity ?? null;
 
   readonly formGroup = new FormGroup({
     vendorName: new FormControl({ value: this.data.operation.vendorName, disabled: true }, { nonNullable: true }),
-    quantity: new FormControl<number | null>(this.data.defaultQuantity, [Validators.required, Validators.min(0.0001)]),
+    quantity: new FormControl<number | null>(this.data.defaultQuantity,
+      [Validators.required, Validators.min(0.0001), this.withinSendLimit()]),
     expectedReturnDate: new FormControl<Date | null>(this.defaultReturnDate()),
     createPurchaseOrder: new FormControl(true, { nonNullable: true }),
-  });
+    overrunAck: new FormControl(false, { nonNullable: true }),
+  }, { validators: this.overrunConfirmed() });
+
+  private readonly quantity = toSignal(this.formGroup.controls.quantity.valueChanges,
+    { initialValue: this.formGroup.controls.quantity.value });
+
+  protected readonly overrun = computed(() => this.overrunOf(this.quantity()));
 
   readonly violations = FormValidationService.getViolations(this.formGroup, {
     quantity: this.translate.instant('subcontractUi.quantity'),
     expectedReturnDate: this.translate.instant('subcontractUi.expectedReturn'),
   });
+
+  constructor() {
+    this.formGroup.controls.quantity.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.formGroup.controls.overrunAck.setValue(false, { emitEvent: false }));
+  }
 
   save(): void {
     if (this.formGroup.invalid || this.saving()) return;
@@ -65,6 +86,26 @@ export class SubcontractSendOutDialogComponent {
       },
       error: () => this.saving.set(false),
     });
+  }
+
+  private overrunOf(quantity: number | null): number {
+    const sending = Number(quantity ?? 0);
+    if (sending <= 0 || (this.maxSend !== null && sending > this.maxSend)) return 0;
+    return Math.max(0, Math.round((this.committed + sending - this.data.operation.jobQuantity) * 10000) / 10000);
+  }
+
+  private withinSendLimit(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null =>
+      this.maxSend !== null && Number(control.value ?? 0) > this.maxSend
+        ? { sendLimit: { message: this.translate.instant('subcontractUi.overLimit', { max: this.maxSend }) } }
+        : null;
+  }
+
+  private overrunConfirmed(): ValidatorFn {
+    return (group: AbstractControl): ValidationErrors | null =>
+      this.overrunOf(group.get('quantity')?.value ?? null) > 0 && !group.get('overrunAck')?.value
+        ? { overrunAck: { message: this.translate.instant('subcontractUi.overrunConfirmFirst') } }
+        : null;
   }
 
   private defaultReturnDate(): Date | null {

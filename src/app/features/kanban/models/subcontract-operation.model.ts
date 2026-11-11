@@ -7,4 +7,7 @@ export interface SubcontractOperation {
   subcontractCost: number | null;
   turnTimeDays: number | null;
   jobQuantity: number;
+  committedQuantity?: number;
+  remainingQuantity?: number;
+  maxSendQuantity?: number | null;
 }

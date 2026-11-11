@@ -98,6 +98,47 @@ describe('SubcontractSendOutDialogComponent', () => {
     expect(sendOut).not.toHaveBeenCalled();
   });
 
+  it('refuses a quantity above what the job allows out', () => {
+    const { component, sendOut } = setup(operation({ maxSendQuantity: 20 }));
+
+    expect(component.formGroup.controls.quantity.hasError('sendLimit')).toBe(true);
+    component.save();
+    expect(sendOut).not.toHaveBeenCalled();
+
+    component.formGroup.controls.quantity.setValue(20);
+    expect(component.formGroup.valid).toBe(true);
+  });
+
+  it('asks for a confirmation before sending past the start quantity', () => {
+    const { component, sendOut } = setup(operation({ committedQuantity: 30 }));
+
+    expect(component.formGroup.hasError('overrunAck')).toBe(true);
+    component.save();
+    expect(sendOut).not.toHaveBeenCalled();
+
+    component.formGroup.controls.overrunAck.setValue(true);
+    component.save();
+
+    expect(sendOut).toHaveBeenCalledWith(7, 30, expect.objectContaining({ quantity: 25 }));
+  });
+
+  it('asks again when the quantity changes after the confirmation', () => {
+    const { component } = setup(operation({ committedQuantity: 30 }));
+    component.formGroup.controls.overrunAck.setValue(true);
+    expect(component.formGroup.valid).toBe(true);
+
+    component.formGroup.controls.quantity.setValue(50);
+
+    expect(component.formGroup.controls.overrunAck.value).toBe(false);
+    expect(component.formGroup.hasError('overrunAck')).toBe(true);
+  });
+
+  it('needs no confirmation inside the start quantity', () => {
+    const { component } = setup(operation({ committedQuantity: 15 }));
+
+    expect(component.formGroup.valid).toBe(true);
+  });
+
   it('stays open when the send-out fails', () => {
     const { component, close } = setup(operation(), vi.fn(() => throwError(() => new Error('boom'))));
 

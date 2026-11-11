@@ -4,6 +4,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { merge } from 'rxjs';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -43,7 +44,8 @@ export class SubcontractReceiveBackDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly canOverrideTolerance = this.auth.hasAnyRole([...TOLERANCE_OVERRIDE_ROLES]);
-  protected readonly returnedBefore = (this.data.order.receivedQuantity ?? 0) + (this.data.order.scrapQuantity ?? 0);
+  protected readonly returnedBefore = (this.data.order.receivedQuantity ?? 0) + (this.data.order.rejectedQuantity ?? 0)
+    + (this.data.order.scrapQuantity ?? 0);
   protected readonly maxAccepted = this.data.order.maxAcceptedQuantity ?? this.data.order.quantity;
   protected readonly minComplete = this.data.order.minCompleteQuantity ?? this.data.order.quantity;
   protected readonly room = roomWithinTolerance(this.maxAccepted, this.returnedBefore);
@@ -51,6 +53,7 @@ export class SubcontractReceiveBackDialogComponent {
   readonly formGroup = new FormGroup({
     goodQuantity: new FormControl<number | null>(Math.max(0, this.data.order.quantity - this.returnedBefore),
       [Validators.required, Validators.min(0), this.somethingBack()]),
+    rejectedQuantity: new FormControl<number | null>(0, [Validators.required, Validators.min(0)]),
     scrapQuantity: new FormControl<number | null>(0, [Validators.required, Validators.min(0)]),
     overReason: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
     closeShort: new FormControl<boolean>(false, { nonNullable: true }),
@@ -60,7 +63,8 @@ export class SubcontractReceiveBackDialogComponent {
 
   protected readonly returnedTotal = computed(() => {
     const value = this.formValue();
-    return this.returnedBefore + Number(value.goodQuantity ?? 0) + Number(value.scrapQuantity ?? 0);
+    return this.returnedBefore + Number(value.goodQuantity ?? 0) + Number(value.rejectedQuantity ?? 0)
+      + Number(value.scrapQuantity ?? 0);
   });
 
   protected readonly outcome = computed<ReceiveBackOutcome>(() => {
@@ -73,12 +77,13 @@ export class SubcontractReceiveBackDialogComponent {
 
   readonly violations = FormValidationService.getViolations(this.formGroup, {
     goodQuantity: this.translate.instant('subcontractUi.goodQuantity'),
+    rejectedQuantity: this.translate.instant('subcontractUi.rejectedQuantity'),
     scrapQuantity: this.translate.instant('subcontractUi.scrapQuantity'),
     overReason: this.translate.instant('tolerance.overReason'),
   });
 
   constructor() {
-    this.formGroup.controls.scrapQuantity.valueChanges
+    merge(this.formGroup.controls.scrapQuantity.valueChanges, this.formGroup.controls.rejectedQuantity.valueChanges)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.formGroup.controls.goodQuantity.updateValueAndValidity());
   }
@@ -88,13 +93,14 @@ export class SubcontractReceiveBackDialogComponent {
 
     this.saving.set(true);
     const good = this.formGroup.controls.goodQuantity.value ?? 0;
+    const rejected = this.formGroup.controls.rejectedQuantity.value ?? 0;
     const scrap = this.formGroup.controls.scrapQuantity.value ?? 0;
     const outcome = this.outcome();
     const reason = this.formGroup.controls.overReason.value.trim();
     this.subcontractService.receiveBack(this.data.order.id, {
       receivedQuantity: good,
+      rejectedQuantity: rejected,
       scrapQuantity: scrap,
-      passedInspection: good > 0,
       ...(outcome === 'over' ? { confirmOverTolerance: true, overToleranceReason: reason } : {}),
       ...(outcome === 'staysOpen' && this.formGroup.controls.closeShort.value ? { closeShort: true } : {}),
     }).subscribe({
@@ -110,8 +116,9 @@ export class SubcontractReceiveBackDialogComponent {
   private somethingBack(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const good = Number(control.value ?? 0);
+      const rejected = Number(control.parent?.get('rejectedQuantity')?.value ?? 0);
       const scrap = Number(control.parent?.get('scrapQuantity')?.value ?? 0);
-      return good + scrap <= 0
+      return good + rejected + scrap <= 0
         ? { nothingBack: { message: this.translate.instant('subcontractUi.nothingBack') } }
         : null;
     };
@@ -119,15 +126,15 @@ export class SubcontractReceiveBackDialogComponent {
 
   private overToleranceAccepted(): ValidatorFn {
     return (group: AbstractControl): ValidationErrors | null => {
-      const good = Number(group.get('goodQuantity')?.value ?? 0);
-      const scrap = Number(group.get('scrapQuantity')?.value ?? 0);
-      if (this.returnedBefore + good + scrap <= this.maxAccepted) return null;
+      const returning = Number(group.get('goodQuantity')?.value ?? 0) + Number(group.get('rejectedQuantity')?.value ?? 0)
+        + Number(group.get('scrapQuantity')?.value ?? 0);
+      if (this.returnedBefore + returning <= this.maxAccepted) return null;
       const reason = String(group.get('overReason')?.value ?? '').trim();
       if (this.canOverrideTolerance && reason) return null;
       return {
         overTolerance: {
           message: this.translate.instant(this.canOverrideTolerance ? 'tolerance.reasonRequired' : 'tolerance.overNeedsManager',
-            { quantity: good + scrap, room: this.room }),
+            { quantity: returning, room: this.room }),
         },
       };
     };

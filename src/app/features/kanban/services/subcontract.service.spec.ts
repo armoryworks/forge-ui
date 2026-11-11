@@ -44,7 +44,7 @@ describe('SubcontractService', () => {
   });
 
   it('posts a receive-back for an order', () => {
-    const body = { receivedQuantity: 8, scrapQuantity: 2, passedInspection: true };
+    const body = { receivedQuantity: 8, rejectedQuantity: 1, scrapQuantity: 2 };
     service.receiveBack(5, body).subscribe();
     const req = httpMock.expectOne(`${baseUrl}/subcontract-orders/5/receive`);
     expect(req.request.method).toBe('POST');

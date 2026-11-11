@@ -1,7 +1,7 @@
 export interface ReceiveBackSubcontractRequest {
   receivedQuantity: number;
+  rejectedQuantity: number;
   scrapQuantity: number;
-  passedInspection: boolean;
   confirmOverTolerance?: boolean;
   overToleranceReason?: string;
   closeShort?: boolean;

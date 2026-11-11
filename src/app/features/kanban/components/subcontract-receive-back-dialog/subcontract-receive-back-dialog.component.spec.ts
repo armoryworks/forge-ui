@@ -48,18 +48,49 @@ describe('SubcontractReceiveBackDialogComponent', () => {
 
     component.save();
 
-    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 8, scrapQuantity: 2, passedInspection: true });
+    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 8, rejectedQuantity: 0, scrapQuantity: 2 });
     expect(close).toHaveBeenCalledWith(expect.objectContaining({ status: 'Complete' }));
   });
 
-  it('marks an all-scrap return as failed', () => {
+  it('sends an all-scrap return as scrap', () => {
     const { component, receiveBack } = setup();
     component.formGroup.controls.goodQuantity.setValue(0);
     component.formGroup.controls.scrapQuantity.setValue(10);
 
     component.save();
 
-    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 0, scrapQuantity: 10, passedInspection: false });
+    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 0, rejectedQuantity: 0, scrapQuantity: 10 });
+  });
+
+  it('sends pieces that failed inspection as rejected', () => {
+    const { component, receiveBack } = setup();
+    component.formGroup.controls.goodQuantity.setValue(6);
+    component.formGroup.controls.rejectedQuantity.setValue(3);
+    component.formGroup.controls.scrapQuantity.setValue(1);
+
+    component.save();
+
+    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 6, rejectedQuantity: 3, scrapQuantity: 1 });
+  });
+
+  it('takes a return of rejected pieces only', () => {
+    const { component, receiveBack } = setup();
+    component.formGroup.controls.goodQuantity.setValue(0);
+    expect(component.formGroup.controls.goodQuantity.hasError('nothingBack')).toBe(true);
+
+    component.formGroup.controls.rejectedQuantity.setValue(4);
+    expect(component.formGroup.controls.goodQuantity.hasError('nothingBack')).toBe(false);
+    component.save();
+
+    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 0, rejectedQuantity: 4, scrapQuantity: 0 });
+  });
+
+  it('counts rejected pieces against what was sent', () => {
+    const { component } = setup();
+    component.formGroup.controls.goodQuantity.setValue(8);
+    component.formGroup.controls.rejectedQuantity.setValue(3);
+
+    expect(component.formGroup.hasError('overTolerance')).toBe(true);
   });
 
   it('blocks a return with nothing back and clears once scrap is entered', () => {
@@ -94,7 +125,7 @@ describe('SubcontractReceiveBackDialogComponent', () => {
 
     expect(component.formGroup.valid).toBe(true);
     component.save();
-    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 108, scrapQuantity: 0, passedInspection: true });
+    expect(receiveBack).toHaveBeenCalledWith(5, { receivedQuantity: 108, rejectedQuantity: 0, scrapQuantity: 0 });
   });
 
   it('sends a manager-confirmed over-tolerance return with its reason', () => {
@@ -132,5 +163,11 @@ describe('SubcontractReceiveBackDialogComponent', () => {
     const { component } = setup({ ...banded, receivedQuantity: 60, scrapQuantity: 5 } as SubcontractOrder);
 
     expect(component.formGroup.controls.goodQuantity.value).toBe(35);
+  });
+
+  it('counts pieces rejected on an earlier receive-back as already back', () => {
+    const { component } = setup({ ...banded, receivedQuantity: 0, rejectedQuantity: 40, scrapQuantity: 5 } as SubcontractOrder);
+
+    expect(component.formGroup.controls.goodQuantity.value).toBe(55);
   });
 });
