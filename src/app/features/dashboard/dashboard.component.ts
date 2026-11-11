@@ -210,14 +210,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       cellHeight: 60,
       margin: 4,
       animate: true,
-      float: false,
+      mode: 'top',
       disableDrag: true,
       disableResize: true,
     }, container);
 
     this.loadSavedLayout();
 
-    this.grid.on('change', (_event: Event, nodes: GridStackNode[]) => {
+    this.grid?.on('change', (_event: Event, nodes: GridStackNode[]) => {
       if (nodes && this.editing()) {
         this.saveLayout();
       }
@@ -343,12 +343,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         cellHeight: 60,
         margin: 4,
         animate: true,
-        float: false,
+        mode: 'top',
         disableDrag: !this.editing(),
         disableResize: !this.editing(),
       }, container);
 
-      this.grid.on('change', (_event: Event, nodes: GridStackNode[]) => {
+      this.grid?.on('change', (_event: Event, nodes: GridStackNode[]) => {
         if (nodes && this.editing()) {
           this.saveLayout();
         }

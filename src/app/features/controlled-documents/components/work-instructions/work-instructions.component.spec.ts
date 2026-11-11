@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { WorkInstructionsComponent } from './work-instructions.component';
@@ -23,8 +23,9 @@ describe('WorkInstructionsComponent', () => {
     workInstructions = vi.fn(() => of([WI]));
     openOrDownload = vi.fn();
     TestBed.configureTestingModule({
-      imports: [WorkInstructionsComponent, TranslateModule.forRoot()],
+      imports: [WorkInstructionsComponent],
       providers: [
+        provideTranslateService(),
         { provide: ControlledDocumentService, useValue: { workInstructions, fileDownloadUrl: (id: number) => `/files/${id}/download` } },
         { provide: CapabilityService, useValue: { isEnabled: () => enabled } },
         { provide: FileDownloadService, useValue: { openOrDownload } },

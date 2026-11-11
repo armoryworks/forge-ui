@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { AdminService } from '../../services/admin.service';
@@ -43,8 +43,9 @@ function setup(integration: IntegrationStatus = smtp) {
   const snackbar = { success: vi.fn(), warn: vi.fn(), errorFrom: vi.fn() };
   const matDialogRef = { close: vi.fn() };
   TestBed.configureTestingModule({
-    imports: [IntegrationConfigDialogComponent, TranslateModule.forRoot()],
+    imports: [IntegrationConfigDialogComponent],
     providers: [
+      provideTranslateService(),
       provideHttpClient(),
       provideHttpClientTesting(),
       { provide: MAT_DIALOG_DATA, useValue: { integration, showSandboxGuides: false } },

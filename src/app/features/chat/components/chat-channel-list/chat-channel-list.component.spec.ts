@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { ChatConversation } from '../../models/chat-conversation.model';
@@ -78,8 +78,8 @@ describe('ChatChannelListComponent channel rows', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ChatChannelListComponent, TranslateModule.forRoot()],
-      providers: [provideNoopAnimations()],
+      imports: [ChatChannelListComponent],
+      providers: [provideTranslateService(), provideNoopAnimations()],
     });
     fixture = TestBed.createComponent(ChatChannelListComponent);
     fixture.componentRef.setInput('channels', [ROOM]);
@@ -116,8 +116,8 @@ describe('ChatChannelListComponent actions and search', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      imports: [ChatChannelListComponent, TranslateModule.forRoot()],
-      providers: [provideNoopAnimations()],
+      imports: [ChatChannelListComponent],
+      providers: [provideTranslateService(), provideNoopAnimations()],
     });
     fixture = TestBed.createComponent(ChatChannelListComponent);
     el = fixture.nativeElement as HTMLElement;

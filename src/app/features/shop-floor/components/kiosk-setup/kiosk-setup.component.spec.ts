@@ -3,7 +3,7 @@ import { Component, input, output, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { FormControl } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 
@@ -60,8 +60,9 @@ function setup() {
     hasAnyRole: vi.fn((_roles: string[]) => true),
   };
   TestBed.configureTestingModule({
-    imports: [KioskSetupComponent, TranslateModule.forRoot()],
+    imports: [KioskSetupComponent],
     providers: [
+      provideTranslateService(),
       { provide: ShopFloorService, useValue: shopFloor },
       { provide: AuthService, useValue: auth },
     ],

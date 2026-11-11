@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { Component, Directive, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -61,8 +61,9 @@ describe('CapabilitiesComponent', () => {
     descriptor = signal<CapabilityDescriptor | null>(null);
     bannerDismissed = signal(true);
     TestBed.configureTestingModule({
-      imports: [CapabilitiesComponent, TranslateModule.forRoot()],
+      imports: [CapabilitiesComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         {
           provide: CapabilityService,
@@ -184,8 +185,9 @@ describe('CapabilitiesComponent toggles', () => {
 
   function component(): ToggleInternals {
     TestBed.configureTestingModule({
-      imports: [CapabilitiesComponent, TranslateModule.forRoot()],
+      imports: [CapabilitiesComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         {
           provide: CapabilityService,

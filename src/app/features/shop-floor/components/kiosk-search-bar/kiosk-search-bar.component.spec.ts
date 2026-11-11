@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
 import { KioskSearchBarComponent } from './kiosk-search-bar.component';
@@ -41,8 +41,9 @@ describe('KioskSearchBarComponent', () => {
     vi.clearAllMocks();
     shopFloor.getJobStatus.mockReturnValue(of(status));
     TestBed.configureTestingModule({
-      imports: [KioskSearchBarComponent, TranslateModule.forRoot()],
+      imports: [KioskSearchBarComponent],
       providers: [
+        provideTranslateService(),
         { provide: HttpClient, useValue: { get: vi.fn(() => of([])) } },
         { provide: ShopFloorService, useValue: shopFloor },
         { provide: Router, useValue: router },

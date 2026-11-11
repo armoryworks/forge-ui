@@ -51,7 +51,7 @@ export class I18nOverridesService {
       .pipe(catchError(() => of({} as I18nOverrideMap)))
       .subscribe((map) => {
         this.overrides.set(map ?? {});
-        this.reapply(this.translate.currentLang || this.translate.getDefaultLang() || 'en');
+        this.reapply(this.translate.getCurrentLang() || this.translate.getFallbackLang() || 'en');
       });
   }
 

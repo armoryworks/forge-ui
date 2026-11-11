@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { PinPromptDialogComponent, PinPromptDialogData } from './pin-prompt-dialog.component';
 import { DialogEscapeService } from '../../../../shared/services/dialog-escape.service';
@@ -31,8 +31,9 @@ function escapeStub(confirmed: boolean) {
 function setup(data: PinPromptDialogData | null, escape = escapeStub(false)) {
   const dialogRef = { close: vi.fn() };
   TestBed.configureTestingModule({
-    imports: [PinPromptDialogComponent, TranslateModule.forRoot()],
+    imports: [PinPromptDialogComponent],
     providers: [
+      provideTranslateService(),
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
       { provide: DialogEscapeService, useValue: escape },

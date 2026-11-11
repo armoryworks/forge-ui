@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 
 import { OnboardingBannerComponent, ONBOARDING_BANNER_DISMISSED_UNTIL_KEY } from './onboarding-banner.component';
@@ -32,8 +32,9 @@ function setup(options: { hrOn: boolean; dismissedUntil?: string | null }) {
   };
 
   TestBed.configureTestingModule({
-    imports: [OnboardingBannerComponent, TranslateModule.forRoot()],
+    imports: [OnboardingBannerComponent],
     providers: [
+      provideTranslateService(),
       { provide: AuthService, useValue: { isAuthenticated: () => true, user: () => ({ profileComplete: false }) } },
       { provide: CapabilityService, useValue: { isEnabled: (code: string) => options.hrOn && code === 'CAP-HR-HIRE' } },
       { provide: LayoutService, useValue: { isAccountRoute: () => false, isOnboardingRoute: () => false } },

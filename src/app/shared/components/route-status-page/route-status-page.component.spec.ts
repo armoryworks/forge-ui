@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { LayoutService } from '../../services/layout.service';
 import { RouteStatusPageComponent } from './route-status-page.component';
@@ -13,8 +13,9 @@ describe('RouteStatusPageComponent', () => {
   function render(status: string | undefined, path: string) {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      imports: [RouteStatusPageComponent, TranslateModule.forRoot()],
+      imports: [RouteStatusPageComponent],
       providers: [
+        provideTranslateService(),
         { provide: ActivatedRoute, useValue: { snapshot: { data: status ? { status } : {} } } },
         { provide: Router, useValue: { navigateByUrl } },
         { provide: Location, useValue: { path: () => path } },

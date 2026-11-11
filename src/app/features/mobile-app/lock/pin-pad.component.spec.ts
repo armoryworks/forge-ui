@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { PinPadComponent } from './pin-pad.component';
 
@@ -10,7 +10,8 @@ describe('PinPadComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PinPadComponent, TranslateModule.forRoot()],
+      imports: [PinPadComponent],
+      providers: [provideTranslateService()],
     }).compileComponents();
     fixture = TestBed.createComponent(PinPadComponent);
     emitted = [];

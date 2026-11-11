@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { DetailLoadErrorComponent } from './detail-load-error.component';
 
 describe('DetailLoadErrorComponent', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ imports: [DetailLoadErrorComponent, TranslateModule.forRoot()] });
+    TestBed.configureTestingModule({ imports: [DetailLoadErrorComponent], providers: [provideTranslateService()] });
   });
 
   function render(error: unknown) {
@@ -53,7 +53,7 @@ describe('DetailLoadErrorComponent', () => {
 describe('DetailLoadErrorComponent actions', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ imports: [DetailLoadErrorComponent, TranslateModule.forRoot()] });
+    TestBed.configureTestingModule({ imports: [DetailLoadErrorComponent], providers: [provideTranslateService()] });
   });
 
   function render(error: unknown, inputs: Record<string, unknown> = {}) {

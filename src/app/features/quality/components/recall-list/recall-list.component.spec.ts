@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { RecallListComponent } from './recall-list.component';
@@ -46,8 +46,9 @@ describe('RecallListComponent', () => {
     queryParams = new BehaviorSubject(convertToParamMap({}));
     dialogOpen = vi.fn(() => ({ afterClosed: () => of({ id: 9 }) }));
     TestBed.configureTestingModule({
-      imports: [RecallListComponent, TranslateModule.forRoot()],
+      imports: [RecallListComponent],
       providers: [
+        provideTranslateService(),
         { provide: RecallService, useValue: { getRecalls } },
         { provide: DetailDialogService, useValue: { open, getDetailFromUrl: () => detailFromUrl } },
         { provide: ActivatedRoute, useValue: { queryParamMap: queryParams.asObservable() } },

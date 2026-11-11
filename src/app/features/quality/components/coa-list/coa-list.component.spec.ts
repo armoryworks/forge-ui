@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { CoaListComponent } from './coa-list.component';
 import { CoaService } from '../../services/coa.service';
@@ -17,8 +17,9 @@ describe('CoaListComponent', () => {
   it('downloads the certificate PDF in the language picked and offers void only when allowed', () => {
     const open = vi.fn();
     TestBed.configureTestingModule({
-      imports: [CoaListComponent, TranslateModule.forRoot()],
+      imports: [CoaListComponent],
       providers: [
+        provideTranslateService(),
         { provide: CoaService, useValue: { pdfUrl: (id: number, lang: string) => `/coa/${id}/pdf?language=${lang}` } },
         { provide: FileDownloadService, useValue: { open } },
       ],

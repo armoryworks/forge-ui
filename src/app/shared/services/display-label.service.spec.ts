@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { DisplayLabelService } from './display-label.service';
 import { TermSetStore } from '../terminology/term-set.store';
@@ -11,7 +11,7 @@ describe('DisplayLabelService', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    TestBed.configureTestingModule({ imports: [TranslateModule.forRoot()] });
+    TestBed.configureTestingModule({ providers: [provideTranslateService()] });
     service = TestBed.inject(DisplayLabelService);
     translate = TestBed.inject(TranslateService);
     store = TestBed.inject(TermSetStore);

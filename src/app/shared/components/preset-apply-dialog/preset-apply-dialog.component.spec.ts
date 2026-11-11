@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import {
@@ -21,8 +21,9 @@ function escapeStub(confirmed: boolean) {
 function setupDialog(data: PresetApplyDialogData, escape = escapeStub(false)) {
   const dialogRef = { close: vi.fn() } as unknown as MatDialogRef<PresetApplyDialogComponent, PresetApplyDialogResult>;
   TestBed.configureTestingModule({
-    imports: [PresetApplyDialogComponent, TranslateModule.forRoot()],
+    imports: [PresetApplyDialogComponent],
     providers: [
+      provideTranslateService(),
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
       { provide: DialogEscapeService, useValue: escape },

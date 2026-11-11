@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { MfaGraceBannerComponent, MFA_GRACE_BANNER_DISMISSED_KEY } from './mfa-grace-banner.component';
 import { AuthService, AuthUser } from '../../services/auth.service';
@@ -23,8 +23,9 @@ function setup(options: { user: AuthUser | null; accountRoute?: boolean }) {
   const navigate = vi.fn(() => Promise.resolve(true));
 
   TestBed.configureTestingModule({
-    imports: [MfaGraceBannerComponent, TranslateModule.forRoot()],
+    imports: [MfaGraceBannerComponent],
     providers: [
+      provideTranslateService(),
       { provide: AuthService, useValue: { isAuthenticated: () => user() !== null, user } },
       { provide: LanguageService, useValue: { currentLanguage: signal('en') } },
       { provide: LayoutService, useValue: { isAccountRoute: () => options.accountRoute ?? false } },

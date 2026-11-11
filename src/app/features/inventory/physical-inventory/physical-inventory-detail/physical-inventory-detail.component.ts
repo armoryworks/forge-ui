@@ -238,7 +238,7 @@ export class PhysicalInventoryDetailComponent {
     const inv = this.inventory();
     if (!inv) return;
     this.busy.set(true);
-    this.service.countSheets(inv.id, this.translate.currentLang || 'en').subscribe({
+    this.service.countSheets(inv.id, this.translate.getCurrentLang() || 'en').subscribe({
       next: blob => {
         this.busy.set(false);
         downloadBlob(blob, `${inv.inventoryNumber}-count-sheets.pdf`);

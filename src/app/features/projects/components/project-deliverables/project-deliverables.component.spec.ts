@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { ProjectDeliverablesComponent } from './project-deliverables.component';
@@ -26,8 +26,9 @@ describe('ProjectDeliverablesComponent', () => {
   function render() {
     update = vi.fn(() => of({ ...DRAFT, status: 'In Review' }));
     TestBed.configureTestingModule({
-      imports: [ProjectDeliverablesComponent, TranslateModule.forRoot()],
+      imports: [ProjectDeliverablesComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         { provide: DeliverableService, useValue: { listForProject: vi.fn(() => of({ items: [DRAFT] })), update, delete: vi.fn(() => of(undefined)) } },
         { provide: ReferenceDataService, useValue: { getByGroup: vi.fn(() => of([{ id: 1, label: 'Report', isActive: true }])) } },

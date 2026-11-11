@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, throwError } from 'rxjs';
@@ -60,8 +60,9 @@ describe('RecallDetailDialogComponent', () => {
     getRecall = vi.fn(() => load);
     resolveRecall = vi.fn(() => of({ ...detail, status: 'Resolved', resolvedAt: new Date('2026-10-05') }));
     TestBed.configureTestingModule({
-      imports: [RecallDetailDialogComponent, TranslateModule.forRoot()],
+      imports: [RecallDetailDialogComponent],
       providers: [
+        provideTranslateService(),
         { provide: MAT_DIALOG_DATA, useValue: { recallId: detail.id } },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MatDialog, useValue: confirmDialog },

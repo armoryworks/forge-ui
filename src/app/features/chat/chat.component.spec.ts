@@ -5,7 +5,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { ChatComponent } from './chat.component';
@@ -49,8 +49,9 @@ describe('ChatComponent channel rows', () => {
       markChannelRead: vi.fn(() => of(undefined)),
     };
     TestBed.configureTestingModule({
-      imports: [ChatComponent, TranslateModule.forRoot()],
+      imports: [ChatComponent],
       providers: [
+        provideTranslateService(),
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),

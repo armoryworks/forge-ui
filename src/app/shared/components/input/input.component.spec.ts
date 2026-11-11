@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideTranslateService, TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { InputComponent } from './input.component';
@@ -111,7 +111,7 @@ class PasswordHostComponent {
 
 describe('InputComponent · password reveal', () => {
   it('toggles on a click, tap or key press and reports its pressed state', async () => {
-    TestBed.configureTestingModule({ imports: [TranslateModule.forRoot()], providers: [provideNoopAnimations()] });
+    TestBed.configureTestingModule({ providers: [provideTranslateService(), provideNoopAnimations()] });
     const fixture = TestBed.createComponent(PasswordHostComponent);
     await fixture.whenStable();
     fixture.detectChanges();

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
 import { EcoImpactComponent } from './eco-impact.component';
@@ -28,8 +28,9 @@ describe('EcoImpactComponent', () => {
 
   function render() {
     TestBed.configureTestingModule({
-      imports: [EcoImpactComponent, TranslateModule.forRoot()],
+      imports: [EcoImpactComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         { provide: EcoService, useValue: { getImpact } },
         { provide: EntityPreviewService, useValue: { getPreview: vi.fn(() => of(null)) } },
@@ -58,8 +59,9 @@ describe('EcoImpactComponent', () => {
   it('reloads the impact when the ECO gains an affected item', () => {
     getImpact = vi.fn(() => of(IMPACT));
     TestBed.configureTestingModule({
-      imports: [EcoImpactComponent, TranslateModule.forRoot()],
+      imports: [EcoImpactComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         { provide: EcoService, useValue: { getImpact } },
         { provide: EntityPreviewService, useValue: { getPreview: vi.fn(() => of(null)) } },

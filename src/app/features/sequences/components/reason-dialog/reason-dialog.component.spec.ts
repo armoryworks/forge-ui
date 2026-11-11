@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ReasonDialogComponent, ReasonDialogData } from './reason-dialog.component';
@@ -17,8 +17,9 @@ function escapeStub(confirmed: boolean) {
 function setupDialog(data: ReasonDialogData, escape = escapeStub(false)) {
   const dialogRef = { close: vi.fn() } as unknown as MatDialogRef<ReasonDialogComponent>;
   TestBed.configureTestingModule({
-    imports: [ReasonDialogComponent, TranslateModule.forRoot()],
+    imports: [ReasonDialogComponent],
     providers: [
+      provideTranslateService(),
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
       { provide: DialogEscapeService, useValue: escape },

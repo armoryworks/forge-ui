@@ -37,7 +37,7 @@ export class ClockEventTypeService {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
   private readonly lang = toSignal(this.translate.onLangChange.pipe(map((e) => e.lang)), {
-    initialValue: this.translate.getCurrentLang(),
+    initialValue: this.translate.getCurrentLang() ?? 'en',
   });
   private readonly _definitions = signal<ClockEventTypeDef[]>([]);
   private loaded = false;

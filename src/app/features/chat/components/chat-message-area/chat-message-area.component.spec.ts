@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../../shared/services/auth.service';
 import { FileDownloadService } from '../../../../shared/services/file-download.service';
@@ -18,8 +18,9 @@ describe('ChatMessageAreaComponent composer', () => {
     fileDownload = { openOrDownload: vi.fn() };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      imports: [ChatMessageAreaComponent, TranslateModule.forRoot()],
+      imports: [ChatMessageAreaComponent],
       providers: [
+        provideTranslateService(),
         provideNoopAnimations(),
         { provide: AuthService, useValue: { user: signal({ id: 1 }) } },
         { provide: FileDownloadService, useValue: fileDownload },

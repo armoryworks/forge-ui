@@ -3,7 +3,7 @@ import { Component, Directive, computed, input, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { CapabilityService } from '../../../shared/services/capability.service';
@@ -154,8 +154,9 @@ describe('DiscoveryComponent', () => {
     };
 
     TestBed.configureTestingModule({
-      imports: [DiscoveryComponent, TranslateModule.forRoot()],
+      imports: [DiscoveryComponent],
       providers: [
+        provideTranslateService(),
         { provide: DiscoveryService, useValue: discovery },
         { provide: ConsultantModeService, useValue: { enabled: consultantMode, toggle: () => consultantMode.update(v => !v) } },
         {

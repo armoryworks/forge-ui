@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { NumericKeypadComponent } from './numeric-keypad.component';
 
@@ -23,7 +23,7 @@ const MODE_KEY = 'sf-keypad-mode';
 
 function render(mode: string) {
   localStorage.setItem(MODE_KEY, mode);
-  TestBed.configureTestingModule({ imports: [NumericKeypadComponent, TranslateModule.forRoot()] });
+  TestBed.configureTestingModule({ imports: [NumericKeypadComponent], providers: [provideTranslateService()] });
   const translate = TestBed.inject(TranslateService);
   translate.setTranslation('es', ES);
   translate.use('es');

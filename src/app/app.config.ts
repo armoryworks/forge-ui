@@ -44,7 +44,7 @@ import { DialogEscapeService } from './shared/services/dialog-escape.service';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
-  FormValidationService.setTranslator((key, params) => translate.instant(key, params), () => translate.getCurrentLang());
+  FormValidationService.setTranslator((key, params) => translate.instant(key, params), () => translate.getCurrentLang() ?? 'en');
   return async () => {
     const saved = localStorage.getItem('language') || 'en';
     await firstValueFrom(translate.use(saved));
@@ -85,7 +85,7 @@ export const appConfig: ApplicationConfig = {
     { provide: MatPaginatorIntl, useClass: TranslatedPaginatorIntl },
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
-      useValue: { prefix: '/assets/i18n/', suffix: '.json' },
+      useValue: { resources: [{ prefix: '/assets/i18n/', suffix: '.json' }], failOnError: true },
     },
     {
       provide: APP_INITIALIZER,

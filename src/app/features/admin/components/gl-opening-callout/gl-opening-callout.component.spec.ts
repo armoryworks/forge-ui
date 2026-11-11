@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { CapabilityService } from '../../../../shared/services/capability.service';
@@ -18,8 +18,9 @@ describe('GlOpeningCalloutComponent', () => {
 
   function render(roles: string[]): { fixture: ComponentFixture<GlOpeningCalloutComponent>; el: HTMLElement } {
     TestBed.configureTestingModule({
-      imports: [GlOpeningCalloutComponent, TranslateModule.forRoot()],
+      imports: [GlOpeningCalloutComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         {
           provide: CapabilityService,

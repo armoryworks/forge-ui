@@ -39,7 +39,7 @@ describe('TerminologyTranslateLoader + TerminologyService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideTranslateService({ loader: provideTranslateLoader(TerminologyTranslateLoader) }),
-        { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { prefix: '/assets/i18n/', suffix: '.json' } },
+        { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { resources: [{ prefix: '/assets/i18n/', suffix: '.json' }], failOnError: true } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' } },
       ],
     });
@@ -99,7 +99,7 @@ describe('TerminologyTranslateLoader + TerminologyService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideTranslateService({ loader: provideTranslateLoader(TerminologyTranslateLoader) }),
-        { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { prefix: '/assets/i18n/', suffix: '.json' } },
+        { provide: TRANSLATE_HTTP_LOADER_CONFIG, useValue: { resources: [{ prefix: '/assets/i18n/', suffix: '.json' }], failOnError: true } },
         { provide: CapabilityService, useValue: { isEnabled: (code: string) => code === 'CAP-ADMIN-I18N' } },
       ],
     });

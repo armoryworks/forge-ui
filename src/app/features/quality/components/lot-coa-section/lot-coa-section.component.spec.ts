@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { LotCoaSectionComponent } from './lot-coa-section.component';
@@ -28,8 +28,9 @@ describe('LotCoaSectionComponent', () => {
     list = vi.fn(() => of([CERT]));
     dialogOpen = vi.fn(() => ({ afterClosed: () => of({ ...CERT, id: 4, certificateNumber: 'COA-000004', conforms: true }) }));
     TestBed.configureTestingModule({
-      imports: [LotCoaSectionComponent, TranslateModule.forRoot()],
+      imports: [LotCoaSectionComponent],
       providers: [
+        provideTranslateService(),
         { provide: CoaService, useValue: { list, pdfUrl: (id: number, lang: string) => `/coa/${id}/${lang}` } },
         { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
         { provide: CapabilityService, useValue: { isEnabled: () => enabled } },

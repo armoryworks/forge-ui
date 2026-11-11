@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../../../shared/services/auth.service';
 import { NewMessageDialogComponent, NewMessageRecipient } from './new-message-dialog.component';
@@ -25,8 +25,9 @@ describe('NewMessageDialogComponent', () => {
     close = vi.fn();
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      imports: [NewMessageDialogComponent, TranslateModule.forRoot()],
+      imports: [NewMessageDialogComponent],
       providers: [
+        provideTranslateService(),
         provideNoopAnimations(),
         provideHttpClient(),
         provideHttpClientTesting(),

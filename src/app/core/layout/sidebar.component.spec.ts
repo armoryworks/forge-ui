@@ -1,7 +1,7 @@
 import { ElementRef, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { LayoutService } from '../../shared/services/layout.service';
 import { NavTreeService } from '../../shared/services/nav-tree.service';
@@ -96,8 +96,9 @@ describe('SidebarComponent collapse toggle', () => {
   beforeEach(() => {
     isMobile = signal(true);
     TestBed.configureTestingModule({
-      imports: [SidebarComponent, TranslateModule.forRoot()],
+      imports: [SidebarComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         {
           provide: LayoutService,

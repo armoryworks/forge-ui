@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { EventsPanelComponent } from './events-panel.component';
@@ -21,8 +21,9 @@ describe('EventsPanelComponent', () => {
     dialogOpen = vi.fn(() => ({ afterClosed: () => of(false) }));
     deleteEvent = vi.fn(() => of(undefined));
     TestBed.configureTestingModule({
-      imports: [EventsPanelComponent, TranslateModule.forRoot()],
+      imports: [EventsPanelComponent],
       providers: [
+        provideTranslateService(),
         { provide: MatDialog, useValue: { open: dialogOpen } },
         { provide: EventsService, useValue: { deleteEvent } },
         { provide: CalendarService, useValue: {} },

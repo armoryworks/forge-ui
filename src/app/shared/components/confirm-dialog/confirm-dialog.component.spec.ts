@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { ConfirmDialogComponent, ConfirmDialogData } from './confirm-dialog.component';
@@ -8,8 +8,9 @@ import { ConfirmDialogComponent, ConfirmDialogData } from './confirm-dialog.comp
 function setupDialog(data: ConfirmDialogData) {
   const dialogRef = { close: vi.fn() } as unknown as MatDialogRef<ConfirmDialogComponent>;
   TestBed.configureTestingModule({
-    imports: [ConfirmDialogComponent, TranslateModule.forRoot()],
+    imports: [ConfirmDialogComponent],
     providers: [
+      provideTranslateService(),
       { provide: MAT_DIALOG_DATA, useValue: data },
       { provide: MatDialogRef, useValue: dialogRef },
     ],

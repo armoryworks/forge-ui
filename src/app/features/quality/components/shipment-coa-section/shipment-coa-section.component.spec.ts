@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { provideTranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 
 import { ShipmentCoaSectionComponent } from './shipment-coa-section.component';
@@ -31,8 +31,9 @@ describe('ShipmentCoaSectionComponent', () => {
     }));
     snackbar = { success: vi.fn(), warn: vi.fn(), info: vi.fn(), errorFrom: vi.fn() };
     TestBed.configureTestingModule({
-      imports: [ShipmentCoaSectionComponent, TranslateModule.forRoot()],
+      imports: [ShipmentCoaSectionComponent],
       providers: [
+        provideTranslateService(),
         provideRouter([]),
         { provide: CoaService, useValue: { list: vi.fn(() => of([])), attachToShipment, pdfUrl: () => '' } },
         { provide: AuthService, useValue: { hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },

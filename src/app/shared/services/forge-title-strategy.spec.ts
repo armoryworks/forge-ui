@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, Data, RouterStateSnapshot, convertToParamMap } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateService, provideTranslateService } from '@ngx-translate/core';
 
 import { ForgeTitleStrategy } from './forge-title-strategy';
 import { ThemeService } from './theme.service';
@@ -35,8 +35,7 @@ describe('ForgeTitleStrategy', () => {
   beforeEach(() => {
     localStorage.clear();
     TestBed.configureTestingModule({
-      imports: [TranslateModule.forRoot()],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideTranslateService(), provideHttpClient(), provideHttpClientTesting()],
     });
     translate = TestBed.inject(TranslateService);
     translate.setTranslation('en', {
