@@ -36,6 +36,7 @@ import { secondTicker } from '../../shared/utils/second-ticker';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { JobOperationsService } from '../../shared/services/job-operations.service';
 import { JobOperationEntryType } from '../../shared/models/job-operation-entry-type.type';
+import { JOB_OPERATION_RECORD_ROLES } from '../../shared/models/job-operation-record-roles.const';
 import { JobOperationRow } from '../../shared/models/job-operation-row.model';
 import { OvertimeBreakdownComponent } from './components/overtime-breakdown/overtime-breakdown.component';
 
@@ -147,7 +148,8 @@ export class TimeTrackingComponent implements OnInit, OnDestroy {
     category: new FormControl(''),
     notes: new FormControl(''),
   });
-  protected readonly operationTimersEnabled = computed(() => this.capabilities.isEnabled('CAP-MFG-MULTIOP', true));
+  protected readonly operationTimersEnabled = computed(() =>
+    this.capabilities.isEnabled('CAP-MFG-MULTIOP', true) && this.auth.hasAnyRole([...JOB_OPERATION_RECORD_ROLES]));
   protected readonly timerOperations = signal<JobOperationRow[]>([]);
   protected readonly timerOperationOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('timeTracking.noOperation') },

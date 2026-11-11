@@ -18,6 +18,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { JobOperationEntryType } from '../../../shared/models/job-operation-entry-type.type';
 import { JobOperationProgressResult } from '../../../shared/models/job-operation-progress-result.model';
+import { JOB_OPERATION_RECORD_ROLES } from '../../../shared/models/job-operation-record-roles.const';
 import { JobOperations } from '../../../shared/models/job-operations.model';
 import { OperationQuantityDialogData } from '../../../shared/models/operation-quantity-dialog-data.model';
 import { OperationQuantityDialogResult } from '../../../shared/models/operation-quantity-dialog-result.model';
@@ -107,7 +108,8 @@ export class OperationTimeTabComponent {
     if (!data) return [];
     const loadedAt = this.loadedAt();
     const liveNow = this.hasOpenTimers() ? Math.max(this.now(), loadedAt) : loadedAt;
-    return toOperationTimeRows(data, this.auth.user()?.id ?? null, liveNow, loadedAt);
+    return toOperationTimeRows(
+      data, this.auth.user()?.id ?? null, liveNow, loadedAt, this.auth.hasAnyRole([...JOB_OPERATION_RECORD_ROLES]));
   });
 
   private readonly baseColumns: ColumnDef[] = [

@@ -319,6 +319,15 @@ describe('ScanJobFlowComponent — operation tracking', () => {
     expect(shopFloor.getOperations).toHaveBeenCalledTimes(2);
   });
 
+  it('a start refused for the role says the role cannot record step work', () => {
+    shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
+    shopFloor.startOperationTimer.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+    const c = create();
+
+    c.startOperation(opRow(1));
+    expect(c.error()).toBe('shopFloor.operations.notAllowed');
+  });
+
   it('stops one operation timer and a running timer by its entry', () => {
     shopFloor.getConfig.mockReturnValueOnce(of({ operationTracking: true }));
     const c = create();

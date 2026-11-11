@@ -212,9 +212,11 @@ export class JobOperationsComponent {
       ended = await run();
     } catch (err) {
       this.editing.set(null);
-      this.notice.set(httpProblemDetail(err) ?? this.translate.instant(err instanceof HttpErrorResponse && err.status === 409
-        ? 'mobileApp.operations.conflict'
-        : 'mobileApp.jobs.actionFailed'));
+      const status = err instanceof HttpErrorResponse ? err.status : null;
+      this.notice.set(httpProblemDetail(err) ?? this.translate.instant(
+        status === 409 ? 'mobileApp.operations.conflict'
+          : status === 403 ? 'mobileApp.operations.notAllowed'
+            : 'mobileApp.jobs.actionFailed'));
       this.load(this.jobId());
     } finally {
       this.busy.set(false);

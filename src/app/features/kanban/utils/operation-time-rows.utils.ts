@@ -27,11 +27,12 @@ export function toOperationTimeRows(
   currentUserId: number | null,
   liveNowMs: number,
   loadedAtMs: number,
+  canRecord = true,
 ): OperationTimeRow[] {
   const liveDeltaMinutes = Math.max(0, liveNowMs - loadedAtMs) / 60000;
   const serverNowMs = new Date(data.serverNow).getTime();
   const clockOffsetMs = Number.isNaN(serverNowMs) ? 0 : serverNowMs - loadedAtMs;
-  return data.operations.map(op => toRow(op, currentUserId, liveDeltaMinutes, liveNowMs + clockOffsetMs));
+  return data.operations.map(op => toRow(op, currentUserId, liveDeltaMinutes, liveNowMs + clockOffsetMs, canRecord));
 }
 
 function toRow(
@@ -39,6 +40,7 @@ function toRow(
   currentUserId: number | null,
   liveDeltaMinutes: number,
   serverNowMs: number,
+  canRecord: boolean,
 ): OperationTimeRow {
   const timers = op.openTimers ?? [];
   const live = (types: string[] | null) => timers
@@ -83,7 +85,7 @@ function toRow(
     otherInitials: timers
       .filter(t => t.userId !== currentUserId)
       .map(t => t.userInitials ?? t.userName.slice(0, 2).toUpperCase()),
-    canAct: op.operationId !== null && op.isRoutingStep,
+    canAct: canRecord && op.operationId !== null && op.isRoutingStep,
     closed: op.status === 'Complete' || op.status === 'Skipped',
     source: op,
   };

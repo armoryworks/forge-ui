@@ -251,7 +251,7 @@ describe('TimeTrackingComponent', () => {
 
   it('starts a job-operation timer when a job and one of its open operations are picked', () => {
     jobOperations.startTimer.mockClear();
-    const { component, service } = setup([], of([]));
+    const { component, service } = setup([], of([]), false, ['ProductionWorker']);
     component.openStartTimer();
     component.timerForm.controls.jobId.setValue(42);
 
@@ -267,6 +267,23 @@ describe('TimeTrackingComponent', () => {
 
     component.timerForm.controls.jobId.setValue(43);
     expect(component.timerHasOperation()).toBe(false);
+  });
+
+  it('offers no operations to a role that cannot record step work, and starts a plain job timer', () => {
+    for (const roles of [['Production Planner'], ['Procurement'], ['Controller']]) {
+      jobOperations.getOperations.mockClear();
+      jobOperations.startTimer.mockClear();
+      const { component, service } = setup([], of([]), false, roles);
+      component.openStartTimer();
+      component.timerForm.controls.jobId.setValue(42);
+
+      expect(jobOperations.getOperations).not.toHaveBeenCalled();
+      expect(component.timerOperationOptions().map(o => o.value)).toEqual([null]);
+      component.startTimer();
+
+      expect(jobOperations.startTimer).not.toHaveBeenCalled();
+      expect(service.startTimer).toHaveBeenCalledWith(expect.objectContaining({ jobId: 42 }));
+    }
   });
 
   it('starts a job timer without an operation, and an overhead timer with only a category', () => {

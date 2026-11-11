@@ -90,7 +90,7 @@ function payload(trackingEnabled: boolean, operations: JobOperationRow[] = [op()
   };
 }
 
-function setup(response: Observable<unknown>) {
+function setup(response: Observable<unknown>, roles: string[] = ['ProductionWorker']) {
   const operations = {
     getOperations: vi.fn().mockReturnValue(response),
     startTimer: vi.fn().mockReturnValue(of({})),
@@ -117,7 +117,7 @@ function setup(response: Observable<unknown>) {
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       { provide: JobOperationsService, useValue: operations },
       { provide: JobCostService, useValue: cost },
-      { provide: AuthService, useValue: { user: () => ({ id: 1 }) } },
+      { provide: AuthService, useValue: { user: () => ({ id: 1 }), hasAnyRole: (wanted: string[]) => wanted.some(r => roles.includes(r)) } },
       { provide: BoardHubService, useValue: { jobUpdated$: jobUpdated.asObservable() } },
       { provide: MatDialog, useValue: dialog },
       { provide: SnackbarService, useValue: snackbar },
@@ -162,6 +162,15 @@ describe('OperationTimeTabComponent', () => {
     expect(fields).toContain('actions');
     expect(component.tableId()).toBe('operation-time-tracking');
     expect(component.remainingMs()).toBe(3600000);
+  });
+
+  it('lets the roles that record step work act on a step, and shows it read-only to the rest', () => {
+    for (const role of ['ProductionWorker', 'Production Manager']) {
+      expect(setup(of(payload(true)), [role]).component.operations().some(row => row.canAct)).toBe(true);
+    }
+    for (const role of ['Production Planner', 'Procurement']) {
+      expect(setup(of(payload(true)), [role]).component.operations().some(row => row.canAct)).toBe(false);
+    }
   });
 
   it('carries each step planned quantity and the job target beside the start', () => {

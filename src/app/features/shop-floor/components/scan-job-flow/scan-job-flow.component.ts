@@ -215,7 +215,9 @@ export class ScanJobFlowComponent implements OnInit {
 
   private operationFailed(err: HttpErrorResponse): void {
     this.operationBusy.set(false);
-    this.error.set(this.translate.instant('shopFloor.operations.actionFailed', { reason: this.serverReason(err) }));
+    this.error.set(err.status === 403
+      ? this.translate.instant('shopFloor.operations.notAllowed')
+      : this.translate.instant('shopFloor.operations.actionFailed', { reason: this.serverReason(err) }));
     this.loadOperations();
     this.loadRunningTimers();
   }

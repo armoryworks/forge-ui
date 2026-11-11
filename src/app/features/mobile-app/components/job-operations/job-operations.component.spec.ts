@@ -296,6 +296,17 @@ describe('JobOperationsComponent', () => {
     expect(el().querySelector('[data-testid="job-operations-move"]')).toBeNull();
   });
 
+  it('says the role cannot record step work when the server refuses with 403', async () => {
+    render(operations([row(20, { status: 'InProgress', version: 3 })]));
+    api.updateOperationProgress.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403 })));
+
+    click('job-operation-done-20');
+    click('operation-qty-done');
+    await settle();
+
+    expect(el().querySelector('[data-testid="job-operations-notice"]')!.textContent).toContain('mobileApp.operations.notAllowed');
+  });
+
   it('shows a conflict and reloads when the server refuses with 409', async () => {
     render(operations([row(20, { status: 'InProgress', version: 3 })]));
     api.updateOperationProgress.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
