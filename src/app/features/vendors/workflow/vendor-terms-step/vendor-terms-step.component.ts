@@ -9,7 +9,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { overToleranceInfo } from '../../../../shared/utils/over-tolerance-info';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 
 import { VendorDetail } from '../../models/vendor-detail.model';
@@ -37,6 +39,7 @@ export class VendorTermsStepComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
   private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly destroyRef = inject(DestroyRef);
 
@@ -48,6 +51,7 @@ export class VendorTermsStepComponent {
 
   protected readonly saving = signal(false);
   protected readonly paymentTermsOptions = this.paymentTerms.options;
+  protected readonly overToleranceInfo = overToleranceInfo(this.translate, this.auth, 'tolerance.vendorHint');
 
   protected readonly form = new FormGroup({
     paymentTermsId: new FormControl<number | null>(null),

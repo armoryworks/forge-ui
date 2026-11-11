@@ -3,7 +3,9 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { overToleranceInfo } from '../../../../shared/utils/over-tolerance-info';
 import { CustomerSummary } from '../../models/customer-summary.model';
 import { UpdateCustomerRequest } from '../../models/update-customer-request.model';
 import { CustomerService } from '../../services/customer.service';
@@ -21,11 +23,13 @@ export class ShipToleranceCardComponent {
   private readonly service = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
   readonly customer = input.required<CustomerSummary>();
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
+  protected readonly overToleranceInfo = overToleranceInfo(this.translate, this.auth);
   protected readonly form = new FormGroup({
     over: new FormControl<number | null>(null, [Validators.min(0), Validators.max(999.99)]),
     under: new FormControl<number | null>(null, [Validators.min(0), Validators.max(100)]),

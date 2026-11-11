@@ -15402,7 +15402,8 @@
       "creditedDepositLine": "A deposit line can't be credited. Credit the deposit invoice instead.",
       "depositLineManual": "Deposit lines are added from the sales order's deposit invoices.",
       "depositInvoiceInUse": "This deposit invoice can't be voided: later invoices for the order have already used its deposit. Void those invoices first.",
-      "creditMemoLineOverInvoiced": "A credit for an invoice line can't be priced above what was invoiced, and all the credits on that line can't add up to more than its amount."
+      "creditMemoLineOverInvoiced": "A credit for an invoice line can't be priced above what was invoiced, and all the credits on that line can't add up to more than its amount.",
+      "toleranceRaiseNotAllowed": "Only an Admin or Manager can raise an over tolerance. It is {{comparisonValue}}% now; lower it or leave it."
     },
     "validators": {
       "required": "{{field}} is required.",
@@ -17477,6 +17478,7 @@
     "customerTitle": "Shipment tolerance",
     "customerHint": "How far over or under the ordered quantity an order line may ship and still be complete. Blank uses the company default.",
     "saved": "Tolerance saved",
-    "lineTitle": "Line tolerance"
+    "lineTitle": "Line tolerance",
+    "raiseNeedsManager": "Only an Admin or Manager can raise the over tolerance. You can lower it."
   }
 }

@@ -48,6 +48,7 @@ import { NumberLockInfoComponent } from '../../../../shared/components/number-lo
 import { DateOnlyPipe } from '../../../../shared/pipes/date-only.pipe';
 import { DetailLoadErrorComponent } from '../../../../shared/components/detail-load-error/detail-load-error.component';
 import { UNIT_DECIMALS } from '../../../../shared/utils/money';
+import { overToleranceInfo } from '../../../../shared/utils/over-tolerance-info';
 import { maxDecimalsValidator } from '../../../../shared/validators/max-decimals.validator';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
 import { PO_STATUS_CHIP_CLASSES } from '../../models/po-status.const';
@@ -603,6 +604,7 @@ export class PoDetailPanelComponent implements OnInit {
 
   protected readonly showAddLineDialog = signal(false);
   protected readonly addLineSaving = signal(false);
+  protected readonly overToleranceInfo = overToleranceInfo(this.translate, this.auth);
 
   protected readonly addLineForm = new FormGroup({
     partId: new FormControl<number | null>(null),

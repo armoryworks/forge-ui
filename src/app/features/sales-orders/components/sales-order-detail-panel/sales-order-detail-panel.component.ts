@@ -36,6 +36,7 @@ import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/compon
 import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { ManualNumberSettingsService } from '../../../../shared/services/manual-number-settings.service';
 import { fromIsoDate, toIsoDate } from '../../../../shared/utils/date.utils';
+import { overToleranceInfo } from '../../../../shared/utils/over-tolerance-info';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
@@ -155,6 +156,7 @@ export class SalesOrderDetailPanelComponent {
   // --- Line editing (Draft only). editingLineId: null = closed, 0 = adding, >0 = editing. ---
   protected readonly editingLineId = signal<number | null>(null);
   protected readonly savingLine = signal(false);
+  protected readonly overToleranceInfo = overToleranceInfo(this.translate, this.auth);
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

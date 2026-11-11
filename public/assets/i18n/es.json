@@ -15402,7 +15402,8 @@
       "creditedDepositLine": "No se puede acreditar una línea de anticipo. Acredite la factura de anticipo.",
       "depositLineManual": "Las líneas de anticipo se agregan a partir de las facturas de anticipo de la orden de venta.",
       "depositInvoiceInUse": "No se puede anular esta factura de anticipo: otras facturas posteriores de la orden ya usaron su anticipo. Anule primero esas facturas.",
-      "creditMemoLineOverInvoiced": "Un crédito para una línea de factura no puede tener un precio mayor que el facturado, y la suma de los créditos de esa línea no puede superar su importe."
+      "creditMemoLineOverInvoiced": "Un crédito para una línea de factura no puede tener un precio mayor que el facturado, y la suma de los créditos de esa línea no puede superar su importe.",
+      "toleranceRaiseNotAllowed": "Solo un Administrador o Gerente puede subir una tolerancia de exceso. Ahora es {{comparisonValue}}%; bájela o déjela como está."
     },
     "validators": {
       "required": "{{field}} es obligatorio.",
@@ -17477,6 +17478,7 @@
     "customerTitle": "Tolerancia de envío",
     "customerHint": "Cuánto por encima o por debajo de la cantidad pedida puede enviarse una línea y quedar completa. En blanco usa el valor de la empresa.",
     "saved": "Tolerancia guardada",
-    "lineTitle": "Tolerancia de la línea"
+    "lineTitle": "Tolerancia de la línea",
+    "raiseNeedsManager": "Solo un Administrador o Gerente puede subir la tolerancia de exceso. Usted puede bajarla."
   }
 }

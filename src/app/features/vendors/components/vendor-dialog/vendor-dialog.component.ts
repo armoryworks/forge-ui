@@ -16,8 +16,10 @@ import { Address } from '../../../../shared/models/address.model';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { PaymentTermsService } from '../../../../shared/services/payment-terms.service';
 import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address.utils';
+import { overToleranceInfo } from '../../../../shared/utils/over-tolerance-info';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DocumentCurrencyComponent } from '../../../../shared/components/document-currency/document-currency.component';
 import { requiredTrimmed } from '../../../../shared/validators/required-trimmed.validator';
@@ -44,6 +46,7 @@ export class VendorDialogComponent implements OnInit {
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
   private readonly paymentTerms = inject(PaymentTermsService).ensureLoaded();
   private readonly manualNumberSettings = inject(ManualNumberSettingsService);
   private readonly capabilities = inject(CapabilityService);
@@ -69,6 +72,8 @@ export class VendorDialogComponent implements OnInit {
       route: '/vendors',
     };
   }
+
+  protected readonly overToleranceInfo = overToleranceInfo(this.translate, this.auth, 'tolerance.vendorHint');
 
   readonly form = new FormGroup({
     companyName: new FormControl('', [requiredTrimmed]),
